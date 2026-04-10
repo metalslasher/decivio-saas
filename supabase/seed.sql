@@ -1,0 +1,2 @@
+-- Intentionally empty seed file.
+-- Kept to match supabase/config.toml so local reset/start does not fail.
