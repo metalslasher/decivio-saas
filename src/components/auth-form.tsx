@@ -15,6 +15,12 @@ function normalizeNextPath(value: string | null) {
   return value;
 }
 
+function buildEmailRedirectUrl(nextPath: string) {
+  const url = new URL("/auth/callback", window.location.origin);
+  url.searchParams.set("next", nextPath);
+  return url.toString();
+}
+
 function mapAuthErrorMessage(message: string) {
   const normalized = message.toLowerCase();
 
@@ -104,7 +110,8 @@ export function AuthForm({
           options: {
             data: {
               source: "header_signup"
-            }
+            },
+            emailRedirectTo: buildEmailRedirectUrl(redirectTo)
           }
         });
 

@@ -25,7 +25,12 @@ export function getSupabaseBrowserClient() {
 
   browserClient = createClient(
     getRequiredPublicEnv("NEXT_PUBLIC_SUPABASE_URL"),
-    getRequiredPublicEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY")
+    getRequiredPublicEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY"),
+    {
+      auth: {
+        detectSessionInUrl: false
+      }
+    }
   );
 
   return browserClient;

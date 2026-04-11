@@ -1,5 +1,6 @@
 import { Manrope } from "next/font/google";
 import { JsonLd } from "@/components/json-ld";
+import { AuthRecoveryRedirect } from "@/components/auth-recovery-redirect";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { createOrganizationSchema, createWebSiteSchema, rootMetadata } from "@/lib/seo";
@@ -24,6 +25,7 @@ export default function RootLayout({
   return (
     <html lang="uk">
       <body className={`${bodyFont.variable} antialiased`}>
+        <AuthRecoveryRedirect />
         <JsonLd data={organizationSchema} />
         <JsonLd data={webSiteSchema} />
         <SiteHeader />
