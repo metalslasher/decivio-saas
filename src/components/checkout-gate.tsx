@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { useAuthDialog } from "@/components/auth-dialog-provider";
 import { getSupabaseBrowserClient } from "@/lib/db/supabase-browser";
 import { formatUah, getCheckoutHref, pricingPlans } from "@/lib/pricing";
 
@@ -16,6 +16,7 @@ type CheckoutState =
 
 export function CheckoutGate({ plan }: CheckoutGateProps) {
   const supabase = useMemo(() => getSupabaseBrowserClient(), []);
+  const { openAuthDialog } = useAuthDialog();
   const [authState, setAuthState] = useState<CheckoutState>({ status: "loading" });
 
   useEffect(() => {
@@ -44,13 +45,11 @@ export function CheckoutGate({ plan }: CheckoutGateProps) {
   }, [supabase]);
 
   const nextPath = getCheckoutHref(plan.id);
-  const loginHref = `/login?next=${encodeURIComponent(nextPath)}`;
-  const signupHref = `/signup?next=${encodeURIComponent(nextPath)}`;
 
   if (authState.status === "loading") {
     return (
       <div className="surface-panel rounded-[2rem] p-6 md:p-7">
-        <p className="text-sm leading-[1.7] text-[var(--text-muted)]">Перевіряємо сесію перед оформленням…</p>
+        <p className="text-sm leading-[1.7] text-[var(--text-muted)]">Перевіряємо сесію перед оформленням...</p>
       </div>
     );
   }
@@ -64,18 +63,17 @@ export function CheckoutGate({ plan }: CheckoutGateProps) {
             Спочатку закріпимо доступ за акаунтом.
           </h2>
           <p className="text-[0.98rem] leading-[1.72] text-[var(--text-muted)]">
-            Це потрібно, щоб після підключення mono checkout і успішної оплати платний доступ відкрився саме у вашому профілі, а
-            не загубився між сесіями.
+            Це потрібно, щоб після підключення mono checkout і успішної оплати платний доступ відкрився саме у вашому профілі, а не загубився між сесіями.
           </p>
         </div>
 
         <div className="mt-6 grid gap-3 md:grid-cols-2">
-          <Link href={signupHref} className="btn-primary text-center">
+          <button type="button" onClick={() => openAuthDialog("signup", { nextPath })} className="btn-primary text-center">
             Створити акаунт
-          </Link>
-          <Link href={loginHref} className="btn-secondary text-center">
+          </button>
+          <button type="button" onClick={() => openAuthDialog("login", { nextPath })} className="btn-secondary text-center">
             У мене вже є акаунт
-          </Link>
+          </button>
         </div>
       </div>
     );
@@ -85,9 +83,7 @@ export function CheckoutGate({ plan }: CheckoutGateProps) {
     <div className="grid gap-5 md:grid-cols-[1.15fr,0.85fr]">
       <article className="surface-dark rounded-[2rem] p-6 text-white md:p-7">
         <p className="text-sm font-semibold uppercase tracking-[0.14em] text-white/60">Обраний план</p>
-        <h2 className="mt-3 font-display text-[1.8rem] font-bold leading-[0.98] tracking-[-0.045em] md:text-[2.3rem]">
-          {plan.name}
-        </h2>
+        <h2 className="mt-3 font-display text-[1.8rem] font-bold leading-[0.98] tracking-[-0.045em] md:text-[2.3rem]">{plan.name}</h2>
         <p className="mt-3 text-[1rem] leading-[1.72] text-white/72">{plan.description}</p>
 
         <div className="mt-6 grid gap-3 sm:grid-cols-2">
@@ -104,8 +100,8 @@ export function CheckoutGate({ plan }: CheckoutGateProps) {
         <div className="mt-6 rounded-[1.35rem] border border-white/10 bg-white/8 px-4 py-4">
           <p className="text-sm text-white/56">Поточний статус</p>
           <p className="mt-2 text-[0.98rem] leading-[1.7] text-white/82">
-            Ви вже авторизовані як <span className="font-semibold text-white">{authState.email}</span>. Наступним кроком тут підключаємо
-            створення mono invoice, редирект на hosted checkout і автозакриття доступу після webhook.
+            Ви вже авторизовані як <span className="font-semibold text-white">{authState.email}</span>. Наступним кроком тут підключаємо створення mono invoice,
+            редірект на hosted checkout і автозакриття доступу після webhook.
           </p>
         </div>
       </article>

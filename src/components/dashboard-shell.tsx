@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { useAuthDialog } from "@/components/auth-dialog-provider";
 import { formatUah, pricingPlans } from "@/lib/pricing";
 import { getSupabaseBrowserClient } from "@/lib/db/supabase-browser";
 
@@ -309,6 +310,7 @@ function DashboardSkeleton() {
 
 export function DashboardShell() {
   const supabase = useMemo(() => getSupabaseBrowserClient(), []);
+  const { openAuthDialog } = useAuthDialog();
   const [state, setState] = useState<DashboardState>({ status: "loading" });
 
   useEffect(() => {
@@ -437,12 +439,12 @@ export function DashboardShell() {
           </p>
 
           <div className="mt-6 flex flex-wrap gap-3">
-            <Link href="/login?next=%2Fdashboard" className="btn-secondary">
+            <button type="button" onClick={() => openAuthDialog("login", { nextPath: "/dashboard" })} className="btn-secondary">
               Увійти
-            </Link>
-            <Link href="/signup?next=%2Fdashboard" className="btn-primary">
+            </button>
+            <button type="button" onClick={() => openAuthDialog("signup", { nextPath: "/dashboard" })} className="btn-primary">
               Створити акаунт
-            </Link>
+            </button>
           </div>
         </div>
       </section>

@@ -1,4 +1,5 @@
 import { Manrope } from "next/font/google";
+import { AuthDialogProvider } from "@/components/auth-dialog-provider";
 import { JsonLd } from "@/components/json-ld";
 import { AuthRecoveryRedirect } from "@/components/auth-recovery-redirect";
 import { SiteFooter } from "@/components/site-footer";
@@ -25,12 +26,14 @@ export default function RootLayout({
   return (
     <html lang="uk">
       <body className={`${bodyFont.variable} antialiased`}>
-        <AuthRecoveryRedirect />
-        <JsonLd data={organizationSchema} />
-        <JsonLd data={webSiteSchema} />
-        <SiteHeader />
-        <main>{children}</main>
-        <SiteFooter />
+        <AuthDialogProvider>
+          <AuthRecoveryRedirect />
+          <JsonLd data={organizationSchema} />
+          <JsonLd data={webSiteSchema} />
+          <SiteHeader />
+          <main>{children}</main>
+          <SiteFooter />
+        </AuthDialogProvider>
       </body>
     </html>
   );

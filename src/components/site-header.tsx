@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { getSupabaseBrowserClient } from "@/lib/db/supabase-browser";
+import { useAuthDialog } from "@/components/auth-dialog-provider";
 import { WordmarkLogo } from "@/components/wordmark-logo";
+import { getSupabaseBrowserClient } from "@/lib/db/supabase-browser";
 
 const publicNavItems = [
   { href: "/#features", label: "Можливості" },
@@ -22,6 +23,7 @@ type AuthState =
 export function SiteHeader() {
   const router = useRouter();
   const supabase = useMemo(() => getSupabaseBrowserClient(), []);
+  const { openAuthDialog } = useAuthDialog();
   const [isOpen, setIsOpen] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [authState, setAuthState] = useState<AuthState>({ status: "loading" });
@@ -60,6 +62,14 @@ export function SiteHeader() {
     router.push("/");
   };
 
+  const openLoginDialog = () => {
+    openAuthDialog("login", { nextPath: "/dashboard" });
+  };
+
+  const openSignupDialog = () => {
+    openAuthDialog("signup", { nextPath: "/dashboard" });
+  };
+
   const navItems = authState.status === "user" ? [{ href: "/dashboard", label: "Кабінет" }, ...publicNavItems] : publicNavItems;
 
   const authDesktop =
@@ -85,14 +95,16 @@ export function SiteHeader() {
       </div>
     ) : (
       <>
-        <Link
-          href="/login?next=%2Fdashboard"
+        <button
+          type="button"
+          onClick={openLoginDialog}
           className="hidden items-center justify-center px-2 text-[1.03rem] font-semibold text-[var(--accent-strong)] transition hover:text-[var(--accent)] md:inline-flex"
         >
           Вхід
-        </Link>
-        <Link
-          href="/signup?next=%2Fdashboard"
+        </button>
+        <button
+          type="button"
+          onClick={openSignupDialog}
           className="hidden min-w-[11.2rem] items-center justify-start gap-3 rounded-full bg-[var(--accent-strong)] px-3 py-2.5 pr-4 text-[1.03rem] font-semibold text-white shadow-[0_14px_30px_-22px_rgba(41,73,244,0.54)] transition hover:-translate-y-px hover:bg-[var(--accent)] md:inline-flex"
         >
           <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white text-[var(--accent-strong)]">
@@ -101,7 +113,7 @@ export function SiteHeader() {
             </svg>
           </span>
           <span>Реєстрація</span>
-        </Link>
+        </button>
       </>
     );
 
@@ -173,12 +185,26 @@ export function SiteHeader() {
                 </>
               ) : (
                 <>
-                  <Link href="/login?next=%2Fdashboard" onClick={() => setIsOpen(false)} className="btn-secondary mt-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsOpen(false);
+                      openLoginDialog();
+                    }}
+                    className="btn-secondary mt-1"
+                  >
                     Вхід
-                  </Link>
-                  <Link href="/signup?next=%2Fdashboard" onClick={() => setIsOpen(false)} className="btn-primary">
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsOpen(false);
+                      openSignupDialog();
+                    }}
+                    className="btn-primary"
+                  >
                     Реєстрація
-                  </Link>
+                  </button>
                 </>
               )}
             </div>

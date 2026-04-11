@@ -1,0 +1,137 @@
+"use client";
+
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { AuthForm, type AuthView } from "@/components/auth-form";
+
+type OpenAuthDialogOptions = {
+  nextPath?: string;
+  notice?: string | null;
+};
+
+type AuthDialogContextValue = {
+  openAuthDialog: (view: AuthView, options?: OpenAuthDialogOptions) => void;
+  closeAuthDialog: () => void;
+};
+
+type DialogState = {
+  isOpen: boolean;
+  view: AuthView;
+  nextPath: string;
+  notice: string | null;
+  version: number;
+};
+
+const AuthDialogContext = createContext<AuthDialogContextValue | null>(null);
+
+const initialState: DialogState = {
+  isOpen: false,
+  view: "login",
+  nextPath: "/dashboard",
+  notice: null,
+  version: 0
+};
+
+export function AuthDialogProvider({
+  children
+}: {
+  children: React.ReactNode;
+}) {
+  const [state, setState] = useState<DialogState>(initialState);
+
+  const closeAuthDialog = useCallback(() => {
+    setState((current) => ({
+      ...current,
+      isOpen: false,
+      notice: null
+    }));
+  }, []);
+
+  const openAuthDialog = useCallback((view: AuthView, options?: OpenAuthDialogOptions) => {
+    setState((current) => ({
+      isOpen: true,
+      view,
+      nextPath: options?.nextPath ?? "/dashboard",
+      notice: options?.notice ?? null,
+      version: current.version + 1
+    }));
+  }, []);
+
+  useEffect(() => {
+    if (!state.isOpen) {
+      return;
+    }
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        closeAuthDialog();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [closeAuthDialog, state.isOpen]);
+
+  const value = useMemo(
+    () => ({
+      openAuthDialog,
+      closeAuthDialog
+    }),
+    [closeAuthDialog, openAuthDialog]
+  );
+
+  return (
+    <AuthDialogContext.Provider value={value}>
+      {children}
+
+      {state.isOpen ? (
+        <div className="fixed inset-0 z-[90] flex items-center justify-center p-4 sm:p-6" aria-modal="true" role="dialog" aria-label="Авторизація">
+          <button
+            type="button"
+            onClick={closeAuthDialog}
+            className="absolute inset-0 bg-[rgba(20,25,37,0.34)] backdrop-blur-md"
+            aria-label="Закрити вікно авторизації"
+          />
+
+          <div className="relative z-[1] w-full max-w-[32rem]">
+            <button
+              type="button"
+              onClick={closeAuthDialog}
+              className="absolute right-4 top-4 z-[2] inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/60 bg-[rgba(252,253,255,0.84)] text-[var(--text-muted)] transition hover:bg-white hover:text-[var(--text-strong)]"
+              aria-label="Закрити"
+            >
+              <svg viewBox="0 0 24 24" className="h-5 w-5 fill-none" aria-hidden="true">
+                <path d="M7 7l10 10M17 7 7 17" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+              </svg>
+            </button>
+
+            <AuthForm
+              key={`${state.view}:${state.nextPath}:${state.version}`}
+              initialView={state.view}
+              nextPath={state.nextPath}
+              initialNotice={state.notice}
+              display="modal"
+              onClose={closeAuthDialog}
+            />
+          </div>
+        </div>
+      ) : null}
+    </AuthDialogContext.Provider>
+  );
+}
+
+export function useAuthDialog() {
+  const context = useContext(AuthDialogContext);
+
+  if (!context) {
+    throw new Error("useAuthDialog must be used within AuthDialogProvider.");
+  }
+
+  return context;
+}

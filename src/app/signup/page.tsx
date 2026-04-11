@@ -15,5 +15,5 @@ export const metadata = createMetadata({
 });
 
 export default function SignupPage({ searchParams }: SignupPageProps) {
-  return <AuthForm mode="signup" nextPath={searchParams?.next} />;
+  return <AuthForm initialView="signup" nextPath={searchParams?.next} />;
 }

@@ -5,7 +5,15 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { getSupabaseBrowserClient } from "@/lib/db/supabase-browser";
 
-type AuthMode = "login" | "signup";
+export type AuthView = "login" | "signup" | "reset";
+
+type AuthFormProps = {
+  initialView: AuthView;
+  nextPath?: string | null;
+  initialNotice?: string | null;
+  display?: "page" | "modal";
+  onClose?: () => void;
+};
 
 function normalizeNextPath(value: string | null) {
   if (!value || !value.startsWith("/") || value.startsWith("//")) {
@@ -15,7 +23,7 @@ function normalizeNextPath(value: string | null) {
   return value;
 }
 
-function buildEmailRedirectUrl(nextPath: string) {
+function buildCallbackUrl(nextPath: string) {
   const url = new URL("/auth/callback", window.location.origin);
   url.searchParams.set("next", nextPath);
   return url.toString();
@@ -29,11 +37,15 @@ function mapAuthErrorMessage(message: string) {
   }
 
   if (normalized.includes("email not confirmed")) {
-    return "Пошта ще не підтверджена.";
+    return "Пошта ще не підтверджена. Спершу відкрийте лист і підтвердьте акаунт.";
   }
 
   if (normalized.includes("user already registered")) {
     return "Користувач із таким email уже існує.";
+  }
+
+  if (normalized.includes("same password")) {
+    return "Новий пароль має відрізнятися від попереднього.";
   }
 
   if (normalized.includes("password")) {
@@ -47,28 +59,75 @@ function mapAuthErrorMessage(message: string) {
   return message;
 }
 
+function getViewCopy(view: AuthView) {
+  switch (view) {
+    case "signup":
+      return {
+        title: "Реєстрація",
+        description: null,
+        submitLabel: "Зареєструватися",
+        submitBusyLabel: "Створюємо акаунт..."
+      };
+    case "reset":
+      return {
+        title: "Відновлення пароля",
+        description: "Введіть email, і ми надішлемо посилання для зміни пароля.",
+        submitLabel: "Надіслати посилання",
+        submitBusyLabel: "Надсилаємо лист..."
+      };
+    default:
+      return {
+        title: "Вхід",
+        description: null,
+        submitLabel: "Увійти",
+        submitBusyLabel: "Входимо..."
+      };
+  }
+}
+
 export function AuthForm({
-  mode,
+  initialView,
   nextPath,
-  wasJustCreated = false
-}: {
-  mode: AuthMode;
-  nextPath?: string | null;
-  wasJustCreated?: boolean;
-}) {
+  initialNotice = null,
+  display = "page",
+  onClose
+}: AuthFormProps) {
   const router = useRouter();
   const redirectTo = useMemo(() => normalizeNextPath(nextPath ?? null), [nextPath]);
   const supabase = useMemo(() => getSupabaseBrowserClient(), []);
 
+  const [view, setView] = useState<AuthView>(initialView);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isCheckingSession, setIsCheckingSession] = useState(true);
+  const [isCheckingSession, setIsCheckingSession] = useState(initialView !== "reset");
   const [error, setError] = useState<string | null>(null);
-  const [notice, setNotice] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(initialNotice);
+
+  const copy = getViewCopy(view);
+  const isSignup = view === "signup";
+  const isReset = view === "reset";
+  const showDescription = Boolean(copy.description);
+
+  useEffect(() => {
+    setView(initialView);
+    setError(null);
+    setNotice(initialNotice);
+    setPassword("");
+    setIsCheckingSession(initialView !== "reset");
+  }, [initialNotice, initialView]);
 
   useEffect(() => {
     let isMounted = true;
+
+    if (view === "reset") {
+      setIsCheckingSession(false);
+      return () => {
+        isMounted = false;
+      };
+    }
+
+    setIsCheckingSession(true);
 
     supabase.auth.getSession().then(({ data }) => {
       if (!isMounted) {
@@ -76,7 +135,9 @@ export function AuthForm({
       }
 
       if (data.session) {
+        onClose?.();
         router.replace(redirectTo);
+        router.refresh();
         return;
       }
 
@@ -86,15 +147,14 @@ export function AuthForm({
     return () => {
       isMounted = false;
     };
-  }, [redirectTo, router, supabase]);
+  }, [display, onClose, redirectTo, router, supabase, view]);
 
-  useEffect(() => {
-    if (mode === "login" && wasJustCreated) {
-      setNotice("Акаунт створено. Тепер можете увійти у свій профіль.");
-    }
-  }, [mode, wasJustCreated]);
-
-  const isSignup = mode === "signup";
+  const switchView = (nextView: AuthView, nextNotice?: string | null) => {
+    setView(nextView);
+    setError(null);
+    setNotice(nextNotice ?? null);
+    setPassword("");
+  };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -103,15 +163,29 @@ export function AuthForm({
     setIsSubmitting(true);
 
     try {
+      if (isReset) {
+        const { error: resetError } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+          redirectTo: buildCallbackUrl("/reset-password")
+        });
+
+        if (resetError) {
+          setError(mapAuthErrorMessage(resetError.message));
+          return;
+        }
+
+        switchView("login", "Надіслали лист для зміни пароля. Перевірте пошту й відкрийте посилання з листа.");
+        return;
+      }
+
       if (isSignup) {
         const { data, error: signUpError } = await supabase.auth.signUp({
           email: email.trim(),
           password,
           options: {
             data: {
-              source: "header_signup"
+              source: display === "modal" ? "modal_signup" : "page_signup"
             },
-            emailRedirectTo: buildEmailRedirectUrl(redirectTo)
+            emailRedirectTo: buildCallbackUrl(redirectTo)
           }
         });
 
@@ -121,13 +195,13 @@ export function AuthForm({
         }
 
         if (data.session) {
+          onClose?.();
           router.replace(redirectTo);
           router.refresh();
           return;
         }
 
-        router.replace(`/login?next=${encodeURIComponent(redirectTo)}&created=1`);
-        router.refresh();
+        switchView("login", "Акаунт створено. Підтвердьте email у листі, а потім увійдіть у свій профіль.");
         return;
       }
 
@@ -141,10 +215,11 @@ export function AuthForm({
         return;
       }
 
+      onClose?.();
       router.replace(redirectTo);
       router.refresh();
     } catch (submitError) {
-      setError(submitError instanceof Error ? submitError.message : "Сталася помилка під час авторизації.");
+      setError(submitError instanceof Error ? mapAuthErrorMessage(submitError.message) : "Сталася помилка під час авторизації.");
     } finally {
       setIsSubmitting(false);
     }
@@ -152,7 +227,7 @@ export function AuthForm({
 
   if (isCheckingSession) {
     return (
-      <section className="mx-auto max-w-xl py-10">
+      <section className={display === "modal" ? "" : "mx-auto max-w-xl py-10"}>
         <div className="surface-panel rounded-[2rem] p-6 md:p-8">
           <p className="body-copy">Перевіряємо вашу сесію...</p>
         </div>
@@ -160,11 +235,16 @@ export function AuthForm({
     );
   }
 
+  const rootClassName = display === "modal" ? "" : "mx-auto max-w-xl py-6 md:py-10";
+  const panelClassName = display === "modal" ? "surface-panel rounded-[2rem] p-6 md:p-8" : "surface-panel rounded-[2rem] p-6 md:p-8";
+  const switchHref = `${view === "signup" ? "/login" : "/signup"}?next=${encodeURIComponent(redirectTo)}`;
+
   return (
-    <section className="mx-auto max-w-xl py-6 md:py-10">
-      <div className="surface-panel rounded-[2rem] p-6 md:p-8">
+    <section className={rootClassName}>
+      <div className={panelClassName}>
         <div>
-          <h1 className="page-title max-w-[11ch]">{isSignup ? "Реєстрація" : "Вхід"}</h1>
+          <h1 className="page-title max-w-[13ch]">{copy.title}</h1>
+          {showDescription ? <p className="mt-3 text-[0.98rem] leading-[1.72] text-[var(--text-muted)]">{copy.description}</p> : null}
         </div>
 
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
@@ -180,18 +260,34 @@ export function AuthForm({
             />
           </label>
 
-          <label className="block text-sm font-medium leading-[1.6] text-[var(--text-muted)]">
-            Пароль
-            <input
-              type="password"
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              className="field-surface mt-1"
-              autoComplete={isSignup ? "new-password" : "current-password"}
-              minLength={6}
-              required
-            />
-          </label>
+          {!isReset ? (
+            <>
+              <label className="block text-sm font-medium leading-[1.6] text-[var(--text-muted)]">
+                Пароль
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  className="field-surface mt-1"
+                  autoComplete={isSignup ? "new-password" : "current-password"}
+                  minLength={6}
+                  required
+                />
+              </label>
+
+              {view === "login" ? (
+                <div className="flex justify-start">
+                  <button
+                    type="button"
+                    onClick={() => switchView("reset")}
+                    className="text-sm font-semibold text-[var(--accent-strong)] transition hover:text-[var(--accent)]"
+                  >
+                    Забули пароль?
+                  </button>
+                </div>
+              ) : null}
+            </>
+          ) : null}
 
           {error ? (
             <p className="rounded-[1.3rem] border border-[rgba(201,155,134,0.5)] bg-[var(--danger-soft)] px-4 py-3 text-sm text-[var(--danger-strong)]">
@@ -206,24 +302,67 @@ export function AuthForm({
           ) : null}
 
           <button type="submit" disabled={isSubmitting} className="btn-primary w-full disabled:cursor-not-allowed disabled:opacity-70">
-            {isSubmitting ? (isSignup ? "Створюємо акаунт..." : "Входимо...") : isSignup ? "Зареєструватися" : "Увійти"}
+            {isSubmitting ? copy.submitBusyLabel : copy.submitLabel}
           </button>
         </form>
 
         <div className="mt-5 text-sm text-[var(--text-muted)]">
-          {isSignup ? (
-            <p>
-              Уже є акаунт?{" "}
-              <Link href={`/login?next=${encodeURIComponent(redirectTo)}`} className="font-semibold text-[var(--accent-strong)] hover:text-[var(--accent)]">
-                Увійти
-              </Link>
-            </p>
+          {view === "signup" ? (
+            display === "modal" ? (
+              <p>
+                Уже є акаунт?{" "}
+                <button
+                  type="button"
+                  onClick={() => switchView("login")}
+                  className="font-semibold text-[var(--accent-strong)] transition hover:text-[var(--accent)]"
+                >
+                  Увійти
+                </button>
+              </p>
+            ) : (
+              <p>
+                Уже є акаунт?{" "}
+                <Link href={switchHref} className="font-semibold text-[var(--accent-strong)] hover:text-[var(--accent)]">
+                  Увійти
+                </Link>
+              </p>
+            )
+          ) : view === "login" ? (
+            display === "modal" ? (
+              <p>
+                Немає акаунта?{" "}
+                <button
+                  type="button"
+                  onClick={() => switchView("signup")}
+                  className="font-semibold text-[var(--accent-strong)] transition hover:text-[var(--accent)]"
+                >
+                  Зареєструватися
+                </button>
+              </p>
+            ) : (
+              <p>
+                Немає акаунта?{" "}
+                <Link href={switchHref} className="font-semibold text-[var(--accent-strong)] hover:text-[var(--accent)]">
+                  Зареєструватися
+                </Link>
+              </p>
+            )
           ) : (
             <p>
-              Немає акаунта?{" "}
-              <Link href={`/signup?next=${encodeURIComponent(redirectTo)}`} className="font-semibold text-[var(--accent-strong)] hover:text-[var(--accent)]">
-                Зареєструватися
-              </Link>
+              Згадали пароль?{" "}
+              {display === "modal" ? (
+                <button
+                  type="button"
+                  onClick={() => switchView("login")}
+                  className="font-semibold text-[var(--accent-strong)] transition hover:text-[var(--accent)]"
+                >
+                  Повернутися до входу
+                </button>
+              ) : (
+                <Link href={`/login?next=${encodeURIComponent(redirectTo)}`} className="font-semibold text-[var(--accent-strong)] hover:text-[var(--accent)]">
+                  Повернутися до входу
+                </Link>
+              )}
             </p>
           )}
         </div>

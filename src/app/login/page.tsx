@@ -16,5 +16,11 @@ export const metadata = createMetadata({
 });
 
 export default function LoginPage({ searchParams }: LoginPageProps) {
-  return <AuthForm mode="login" nextPath={searchParams?.next} wasJustCreated={searchParams?.created === "1"} />;
+  return (
+    <AuthForm
+      initialView="login"
+      nextPath={searchParams?.next}
+      initialNotice={searchParams?.created === "1" ? "Акаунт створено. Підтвердьте email у листі, а потім увійдіть у свій профіль." : null}
+    />
+  );
 }
