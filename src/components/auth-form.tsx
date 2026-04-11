@@ -32,6 +32,10 @@ function buildCallbackUrl(nextPath: string) {
 function mapAuthErrorMessage(message: string) {
   const normalized = message.toLowerCase();
 
+  if (normalized.includes("failed to fetch") || normalized.includes("networkerror")) {
+    return "Не вдалося підключитися до сервісу авторизації. Якщо ви працюєте локально, перевірте, чи запущений Supabase.";
+  }
+
   if (normalized.includes("invalid login credentials")) {
     return "Неправильний email або пароль.";
   }

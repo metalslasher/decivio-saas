@@ -1,6 +1,12 @@
 import { DashboardShell } from "@/components/dashboard-shell";
 import { createMetadata } from "@/lib/seo";
 
+type DashboardPageProps = {
+  searchParams?: {
+    view?: string;
+  };
+};
+
 export const metadata = createMetadata({
   title: "Кабінет",
   description: "Особистий кабінет користувача Decivio.",
@@ -8,6 +14,6 @@ export const metadata = createMetadata({
   noIndex: true
 });
 
-export default function DashboardPage() {
-  return <DashboardShell />;
+export default function DashboardPage({ searchParams }: DashboardPageProps) {
+  return <DashboardShell requestedView={searchParams?.view} />;
 }

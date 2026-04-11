@@ -3,8 +3,10 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useAuthDialog } from "@/components/auth-dialog-provider";
-import { formatUah, pricingPlans } from "@/lib/pricing";
 import { getSupabaseBrowserClient } from "@/lib/db/supabase-browser";
+import { formatUah, paidFeatureSections, pricingPlans } from "@/lib/pricing";
+
+type DashboardView = "overview" | "scenarios" | "access" | "tools";
 
 type DashboardState =
   | { status: "loading" }
@@ -16,11 +18,6 @@ type DashboardState =
         id: string;
         email: string;
         displayName: string;
-        createdAt: string | null;
-      };
-      profile: {
-        locale: string | null;
-        timezone: string | null;
       };
       subscription: {
         plan: "free" | "pro";
@@ -47,9 +44,6 @@ type DashboardSimulation = {
 type ProfileRow = {
   email?: string | null;
   full_name?: string | null;
-  locale?: string | null;
-  timezone?: string | null;
-  created_at?: string | null;
 };
 
 type SubscriptionRow = {
@@ -70,27 +64,31 @@ type SimulationResultRow = {
   summary_metrics?: unknown;
 };
 
-type ModuleCard = {
-  title: string;
-  description: string;
-  statusLabel: string;
-  tone: "live" | "future";
-  href?: string;
-  cta?: string;
+type DashboardNavItem = {
+  view: DashboardView;
+  label: string;
+  helper: string;
+};
+
+type DashboardAccessState = {
+  plan: "free" | "pro";
+  status: "free" | "trial" | "active" | "canceled" | "past_due";
+  currentPeriodEnd: string | null;
 };
 
 const dateFormatter = new Intl.DateTimeFormat("uk-UA", {
-  day: "numeric",
-  month: "long",
-  year: "numeric"
-});
-
-const dateTimeFormatter = new Intl.DateTimeFormat("uk-UA", {
   day: "numeric",
   month: "short",
   hour: "2-digit",
   minute: "2-digit"
 });
+
+const dashboardNavItems: DashboardNavItem[] = [
+  { view: "overview", label: "Огляд", helper: "Швидкі дії та ключові блоки" },
+  { view: "scenarios", label: "Сценарії", helper: "Історія переходів і нові розрахунки" },
+  { view: "access", label: "Доступ", helper: "План, оплата й активний статус" },
+  { view: "tools", label: "Інструменти", helper: "Модулі, які підключатимуться далі" }
+];
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -104,22 +102,13 @@ function toNumber(value: unknown) {
   return typeof value === "number" && Number.isFinite(value) ? value : null;
 }
 
-function formatDate(value: string | null) {
-  if (!value) {
-    return null;
-  }
-
-  const parsed = new Date(value);
-  return Number.isNaN(parsed.getTime()) ? null : dateFormatter.format(parsed);
-}
-
 function formatDateTime(value: string | null) {
   if (!value) {
     return null;
   }
 
   const parsed = new Date(value);
-  return Number.isNaN(parsed.getTime()) ? null : dateTimeFormatter.format(parsed);
+  return Number.isNaN(parsed.getTime()) ? null : dateFormatter.format(parsed);
 }
 
 function formatDisplayName(fullName: string | null | undefined, email: string) {
@@ -130,7 +119,7 @@ function formatDisplayName(fullName: string | null | undefined, email: string) {
 
   const localPart = email.split("@")[0]?.trim() ?? "";
   if (!localPart) {
-    return "У вашому кабінеті";
+    return "Ваш кабінет";
   }
 
   return localPart.charAt(0).toUpperCase() + localPart.slice(1);
@@ -170,14 +159,14 @@ function mapAccessLabel(plan: "free" | "pro", status: "free" | "trial" | "active
   }
 
   if (plan === "pro" && status === "past_due") {
-    return "Оплата потребує уваги";
+    return "Потрібна увага до оплати";
   }
 
   if (plan === "pro" && status === "canceled") {
-    return "Pro зупинено";
+    return "Pro призупинено";
   }
 
-  return "Безкоштовний доступ";
+  return "Базовий доступ";
 }
 
 function accessBadgeClasses(plan: "free" | "pro", status: "free" | "trial" | "active" | "canceled" | "past_due") {
@@ -231,6 +220,15 @@ function verdictLabel(value: string | null) {
   }
 }
 
+function probabilityLabel(value: number | null) {
+  if (value === null) {
+    return null;
+  }
+
+  const normalized = value <= 1 ? value * 100 : value;
+  return `${Math.round(normalized)}% шанс входу`;
+}
+
 function extractSimulationSnapshot(simulation: SimulationRow, result: SimulationResultRow | null): DashboardSimulation {
   const inputs = isRecord(simulation.inputs) ? simulation.inputs : null;
   const metrics = result?.summary_metrics && isRecord(result.summary_metrics) ? result.summary_metrics : null;
@@ -249,66 +247,466 @@ function extractSimulationSnapshot(simulation: SimulationRow, result: Simulation
   };
 }
 
-function probabilityLabel(value: number | null) {
-  if (value === null) {
-    return null;
-  }
-
-  const normalized = value <= 1 ? value * 100 : value;
-  return `${Math.round(normalized)}% шанс входу`;
+function getDashboardView(value: string | null): DashboardView {
+  return value === "scenarios" || value === "access" || value === "tools" ? value : "overview";
 }
 
-function ModuleCard({ title, description, statusLabel, tone, href, cta }: ModuleCard) {
-  const badgeClasses =
-    tone === "live"
-      ? "border-[rgba(63,94,255,0.18)] bg-[rgba(238,242,255,0.88)] text-[var(--accent-strong)]"
-      : "border-[var(--line-soft)] bg-[rgba(255,255,255,0.76)] text-[var(--text-muted)]";
-
-  return (
-    <article className="surface-panel flex h-full flex-col rounded-[1.9rem] p-5 md:p-6">
-      <span className={`inline-flex w-fit rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] ${badgeClasses}`}>
-        {statusLabel}
-      </span>
-      <h3 className="panel-title mt-4">{title}</h3>
-      <p className="mt-3 text-[0.95rem] leading-[1.72] text-[var(--text-muted)]">{description}</p>
-
-      <div className="mt-auto pt-5">
-        {href && cta ? (
-          <Link href={href} className={tone === "live" ? "btn-primary" : "btn-secondary"}>
-            {cta}
-          </Link>
-        ) : (
-          <span className="inline-flex rounded-full border border-[var(--line-soft)] bg-[rgba(255,255,255,0.72)] px-4 py-2 text-sm font-semibold text-[var(--text-soft)]">
-            Скоро тут
-          </span>
-        )}
-      </div>
-    </article>
-  );
+function getDashboardHref(view: DashboardView) {
+  return view === "overview" ? "/dashboard" : `/dashboard?view=${view}`;
 }
 
 function DashboardSkeleton() {
   return (
-    <section className="space-y-6 py-4 md:space-y-8 md:py-8">
-      <div className="surface-panel rounded-[2.2rem] p-6 md:p-8">
-        <div className="h-4 w-32 rounded-full bg-[rgba(223,229,241,0.9)]" />
-        <div className="mt-4 h-12 max-w-xl rounded-[1.2rem] bg-[rgba(223,229,241,0.9)]" />
-        <div className="mt-4 h-5 max-w-2xl rounded-full bg-[rgba(223,229,241,0.8)]" />
+    <section className="grid gap-5 py-4 lg:grid-cols-[18rem,minmax(0,1fr)] lg:gap-6 lg:py-8">
+      <div className="surface-panel rounded-[2rem] p-5">
+        <div className="h-10 w-full rounded-[1rem] bg-[rgba(223,229,241,0.8)]" />
+        <div className="mt-3 h-10 w-full rounded-[1rem] bg-[rgba(223,229,241,0.72)]" />
+        <div className="mt-3 h-10 w-full rounded-[1rem] bg-[rgba(223,229,241,0.72)]" />
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
-        {Array.from({ length: 3 }).map((_, index) => (
-          <div key={index} className="surface-panel rounded-[1.8rem] p-5 md:p-6">
-            <div className="h-4 w-24 rounded-full bg-[rgba(223,229,241,0.9)]" />
-            <div className="mt-4 h-10 w-32 rounded-[1rem] bg-[rgba(223,229,241,0.8)]" />
-          </div>
-        ))}
+      <div className="space-y-4">
+        <div className="surface-panel rounded-[2rem] p-6">
+          <div className="h-5 w-28 rounded-full bg-[rgba(223,229,241,0.84)]" />
+          <div className="mt-4 h-14 max-w-xl rounded-[1.2rem] bg-[rgba(223,229,241,0.9)]" />
+          <div className="mt-4 h-5 max-w-2xl rounded-full bg-[rgba(223,229,241,0.8)]" />
+        </div>
+        <div className="grid gap-4 md:grid-cols-3">
+          {Array.from({ length: 3 }).map((_, index) => (
+            <div key={index} className="surface-panel rounded-[1.6rem] p-5">
+              <div className="h-4 w-20 rounded-full bg-[rgba(223,229,241,0.84)]" />
+              <div className="mt-4 h-10 w-28 rounded-[1rem] bg-[rgba(223,229,241,0.8)]" />
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   );
 }
 
-export function DashboardShell() {
+function DashboardGuest({ onLogin, onSignup }: { onLogin: () => void; onSignup: () => void }) {
+  return (
+    <section className="space-y-6 py-4 md:space-y-8 md:py-8">
+      <div className="surface-panel rounded-[2.2rem] p-6 md:p-8">
+        <span className="eyebrow-pill">Особистий кабінет</span>
+        <h1 className="page-title mt-4 max-w-[13ch]">Кабінет відкривається після входу.</h1>
+        <p className="lead-copy mt-4 max-w-2xl">
+          Після авторизації тут з’явиться робочий простір з навігацією по сценаріях, доступу й інструментах сервісу.
+        </p>
+
+        <div className="mt-6 flex flex-wrap gap-3">
+          <button type="button" onClick={onLogin} className="btn-secondary">
+            Увійти
+          </button>
+          <button type="button" onClick={onSignup} className="btn-primary">
+            Створити акаунт
+          </button>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function DashboardError({ message }: { message: string }) {
+  return (
+    <section className="space-y-6 py-4 md:space-y-8 md:py-8">
+      <div className="surface-panel rounded-[2.2rem] p-6 md:p-8">
+        <span className="eyebrow-pill">Особистий кабінет</span>
+        <h1 className="page-title mt-4 max-w-[13ch]">Кабінет тимчасово недоступний.</h1>
+        <p className="lead-copy mt-4 max-w-2xl">{message}</p>
+        <div className="mt-6 flex flex-wrap gap-3">
+          <Link href="/simulate" className="btn-primary">
+            Перейти до симуляції
+          </Link>
+          <Link href="/" className="btn-secondary">
+            На головну
+          </Link>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function DashboardSidebar({
+  activeView,
+  totalSimulations,
+  accessLabel
+}: {
+  activeView: DashboardView;
+  totalSimulations: number;
+  accessLabel: string;
+}) {
+  return (
+    <aside className="space-y-4 lg:sticky lg:top-24 lg:self-start">
+      <div className="surface-panel rounded-[2rem] p-4 md:p-5">
+        <p className="label-muted">Навігація</p>
+
+        <nav className="mt-4 space-y-2" aria-label="Розділи кабінету">
+          {dashboardNavItems.map((item) => {
+            const isActive = item.view === activeView;
+
+            return (
+              <Link
+                key={item.view}
+                href={getDashboardHref(item.view)}
+                className={`flex rounded-[1.35rem] px-4 py-3 transition ${
+                  isActive
+                    ? "bg-[rgba(67,97,255,0.12)] text-[var(--accent-strong)] shadow-[inset_0_1px_0_rgba(255,255,255,0.92)]"
+                    : "bg-[rgba(255,255,255,0.56)] text-[var(--text-muted)] hover:bg-[rgba(255,255,255,0.84)] hover:text-[var(--text-strong)]"
+                }`}
+              >
+                <span className="block">
+                  <span className="block text-sm font-semibold">{item.label}</span>
+                  <span className="mt-1 block text-xs leading-[1.5] opacity-80">{item.helper}</span>
+                </span>
+              </Link>
+            );
+          })}
+        </nav>
+      </div>
+
+      <div className="surface-panel rounded-[2rem] p-4 md:p-5">
+        <p className="label-muted">Швидкий стан</p>
+
+        <div className="mt-4 space-y-3 text-sm leading-[1.65] text-[var(--text-muted)]">
+          <div className="rounded-[1.2rem] bg-[rgba(255,255,255,0.7)] px-4 py-3">
+            <span className="block text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-[var(--text-soft)]">Доступ</span>
+            <span className="mt-2 block font-semibold text-[var(--text-strong)]">{accessLabel}</span>
+          </div>
+
+          <div className="rounded-[1.2rem] bg-[rgba(255,255,255,0.7)] px-4 py-3">
+            <span className="block text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-[var(--text-soft)]">Сценарії</span>
+            <span className="mt-2 block font-semibold text-[var(--text-strong)]">{totalSimulations} збережено</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+  );
+}
+
+function MetricCard({ label, value, description }: { label: string; value: string; description: string }) {
+  return (
+    <article className="surface-panel rounded-[1.7rem] p-5 md:p-6">
+      <p className="label-muted">{label}</p>
+      <p className="mt-3 font-display text-[1.8rem] font-bold leading-[0.98] tracking-[-0.05em] text-[var(--text-strong)]">{value}</p>
+      <p className="mt-2 text-[0.93rem] leading-[1.68] text-[var(--text-muted)]">{description}</p>
+    </article>
+  );
+}
+
+function DashboardOverview({
+  userDisplayName,
+  accessLabel,
+  subscription,
+  totalSimulations,
+  lastSimulation
+}: {
+  userDisplayName: string;
+  accessLabel: string;
+  subscription: DashboardAccessState;
+  totalSimulations: number;
+  lastSimulation: DashboardSimulation | null;
+}) {
+  const monthlyPlan = pricingPlans[0];
+  const lastActivity = lastSimulation ? formatDateTime(lastSimulation.createdAt) : null;
+  const accessPeriod = subscription.currentPeriodEnd ? formatDateTime(subscription.currentPeriodEnd) : null;
+  const statusDescription =
+    subscription.plan === "pro"
+      ? accessPeriod
+        ? `Активний період доступу триває до ${accessPeriod}.`
+        : "Платний доступ уже прив’язаний до вашого акаунта."
+      : `Базовий рівень активний. Повний доступ відкривається від ${formatUah(monthlyPlan.billedNowUah)}.`;
+
+  return (
+    <div className="space-y-5">
+      <div className="surface-panel rounded-[2.2rem] p-6 md:p-8">
+        <div className="grid gap-6 xl:grid-cols-[1.12fr,0.88fr] xl:items-start">
+          <div>
+            <span className="eyebrow-pill">Робочий простір</span>
+            <h1 className="page-title mt-4 max-w-[14ch]">{userDisplayName}, тут ваш центр керування Decivio.</h1>
+            <p className="lead-copy mt-4 max-w-3xl">
+              Запускайте нові сценарії, повертайтеся до історії переходів і тримайте під контролем доступ до сервісу без лендингового шуму.
+            </p>
+
+            <div className="mt-6 flex flex-wrap gap-3">
+              <Link href="/simulate" className="btn-primary">
+                Запустити симуляцію
+              </Link>
+              <Link href={getDashboardHref("scenarios")} className="btn-secondary">
+                Відкрити історію
+              </Link>
+            </div>
+          </div>
+
+          <div className="surface-soft rounded-[1.8rem] p-5 md:p-6">
+            <p className="label-muted">Що зараз під рукою</p>
+            <div className="mt-4 space-y-3 text-[0.95rem] leading-[1.72] text-[var(--text-muted)]">
+              <p className="rounded-[1.2rem] bg-[rgba(255,255,255,0.7)] px-4 py-3">
+                Основний сценарний інструмент уже доступний і готовий до нового розрахунку.
+              </p>
+              <p className="rounded-[1.2rem] bg-[rgba(255,255,255,0.7)] px-4 py-3">
+                Історія зберігає останні переходи, щоб порівнювати рішення без повторного заповнення всього з нуля.
+              </p>
+              <p className="rounded-[1.2rem] bg-[rgba(255,255,255,0.7)] px-4 py-3">
+                Доступ і майбутні інструменти винесені в окремі розділи, а не змішані в одному екрані.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-3">
+        <MetricCard label="Доступ" value={accessLabel} description={statusDescription} />
+        <MetricCard
+          label="Сценарії"
+          value={`${totalSimulations}`}
+          description={
+            totalSimulations > 0
+              ? "У кабінеті вже є база для порівняння наступних рішень."
+              : "Після першої симуляції тут з’явиться історія переходів."
+          }
+        />
+        <MetricCard
+          label="Остання активність"
+          value={lastActivity ?? "Ще не було"}
+          description={
+            lastSimulation
+              ? "Останній збережений сценарій можна використати як відправну точку для нового розрахунку."
+              : "Кабінет готовий. Наступний крок — перша симуляція переходу."
+          }
+        />
+      </div>
+
+      <div className="grid gap-4 xl:grid-cols-3">
+        <article className="surface-panel rounded-[1.8rem] p-5 md:p-6">
+          <p className="label-muted">Симуляція</p>
+          <h2 className="mt-3 panel-title">Старт нового сценарію</h2>
+          <p className="mt-3 text-[0.95rem] leading-[1.72] text-[var(--text-muted)]">
+            Перейдіть до симуляції, щоб прорахувати новий маршрут переходу з урахуванням доходу, ризику і стелі ролі.
+          </p>
+          <Link href="/simulate" className="btn-primary mt-5">
+            Нова симуляція
+          </Link>
+        </article>
+
+        <article className="surface-panel rounded-[1.8rem] p-5 md:p-6">
+          <p className="label-muted">Історія</p>
+          <h2 className="mt-3 panel-title">Повернення до сценаріїв</h2>
+          <p className="mt-3 text-[0.95rem] leading-[1.72] text-[var(--text-muted)]">
+            В окремому розділі зібрані останні переходи, щоб не тримати весь архів у головному екрані кабінету.
+          </p>
+          <Link href={getDashboardHref("scenarios")} className="btn-secondary mt-5">
+            Відкрити сценарії
+          </Link>
+        </article>
+
+        <article className="surface-panel rounded-[1.8rem] p-5 md:p-6">
+          <p className="label-muted">Інструменти</p>
+          <h2 className="mt-3 panel-title">Що підключатиметься далі</h2>
+          <p className="mt-3 text-[0.95rem] leading-[1.72] text-[var(--text-muted)]">
+            Резюме, вакансії та підготовка до співбесід будуть винесені в окремі секції кабінету, а не змішані з поточним функціоналом.
+          </p>
+          <Link href={getDashboardHref("tools")} className="btn-secondary mt-5">
+            Подивитися структуру
+          </Link>
+        </article>
+      </div>
+    </div>
+  );
+}
+
+function DashboardScenarios({ recentSimulations }: { recentSimulations: DashboardSimulation[] }) {
+  return (
+    <div className="space-y-5">
+      <div className="surface-panel rounded-[2rem] p-6 md:p-8">
+        <span className="eyebrow-pill">Сценарії</span>
+        <h1 className="page-title mt-4 max-w-[12ch]">Історія переходів і нові розрахунки.</h1>
+        <p className="lead-copy mt-4 max-w-3xl">
+          Тут зібрані останні сценарії, щоб повертатися до них окремо, а не тримати їх у головному екрані кабінету.
+        </p>
+
+        <div className="mt-6">
+          <Link href="/simulate" className="btn-primary">
+            Запустити нову симуляцію
+          </Link>
+        </div>
+      </div>
+
+      {recentSimulations.length > 0 ? (
+        <div className="grid gap-4">
+          {recentSimulations.map((simulation) => {
+            const roleLabel =
+              simulation.currentRole && simulation.targetRole
+                ? `${simulation.currentRole} → ${simulation.targetRole}`
+                : simulation.targetRole ?? simulation.currentRole ?? "Кар’єрний сценарій";
+            const verdict = verdictLabel(simulation.verdictLabel);
+            const probability = probabilityLabel(simulation.probabilityOfGettingJob);
+            const createdAt = formatDateTime(simulation.createdAt);
+            const targetMarket = mapTargetMarketLabel(simulation.targetMarket);
+            const priority = mapPriorityLabel(simulation.transitionPriority);
+
+            return (
+              <article key={simulation.id} className="surface-panel rounded-[1.8rem] p-5 md:p-6">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <h2 className="panel-title">{roleLabel}</h2>
+                    <p className="mt-2 text-sm leading-[1.68] text-[var(--text-muted)]">
+                      {createdAt ? `Збережено ${createdAt}.` : "Сценарій збережено у вашому кабінеті."}
+                    </p>
+                  </div>
+                  <span className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] ${simulationStatusClasses(simulation.status)}`}>
+                    {simulationStatusLabel(simulation.status)}
+                  </span>
+                </div>
+
+                <div className="mt-4 flex flex-wrap gap-2 text-[0.8rem] font-semibold text-[var(--text-muted)]">
+                  {verdict ? <span className="rounded-full border border-[var(--line-soft)] bg-white/76 px-3 py-1.5">{verdict}</span> : null}
+                  {probability ? <span className="rounded-full border border-[var(--line-soft)] bg-white/76 px-3 py-1.5">{probability}</span> : null}
+                  {targetMarket ? <span className="rounded-full border border-[var(--line-soft)] bg-white/76 px-3 py-1.5">{targetMarket}</span> : null}
+                  {priority ? <span className="rounded-full border border-[var(--line-soft)] bg-white/76 px-3 py-1.5">Фокус: {priority}</span> : null}
+                  {simulation.ceilingGapMedian !== null ? (
+                    <span className="rounded-full border border-[var(--line-soft)] bg-white/76 px-3 py-1.5">
+                      Стеля: {simulation.ceilingGapMedian > 0 ? "+" : ""}
+                      {formatUah(Math.abs(Math.round(simulation.ceilingGapMedian))).replace(" грн", "")} грн
+                    </span>
+                  ) : null}
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="surface-panel rounded-[2rem] p-6 md:p-8">
+          <h2 className="panel-title">Історія ще порожня</h2>
+          <p className="mt-3 text-[0.96rem] leading-[1.72] text-[var(--text-muted)]">
+            Коли ви почнете рахувати сценарії вже з акаунта, вони з’являться тут окремими записами з базовим статусом і коротким контекстом.
+          </p>
+          <Link href="/simulate" className="btn-primary mt-5">
+            Створити перший сценарій
+          </Link>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function DashboardAccess({
+  accessLabel,
+  subscription,
+  email
+}: {
+  accessLabel: string;
+  subscription: DashboardAccessState;
+  email: string;
+}) {
+  const monthlyPlan = pricingPlans[0];
+  const annualPlan = pricingPlans[1];
+
+  return (
+    <div className="space-y-5">
+      <div className="surface-panel rounded-[2rem] p-6 md:p-8">
+        <span className="eyebrow-pill">Доступ</span>
+        <h1 className="page-title mt-4 max-w-[12ch]">Статус плану й оплати в одному місці.</h1>
+        <p className="lead-copy mt-4 max-w-3xl">
+          Тут тримається тільки те, що справді стосується доступу: ваш поточний рівень, куди прив’язаний акаунт і який крок логічний далі.
+        </p>
+      </div>
+
+      <div className="grid gap-4 xl:grid-cols-[1.15fr,0.85fr]">
+        <article className="surface-panel rounded-[1.9rem] p-5 md:p-6">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="label-muted">Поточний статус</p>
+            <span className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] ${accessBadgeClasses(subscription.plan, subscription.status)}`}>
+              {accessLabel}
+            </span>
+          </div>
+
+          <div className="mt-5 space-y-3 text-[0.96rem] leading-[1.72] text-[var(--text-muted)]">
+            <p className="rounded-[1.25rem] bg-[rgba(255,255,255,0.72)] px-4 py-4">
+              Акаунт доступу закріплений за <span className="font-semibold text-[var(--text-strong)]">{email}</span>.
+            </p>
+            <p className="rounded-[1.25rem] bg-[rgba(255,255,255,0.72)] px-4 py-4">
+              {subscription.plan === "pro"
+                ? "Платний доступ уже закріплений. Тут далі з’являтиметься історія білінгу та зміни статусу."
+                : "Зараз у вас базовий рівень. Коли будете готові відкривати повний стек інструментів, це керується звідси."}
+            </p>
+          </div>
+
+          <div className="mt-5 flex flex-wrap gap-3">
+            <Link href="/pricing" className="btn-primary">
+              Переглянути тарифи
+            </Link>
+            <Link href="/checkout?plan=monthly" className="btn-secondary">
+              Відкрити оплату
+            </Link>
+          </div>
+        </article>
+
+        <article className="surface-panel rounded-[1.9rem] p-5 md:p-6">
+          <p className="label-muted">Орієнтир по планах</p>
+
+          <div className="mt-5 space-y-3">
+            <div className="surface-soft rounded-[1.45rem] px-4 py-4">
+              <div className="flex items-center justify-between gap-3">
+                <p className="font-semibold text-[var(--text-strong)]">{monthlyPlan.name}</p>
+                <span className="chip-positive">{formatUah(monthlyPlan.billedNowUah)}</span>
+              </div>
+              <p className="mt-2 text-[0.94rem] leading-[1.68] text-[var(--text-muted)]">{monthlyPlan.billingLabel}</p>
+            </div>
+
+            <div className="surface-soft rounded-[1.45rem] px-4 py-4">
+              <div className="flex items-center justify-between gap-3">
+                <p className="font-semibold text-[var(--text-strong)]">{annualPlan.name}</p>
+                <span className="chip-positive">{formatUah(annualPlan.billedNowUah)}</span>
+              </div>
+              <p className="mt-2 text-[0.94rem] leading-[1.68] text-[var(--text-muted)]">
+                {annualPlan.billingLabel}. Економія {formatUah(annualPlan.savingsUah)} за рік.
+              </p>
+            </div>
+          </div>
+        </article>
+      </div>
+    </div>
+  );
+}
+
+function DashboardTools() {
+  const roadmapItems = paidFeatureSections.flatMap((section) =>
+    section.items.map((item) => ({
+      section: section.heading,
+      title: item.title,
+      description: item.description
+    }))
+  );
+
+  return (
+    <div className="space-y-5">
+      <div className="surface-panel rounded-[2rem] p-6 md:p-8">
+        <span className="eyebrow-pill">Інструменти</span>
+        <h1 className="page-title mt-4 max-w-[12ch]">Структура майбутніх модулів кабінету.</h1>
+        <p className="lead-copy mt-4 max-w-3xl">
+          Поки функції ще не підключені, тут уже видно логіку кабінету: кожен інструмент житиме у своєму окремому розділі, а не в одному перевантаженому екрані.
+        </p>
+      </div>
+
+      <div className="grid gap-4 xl:grid-cols-2">
+        {roadmapItems.map((item) => (
+          <article key={`${item.section}-${item.title}`} className="surface-panel rounded-[1.8rem] p-5 md:p-6">
+            <span className="inline-flex rounded-full border border-[var(--line-soft)] bg-[rgba(255,255,255,0.72)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)]">
+              {item.section}
+            </span>
+            <h2 className="panel-title mt-4">{item.title}</h2>
+            <p className="mt-3 text-[0.95rem] leading-[1.72] text-[var(--text-muted)]">{item.description}</p>
+            <span className="mt-5 inline-flex rounded-full border border-[var(--line-soft)] bg-[rgba(255,255,255,0.72)] px-4 py-2 text-sm font-semibold text-[var(--text-soft)]">
+              Скоро тут
+            </span>
+          </article>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export function DashboardShell({ requestedView }: { requestedView?: string | null }) {
   const supabase = useMemo(() => getSupabaseBrowserClient(), []);
   const { openAuthDialog } = useAuthDialog();
   const [state, setState] = useState<DashboardState>({ status: "loading" });
@@ -345,7 +743,7 @@ export function DashboardShell() {
       const userId = session.user.id;
 
       const [profileResponse, subscriptionResponse, countResponse, simulationsResponse] = await Promise.all([
-        supabase.from("profiles").select("email, full_name, locale, timezone, created_at").eq("id", userId).maybeSingle(),
+        supabase.from("profiles").select("email, full_name").eq("id", userId).maybeSingle(),
         supabase.from("subscriptions").select("status, plan, current_period_end").eq("user_id", userId).maybeSingle(),
         supabase.from("simulations").select("id", { count: "exact", head: true }).eq("user_id", userId),
         supabase.from("simulations").select("id, created_at, status, inputs").eq("user_id", userId).order("created_at", { ascending: false }).limit(6)
@@ -393,12 +791,7 @@ export function DashboardShell() {
         user: {
           id: userId,
           email,
-          displayName: formatDisplayName(profile?.full_name, email),
-          createdAt: profile?.created_at ?? session.user.created_at ?? null
-        },
-        profile: {
-          locale: profile?.locale ?? null,
-          timezone: profile?.timezone ?? null
+          displayName: formatDisplayName(profile?.full_name, email)
         },
         subscription: {
           plan: derivedPlan,
@@ -429,317 +822,35 @@ export function DashboardShell() {
   }
 
   if (state.status === "guest") {
-    return (
-      <section className="space-y-6 py-4 md:space-y-8 md:py-8">
-        <div className="surface-panel rounded-[2.2rem] p-6 md:p-8">
-          <span className="eyebrow-pill">Особистий кабінет</span>
-          <h1 className="page-title mt-4 max-w-[14ch]">Кабінет відкривається після входу.</h1>
-          <p className="lead-copy mt-4 max-w-3xl">
-            Тут будуть ваш доступ, історія симуляцій, статус оплати і робоча панель з інструментами Decivio.
-          </p>
-
-          <div className="mt-6 flex flex-wrap gap-3">
-            <button type="button" onClick={() => openAuthDialog("login", { nextPath: "/dashboard" })} className="btn-secondary">
-              Увійти
-            </button>
-            <button type="button" onClick={() => openAuthDialog("signup", { nextPath: "/dashboard" })} className="btn-primary">
-              Створити акаунт
-            </button>
-          </div>
-        </div>
-      </section>
-    );
+    return <DashboardGuest onLogin={() => openAuthDialog("login", { nextPath: "/dashboard" })} onSignup={() => openAuthDialog("signup", { nextPath: "/dashboard" })} />;
   }
 
   if (state.status === "error") {
-    return (
-      <section className="space-y-6 py-4 md:space-y-8 md:py-8">
-        <div className="surface-panel rounded-[2.2rem] p-6 md:p-8">
-          <span className="eyebrow-pill">Особистий кабінет</span>
-          <h1 className="page-title mt-4 max-w-[14ch]">Кабінет тимчасово недоступний.</h1>
-          <p className="lead-copy mt-4 max-w-3xl">{state.message}</p>
-          <div className="mt-6 flex flex-wrap gap-3">
-            <Link href="/simulate" className="btn-primary">
-              Перейти до симуляції
-            </Link>
-            <Link href="/" className="btn-secondary">
-              На головну
-            </Link>
-          </div>
-        </div>
-      </section>
-    );
+    return <DashboardError message={state.message} />;
   }
 
-  const { user, profile, subscription, totalSimulations, recentSimulations } = state;
-  const accessLabel = mapAccessLabel(subscription.plan, subscription.status);
-  const accessPeriod = formatDate(subscription.currentPeriodEnd);
-  const memberSince = formatDate(user.createdAt);
-  const lastSimulation = recentSimulations[0] ?? null;
-  const lastActivity = lastSimulation ? formatDateTime(lastSimulation.createdAt) : memberSince;
-  const monthlyPlan = pricingPlans[0];
-
-  const workspaceModules: ModuleCard[] = [
-    {
-      title: "Симуляція переходу",
-      description: "Запускаєте новий сценарій і швидко перевіряєте, чи варто рухатись у новий напрям саме зараз.",
-      statusLabel: "Доступно зараз",
-      tone: "live",
-      href: "/simulate",
-      cta: "Запустити симуляцію"
-    },
-    {
-      title: "Доступ і тарифи",
-      description: "Перевіряєте свій статус доступу і вирішуєте, коли відкривати повний набір інструментів.",
-      statusLabel: subscription.plan === "pro" ? "Pro активний" : "Готово до підключення",
-      tone: "live",
-      href: "/pricing",
-      cta: subscription.plan === "pro" ? "Подивитися доступ" : "Перейти до тарифів"
-    },
-    {
-      title: "Історія переходів",
-      description: "Тут зберігатимуться ваші останні сценарії, щоб повертатися до них і порівнювати рішення.",
-      statusLabel: totalSimulations > 0 ? "Є збереження" : "Чекає на першу симуляцію",
-      tone: "live",
-      href: "/simulate",
-      cta: totalSimulations > 0 ? "Порахувати новий сценарій" : "Створити перший сценарій"
-    },
-    {
-      title: "Резюме під цільову роль",
-      description: "Модуль для пакування досвіду під нову позицію з’явиться тут окремим блоком кабінету.",
-      statusLabel: "Готуємо",
-      tone: "future"
-    },
-    {
-      title: "Перевірка вакансій",
-      description: "Після запуску тут можна буде швидко звіряти вакансії з вашим профілем і бачити прогалини.",
-      statusLabel: "Готуємо",
-      tone: "future"
-    },
-    {
-      title: "Підготовка до співбесід",
-      description: "Окремий модуль з питаннями, тренуванням відповідей і підказками також з’явиться в кабінеті.",
-      statusLabel: "Готуємо",
-      tone: "future"
-    }
-  ];
+  const activeView = getDashboardView(requestedView ?? null);
+  const accessLabel = mapAccessLabel(state.subscription.plan, state.subscription.status);
+  const lastSimulation = state.recentSimulations[0] ?? null;
 
   return (
-    <section className="space-y-6 py-4 md:space-y-8 md:py-8">
-      <div className="surface-panel rounded-[2.2rem] p-6 md:p-8">
-        <div className="grid gap-6 lg:grid-cols-[1.15fr,0.85fr] lg:items-start">
-          <div>
-            <span className="eyebrow-pill">Особистий кабінет</span>
-            <h1 className="page-title mt-4 max-w-[15ch]">{user.displayName}, тут зібраний ваш робочий простір.</h1>
-            <p className="lead-copy mt-4 max-w-3xl">
-              Керуйте доступом, повертайтесь до своїх сценаріїв і запускайте нові переходи з одного місця, без зайвого шуму.
-            </p>
+    <section className="grid gap-5 py-4 lg:grid-cols-[18rem,minmax(0,1fr)] lg:gap-6 lg:py-8">
+      <DashboardSidebar activeView={activeView} totalSimulations={state.totalSimulations} accessLabel={accessLabel} />
 
-            <div className="mt-6 flex flex-wrap gap-3">
-              <Link href="/simulate" className="btn-primary">
-                Нова симуляція
-              </Link>
-              <Link href="/pricing" className="btn-secondary">
-                Тарифи і доступ
-              </Link>
-            </div>
-          </div>
+      <div className="min-w-0">
+        {activeView === "overview" ? (
+          <DashboardOverview
+            userDisplayName={state.user.displayName}
+            accessLabel={accessLabel}
+            subscription={state.subscription}
+            totalSimulations={state.totalSimulations}
+            lastSimulation={lastSimulation}
+          />
+        ) : null}
 
-          <article className="surface-soft rounded-[1.9rem] p-5 md:p-6">
-            <div className="flex items-center justify-between gap-3">
-              <p className="label-muted">Акаунт</p>
-              <span className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] ${accessBadgeClasses(subscription.plan, subscription.status)}`}>
-                {accessLabel}
-              </span>
-            </div>
-
-            <div className="mt-4 space-y-3 text-[0.95rem] leading-[1.72] text-[var(--text-muted)]">
-              <p>
-                <span className="font-semibold text-[var(--text-strong)]">Email:</span> {user.email}
-              </p>
-              <p>
-                <span className="font-semibold text-[var(--text-strong)]">У системі:</span> {memberSince ?? "щойно"}
-              </p>
-              <p>
-                <span className="font-semibold text-[var(--text-strong)]">Мова:</span> {profile.locale ?? "uk"}
-              </p>
-              <p>
-                <span className="font-semibold text-[var(--text-strong)]">Часовий пояс:</span> {profile.timezone ?? "Europe/Kiev"}
-              </p>
-            </div>
-          </article>
-        </div>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-3">
-        <article className="surface-panel rounded-[1.8rem] p-5 md:p-6">
-          <p className="label-muted">Доступ</p>
-          <p className="mt-3 font-display text-[1.9rem] font-bold leading-[0.96] tracking-[-0.05em] text-[var(--text-strong)]">
-            {accessLabel}
-          </p>
-          <p className="mt-2 text-[0.93rem] leading-[1.68] text-[var(--text-muted)]">
-            {accessPeriod
-              ? `Поточний період активний до ${accessPeriod}.`
-              : `Зараз у вас базовий рівень доступу. Повний набір відкривається від ${formatUah(monthlyPlan.billedNowUah)}.`}
-          </p>
-        </article>
-
-        <article className="surface-panel rounded-[1.8rem] p-5 md:p-6">
-          <p className="label-muted">Збережені сценарії</p>
-          <p className="mt-3 font-display text-[1.9rem] font-bold leading-[0.96] tracking-[-0.05em] text-[var(--text-strong)]">
-            {totalSimulations}
-          </p>
-          <p className="mt-2 text-[0.93rem] leading-[1.68] text-[var(--text-muted)]">
-            {totalSimulations > 0
-              ? "Усі нові симуляції поступово збираються в кабінеті, щоб ви могли повертатися до контексту."
-              : "Після першої симуляції тут з’явиться історія ваших переходів і статус кожного сценарію."}
-          </p>
-        </article>
-
-        <article className="surface-panel rounded-[1.8rem] p-5 md:p-6">
-          <p className="label-muted">Остання активність</p>
-          <p className="mt-3 font-display text-[1.55rem] font-bold leading-[1.02] tracking-[-0.05em] text-[var(--text-strong)]">
-            {lastActivity ?? "Ще немає дій"}
-          </p>
-          <p className="mt-2 text-[0.93rem] leading-[1.68] text-[var(--text-muted)]">
-            {lastSimulation
-              ? "Останній сценарій можна використати як відправну точку для нового рішення."
-              : "Кабінет готовий. Далі все починається з першої симуляції переходу."}
-          </p>
-        </article>
-      </div>
-
-      <section className="space-y-4">
-        <div className="max-w-3xl">
-          <h2 className="section-title">Що у вас під рукою</h2>
-          <p className="lead-copy mt-3">
-            Тут зібрані всі ключові елементи сервісу: те, чим уже можна користуватися зараз, і модулі, які з’являться в кабінеті далі.
-          </p>
-        </div>
-
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {workspaceModules.map((item) => (
-            <ModuleCard key={item.title} {...item} />
-          ))}
-        </div>
-      </section>
-
-      <div className="grid gap-4 lg:grid-cols-[1.15fr,0.85fr]">
-        <section className="surface-panel rounded-[2rem] p-5 md:p-6">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <p className="label-muted">Історія симуляцій</p>
-              <h2 className="mt-3 section-title">Останні сценарії у кабінеті</h2>
-            </div>
-            <Link href="/simulate" className="btn-secondary">
-              Нова симуляція
-            </Link>
-          </div>
-
-          {recentSimulations.length > 0 ? (
-            <div className="mt-5 space-y-3">
-              {recentSimulations.map((simulation) => {
-                const roleLabel =
-                  simulation.currentRole && simulation.targetRole
-                    ? `${simulation.currentRole} → ${simulation.targetRole}`
-                    : simulation.targetRole ?? simulation.currentRole ?? "Карʼєрний сценарій";
-                const verdict = verdictLabel(simulation.verdictLabel);
-                const probability = probabilityLabel(simulation.probabilityOfGettingJob);
-                const createdAt = formatDateTime(simulation.createdAt);
-                const targetMarket = mapTargetMarketLabel(simulation.targetMarket);
-                const priority = mapPriorityLabel(simulation.transitionPriority);
-
-                return (
-                  <article key={simulation.id} className="surface-soft rounded-[1.6rem] p-4 md:p-5">
-                    <div className="flex flex-wrap items-start justify-between gap-3">
-                      <div>
-                        <h3 className="panel-title text-[1.12rem]">{roleLabel}</h3>
-                        <p className="mt-2 text-sm leading-[1.68] text-[var(--text-muted)]">
-                          {createdAt ? `Створено ${createdAt}.` : "Сценарій збережено в кабінеті."}
-                        </p>
-                      </div>
-                      <span className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] ${simulationStatusClasses(simulation.status)}`}>
-                        {simulationStatusLabel(simulation.status)}
-                      </span>
-                    </div>
-
-                    <div className="mt-4 flex flex-wrap gap-2 text-[0.8rem] font-semibold text-[var(--text-muted)]">
-                      {verdict ? <span className="rounded-full border border-[var(--line-soft)] bg-white/70 px-3 py-1.5">{verdict}</span> : null}
-                      {probability ? <span className="rounded-full border border-[var(--line-soft)] bg-white/70 px-3 py-1.5">{probability}</span> : null}
-                      {targetMarket ? <span className="rounded-full border border-[var(--line-soft)] bg-white/70 px-3 py-1.5">{targetMarket}</span> : null}
-                      {priority ? <span className="rounded-full border border-[var(--line-soft)] bg-white/70 px-3 py-1.5">Фокус: {priority}</span> : null}
-                      {simulation.ceilingGapMedian !== null ? (
-                        <span className="rounded-full border border-[var(--line-soft)] bg-white/70 px-3 py-1.5">
-                          Стеля: {simulation.ceilingGapMedian > 0 ? "+" : ""}
-                          {formatUah(Math.abs(Math.round(simulation.ceilingGapMedian))).replace(" грн", "")} грн
-                        </span>
-                      ) : null}
-                    </div>
-                  </article>
-                );
-              })}
-            </div>
-          ) : (
-            <div className="mt-5 rounded-[1.7rem] border border-[var(--line-soft)] bg-[rgba(255,255,255,0.62)] p-5 md:p-6">
-              <h3 className="panel-title text-[1.12rem]">Історія ще порожня</h3>
-              <p className="mt-3 text-[0.95rem] leading-[1.72] text-[var(--text-muted)]">
-                Коли ви почнете рахувати сценарії переходу вже з акаунта, вони з’являться тут як окремі записи з датою і статусом.
-              </p>
-            </div>
-          )}
-        </section>
-
-        <section className="space-y-4">
-          <article className="surface-panel rounded-[2rem] p-5 md:p-6">
-            <p className="label-muted">Доступ і оплата</p>
-            <h2 className="mt-3 section-title">Статус вашого доступу</h2>
-            <p className="body-copy mt-3">
-              {subscription.plan === "pro"
-                ? "Платний доступ уже закріплений за вашим акаунтом. Усі майбутні модулі відкриватимуться тут без додаткового входу."
-                : "Зараз у вас базовий доступ. Коли будете готові рухатися глибше, тут же можна буде контролювати платний рівень і пов’язані інструменти."}
-            </p>
-
-            <div className="mt-5 space-y-3">
-              <div className="surface-soft rounded-[1.45rem] px-4 py-4">
-                <p className="text-sm font-semibold text-[var(--text-strong)]">Поточний статус</p>
-                <p className="mt-2 text-[0.95rem] leading-[1.72] text-[var(--text-muted)]">{accessLabel}</p>
-              </div>
-              <div className="surface-soft rounded-[1.45rem] px-4 py-4">
-                <p className="text-sm font-semibold text-[var(--text-strong)]">Історія платежів</p>
-                <p className="mt-2 text-[0.95rem] leading-[1.72] text-[var(--text-muted)]">
-                  Після першої оплати в цьому блоці з’являться записи по білінгу і змінах статусу доступу.
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-5">
-              <Link href="/pricing" className="btn-primary">
-                Переглянути тарифи
-              </Link>
-            </div>
-          </article>
-
-          <article className="surface-panel rounded-[2rem] p-5 md:p-6">
-            <p className="label-muted">Наступний крок</p>
-            <h2 className="mt-3 section-title">
-              {totalSimulations > 0 ? "Пора рухати наступний сценарій" : "Почніть із першої симуляції"}
-            </h2>
-            <p className="body-copy mt-3">
-              {totalSimulations > 0
-                ? "У вас уже є база в кабінеті. Найкращий наступний крок зараз — порахувати ще один маршрут переходу або перейти до повного доступу."
-                : "Перший результат дасть точку опори для всього іншого: історії, доступу і майбутніх модулів, які з’являться в кабінеті."}
-            </p>
-
-            <div className="mt-5 flex flex-wrap gap-3">
-              <Link href="/simulate" className="btn-primary">
-                {totalSimulations > 0 ? "Запустити ще одну симуляцію" : "Запустити першу симуляцію"}
-              </Link>
-              <Link href="/pricing" className="btn-secondary">
-                Подивитися Pro
-              </Link>
-            </div>
-          </article>
-        </section>
+        {activeView === "scenarios" ? <DashboardScenarios recentSimulations={state.recentSimulations} /> : null}
+        {activeView === "access" ? <DashboardAccess accessLabel={accessLabel} subscription={state.subscription} email={state.user.email} /> : null}
+        {activeView === "tools" ? <DashboardTools /> : null}
       </div>
     </section>
   );

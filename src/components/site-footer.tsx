@@ -1,4 +1,7 @@
-﻿import Link from "next/link";
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { WordmarkLogo } from "@/components/wordmark-logo";
 
 type SocialLink = {
@@ -55,7 +58,12 @@ const socialLinks: SocialLink[] = [
 ];
 
 export function SiteFooter() {
+  const pathname = usePathname();
   const year = new Date().getFullYear();
+
+  if (pathname?.startsWith("/dashboard")) {
+    return null;
+  }
 
   return (
     <footer className="mt-24 bg-[var(--surface-ink)] text-white">
@@ -63,9 +71,7 @@ export function SiteFooter() {
         <div className="grid gap-10 border-b border-white/10 pb-10 lg:grid-cols-[1.2fr_1fr_auto]">
           <div className="space-y-4">
             <WordmarkLogo tone="light" className="text-[2.25rem]" />
-            <p className="max-w-md text-sm leading-relaxed text-white/64">
-              Змінюйте карʼєру з планом, а не навмання.
-            </p>
+            <p className="max-w-md text-sm leading-relaxed text-white/64">Змінюйте карʼєру з планом, а не навмання.</p>
           </div>
 
           <nav className="grid grid-cols-2 gap-x-8 gap-y-3 text-sm text-white/68 lg:content-start" aria-label="Навігація футера">
