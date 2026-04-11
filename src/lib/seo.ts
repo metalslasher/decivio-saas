@@ -107,11 +107,6 @@ function buildBrandedTitle(title: string) {
   return `${title} | ${siteConfig.name}`;
 }
 
-const defaultOpenGraphImage = {
-  url: buildAbsoluteUrl("/logo.png"),
-  alt: "Decivio"
-};
-
 export const rootMetadata: Metadata = {
   metadataBase: new URL(`${siteConfig.url}/`),
   title: {
@@ -139,14 +134,12 @@ export const rootMetadata: Metadata = {
     url: siteConfig.url,
     siteName: siteConfig.name,
     locale: siteConfig.locale,
-    type: "website",
-    images: [defaultOpenGraphImage]
+    type: "website"
   },
   twitter: {
-    card: "summary_large_image",
+    card: "summary",
     title: siteConfig.name,
-    description: siteConfig.description,
-    images: [defaultOpenGraphImage.url]
+    description: siteConfig.description
   },
   robots: buildRobots(false),
   icons: {
@@ -178,14 +171,12 @@ export function createMetadata({ title, description, path, keywords = [], noInde
       url: buildAbsoluteUrl(path),
       siteName: siteConfig.name,
       locale: siteConfig.locale,
-      type: "website",
-      images: [defaultOpenGraphImage]
+      type: "website"
     },
     twitter: {
-      card: "summary_large_image",
+      card: "summary",
       title: brandedTitle,
-      description,
-      images: [defaultOpenGraphImage.url]
+      description
     },
     robots: buildRobots(noIndex)
   };
@@ -197,7 +188,7 @@ export function createOrganizationSchema() {
     "@type": "Organization",
     name: siteConfig.name,
     url: siteConfig.url,
-    logo: buildAbsoluteUrl("/logo.png"),
+    logo: buildAbsoluteUrl("/favicon.svg"),
     description: siteConfig.description,
     sameAs: siteConfig.socialLinks
   };
