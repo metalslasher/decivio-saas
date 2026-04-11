@@ -1,12 +1,20 @@
 import Link from "next/link";
 import { CheckoutGate } from "@/components/checkout-gate";
 import { getPricingPlan, pricingPlans } from "@/lib/pricing";
+import { createMetadata } from "@/lib/seo";
 
 type CheckoutPageProps = {
   searchParams?: {
     plan?: string;
   };
 };
+
+export const metadata = createMetadata({
+  title: "Оформлення доступу",
+  description: "Службова сторінка оформлення доступу до Decivio.",
+  path: "/checkout",
+  noIndex: true
+});
 
 export default function CheckoutPage({ searchParams }: CheckoutPageProps) {
   const plan = getPricingPlan(searchParams?.plan);

@@ -125,12 +125,12 @@ export async function POST(request: Request) {
       { status: 200 }
     );
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Не вдалося отримати AI-аналіз.";
+    const message = error instanceof Error ? error.message : "Не вдалося отримати висновок.";
     return NextResponse.json(
       {
         error:
           message.includes("невалідний JSON") || message.includes("валідний JSON")
-            ? "AI-аналіз тимчасово недоступний. Спробуйте ще раз через кілька хвилин."
+            ? "Сервіс аналізу тимчасово недоступний. Спробуйте ще раз через кілька хвилин."
             : message
       },
       { status: 503 }

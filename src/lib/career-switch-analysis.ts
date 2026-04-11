@@ -576,14 +576,14 @@ async function requestAnalysisAttempt(
 
   const rawContent = response.output_text?.trim();
   if (!rawContent) {
-    throw new Error("OpenAI повернув порожню відповідь.");
+    throw new Error("Сервіс аналізу повернув порожню відповідь.");
   }
 
   let parsed: unknown;
   try {
     parsed = JSON.parse(rawContent);
   } catch {
-    throw new Error("OpenAI повернув невалідний JSON.");
+    throw new Error("Сервіс аналізу повернув невалідний JSON.");
   }
 
   const analysis = validateCareerSwitchAnalysis(parsed);
@@ -658,7 +658,7 @@ export async function generateCareerSwitchAnalysis(
 
   const missingOpenAiEnv = getMissingOpenAiEnv();
   if (missingOpenAiEnv.length > 0) {
-    throw new Error(`OpenAI не налаштовано. Відсутні env змінні: ${missingOpenAiEnv.join(", ")}.`);
+    throw new Error(`Сервіс аналізу не налаштовано. Відсутні env змінні: ${missingOpenAiEnv.join(", ")}.`);
   }
 
   const configuredModel = getConfiguredModel();

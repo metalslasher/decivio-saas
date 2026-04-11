@@ -1,4 +1,12 @@
-﻿import Link from "next/link";
+import Link from "next/link";
+import { createMetadata } from "@/lib/seo";
+
+export const metadata = createMetadata({
+  title: "Сторінку не знайдено",
+  description: "404 сторінка Decivio.",
+  path: "/404",
+  noIndex: true
+});
 
 export default function NotFound() {
   return (

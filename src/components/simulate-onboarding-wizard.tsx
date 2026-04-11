@@ -27,7 +27,7 @@ const REQUIRED_ERROR = "Поле обов'язкове.";
 const steps: Array<{ title: string; helper: string; fields: WizardField[] }> = [
   {
     title: "Ваш поточний дохід",
-    helper: "Це потрібно, щоб AI зрозумів вашу поточну точку і не давав абстрактну відповідь.",
+    helper: "Це потрібно, щоб відштовхуватись від вашої реальної стартової точки.",
     fields: ["current_income"]
   },
   {
@@ -264,14 +264,11 @@ export function SimulateOnboardingWizard() {
   const currentMeta = steps[currentStep];
 
   return (
-    <section className="mx-auto max-w-3xl space-y-6 py-4 md:space-y-8 md:py-8">
-      <header className="space-y-3 text-center">
-        <div className="flex justify-center">
-          <span className="eyebrow-pill">Симуляція</span>
-        </div>
-        <h1 className="page-title mx-auto max-w-[13ch]">Змоделюйте свій кар&rsquo;єрний перехід</h1>
-        <p className="lead-copy mx-auto max-w-2xl">
-          Введіть кілька деталей і отримайте персоналізований AI-висновок без шаблонної відповіді.
+    <section className="space-y-6 py-4 md:space-y-8 md:py-8">
+      <header className="mx-auto max-w-2xl space-y-3 text-center">
+        <h1 className="page-title mx-auto max-w-[9ch]">Симуляція</h1>
+        <p className="lead-copy">
+          Заповніть кілька деталей, щоб оцінити свій сценарій переходу, ризики та наступний крок.
         </p>
       </header>
 

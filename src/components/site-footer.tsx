@@ -11,7 +11,8 @@ const footerNav = [
   { href: "/simulate", label: "Симуляція" },
   { href: "/pricing", label: "Ціни" },
   { href: "/#features", label: "Можливості" },
-  { href: "/#reviews", label: "Відгуки" }
+  { href: "/#reviews", label: "Відгуки" },
+  { href: "/#faq", label: "FAQ" }
 ];
 
 const socialLinks: SocialLink[] = [
@@ -63,7 +64,7 @@ export function SiteFooter() {
           <div className="space-y-4">
             <WordmarkLogo tone="light" className="text-[2.25rem]" />
             <p className="max-w-md text-sm leading-relaxed text-white/64">
-              Прогноз карʼєрного переходу, який допомагає приймати рішення на фактах, а не на відчуттях.
+              Змінюйте карʼєру з планом, а не навмання.
             </p>
           </div>
 

@@ -1,8 +1,11 @@
 ﻿import Link from "next/link";
 import type { ReactNode } from "react";
 import { HeroBeforeAfter } from "@/components/hero-before-after";
+import { JsonLd } from "@/components/json-ld";
 import { Reveal } from "@/components/reveal";
 import { RotatingCtaButton } from "@/components/rotating-cta-button";
+import { pricingPlans } from "@/lib/pricing";
+import { createFaqSchema, createMetadata, createSoftwareApplicationSchema } from "@/lib/seo";
 
 const featureShowcases = [
   {
@@ -159,7 +162,7 @@ const steps = [
   {
     label: "02",
     title: "Збираємо контекст",
-    description: "AI звіряє ринок, враховує англійську, цільовий ринок і ваш пріоритет.",
+    description: "Звіряємо ринок, враховуємо англійську, цільовий ринок і ваш пріоритет.",
     icon: (
       <svg viewBox="0 0 24 24" className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth="1.8">
         <path d="M5 18l4-4 3 2 7-8" />
@@ -248,6 +251,90 @@ const reviews = [
     rating: 4
   }
 ];
+
+const faqItems = [
+  {
+    question: "Як працює симулятор зміни кар'єри в Decivio?",
+    answer:
+      "Ви вводите поточний дохід, роль, досвід, бажаний напрям, рівень англійської та ринок, а Decivio формує персональний висновок із прогнозом доходу, ризиками переходу та наступними кроками."
+  },
+  {
+    question: "Чим цей аналіз відрізняється від простої оцінки зарплати?",
+    answer:
+      "Decivio дивиться не лише на стартову зарплату. Сервіс порівнює сценарії на кілька років, оцінює шанс увійти в нову роль, часовий горизонт до оферу та потенційну стелю доходу."
+  },
+  {
+    question: "Які дані потрібні для кар'єрної симуляції?",
+    answer:
+      "Для базового прогнозу достатньо поточного доходу, поточної ролі, стажу, цільової ролі, релевантного досвіду, англійської та ринку, на який ви орієнтуєтесь."
+  },
+  {
+    question: "Для кого підходить сервіс Decivio?",
+    answer:
+      "Сервіс корисний фахівцям, які планують зміну професії, перехід у суміжну роль, вихід на міжнародний ринок або хочуть зрозуміти, чи окупиться новий напрям у цифрах."
+  },
+  {
+    question: "Скільки часу займає симуляція?",
+    answer:
+      "Базову симуляцію можна пройти за кілька хвилин. Далі ви отримуєте висновок і можете перейти до платних інструментів, якщо хочете рухатись глибше."
+  },
+  {
+    question: "Що входить у платний доступ?",
+    answer:
+      "Платний доступ відкриває сценарії переходу, резюме під цільову роль, підготовку до співбесід, перевірку вакансій, оцінку оферу та покроковий план переходу."
+  },
+  {
+    question: "Чи підійде сервіс, якщо в мене ще немає досвіду в новій ролі?",
+    answer:
+      "Так. Сервіс враховує, чи є у вас практичний або базовий досвід, і показує, наскільки реалістичним виглядає вхід саме з вашої поточної точки."
+  },
+  {
+    question: "Чи можна використати Decivio перед відгуками на вакансії?",
+    answer:
+      "Так. Після симуляції ви краще розумієте, чи варто рухатися далі, а в платному доступі можете підготувати резюме, перевірити вакансії та підсилити підготовку до співбесіди."
+  },
+  {
+    question: "Чи підходить сервіс для remote або міжнародного ринку?",
+    answer:
+      "Так. У симуляції можна вибрати ринок України, remote або локальну роботу за кордоном, щоб висновок спирався на ваш цільовий напрям."
+  }
+] as const;
+
+export const metadata = createMetadata({
+  title: "Змінюйте карʼєру з планом, а не навмання",
+  description:
+    "Decivio допомагає спланувати зміну карʼєри: оцінити сценарії переходу, дохід і ризики, підготувати резюме, перевірити вакансії та краще пройти співбесіди.",
+  path: "/",
+  keywords: [
+    "аналіз зміни кар'єри",
+    "прогноз доходу після зміни кар'єри",
+    "кар'єрний симулятор",
+    "порівняння кар'єрних сценаріїв"
+  ]
+});
+
+const homeSoftwareSchema = createSoftwareApplicationSchema({
+  path: "/",
+  description:
+    "Decivio допомагає спланувати зміну карʼєри: оцінити сценарії переходу, дохід і ризики, підготувати резюме, перевірити вакансії та краще пройти співбесіди.",
+  featureList: featureShowcases.map((item) => item.title),
+  offers: [
+    {
+      name: "Безкоштовний висновок",
+      price: 0,
+      description: "Перший персоналізований аналіз кар'єрного переходу без оплати.",
+      urlPath: "/simulate"
+    },
+    ...pricingPlans.map((plan) => ({
+      name: plan.name,
+      price: plan.billedNowUah,
+      description: plan.description,
+      urlPath: "/pricing"
+    }))
+  ]
+});
+
+const homeFaqSchema = createFaqSchema([...faqItems]);
 
 function FeaturePreviewShell({ children }: { children: ReactNode }) {
   return (
@@ -664,9 +751,12 @@ function FeaturePreview({ item }: { item: FeatureShowcase }) {
 
 export default function HomePage() {
   return (
-    <div className="space-y-16 pb-10 md:space-y-24">
-      <div className="space-y-8 md:space-y-12">
-        <HeroBeforeAfter />
+    <>
+      <JsonLd data={homeSoftwareSchema} />
+      <JsonLd data={homeFaqSchema} />
+      <div className="space-y-16 pb-10 md:space-y-24">
+        <div className="space-y-8 md:space-y-12">
+          <HeroBeforeAfter />
 
         <section className="py-6 md:py-9">
           <Reveal>
@@ -785,6 +875,30 @@ export default function HomePage() {
         </section>
       </div>
 
+      <section id="faq" className="space-y-5 py-2 md:space-y-6 md:py-4">
+        <Reveal>
+          <div className="mx-auto max-w-3xl text-center">
+            <h2 className="section-title">Часті запитання</h2>
+          </div>
+        </Reveal>
+
+        <div className="grid gap-4 md:grid-cols-2">
+          {faqItems.map((item, index) => (
+            <Reveal key={item.question} delayMs={index * 40}>
+              <details className="surface-panel group rounded-[1.8rem] px-5 py-4 md:px-6 md:py-5">
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-display text-[1.02rem] font-semibold leading-[1.24] tracking-[-0.02em] text-[var(--text-strong)] marker:hidden [&::-webkit-details-marker]:hidden md:text-[1.12rem]">
+                  <span>{item.question}</span>
+                  <span className="text-[1.4rem] font-medium text-[var(--accent-strong)] transition-transform duration-200 group-open:rotate-45">
+                    +
+                  </span>
+                </summary>
+                <p className="mt-3 pr-8 text-[0.94rem] leading-[1.72] text-[var(--text-muted)] md:text-[0.98rem]">{item.answer}</p>
+              </details>
+            </Reveal>
+          ))}
+        </div>
+      </section>
+
       <section id="features" className="space-y-8 md:space-y-10">
         {featureShowcases.map((item, index) => {
           return (
@@ -876,7 +990,9 @@ export default function HomePage() {
           </div>
         </Reveal>
       </section>
+      
     </div>
+    </>
   );
 }
 

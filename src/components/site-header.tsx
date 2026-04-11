@@ -9,6 +9,7 @@ import { WordmarkLogo } from "@/components/wordmark-logo";
 const navItems = [
   { href: "/#features", label: "Можливості" },
   { href: "/#process", label: "Як це працює" },
+  { href: "/#faq", label: "FAQ" },
   { href: "/#reviews", label: "Відгуки" },
   { href: "/pricing", label: "Ціни" }
 ];

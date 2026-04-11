@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { cookies } from "next/headers";
@@ -11,8 +12,15 @@ import {
 } from "@/lib/career-switch-analysis";
 import { getSupabaseAdminClient } from "@/lib/db/supabase";
 import { GUEST_USER_COOKIE_NAME } from "@/lib/guest-session";
+import { createMetadata } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
+export const metadata: Metadata = createMetadata({
+  title: "Результат",
+  description: "Персоналізований результат симуляції зміни кар'єри.",
+  path: "/results",
+  noIndex: true
+});
 
 type SearchParams = {
   simulationId?: string | string[];
@@ -443,7 +451,7 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
     return (
       <EmptyState
         title="Для цього результату бракує нових даних"
-        description="Схоже, цей результат було створено на старій логіці. Запустіть аналіз ще раз, щоб отримати новий персоналізований AI-висновок."
+        description="Схоже, цей результат було створено на старій логіці. Запустіть аналіз ще раз, щоб отримати новий персоналізований висновок."
       />
     );
   }
@@ -514,7 +522,7 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
         <MetricCard
           label="Ваш дохід зараз"
           value={formatCurrency(inputs.current_income)}
-          note="Фактична точка, від якої AI відштовхується у висновку."
+          note="Фактична точка, від якої формується висновок."
         />
         <MetricCard
           label="Шанс увійти за 12 міс."
@@ -582,7 +590,7 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
         </article>
 
         <article className="surface-panel rounded-[2rem] p-5 md:p-6">
-          <p className="label-muted">Як AI це формував</p>
+          <p className="label-muted">Як формувався висновок</p>
           <h2 className="mt-3 section-title">Ринковий контекст і технічні деталі</h2>
           <div className="mt-4 space-y-3 text-[0.95rem] leading-[1.72] text-[var(--text-muted)]">
             <p>Модель: {meta?.model ?? "невідомо"}</p>
@@ -595,7 +603,7 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
 
       <div className="grid gap-4 lg:grid-cols-2">
         <TextList eyebrow="Чому саме такий висновок" title="Ключові аргументи" items={narrative.why_this_result} />
-        <TextList eyebrow="Що персоналізувало відповідь" title="Як AI врахував саме вас" items={narrative.personalization_notes} />
+        <TextList eyebrow="Що персоналізувало відповідь" title="Як сервіс врахував саме вас" items={narrative.personalization_notes} />
       </div>
 
       <article className="surface-panel rounded-[2rem] p-5 md:p-7">

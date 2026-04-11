@@ -156,14 +156,8 @@ export function AuthForm({
   return (
     <section className="mx-auto max-w-xl py-6 md:py-10">
       <div className="surface-panel rounded-[2rem] p-6 md:p-8">
-        <div className="space-y-3">
-          <span className="eyebrow-pill">{isSignup ? "Реєстрація" : "Вхід"}</span>
-          <h1 className="page-title max-w-[10ch]">{isSignup ? "Створіть акаунт" : "Увійдіть у профіль"}</h1>
-          <p className="lead-copy max-w-2xl">
-            {isSignup
-              ? "Створіть акаунт, щоб зберігати доступ до сервісу і працювати з ним далі."
-              : "Увійдіть у свій акаунт через email і пароль."}
-          </p>
+        <div>
+          <h1 className="page-title max-w-[11ch]">{isSignup ? "Реєстрація" : "Вхід"}</h1>
         </div>
 
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">

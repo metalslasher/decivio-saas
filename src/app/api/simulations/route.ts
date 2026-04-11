@@ -195,15 +195,15 @@ function isMissingStatusColumn(message: string) {
 }
 
 function analysisUnavailableErrorMessage(error: unknown) {
-  const message = supabaseUnavailableErrorMessage(error, "Не вдалося отримати персоналізований AI-аналіз.");
+  const message = supabaseUnavailableErrorMessage(error, "Не вдалося отримати персональний висновок.");
   const normalized = message.toLowerCase();
 
   if (normalized.includes("json") || normalized.includes("валідний")) {
-    return "AI-аналіз тимчасово недоступний. Спробуйте повторити запит трохи пізніше.";
+    return "Сервіс аналізу тимчасово недоступний. Спробуйте повторити запит трохи пізніше.";
   }
 
   if (normalized.includes("openai") || normalized.includes("api key")) {
-    return `OpenAI недоступний: ${message}`;
+    return "Сервіс аналізу тимчасово недоступний. Спробуйте повторити запит трохи пізніше.";
   }
 
   return message;
