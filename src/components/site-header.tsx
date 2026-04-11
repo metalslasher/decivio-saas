@@ -6,7 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 import { getSupabaseBrowserClient } from "@/lib/db/supabase-browser";
 import { WordmarkLogo } from "@/components/wordmark-logo";
 
-const navItems = [
+const publicNavItems = [
   { href: "/#features", label: "Можливості" },
   { href: "/#process", label: "Як це працює" },
   { href: "/#faq", label: "FAQ" },
@@ -60,9 +60,17 @@ export function SiteHeader() {
     router.push("/");
   };
 
+  const navItems = authState.status === "user" ? [{ href: "/dashboard", label: "Кабінет" }, ...publicNavItems] : publicNavItems;
+
   const authDesktop =
     authState.status === "user" ? (
       <div className="hidden items-center gap-3 md:flex">
+        <Link
+          href="/dashboard"
+          className="hidden items-center justify-center px-2 text-[1.03rem] font-semibold text-[var(--accent-strong)] transition hover:text-[var(--accent)] md:inline-flex lg:hidden"
+        >
+          Кабінет
+        </Link>
         <span className="rounded-full border border-[var(--line-soft)] bg-[rgba(255,255,255,0.76)] px-3 py-2 text-sm font-semibold text-[var(--text-muted)]">
           {authState.email}
         </span>
@@ -78,13 +86,13 @@ export function SiteHeader() {
     ) : (
       <>
         <Link
-          href="/login?next=%2Fsimulate"
+          href="/login?next=%2Fdashboard"
           className="hidden items-center justify-center px-2 text-[1.03rem] font-semibold text-[var(--accent-strong)] transition hover:text-[var(--accent)] md:inline-flex"
         >
           Вхід
         </Link>
         <Link
-          href="/signup?next=%2Fsimulate"
+          href="/signup?next=%2Fdashboard"
           className="hidden min-w-[11.2rem] items-center justify-start gap-3 rounded-full bg-[var(--accent-strong)] px-3 py-2.5 pr-4 text-[1.03rem] font-semibold text-white shadow-[0_14px_30px_-22px_rgba(41,73,244,0.54)] transition hover:-translate-y-px hover:bg-[var(--accent)] md:inline-flex"
         >
           <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white text-[var(--accent-strong)]">
@@ -165,10 +173,10 @@ export function SiteHeader() {
                 </>
               ) : (
                 <>
-                  <Link href="/login?next=%2Fsimulate" onClick={() => setIsOpen(false)} className="btn-secondary mt-1">
+                  <Link href="/login?next=%2Fdashboard" onClick={() => setIsOpen(false)} className="btn-secondary mt-1">
                     Вхід
                   </Link>
-                  <Link href="/signup?next=%2Fsimulate" onClick={() => setIsOpen(false)} className="btn-primary">
+                  <Link href="/signup?next=%2Fdashboard" onClick={() => setIsOpen(false)} className="btn-primary">
                     Реєстрація
                   </Link>
                 </>

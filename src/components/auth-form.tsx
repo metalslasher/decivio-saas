@@ -9,7 +9,7 @@ type AuthMode = "login" | "signup";
 
 function normalizeNextPath(value: string | null) {
   if (!value || !value.startsWith("/") || value.startsWith("//")) {
-    return "/simulate";
+    return "/dashboard";
   }
 
   return value;
