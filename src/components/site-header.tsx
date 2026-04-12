@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import type { CSSProperties } from "react";
 import { useEffect, useMemo, useState } from "react";
 import { useAuthDialog } from "@/components/auth-dialog-provider";
 import { WordmarkLogo } from "@/components/wordmark-logo";
@@ -33,6 +34,7 @@ export function SiteHeader() {
   const { openAuthDialog } = useAuthDialog();
   const [isOpen, setIsOpen] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
+  const [headerProgress, setHeaderProgress] = useState(() => (pathname === "/" ? 0 : 1));
   const [authState, setAuthState] = useState<AuthState>({ status: "loading" });
 
   useEffect(() => {
@@ -60,10 +62,51 @@ export function SiteHeader() {
     };
   }, [supabase]);
 
+  const shouldUseScrollReactiveHeader = pathname === "/";
+
+  useEffect(() => {
+    if (!shouldUseScrollReactiveHeader) {
+      setHeaderProgress(1);
+      return;
+    }
+
+    const maxScroll = 168;
+    let frameId = 0;
+
+    const syncHeaderProgress = () => {
+      frameId = 0;
+      setHeaderProgress(Math.min(window.scrollY / maxScroll, 1));
+    };
+
+    const handleScroll = () => {
+      if (frameId !== 0) {
+        return;
+      }
+
+      frameId = window.requestAnimationFrame(syncHeaderProgress);
+    };
+
+    syncHeaderProgress();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("resize", handleScroll);
+
+    return () => {
+      if (frameId !== 0) {
+        window.cancelAnimationFrame(frameId);
+      }
+
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", handleScroll);
+    };
+  }, [shouldUseScrollReactiveHeader]);
+
   const isDashboardArea = pathname?.startsWith("/dashboard") ?? false;
   const isDashboardUser = authState.status === "user" && isDashboardArea;
   const logoHref = isDashboardUser ? "/dashboard" : "/";
   const navItems = isDashboardUser ? dashboardNavItems : authState.status === "user" ? [{ href: "/dashboard", label: "Кабінет" }, ...publicNavItems] : publicNavItems;
+
+  const effectiveHeaderProgress = shouldUseScrollReactiveHeader ? Math.max(headerProgress, isOpen ? 1 : 0) : 1;
+  const headerStyle = { "--mirror-progress": effectiveHeaderProgress } as CSSProperties;
 
   const handleSignOut = async () => {
     setIsSigningOut(true);
@@ -85,7 +128,7 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-50">
       <div className="w-full">
-        <nav className="mirror-header relative w-full overflow-hidden px-4 py-3 md:px-6 md:py-4 lg:px-8">
+        <nav style={headerStyle} className="mirror-header relative w-full overflow-hidden px-4 py-3 md:px-6 md:py-4 lg:px-8">
           <div className="relative z-[1] flex items-center justify-between gap-4">
             <div className="flex items-center gap-5">
               <Link href={logoHref} aria-label="Decivio" className="inline-flex items-center">
