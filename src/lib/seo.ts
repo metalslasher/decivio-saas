@@ -33,6 +33,7 @@ type SoftwareApplicationSchemaOptions = {
   featureList?: string[];
   offers?: OfferItem[];
   applicationCategory?: string;
+  isAccessibleForFree?: boolean;
 };
 
 function normalizeSiteUrl(value?: string | null) {
@@ -242,7 +243,8 @@ export function createSoftwareApplicationSchema({
   description,
   featureList,
   offers,
-  applicationCategory = "BusinessApplication"
+  applicationCategory = "BusinessApplication",
+  isAccessibleForFree = true
 }: SoftwareApplicationSchemaOptions) {
   return {
     "@context": "https://schema.org",
@@ -253,7 +255,7 @@ export function createSoftwareApplicationSchema({
     applicationCategory,
     operatingSystem: "Web",
     inLanguage: siteConfig.language,
-    isAccessibleForFree: true,
+    isAccessibleForFree,
     brand: {
       "@type": "Brand",
       name: siteConfig.name
