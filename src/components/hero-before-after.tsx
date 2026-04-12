@@ -138,12 +138,12 @@ export function HeroBeforeAfter() {
   }, []);
 
   return (
-    <section className="relative pt-4 md:pt-8">
+    <section className="relative pt-2 md:pt-4">
       <div className="pointer-events-none absolute -left-24 top-10 h-[26rem] w-[26rem] rounded-full bg-[radial-gradient(circle,rgba(74,108,255,0.10)_0%,rgba(74,108,255,0.05)_36%,transparent_72%)]" />
       <div className="pointer-events-none absolute -right-20 top-4 h-[24rem] w-[24rem] rounded-full bg-[radial-gradient(circle,rgba(152,165,255,0.08)_0%,rgba(152,165,255,0.04)_36%,transparent_72%)]" />
 
       <div className="space-y-8 md:space-y-10">
-        <div className="mx-auto max-w-[58rem] space-y-5 text-center">
+        <div className="mx-auto flex min-h-[calc(100svh-6rem)] max-w-[58rem] flex-col justify-center space-y-5 text-center md:min-h-[calc(100svh-7rem)]">
           <h1 className="mx-auto min-h-[7.35rem] max-w-[17ch] text-balance font-display text-[2.32rem] font-bold leading-[0.91] tracking-[-0.055em] text-[var(--text-strong)] md:min-h-[10.8rem] md:max-w-[20ch] md:text-[3.9rem]">
             {typedText}
             <span className="hero-caret ml-1 text-[var(--accent-strong)]" aria-hidden="true">
