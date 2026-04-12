@@ -17,12 +17,48 @@ const chartPadding = 22;
 const maxValue = 100;
 const chartCurveInset = 1.5;
 
+type HeroHeadlineSegment = {
+  text: string;
+  accent?: boolean;
+};
+
+type HeroHeadline = {
+  fullText: string;
+  segments: readonly HeroHeadlineSegment[];
+};
+
 const heroHeadlines = [
-  "Оцініть свій дохід у новій кар’єрі ще до старту",
-  "Порівняйте напрямки та оберіть найвигідніший",
-  "Отримайте покроковий план зміни професії",
-  "Знайдіть роботу, яка дійсно вам підходить"
-] as const;
+  {
+    fullText: "Оцініть свій дохід у новій кар’єрі ще до старту",
+    segments: [
+      { text: "Оцініть свій " },
+      { text: "дохід", accent: true },
+      { text: " у новій кар’єрі ще до старту" }
+    ]
+  },
+  {
+    fullText: "Порівняйте напрямки та оберіть найвигідніший",
+    segments: [
+      { text: "Порівняйте напрямки та оберіть " },
+      { text: "найвигідніший", accent: true }
+    ]
+  },
+  {
+    fullText: "Отримайте покроковий план зміни професії",
+    segments: [
+      { text: "Отримайте " },
+      { text: "покроковий план", accent: true },
+      { text: " зміни професії" }
+    ]
+  },
+  {
+    fullText: "Знайдіть роботу, яка дійсно вам підходить",
+    segments: [
+      { text: "Знайдіть роботу, яка " },
+      { text: "дійсно вам підходить", accent: true }
+    ]
+  }
+] as const satisfies readonly HeroHeadline[];
 
 const subheadline =
   "Усе для переходу в нову кар’єру з прогнозованим результатом і зрозумілим планом дій.";
@@ -99,15 +135,39 @@ const growthBadge = `${growthPercent >= 0 ? "+" : ""}${growthPercent}% \u0434\u0
 
 const yAxisTicks = [100, 80, 60, 40, 20];
 
+function renderTypedHeadline(segments: readonly HeroHeadlineSegment[], visibleLength: number) {
+  let remaining = visibleLength;
+
+  return segments.flatMap((segment, index) => {
+    if (remaining <= 0) {
+      return [];
+    }
+
+    const visibleText = segment.text.slice(0, remaining);
+    remaining -= visibleText.length;
+
+    if (!visibleText) {
+      return [];
+    }
+
+    return (
+      <span key={`${index}-${segment.text}`} className={segment.accent ? "text-warm" : undefined}>
+        {visibleText}
+      </span>
+    );
+  });
+}
+
 export function HeroBeforeAfter() {
   const [headlineIndex, setHeadlineIndex] = useState(0);
   const [typedText, setTypedText] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
   const [ctaIndex, setCtaIndex] = useState(0);
   const activeHeadline = heroHeadlines[headlineIndex];
+  const typedHeadline = renderTypedHeadline(activeHeadline.segments, typedText.length);
 
   useEffect(() => {
-    if (!isDeleting && typedText === activeHeadline) {
+    if (!isDeleting && typedText === activeHeadline.fullText) {
       const pauseTimer = setTimeout(() => setIsDeleting(true), 1500);
       return () => clearTimeout(pauseTimer);
     }
@@ -121,7 +181,9 @@ export function HeroBeforeAfter() {
     const speed = isDeleting ? 26 : 44;
     const typingTimer = setTimeout(() => {
       setTypedText((prev) =>
-        isDeleting ? activeHeadline.slice(0, Math.max(0, prev.length - 1)) : activeHeadline.slice(0, prev.length + 1)
+        isDeleting
+          ? activeHeadline.fullText.slice(0, Math.max(0, prev.length - 1))
+          : activeHeadline.fullText.slice(0, prev.length + 1)
       );
     }, speed);
 
@@ -144,8 +206,8 @@ export function HeroBeforeAfter() {
       <div className="space-y-8 md:space-y-10">
         <div className="mx-auto flex min-h-[calc(100svh-6rem)] max-w-[64rem] items-center justify-center md:min-h-[calc(100svh-7rem)]">
           <div className="flex w-full max-w-[60rem] flex-col items-center space-y-6 text-center sm:space-y-7 md:-translate-y-8 lg:-translate-y-10">
-            <h1 className="mx-auto min-h-[6.7rem] max-w-[12ch] text-balance font-display text-[2.08rem] font-bold leading-[0.92] tracking-[-0.06em] text-[var(--text-strong)] sm:min-h-[7.8rem] sm:text-[2.7rem] md:min-h-[9rem] md:max-w-[15ch] md:text-[3.8rem] lg:min-h-[9.4rem] lg:max-w-[16ch] lg:text-[4.15rem] xl:max-w-[17ch] xl:text-[4.45rem]">
-              {typedText}
+            <h1 className="mx-auto min-h-[6.7rem] max-w-[12ch] text-balance font-display text-[2.08rem] font-bold leading-[0.92] tracking-[-0.06em] text-[var(--text-strong)] sm:min-h-[7.8rem] sm:text-[2.7rem] md:min-h-[8.5rem] md:max-w-[15ch] md:text-[3.55rem] lg:min-h-[8.8rem] lg:max-w-[16ch] lg:text-[3.85rem] xl:max-w-[17ch] xl:text-[4.1rem]">
+              {typedHeadline}
               <span className="hero-caret ml-1 text-[var(--accent-strong)]" aria-hidden="true">
                 |
               </span>
