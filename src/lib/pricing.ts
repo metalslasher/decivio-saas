@@ -9,6 +9,7 @@ type PricingPlanDefinition = {
   billedNowUah: number;
   billingLabel: string;
   savingsUah: number;
+  oldMonthlyEquivalentUah?: number;
   featured: boolean;
 };
 
@@ -26,24 +27,26 @@ export function formatUah(value: number) {
 export const pricingPlans: PricingPlanDefinition[] = [
   {
     id: "monthly",
-    name: "Місячна оплата",
+    name: "Місячний доступ",
     badge: "Гнучкий старт",
-    description: "Підійде, якщо хочете зайти без великого авансу і працювати покроково місяць за місяцем.",
-    monthlyEquivalentUah: 1490,
-    billedNowUah: 1490,
+    description: "Повний доступ без довгого зобов'язання. Зручно, якщо хочете зайти в роботу поступово й оплатити лише поточний місяць.",
+    monthlyEquivalentUah: 799,
+    billedNowUah: 799,
     billingLabel: "Оплата щомісяця",
     savingsUah: 0,
+    oldMonthlyEquivalentUah: 1599,
     featured: false
   },
   {
     id: "annual",
-    name: "Річна оплата",
-    badge: "Найвигідніше",
-    description: "Той самий повний функціонал, але з нижчою ціною в розрахунку на місяць і запасом на весь рік.",
-    monthlyEquivalentUah: 1190,
-    billedNowUah: 14280,
+    name: "Річний доступ",
+    badge: "Найкраща ціна",
+    description: "Той самий повний набір інструментів, але значно дешевше в перерахунку на місяць і без щомісячного продовження.",
+    monthlyEquivalentUah: 399,
+    billedNowUah: 4788,
     billingLabel: "Один платіж на 12 місяців",
-    savingsUah: 3600,
+    savingsUah: 4800,
+    oldMonthlyEquivalentUah: 1599,
     featured: true
   }
 ];
