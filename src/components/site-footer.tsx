@@ -65,26 +65,20 @@ export function SiteFooter() {
   }
 
   return (
-    <footer className="mt-24 bg-[var(--accent-strong)] text-white">
+    <footer className="mt-16 bg-[linear-gradient(180deg,#162235_0%,#0f1726_100%)] text-white md:mt-24">
       <div className="mx-auto w-full max-w-[1480px] px-[clamp(18px,3.6vw,56px)] py-12 md:px-[clamp(26px,4vw,68px)] md:py-16">
         <div className="grid gap-10 border-b border-white/18 pb-10 md:pb-12 lg:grid-cols-[1.2fr_auto] lg:items-start">
           <div className="space-y-5">
             <WordmarkLogo tone="light" className="text-[2.6rem] md:text-[3rem]" />
             <p className="max-w-2xl text-[1.15rem] font-medium leading-[1.5] text-white/92 md:text-[1.35rem]">
-              Плануйте зміну кар&apos;єри впевнено: від першої симуляції до оферу.
-            </p>
-            <p className="max-w-3xl text-sm leading-[1.8] text-white/72 md:text-[0.98rem]">
-              Прогноз доходу, сценарії переходу, резюме, співбесіди, перевірка вакансій та оцінка оферу в одному продукті.
+              Decivio допомагає пройти зміну кар&apos;єри з ясністю: оцінити новий напрям у цифрах, підготуватися до відгуків і рухатися далі за зрозумілим планом.
             </p>
           </div>
 
           <div className="space-y-5 lg:justify-self-end lg:text-right">
-            <div className="space-y-2">
-              <p className="text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-white/56">Контакт</p>
-              <a href={`mailto:${supportEmail}`} className="text-[1.05rem] font-semibold text-white transition hover:text-white/80 md:text-[1.2rem]">
-                {supportEmail}
-              </a>
-            </div>
+            <a href={`mailto:${supportEmail}`} className="inline-block text-[1.05rem] font-semibold text-white transition hover:text-white/80 md:text-[1.2rem]">
+              {supportEmail}
+            </a>
 
             <div className="flex gap-3 lg:justify-end">
               {socialLinks.map((item) => (
@@ -94,7 +88,7 @@ export function SiteFooter() {
                   target="_blank"
                   rel="noreferrer"
                   aria-label={item.label}
-                  className="inline-flex h-14 w-14 items-center justify-center rounded-[1.2rem] bg-white text-[var(--accent-strong)] transition hover:-translate-y-px hover:bg-white/92"
+                  className="inline-flex h-14 w-14 items-center justify-center rounded-[1.2rem] bg-white text-[#182845] transition hover:-translate-y-px hover:bg-white/92"
                 >
                   {item.icon}
                 </Link>
