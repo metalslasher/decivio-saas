@@ -89,6 +89,29 @@ function getViewCopy(view: AuthView) {
   }
 }
 
+function GoogleIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
+      <path
+        d="M21.805 12.23c0-.68-.061-1.334-.174-1.961H12v3.708h5.5a4.703 4.703 0 0 1-2.04 3.084v2.56h3.294c1.928-1.775 3.051-4.39 3.051-7.39Z"
+        fill="#4285F4"
+      />
+      <path
+        d="M12 22c2.76 0 5.075-.915 6.766-2.479l-3.294-2.56c-.915.613-2.083.975-3.472.975-2.67 0-4.93-1.803-5.737-4.226H2.858v2.644A10 10 0 0 0 12 22Z"
+        fill="#34A853"
+      />
+      <path
+        d="M6.263 13.71A5.996 5.996 0 0 1 5.942 12c0-.594.103-1.17.321-1.71V7.646H2.858A10 10 0 0 0 2 12c0 1.61.386 3.134 1.071 4.354l3.192-2.484Z"
+        fill="#FBBC05"
+      />
+      <path
+        d="M12 6.064c1.5 0 2.847.516 3.907 1.528l2.93-2.93C17.07 3.018 14.756 2 12 2A10 10 0 0 0 3.071 7.646L6.263 10.13C7.07 7.807 9.33 6.064 12 6.064Z"
+        fill="#EA4335"
+      />
+    </svg>
+  );
+}
+
 export function AuthForm({
   initialView,
   nextPath,
@@ -104,6 +127,7 @@ export function AuthForm({
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false);
   const [isCheckingSession, setIsCheckingSession] = useState(initialView !== "reset");
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(initialNotice);
@@ -112,6 +136,7 @@ export function AuthForm({
   const isSignup = view === "signup";
   const isReset = view === "reset";
   const showDescription = Boolean(copy.description);
+  const isAnyAuthPending = isSubmitting || isGoogleSubmitting;
 
   useEffect(() => {
     setView(initialView);
@@ -158,6 +183,38 @@ export function AuthForm({
     setError(null);
     setNotice(nextNotice ?? null);
     setPassword("");
+  };
+
+  const handleGoogleAuth = async () => {
+    setError(null);
+    setNotice(null);
+    setIsGoogleSubmitting(true);
+
+    try {
+      const { data, error: oauthError } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: buildCallbackUrl(redirectTo),
+          skipBrowserRedirect: true
+        }
+      });
+
+      if (oauthError) {
+        setError(mapAuthErrorMessage(oauthError.message));
+        return;
+      }
+
+      if (!data?.url) {
+        setError("Не вдалося підготувати вхід через Google. Спробуйте ще раз.");
+        return;
+      }
+
+      window.location.assign(data.url);
+    } catch (oauthError) {
+      setError(oauthError instanceof Error ? mapAuthErrorMessage(oauthError.message) : "Сталася помилка під час входу через Google.");
+    } finally {
+      setIsGoogleSubmitting(false);
+    }
   };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -252,8 +309,30 @@ export function AuthForm({
         </div>
 
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+          {!isReset ? (
+            <>
+              <button
+                type="button"
+                onClick={handleGoogleAuth}
+                disabled={isAnyAuthPending}
+                className="inline-flex w-full items-center justify-center gap-3 rounded-full border border-[var(--line-soft)] bg-white/88 px-4 py-3 text-[1rem] font-semibold text-[var(--text-strong)] transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-70"
+              >
+                <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white shadow-[0_8px_18px_-14px_rgba(18,24,38,0.36)]">
+                  <GoogleIcon />
+                </span>
+                <span>{isGoogleSubmitting ? "Переходимо до Google..." : isSignup ? "Зареєструватися через Google" : "Увійти через Google"}</span>
+              </button>
+
+              <div className="flex items-center gap-3">
+                <span className="h-px flex-1 bg-[var(--line-soft)]" />
+                <span className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-soft)]">або</span>
+                <span className="h-px flex-1 bg-[var(--line-soft)]" />
+              </div>
+            </>
+          ) : null}
+
           <label className="block text-sm font-medium leading-[1.6] text-[var(--text-muted)]">
-            Email
+            Електронна пошта
             <input
               type="email"
               value={email}
@@ -284,6 +363,7 @@ export function AuthForm({
                   <button
                     type="button"
                     onClick={() => switchView("reset")}
+                    disabled={isAnyAuthPending}
                     className="text-sm font-semibold text-[var(--accent-strong)] transition hover:text-[var(--accent)]"
                   >
                     Забули пароль?
@@ -305,7 +385,7 @@ export function AuthForm({
             </p>
           ) : null}
 
-          <button type="submit" disabled={isSubmitting} className="btn-primary w-full disabled:cursor-not-allowed disabled:opacity-70">
+          <button type="submit" disabled={isAnyAuthPending} className="btn-primary w-full disabled:cursor-not-allowed disabled:opacity-70">
             {isSubmitting ? copy.submitBusyLabel : copy.submitLabel}
           </button>
         </form>
