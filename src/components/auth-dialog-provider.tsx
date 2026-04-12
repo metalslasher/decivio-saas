@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { AuthForm, type AuthView } from "@/components/auth-form";
 
 type OpenAuthDialogOptions = {
@@ -31,12 +31,23 @@ const initialState: DialogState = {
   version: 0
 };
 
+const DIALOG_TITLE_ID = "auth-dialog-title";
+
+function getFocusableElements(container: HTMLElement) {
+  return Array.from(
+    container.querySelectorAll<HTMLElement>(
+      'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    )
+  );
+}
+
 export function AuthDialogProvider({
   children
 }: {
   children: React.ReactNode;
 }) {
   const [state, setState] = useState<DialogState>(initialState);
+  const dialogRef = useRef<HTMLDivElement | null>(null);
 
   const closeAuthDialog = useCallback(() => {
     setState((current) => ({
@@ -62,11 +73,62 @@ export function AuthDialogProvider({
     }
 
     const previousOverflow = document.body.style.overflow;
+    const previousFocusedElement = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     document.body.style.overflow = "hidden";
+
+    const focusFrame = window.requestAnimationFrame(() => {
+      const dialog = dialogRef.current;
+
+      if (!dialog) {
+        return;
+      }
+
+      const [firstFocusableElement] = getFocusableElements(dialog);
+      (firstFocusableElement ?? dialog).focus();
+    });
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
+        event.preventDefault();
         closeAuthDialog();
+        return;
+      }
+
+      if (event.key !== "Tab") {
+        return;
+      }
+
+      const dialog = dialogRef.current;
+
+      if (!dialog) {
+        return;
+      }
+
+      const focusableElements = getFocusableElements(dialog);
+
+      if (focusableElements.length === 0) {
+        event.preventDefault();
+        dialog.focus();
+        return;
+      }
+
+      const firstFocusableElement = focusableElements[0];
+      const lastFocusableElement = focusableElements[focusableElements.length - 1];
+      const activeElement = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+      const isFocusInsideDialog = activeElement ? dialog.contains(activeElement) : false;
+
+      if (event.shiftKey) {
+        if (!isFocusInsideDialog || activeElement === firstFocusableElement) {
+          event.preventDefault();
+          lastFocusableElement.focus();
+        }
+
+        return;
+      }
+
+      if (!isFocusInsideDialog || activeElement === lastFocusableElement) {
+        event.preventDefault();
+        firstFocusableElement.focus();
       }
     };
 
@@ -74,7 +136,12 @@ export function AuthDialogProvider({
 
     return () => {
       document.body.style.overflow = previousOverflow;
+      window.cancelAnimationFrame(focusFrame);
       window.removeEventListener("keydown", handleKeyDown);
+
+      if (previousFocusedElement?.isConnected) {
+        previousFocusedElement.focus();
+      }
     };
   }, [closeAuthDialog, state.isOpen]);
 
@@ -91,34 +158,44 @@ export function AuthDialogProvider({
       {children}
 
       {state.isOpen ? (
-        <div className="fixed inset-0 z-[90] flex items-center justify-center p-4 sm:p-6" aria-modal="true" role="dialog" aria-label="Авторизація">
+        <div className="fixed inset-0 z-[90] overflow-y-auto p-4 sm:p-6">
           <button
             type="button"
             onClick={closeAuthDialog}
-            className="absolute inset-0 bg-[rgba(20,25,37,0.34)] backdrop-blur-md"
+            className="fixed inset-0 bg-[rgba(20,25,37,0.34)] backdrop-blur-md"
             aria-label="Закрити вікно авторизації"
           />
 
-          <div className="relative z-[1] w-full max-w-[32rem]">
-            <button
-              type="button"
-              onClick={closeAuthDialog}
-              className="absolute right-4 top-4 z-[2] inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/60 bg-[rgba(252,253,255,0.84)] text-[var(--text-muted)] transition hover:bg-white hover:text-[var(--text-strong)]"
-              aria-label="Закрити"
+          <div className="relative flex min-h-full items-start justify-center py-4 sm:items-center sm:py-8">
+            <div
+              ref={dialogRef}
+              className="relative z-[1] w-full max-w-[32rem]"
+              aria-modal="true"
+              role="dialog"
+              aria-labelledby={DIALOG_TITLE_ID}
+              tabIndex={-1}
             >
-              <svg viewBox="0 0 24 24" className="h-5 w-5 fill-none" aria-hidden="true">
-                <path d="M7 7l10 10M17 7 7 17" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-              </svg>
-            </button>
+              <button
+                type="button"
+                onClick={closeAuthDialog}
+                className="absolute right-4 top-4 z-[2] inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/60 bg-[rgba(252,253,255,0.84)] text-[var(--text-muted)] transition hover:bg-white hover:text-[var(--text-strong)]"
+                aria-label="Закрити"
+              >
+                <svg viewBox="0 0 24 24" className="h-5 w-5 fill-none" aria-hidden="true">
+                  <path d="M7 7l10 10M17 7 7 17" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+                </svg>
+              </button>
 
-            <AuthForm
-              key={`${state.view}:${state.nextPath}:${state.version}`}
-              initialView={state.view}
-              nextPath={state.nextPath}
-              initialNotice={state.notice}
-              display="modal"
-              onClose={closeAuthDialog}
-            />
+              <AuthForm
+                key={`${state.view}:${state.nextPath}:${state.version}`}
+                initialView={state.view}
+                nextPath={state.nextPath}
+                initialNotice={state.notice}
+                display="modal"
+                onClose={closeAuthDialog}
+                titleId={DIALOG_TITLE_ID}
+              />
+            </div>
           </div>
         </div>
       ) : null}

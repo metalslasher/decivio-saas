@@ -13,7 +13,11 @@ type AuthFormProps = {
   initialNotice?: string | null;
   display?: "page" | "modal";
   onClose?: () => void;
+  titleId?: string;
 };
+
+type FieldName = "email" | "password" | "confirmPassword";
+type TouchedFields = Record<FieldName, boolean>;
 
 function normalizeNextPath(value: string | null) {
   if (!value || !value.startsWith("/") || value.startsWith("//")) {
@@ -89,6 +93,59 @@ function getViewCopy(view: AuthView) {
   }
 }
 
+function isEmailFormatValid(value: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
+}
+
+function getEmailValidationError(value: string) {
+  if (!value.trim()) {
+    return "Введіть email.";
+  }
+
+  if (!isEmailFormatValid(value)) {
+    return "Вкажіть коректний email.";
+  }
+
+  return null;
+}
+
+function getPasswordValidationError(value: string, view: AuthView) {
+  if (view === "reset") {
+    return null;
+  }
+
+  if (!value) {
+    return "Введіть пароль.";
+  }
+
+  if (view === "signup" && value.length < 6) {
+    return "Пароль має містити щонайменше 6 символів.";
+  }
+
+  return null;
+}
+
+function getConfirmPasswordValidationError(password: string, confirmPassword: string, view: AuthView) {
+  if (view !== "signup") {
+    return null;
+  }
+
+  if (!confirmPassword) {
+    return "Підтвердіть пароль.";
+  }
+
+  if (password !== confirmPassword) {
+    return "Паролі не збігаються.";
+  }
+
+  return null;
+}
+
+function getAuthViewHref(view: Extract<AuthView, "login" | "signup">, redirectTo: string) {
+  const path = view === "signup" ? "/signup" : "/login";
+  return `${path}?next=${encodeURIComponent(redirectTo)}`;
+}
+
 function GoogleIcon() {
   return (
     <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
@@ -117,7 +174,8 @@ export function AuthForm({
   nextPath,
   initialNotice = null,
   display = "page",
-  onClose
+  onClose,
+  titleId
 }: AuthFormProps) {
   const router = useRouter();
   const redirectTo = useMemo(() => normalizeNextPath(nextPath ?? null), [nextPath]);
@@ -126,25 +184,53 @@ export function AuthForm({
   const [view, setView] = useState<AuthView>(initialView);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false);
-  const [isCheckingSession, setIsCheckingSession] = useState(initialView !== "reset");
+  const [isCheckingSession, setIsCheckingSession] = useState(initialView !== "reset" && display === "page");
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(initialNotice);
+  const [touchedFields, setTouchedFields] = useState<TouchedFields>({
+    email: false,
+    password: false,
+    confirmPassword: false
+  });
 
   const copy = getViewCopy(view);
   const isSignup = view === "signup";
   const isReset = view === "reset";
   const showDescription = Boolean(copy.description);
   const isAnyAuthPending = isSubmitting || isGoogleSubmitting;
+  const shouldBlockForSessionCheck = display === "page" && isCheckingSession;
+  const validationErrors = useMemo(
+    () => ({
+      email: getEmailValidationError(email),
+      password: getPasswordValidationError(password, view),
+      confirmPassword: getConfirmPasswordValidationError(password, confirmPassword, view)
+    }),
+    [confirmPassword, email, password, view]
+  );
+  const emailError = touchedFields.email ? validationErrors.email : null;
+  const passwordError = touchedFields.password ? validationErrors.password : null;
+  const confirmPasswordError = touchedFields.confirmPassword ? validationErrors.confirmPassword : null;
+  const passwordDescriptionIds = [isSignup ? "auth-password-note" : null, passwordError ? "auth-password-error" : null].filter(Boolean).join(" ") || undefined;
+  const confirmPasswordDescriptionIds = confirmPasswordError ? "auth-confirm-password-error" : undefined;
 
   useEffect(() => {
     setView(initialView);
     setError(null);
     setNotice(initialNotice);
     setPassword("");
-    setIsCheckingSession(initialView !== "reset");
-  }, [initialNotice, initialView]);
+    setConfirmPassword("");
+    setIsPasswordVisible(false);
+    setIsCheckingSession(initialView !== "reset" && display === "page");
+    setTouchedFields({
+      email: false,
+      password: false,
+      confirmPassword: false
+    });
+  }, [display, initialNotice, initialView]);
 
   useEffect(() => {
     let isMounted = true;
@@ -156,22 +242,31 @@ export function AuthForm({
       };
     }
 
-    setIsCheckingSession(true);
+    setIsCheckingSession(display === "page");
 
-    supabase.auth.getSession().then(({ data }) => {
-      if (!isMounted) {
-        return;
-      }
+    supabase.auth
+      .getSession()
+      .then(({ data }) => {
+        if (!isMounted) {
+          return;
+        }
 
-      if (data.session) {
-        onClose?.();
-        router.replace(redirectTo);
-        router.refresh();
-        return;
-      }
+        if (data.session) {
+          onClose?.();
+          router.replace(redirectTo);
+          router.refresh();
+          return;
+        }
 
-      setIsCheckingSession(false);
-    });
+        setIsCheckingSession(false);
+      })
+      .catch(() => {
+        if (!isMounted) {
+          return;
+        }
+
+        setIsCheckingSession(false);
+      });
 
     return () => {
       isMounted = false;
@@ -183,6 +278,25 @@ export function AuthForm({
     setError(null);
     setNotice(nextNotice ?? null);
     setPassword("");
+    setConfirmPassword("");
+    setIsPasswordVisible(false);
+    setTouchedFields({
+      email: false,
+      password: false,
+      confirmPassword: false
+    });
+  };
+
+  const markFieldTouched = (fieldName: FieldName) => {
+    setTouchedFields((current) => (current[fieldName] ? current : { ...current, [fieldName]: true }));
+  };
+
+  const markActiveFieldsTouched = () => {
+    setTouchedFields({
+      email: true,
+      password: !isReset,
+      confirmPassword: isSignup
+    });
   };
 
   const handleGoogleAuth = async () => {
@@ -221,6 +335,15 @@ export function AuthForm({
     event.preventDefault();
     setError(null);
     setNotice(null);
+
+    const hasLocalValidationErrors =
+      Boolean(validationErrors.email) || (!isReset && Boolean(validationErrors.password)) || (isSignup && Boolean(validationErrors.confirmPassword));
+
+    if (hasLocalValidationErrors) {
+      markActiveFieldsTouched();
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -286,7 +409,7 @@ export function AuthForm({
     }
   };
 
-  if (isCheckingSession) {
+  if (shouldBlockForSessionCheck) {
     return (
       <section className={display === "modal" ? "" : "mx-auto max-w-xl py-10"}>
         <div className="surface-panel rounded-[2rem] p-6 md:p-8">
@@ -298,17 +421,80 @@ export function AuthForm({
 
   const rootClassName = display === "modal" ? "" : "mx-auto max-w-xl py-6 md:py-10";
   const panelClassName = display === "modal" ? "surface-panel rounded-[2rem] p-6 md:p-8" : "surface-panel rounded-[2rem] p-6 md:p-8";
-  const switchHref = `${view === "signup" ? "/login" : "/signup"}?next=${encodeURIComponent(redirectTo)}`;
+  const loginHref = getAuthViewHref("login", redirectTo);
+  const signupHref = getAuthViewHref("signup", redirectTo);
 
   return (
     <section className={rootClassName}>
       <div className={panelClassName}>
+        {!isReset ? (
+          <div className="mb-6 grid grid-cols-2 rounded-full border border-[var(--line-soft)] bg-white/72 p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.84)]">
+            {display === "modal" ? (
+              <>
+                <button
+                  type="button"
+                  onClick={() => switchView("login")}
+                  disabled={isAnyAuthPending || view === "login"}
+                  className={`rounded-full px-4 py-2.5 text-sm font-semibold transition ${
+                    view === "login"
+                      ? "bg-white text-[var(--text-strong)] shadow-[0_10px_24px_-18px_rgba(22,29,43,0.4)]"
+                      : "text-[var(--text-muted)] hover:text-[var(--text-strong)] disabled:cursor-default"
+                  }`}
+                  aria-pressed={view === "login"}
+                >
+                  Вхід
+                </button>
+                <button
+                  type="button"
+                  onClick={() => switchView("signup")}
+                  disabled={isAnyAuthPending || view === "signup"}
+                  className={`rounded-full px-4 py-2.5 text-sm font-semibold transition ${
+                    view === "signup"
+                      ? "bg-white text-[var(--text-strong)] shadow-[0_10px_24px_-18px_rgba(22,29,43,0.4)]"
+                      : "text-[var(--text-muted)] hover:text-[var(--text-strong)] disabled:cursor-default"
+                  }`}
+                  aria-pressed={view === "signup"}
+                >
+                  Реєстрація
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  href={loginHref}
+                  className={`rounded-full px-4 py-2.5 text-center text-sm font-semibold transition ${
+                    view === "login"
+                      ? "bg-white text-[var(--text-strong)] shadow-[0_10px_24px_-18px_rgba(22,29,43,0.4)]"
+                      : "text-[var(--text-muted)] hover:text-[var(--text-strong)]"
+                  }`}
+                  aria-current={view === "login" ? "page" : undefined}
+                >
+                  Вхід
+                </Link>
+                <Link
+                  href={signupHref}
+                  className={`rounded-full px-4 py-2.5 text-center text-sm font-semibold transition ${
+                    view === "signup"
+                      ? "bg-white text-[var(--text-strong)] shadow-[0_10px_24px_-18px_rgba(22,29,43,0.4)]"
+                      : "text-[var(--text-muted)] hover:text-[var(--text-strong)]"
+                  }`}
+                  aria-current={view === "signup" ? "page" : undefined}
+                >
+                  Реєстрація
+                </Link>
+              </>
+            )}
+          </div>
+        ) : null}
+
         <div>
-          <h1 className="page-title max-w-[13ch]">{copy.title}</h1>
+          <h1 id={titleId} className="page-title max-w-[13ch]">
+            {copy.title}
+          </h1>
           {showDescription ? <p className="mt-3 text-[0.98rem] leading-[1.72] text-[var(--text-muted)]">{copy.description}</p> : null}
         </div>
 
-        <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+        <form onSubmit={handleSubmit} className="mt-6 space-y-4" aria-busy={isAnyAuthPending}>
           {!isReset ? (
             <>
               <button
@@ -336,27 +522,100 @@ export function AuthForm({
             <input
               type="email"
               value={email}
-              onChange={(event) => setEmail(event.target.value)}
+              onChange={(event) => {
+                setEmail(event.target.value);
+                setError(null);
+              }}
+              onBlur={() => markFieldTouched("email")}
               className="field-surface mt-1"
               autoComplete="email"
+              aria-invalid={emailError ? true : undefined}
+              aria-describedby={emailError ? "auth-email-error" : undefined}
               required
             />
+            {emailError ? (
+              <p id="auth-email-error" className="mt-2 text-xs text-[var(--danger-strong)]">
+                {emailError}
+              </p>
+            ) : null}
           </label>
 
           {!isReset ? (
             <>
               <label className="block text-sm font-medium leading-[1.6] text-[var(--text-muted)]">
                 Пароль
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(event) => setPassword(event.target.value)}
-                  className="field-surface mt-1"
-                  autoComplete={isSignup ? "new-password" : "current-password"}
-                  minLength={6}
-                  required
-                />
+                <div className="relative mt-1">
+                  <input
+                    type={isPasswordVisible ? "text" : "password"}
+                    value={password}
+                    onChange={(event) => {
+                      setPassword(event.target.value);
+                      setError(null);
+                    }}
+                    onBlur={() => markFieldTouched("password")}
+                    className="field-surface pr-24"
+                    autoComplete={isSignup ? "new-password" : "current-password"}
+                    minLength={6}
+                    aria-invalid={passwordError ? true : undefined}
+                    aria-describedby={passwordDescriptionIds}
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setIsPasswordVisible((current) => !current)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-semibold text-[var(--accent-strong)] transition hover:text-[var(--accent)]"
+                    aria-label={isPasswordVisible ? "Сховати пароль" : "Показати пароль"}
+                  >
+                    {isPasswordVisible ? "Сховати" : "Показати"}
+                  </button>
+                </div>
+                {isSignup ? (
+                  <p id="auth-password-note" className="mt-2 text-xs text-[var(--text-soft)]">
+                    Мінімум 6 символів.
+                  </p>
+                ) : null}
+                {passwordError ? (
+                  <p id="auth-password-error" className="mt-2 text-xs text-[var(--danger-strong)]">
+                    {passwordError}
+                  </p>
+                ) : null}
               </label>
+
+              {isSignup ? (
+                <label className="block text-sm font-medium leading-[1.6] text-[var(--text-muted)]">
+                  Підтвердіть пароль
+                  <div className="relative mt-1">
+                    <input
+                      type={isPasswordVisible ? "text" : "password"}
+                      value={confirmPassword}
+                      onChange={(event) => {
+                        setConfirmPassword(event.target.value);
+                        setError(null);
+                      }}
+                      onBlur={() => markFieldTouched("confirmPassword")}
+                      className="field-surface pr-24"
+                      autoComplete="new-password"
+                      minLength={6}
+                      aria-invalid={confirmPasswordError ? true : undefined}
+                      aria-describedby={confirmPasswordDescriptionIds}
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setIsPasswordVisible((current) => !current)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-semibold text-[var(--accent-strong)] transition hover:text-[var(--accent)]"
+                      aria-label={isPasswordVisible ? "Сховати пароль" : "Показати пароль"}
+                    >
+                      {isPasswordVisible ? "Сховати" : "Показати"}
+                    </button>
+                  </div>
+                  {confirmPasswordError ? (
+                    <p id="auth-confirm-password-error" className="mt-2 text-xs text-[var(--danger-strong)]">
+                      {confirmPasswordError}
+                    </p>
+                  ) : null}
+                </label>
+              ) : null}
 
               {view === "login" ? (
                 <div className="flex justify-start">
@@ -374,13 +633,13 @@ export function AuthForm({
           ) : null}
 
           {error ? (
-            <p className="rounded-[1.3rem] border border-[rgba(201,155,134,0.5)] bg-[var(--danger-soft)] px-4 py-3 text-sm text-[var(--danger-strong)]">
+            <p role="alert" className="rounded-[1.3rem] border border-[rgba(201,155,134,0.5)] bg-[var(--danger-soft)] px-4 py-3 text-sm text-[var(--danger-strong)]">
               {error}
             </p>
           ) : null}
 
           {notice ? (
-            <p className="rounded-[1.3rem] border border-[rgba(63,94,255,0.16)] bg-[var(--accent-soft)] px-4 py-3 text-sm text-[var(--accent-strong)]">
+            <p aria-live="polite" className="rounded-[1.3rem] border border-[rgba(63,94,255,0.16)] bg-[var(--accent-soft)] px-4 py-3 text-sm text-[var(--accent-strong)]">
               {notice}
             </p>
           ) : null}
@@ -390,48 +649,8 @@ export function AuthForm({
           </button>
         </form>
 
-        <div className="mt-5 text-sm text-[var(--text-muted)]">
-          {view === "signup" ? (
-            display === "modal" ? (
-              <p>
-                Уже є акаунт?{" "}
-                <button
-                  type="button"
-                  onClick={() => switchView("login")}
-                  className="font-semibold text-[var(--accent-strong)] transition hover:text-[var(--accent)]"
-                >
-                  Увійти
-                </button>
-              </p>
-            ) : (
-              <p>
-                Уже є акаунт?{" "}
-                <Link href={switchHref} className="font-semibold text-[var(--accent-strong)] hover:text-[var(--accent)]">
-                  Увійти
-                </Link>
-              </p>
-            )
-          ) : view === "login" ? (
-            display === "modal" ? (
-              <p>
-                Немає акаунта?{" "}
-                <button
-                  type="button"
-                  onClick={() => switchView("signup")}
-                  className="font-semibold text-[var(--accent-strong)] transition hover:text-[var(--accent)]"
-                >
-                  Зареєструватися
-                </button>
-              </p>
-            ) : (
-              <p>
-                Немає акаунта?{" "}
-                <Link href={switchHref} className="font-semibold text-[var(--accent-strong)] hover:text-[var(--accent)]">
-                  Зареєструватися
-                </Link>
-              </p>
-            )
-          ) : (
+        {view === "reset" ? (
+          <div className="mt-5 text-sm text-[var(--text-muted)]">
             <p>
               Згадали пароль?{" "}
               {display === "modal" ? (
@@ -448,8 +667,8 @@ export function AuthForm({
                 </Link>
               )}
             </p>
-          )}
-        </div>
+          </div>
+        ) : null}
       </div>
     </section>
   );
