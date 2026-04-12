@@ -36,7 +36,7 @@ type SoftwareApplicationSchemaOptions = {
 };
 
 function normalizeSiteUrl(value?: string | null) {
-  const fallbackUrl = "https://decivio.net";
+  const fallbackUrl = "https://www.decivio.net";
   if (!value) {
     return fallbackUrl;
   }
