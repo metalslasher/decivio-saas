@@ -175,17 +175,6 @@ export function AuthDialogProvider({
               aria-labelledby={DIALOG_TITLE_ID}
               tabIndex={-1}
             >
-              <button
-                type="button"
-                onClick={closeAuthDialog}
-                className="absolute right-4 top-4 z-[2] inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/60 bg-[rgba(252,253,255,0.84)] text-[var(--text-muted)] transition hover:bg-white hover:text-[var(--text-strong)]"
-                aria-label="Закрити"
-              >
-                <svg viewBox="0 0 24 24" className="h-5 w-5 fill-none" aria-hidden="true">
-                  <path d="M7 7l10 10M17 7 7 17" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-                </svg>
-              </button>
-
               <AuthForm
                 key={`${state.view}:${state.nextPath}:${state.version}`}
                 initialView={state.view}

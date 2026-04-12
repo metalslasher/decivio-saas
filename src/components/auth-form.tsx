@@ -208,6 +208,7 @@ export function AuthForm({
   const isReset = view === "reset";
   const showDescription = Boolean(copy.description);
   const showVisualTitle = isReset;
+  const showModalCloseButton = display === "modal" && Boolean(onClose);
   const isAnyAuthPending = isSubmitting || isGoogleSubmitting;
   const shouldBlockForSessionCheck = display === "page" && isCheckingSession;
   const validationErrors = useMemo(
@@ -427,8 +428,7 @@ export function AuthForm({
   }
 
   const rootClassName = display === "modal" ? "" : "mx-auto max-w-xl py-6 md:py-10";
-  const panelClassName =
-    display === "modal" ? "surface-panel rounded-[2rem] px-6 pb-6 pt-16 md:px-8 md:pb-8 md:pt-[4.5rem]" : "surface-panel rounded-[2rem] p-6 md:p-8";
+  const panelClassName = display === "modal" ? "surface-panel rounded-[2rem] p-6 md:p-8" : "surface-panel rounded-[2rem] p-6 md:p-8";
   const loginHref = getAuthViewHref("login", redirectTo);
   const signupHref = getAuthViewHref("signup", redirectTo);
   const formClassName = showVisualTitle ? "mt-6 space-y-4" : "space-y-4";
@@ -436,10 +436,10 @@ export function AuthForm({
   return (
     <section className={rootClassName}>
       <div className={panelClassName}>
-        {!isReset ? (
-          <div className="mb-6 grid grid-cols-2 rounded-full border border-[var(--line-soft)] bg-white/72 p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.84)]">
-            {display === "modal" ? (
-              <>
+        {display === "modal" ? (
+          <div className={`mb-6 flex items-center ${isReset ? "justify-end" : "gap-3"}`}>
+            {!isReset ? (
+              <div className="grid flex-1 grid-cols-2 rounded-full border border-[var(--line-soft)] bg-white/72 p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.84)]">
                 <button
                   type="button"
                   onClick={() => switchView("login")}
@@ -466,33 +466,46 @@ export function AuthForm({
                 >
                   Реєстрація
                 </button>
-              </>
-            ) : (
-              <>
-                <Link
-                  href={loginHref}
-                  className={`rounded-full px-4 py-2.5 text-center text-sm font-semibold transition ${
-                    view === "login"
-                      ? "bg-white text-[var(--text-strong)] shadow-[0_10px_24px_-18px_rgba(22,29,43,0.4)]"
-                      : "text-[var(--text-muted)] hover:text-[var(--text-strong)]"
-                  }`}
-                  aria-current={view === "login" ? "page" : undefined}
-                >
-                  Вхід
-                </Link>
-                <Link
-                  href={signupHref}
-                  className={`rounded-full px-4 py-2.5 text-center text-sm font-semibold transition ${
-                    view === "signup"
-                      ? "bg-white text-[var(--text-strong)] shadow-[0_10px_24px_-18px_rgba(22,29,43,0.4)]"
-                      : "text-[var(--text-muted)] hover:text-[var(--text-strong)]"
-                  }`}
-                  aria-current={view === "signup" ? "page" : undefined}
-                >
-                  Реєстрація
-                </Link>
-              </>
-            )}
+              </div>
+            ) : null}
+
+            {showModalCloseButton ? (
+              <button
+                type="button"
+                onClick={onClose}
+                className="inline-flex h-11 w-11 flex-none items-center justify-center rounded-full border border-white/60 bg-[rgba(252,253,255,0.84)] text-[var(--text-muted)] transition hover:bg-white hover:text-[var(--text-strong)]"
+                aria-label="Закрити"
+              >
+                <svg viewBox="0 0 24 24" className="h-5 w-5 fill-none" aria-hidden="true">
+                  <path d="M7 7l10 10M17 7 7 17" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+                </svg>
+              </button>
+            ) : null}
+          </div>
+        ) : !isReset ? (
+          <div className="mb-6 grid grid-cols-2 rounded-full border border-[var(--line-soft)] bg-white/72 p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.84)]">
+            <Link
+              href={loginHref}
+              className={`rounded-full px-4 py-2.5 text-center text-sm font-semibold transition ${
+                view === "login"
+                  ? "bg-white text-[var(--text-strong)] shadow-[0_10px_24px_-18px_rgba(22,29,43,0.4)]"
+                  : "text-[var(--text-muted)] hover:text-[var(--text-strong)]"
+              }`}
+              aria-current={view === "login" ? "page" : undefined}
+            >
+              Вхід
+            </Link>
+            <Link
+              href={signupHref}
+              className={`rounded-full px-4 py-2.5 text-center text-sm font-semibold transition ${
+                view === "signup"
+                  ? "bg-white text-[var(--text-strong)] shadow-[0_10px_24px_-18px_rgba(22,29,43,0.4)]"
+                  : "text-[var(--text-muted)] hover:text-[var(--text-strong)]"
+              }`}
+              aria-current={view === "signup" ? "page" : undefined}
+            >
+              Реєстрація
+            </Link>
           </div>
         ) : null}
 
