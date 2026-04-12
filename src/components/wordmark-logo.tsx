@@ -8,7 +8,7 @@ function AccentDot({ tone }: { tone: "light" | "dark" }) {
 
   return (
     <span
-      className={`pointer-events-none absolute left-[56%] top-[-0.08em] h-[0.14em] w-[0.14em] -translate-x-1/2 rotate-[14deg] rounded-[0.04em] ${accentTone}`}
+      className={`pointer-events-none absolute left-1/2 top-[-0.18em] h-[0.14em] w-[0.14em] -translate-x-1/2 rounded-[0.04em] ${accentTone}`}
     />
   );
 }
@@ -23,14 +23,14 @@ export function WordmarkLogo({ className = "", tone = "dark" }: WordmarkLogoProp
     >
       <span>Dec</span>
 
-      <span className="relative inline-block">
+      <span className="relative inline-flex justify-center">
         <span>ı</span>
         <AccentDot tone={tone} />
       </span>
 
       <span className="-ml-[0.018em]">v</span>
 
-      <span className="relative -ml-[0.022em] inline-block">
+      <span className="relative -ml-[0.022em] inline-flex justify-center">
         <span>ı</span>
         <AccentDot tone={tone} />
       </span>
