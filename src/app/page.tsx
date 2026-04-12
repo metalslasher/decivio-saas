@@ -162,7 +162,7 @@ const steps = [
   {
     label: "02",
     title: "Збираємо контекст",
-    description: "Звіряємо ринок, враховуємо англійську, цільовий ринок і ваш пріоритет.",
+    description: "Зіставляємо ваш профіль із ринком і напрямом переходу.",
     icon: (
       <svg viewBox="0 0 24 24" className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth="1.8">
         <path d="M5 18l4-4 3 2 7-8" />
@@ -174,7 +174,7 @@ const steps = [
   {
     label: "03",
     title: "Бачите висновок",
-    description: "Отримуєте персоналізований висновок, стелю ролей і наступний крок.",
+    description: "Отримуєте чіткий висновок і розуміння, куди рухатись далі.",
     icon: (
       <svg viewBox="0 0 24 24" className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth="1.8">
         <circle cx="12" cy="12" r="8" />
