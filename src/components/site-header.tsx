@@ -34,7 +34,7 @@ export function SiteHeader() {
   const { openAuthDialog } = useAuthDialog();
   const [isOpen, setIsOpen] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
-  const [headerProgress, setHeaderProgress] = useState(() => (pathname === "/" ? 0 : 1));
+  const [headerProgress, setHeaderProgress] = useState(0);
   const [authState, setAuthState] = useState<AuthState>({ status: "loading" });
 
   useEffect(() => {
@@ -62,14 +62,7 @@ export function SiteHeader() {
     };
   }, [supabase]);
 
-  const shouldUseScrollReactiveHeader = pathname === "/";
-
   useEffect(() => {
-    if (!shouldUseScrollReactiveHeader) {
-      setHeaderProgress(1);
-      return;
-    }
-
     const maxScroll = 168;
     let frameId = 0;
 
@@ -98,14 +91,14 @@ export function SiteHeader() {
       window.removeEventListener("scroll", handleScroll);
       window.removeEventListener("resize", handleScroll);
     };
-  }, [shouldUseScrollReactiveHeader]);
+  }, [pathname]);
 
   const isDashboardArea = pathname?.startsWith("/dashboard") ?? false;
   const isDashboardUser = authState.status === "user" && isDashboardArea;
   const logoHref = isDashboardUser ? "/dashboard" : "/";
   const navItems = isDashboardUser ? dashboardNavItems : authState.status === "user" ? [{ href: "/dashboard", label: "Кабінет" }, ...publicNavItems] : publicNavItems;
 
-  const effectiveHeaderProgress = shouldUseScrollReactiveHeader ? Math.max(headerProgress, isOpen ? 1 : 0) : 1;
+  const effectiveHeaderProgress = Math.max(headerProgress, isOpen ? 1 : 0);
   const headerStyle = { "--mirror-progress": effectiveHeaderProgress } as CSSProperties;
 
   const handleSignOut = async () => {

@@ -162,7 +162,7 @@ export default function PricingPage() {
               <h1 className="page-title mx-auto max-w-[12ch]">Оберіть свій формат доступу</h1>
             </header>
 
-            <div className="mt-8 grid gap-4 lg:grid-cols-2">
+            <div className="mt-12 grid gap-4 md:mt-14 lg:grid-cols-2">
               <PlanCard plan={monthlyPlan} />
               <PlanCard plan={annualPlan} />
             </div>
@@ -247,23 +247,6 @@ export default function PricingPage() {
           </div>
         </section>
 
-        <section className="surface-dark rounded-[2.5rem] px-5 py-7 text-center text-white md:px-8 md:py-9">
-          <h2 className="font-display text-[2rem] font-bold leading-[1.01] tracking-[-0.05em] md:text-[2.45rem]">
-            Оберіть план і відкрийте повний доступ до Decivio
-          </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-[0.98rem] leading-[1.74] text-white/72">
-            Місячний формат дає більше гнучкості. Річний дає найвигіднішу ціну, якщо ви хочете працювати над переходом системно.
-          </p>
-
-          <div className="mt-6 flex flex-col items-stretch justify-center gap-3 sm:flex-row">
-            <Link href={getCheckoutHref("annual")} className="btn-primary">
-              Обрати річний доступ
-            </Link>
-            <Link href={getCheckoutHref("monthly")} className="btn-secondary border-white/14 bg-white/10 !text-white hover:border-white/24 hover:bg-white/14 !hover:text-white">
-              Обрати місячний доступ
-            </Link>
-          </div>
-        </section>
       </div>
     </>
   );
