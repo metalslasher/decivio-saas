@@ -9,8 +9,7 @@ import { getSupabaseBrowserClient } from "@/lib/db/supabase-browser";
 
 const publicNavItems = [
   { href: "/#features", label: "Можливості" },
-  { href: "/#process", label: "Як це працює" },
-  { href: "/#faq", label: "FAQ" },
+  { href: "/#faq", label: "Часті питання" },
   { href: "/#reviews", label: "Відгуки" },
   { href: "/pricing", label: "Ціни" }
 ];

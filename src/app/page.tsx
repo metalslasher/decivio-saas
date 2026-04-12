@@ -875,72 +875,6 @@ export default function HomePage() {
         </section>
       </div>
 
-      <section id="faq" className="space-y-5 py-2 md:space-y-6 md:py-4">
-        <Reveal>
-          <div className="mx-auto max-w-3xl text-center">
-            <h2 className="section-title">Часті запитання</h2>
-          </div>
-        </Reveal>
-
-        <div className="grid gap-4 md:grid-cols-2">
-          {faqItems.map((item, index) => (
-            <Reveal key={item.question} delayMs={index * 40}>
-              <details className="surface-panel group rounded-[1.8rem] px-5 py-4 md:px-6 md:py-5">
-                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-display text-[1.02rem] font-semibold leading-[1.24] tracking-[-0.02em] text-[var(--text-strong)] marker:hidden [&::-webkit-details-marker]:hidden md:text-[1.12rem]">
-                  <span>{item.question}</span>
-                  <span className="text-[1.4rem] font-medium text-[var(--accent-strong)] transition-transform duration-200 group-open:rotate-45">
-                    +
-                  </span>
-                </summary>
-                <p className="mt-3 pr-8 text-[0.94rem] leading-[1.72] text-[var(--text-muted)] md:text-[0.98rem]">{item.answer}</p>
-              </details>
-            </Reveal>
-          ))}
-        </div>
-      </section>
-
-      <section id="features" className="space-y-8 md:space-y-10">
-        {featureShowcases.map((item, index) => {
-          return (
-            <Reveal key={item.title} delayMs={index * 40}>
-              <article className="surface-panel relative overflow-hidden rounded-[2.4rem] px-6 py-6 md:px-8 md:py-8">
-                <div className="pointer-events-none absolute -right-10 top-0 h-20 w-52 rounded-full bg-[rgba(67,97,255,0.05)] blur-3xl" />
-                <div className="pointer-events-none absolute -left-10 bottom-0 h-20 w-52 rounded-full bg-[rgba(152,165,255,0.05)] blur-3xl" />
-
-                <div className="relative grid gap-7 md:grid-cols-12 md:gap-8">
-                  <div className="flex h-full flex-col md:col-span-7">
-                    <div className="space-y-4 md:space-y-5">
-                      <h3 className="font-display text-[1.66rem] font-bold leading-[1.01] tracking-[-0.045em] text-[var(--text-strong)] md:text-[2.18rem]">
-                        {item.title}
-                      </h3>
-
-                      <div className="space-y-2.5">
-                        {item.bullets.map((bullet) => (
-                          <p key={bullet} className="flex items-start gap-2.5 text-[0.92rem] leading-[1.7] text-[var(--text-muted)] md:text-[0.97rem]">
-                            <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--accent)]" />
-                            <span>{bullet}</span>
-                          </p>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="mt-6 md:mt-8">
-                      <Link href={item.href} className="btn-primary">
-                        {item.cta}
-                      </Link>
-                    </div>
-                  </div>
-
-                  <div className="md:col-span-5">
-                    <FeaturePreview item={item} />
-                  </div>
-                </div>
-              </article>
-            </Reveal>
-          );
-        })}
-      </section>
-
       <section id="reviews" className="relative py-4 md:py-6">
         <Reveal>
           <div className="relative">
@@ -990,7 +924,73 @@ export default function HomePage() {
           </div>
         </Reveal>
       </section>
-      
+
+      <section id="features" className="space-y-8 md:space-y-10">
+        {featureShowcases.map((item, index) => {
+          return (
+            <Reveal key={item.title} delayMs={index * 40}>
+              <article className="surface-panel relative overflow-hidden rounded-[2.4rem] px-6 py-6 md:px-8 md:py-8">
+                <div className="pointer-events-none absolute -right-10 top-0 h-20 w-52 rounded-full bg-[rgba(67,97,255,0.05)] blur-3xl" />
+                <div className="pointer-events-none absolute -left-10 bottom-0 h-20 w-52 rounded-full bg-[rgba(152,165,255,0.05)] blur-3xl" />
+
+                <div className="relative grid gap-7 md:grid-cols-12 md:gap-8">
+                  <div className="flex h-full flex-col md:col-span-7">
+                    <div className="space-y-4 md:space-y-5">
+                      <h3 className="font-display text-[1.66rem] font-bold leading-[1.01] tracking-[-0.045em] text-[var(--text-strong)] md:text-[2.18rem]">
+                        {item.title}
+                      </h3>
+
+                      <div className="space-y-2.5">
+                        {item.bullets.map((bullet) => (
+                          <p key={bullet} className="flex items-start gap-2.5 text-[0.92rem] leading-[1.7] text-[var(--text-muted)] md:text-[0.97rem]">
+                            <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--accent)]" />
+                            <span>{bullet}</span>
+                          </p>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="mt-6 md:mt-8">
+                      <Link href={item.href} className="btn-primary">
+                        {item.cta}
+                      </Link>
+                    </div>
+                  </div>
+
+                  <div className="md:col-span-5">
+                    <FeaturePreview item={item} />
+                  </div>
+                </div>
+              </article>
+            </Reveal>
+          );
+        })}
+      </section>
+
+      <section id="faq" className="space-y-5 py-2 md:space-y-6 md:py-4">
+        <Reveal>
+          <div className="mx-auto max-w-3xl text-center">
+            <h2 className="section-title">Часті питання</h2>
+          </div>
+        </Reveal>
+
+        <div className="grid gap-4 md:grid-cols-2">
+          {faqItems.map((item, index) => (
+            <Reveal key={item.question} delayMs={index * 40}>
+              <details className="surface-panel group rounded-[1.8rem] px-5 py-4 md:px-6 md:py-5">
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-display text-[1.02rem] font-semibold leading-[1.24] tracking-[-0.02em] text-[var(--text-strong)] marker:hidden [&::-webkit-details-marker]:hidden md:text-[1.12rem]">
+                  <span>{item.question}</span>
+                  <span className="text-[1.4rem] font-medium text-[var(--accent-strong)] transition-transform duration-200 group-open:rotate-45">
+                    +
+                  </span>
+                </summary>
+                <p className="mt-3 pr-8 text-[0.94rem] leading-[1.72] text-[var(--text-muted)] md:text-[0.98rem]">{item.answer}</p>
+              </details>
+            </Reveal>
+          ))}
+        </div>
+      </section>
+
     </div>
     </>
   );
