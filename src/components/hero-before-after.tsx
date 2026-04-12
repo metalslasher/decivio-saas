@@ -142,39 +142,41 @@ export function HeroBeforeAfter() {
       <div className="pointer-events-none absolute -right-20 top-4 h-[24rem] w-[24rem] rounded-full bg-[radial-gradient(circle,rgba(152,165,255,0.08)_0%,rgba(152,165,255,0.04)_36%,transparent_72%)]" />
 
       <div className="space-y-8 md:space-y-10">
-        <div className="mx-auto flex min-h-[calc(100svh-6rem)] max-w-[58rem] flex-col items-center justify-center space-y-6 text-center md:min-h-[calc(100svh-7rem)] md:space-y-7">
-          <h1 className="mx-auto min-h-[7.35rem] max-w-[17ch] text-balance font-display text-[2.32rem] font-bold leading-[0.91] tracking-[-0.055em] text-[var(--text-strong)] md:min-h-[10.8rem] md:max-w-[20ch] md:text-[3.9rem]">
-            {typedText}
-            <span className="hero-caret ml-1 text-[var(--accent-strong)]" aria-hidden="true">
-              |
-            </span>
-          </h1>
+        <div className="mx-auto flex min-h-[calc(100svh-6rem)] max-w-[64rem] items-center justify-center md:min-h-[calc(100svh-7rem)]">
+          <div className="flex w-full max-w-[58rem] flex-col items-center space-y-6 text-center sm:space-y-7 md:-translate-y-8 lg:-translate-y-10">
+            <h1 className="mx-auto min-h-[6.7rem] max-w-[12ch] text-balance font-display text-[2.08rem] font-bold leading-[0.92] tracking-[-0.06em] text-[var(--text-strong)] sm:min-h-[7.8rem] sm:text-[2.7rem] md:min-h-[11rem] md:max-w-[12ch] md:text-[4.45rem] lg:text-[5.05rem]">
+              {typedText}
+              <span className="hero-caret ml-1 text-[var(--accent-strong)]" aria-hidden="true">
+                |
+              </span>
+            </h1>
 
-          <p className="mx-auto max-w-[48rem] text-[1.08rem] leading-[1.68] text-[rgba(92,103,128,0.94)] md:text-[1.26rem] md:leading-[1.62]">
-            {subheadline}
-          </p>
+            <p className="mx-auto max-w-[20rem] text-balance text-[1rem] font-medium leading-[1.66] text-[rgba(92,103,128,0.94)] sm:max-w-[30rem] sm:text-[1.08rem] md:max-w-[36rem] md:text-[1.2rem] md:leading-[1.62] lg:max-w-[44rem] lg:text-[1.24rem]">
+              {subheadline}
+            </p>
 
-          <div className="mt-3 flex justify-center md:mt-5">
-            <div className="w-full max-w-[22rem] sm:w-auto sm:max-w-none">
-              <div className="flex flex-col items-center gap-3">
-                <Link
-                  href="/simulate"
-                  className="btn-primary w-full justify-center gap-2.5 px-6 py-3.5 text-[1.03rem] font-extrabold sm:min-w-[15rem] sm:w-auto sm:px-7"
-                >
-                  <span className="transition-opacity duration-200">{ctaLabels[ctaIndex]}</span>
-                  <span className="inline-flex h-6 w-6 items-center justify-center rounded-md bg-white/20">
-                    <svg viewBox="0 0 24 24" className="h-4 w-4 fill-none" aria-hidden="true">
-                      <path
-                        d="M4 16l5-5 3 3 8-8M15 6h5v5"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </span>
-                </Link>
-                <span className="text-[0.84rem] font-semibold tracking-[0.01em] text-[rgba(129,141,168,0.96)] md:text-[0.92rem]">{ctaMeta}</span>
+            <div className="mt-4 flex justify-center md:mt-7">
+              <div className="w-full max-w-[18.5rem] sm:max-w-[22rem]">
+                <div className="flex flex-col items-center gap-3.5">
+                  <Link
+                    href="/simulate"
+                    className="btn-primary w-full justify-center gap-2.5 px-6 py-3.5 text-[1rem] font-extrabold sm:min-w-[16rem] sm:w-auto sm:px-7 md:text-[1.06rem]"
+                  >
+                    <span className="transition-opacity duration-200">{ctaLabels[ctaIndex]}</span>
+                    <span className="inline-flex h-6 w-6 items-center justify-center rounded-md bg-white/20">
+                      <svg viewBox="0 0 24 24" className="h-4 w-4 fill-none" aria-hidden="true">
+                        <path
+                          d="M4 16l5-5 3 3 8-8M15 6h5v5"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </span>
+                  </Link>
+                  <span className="text-[0.84rem] font-semibold tracking-[0.01em] text-[rgba(140,151,177,0.94)] md:text-[0.94rem]">{ctaMeta}</span>
+                </div>
               </div>
             </div>
           </div>
