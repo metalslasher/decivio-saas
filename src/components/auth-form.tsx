@@ -411,7 +411,7 @@ export function AuthForm({
 
   if (shouldBlockForSessionCheck) {
     return (
-      <section className={display === "modal" ? "" : "mx-auto max-w-xl py-10"}>
+      <section className="mx-auto max-w-xl py-10">
         <div className="surface-panel rounded-[2rem] p-6 md:p-8">
           <p className="body-copy">Перевіряємо вашу сесію...</p>
         </div>
