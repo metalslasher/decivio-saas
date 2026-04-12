@@ -192,7 +192,7 @@ export function SiteHeader() {
                   <button
                     type="button"
                     onClick={openSignupDialog}
-                    className="hidden min-w-[11.2rem] items-center justify-start gap-3 rounded-full bg-[var(--accent-strong)] px-3 py-2.5 pr-4 text-[1.03rem] font-semibold text-white shadow-[0_14px_30px_-22px_rgba(41,73,244,0.54)] transition hover:-translate-y-px hover:bg-[var(--accent)] md:inline-flex"
+                    className="hidden min-w-[11.2rem] items-center justify-start gap-3 rounded-full bg-[var(--accent-strong)] px-3 py-2.5 pr-4 text-[1.03rem] font-semibold text-white transition hover:-translate-y-px hover:bg-[var(--accent)] md:inline-flex"
                   >
                     <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white text-[var(--accent-strong)]">
                       <svg viewBox="0 0 24 24" className="h-4 w-4 fill-none" aria-hidden="true">
