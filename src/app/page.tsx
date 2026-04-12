@@ -3,7 +3,6 @@ import type { ReactNode } from "react";
 import { HeroBeforeAfter } from "@/components/hero-before-after";
 import { JsonLd } from "@/components/json-ld";
 import { Reveal } from "@/components/reveal";
-import { RotatingCtaButton } from "@/components/rotating-cta-button";
 import { pricingPlans } from "@/lib/pricing";
 import { createFaqSchema, createMetadata, createSoftwareApplicationSchema } from "@/lib/seo";
 
@@ -205,12 +204,6 @@ const supportedRoles = [
   "Business Analyst",
   "Product Manager",
   "SMM Specialist"
-] as const;
-
-const quoteCtaLabels = [
-  "Отримати прогноз зміни кар’єри",
-  "Перевірити свій сценарій переходу",
-  "Дізнатись, яка роль має сильнішу стелю доходу"
 ] as const;
 
 const reviews = [
@@ -754,7 +747,7 @@ export default function HomePage() {
     <>
       <JsonLd data={homeSoftwareSchema} />
       <JsonLd data={homeFaqSchema} />
-      <div className="space-y-16 pb-10 md:space-y-24">
+      <div className="pb-10">
         <div className="space-y-8 md:space-y-12">
           <HeroBeforeAfter />
 
@@ -863,16 +856,18 @@ export default function HomePage() {
               та рухаєтесь до карʼєри, яку справді хочете.
             </p>
             <div className="mt-4 flex justify-center md:mt-5">
-              <RotatingCtaButton href="/simulate" labels={quoteCtaLabels} className="btn-primary px-7 py-3 md:px-8" />
+              <Link href="/simulate" className="btn-primary px-7 py-3 md:px-8">
+                Отримати прогноз зміни кар’єри
+              </Link>
             </div>
           </Reveal>
         </section>
       </div>
 
-      <section id="reviews" className="relative py-4 md:py-6">
+      <section id="reviews" className="relative">
         <Reveal>
           <div className="relative">
-            <div className="overflow-hidden px-1 py-8 md:px-2 md:py-10">
+            <div className="overflow-hidden px-1 pt-8 md:px-2 md:pt-10">
               <div className="reviews-marquee-track flex w-max gap-5">
                 {[...reviews, ...reviews].map((review, index) => (
                   <article
@@ -919,7 +914,7 @@ export default function HomePage() {
         </Reveal>
       </section>
 
-      <section id="features" className="space-y-8 md:space-y-10">
+      <section id="features" className="mt-8 space-y-8 md:mt-10 md:space-y-10">
         {featureShowcases.map((item, index) => {
           return (
             <Reveal key={item.title} delayMs={index * 40}>
@@ -961,7 +956,7 @@ export default function HomePage() {
         })}
       </section>
 
-      <section id="faq" className="space-y-5 py-2 md:space-y-6 md:py-4">
+      <section id="faq" className="mt-16 space-y-5 py-2 md:mt-24 md:space-y-6 md:py-4">
         <Reveal>
           <div className="mx-auto max-w-3xl text-center">
             <h2 className="section-title">Часті питання</h2>
