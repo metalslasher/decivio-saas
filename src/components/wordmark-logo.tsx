@@ -8,7 +8,7 @@ function AccentDot({ tone }: { tone: "light" | "dark" }) {
 
   return (
     <span
-      className={`pointer-events-none absolute left-1/2 top-[-0.18em] h-[0.14em] w-[0.14em] -translate-x-1/2 rounded-[0.04em] ${accentTone}`}
+      className={`pointer-events-none absolute left-[58.5%] top-[-0.14em] h-[0.14em] w-[0.14em] -translate-x-1/2 rounded-[0.04em] ${accentTone}`}
     />
   );
 }
