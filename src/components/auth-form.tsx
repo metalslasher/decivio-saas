@@ -118,8 +118,14 @@ function getPasswordValidationError(value: string, view: AuthView) {
     return "Введіть пароль.";
   }
 
-  if (view === "signup" && value.length < 6) {
-    return "Пароль має містити щонайменше 6 символів.";
+  if (view === "signup") {
+    if (value.length < 8) {
+      return "Пароль має містити щонайменше 8 символів.";
+    }
+
+    if (!/[a-z]/.test(value) || !/[A-Z]/.test(value) || !/\d/.test(value)) {
+      return "Пароль має містити цифру, велику та малу літеру.";
+    }
   }
 
   return null;
@@ -201,6 +207,7 @@ export function AuthForm({
   const isSignup = view === "signup";
   const isReset = view === "reset";
   const showDescription = Boolean(copy.description);
+  const showVisualTitle = isReset;
   const isAnyAuthPending = isSubmitting || isGoogleSubmitting;
   const shouldBlockForSessionCheck = display === "page" && isCheckingSession;
   const validationErrors = useMemo(
@@ -420,9 +427,11 @@ export function AuthForm({
   }
 
   const rootClassName = display === "modal" ? "" : "mx-auto max-w-xl py-6 md:py-10";
-  const panelClassName = display === "modal" ? "surface-panel rounded-[2rem] p-6 md:p-8" : "surface-panel rounded-[2rem] p-6 md:p-8";
+  const panelClassName =
+    display === "modal" ? "surface-panel rounded-[2rem] px-6 pb-6 pt-16 md:px-8 md:pb-8 md:pt-[4.5rem]" : "surface-panel rounded-[2rem] p-6 md:p-8";
   const loginHref = getAuthViewHref("login", redirectTo);
   const signupHref = getAuthViewHref("signup", redirectTo);
+  const formClassName = showVisualTitle ? "mt-6 space-y-4" : "space-y-4";
 
   return (
     <section className={rootClassName}>
@@ -488,13 +497,13 @@ export function AuthForm({
         ) : null}
 
         <div>
-          <h1 id={titleId} className="page-title max-w-[13ch]">
+          <h1 id={titleId} className={showVisualTitle ? "page-title max-w-[13ch]" : "sr-only"}>
             {copy.title}
           </h1>
-          {showDescription ? <p className="mt-3 text-[0.98rem] leading-[1.72] text-[var(--text-muted)]">{copy.description}</p> : null}
+          {showVisualTitle && showDescription ? <p className="mt-3 text-[0.98rem] leading-[1.72] text-[var(--text-muted)]">{copy.description}</p> : null}
         </div>
 
-        <form onSubmit={handleSubmit} className="mt-6 space-y-4" aria-busy={isAnyAuthPending}>
+        <form onSubmit={handleSubmit} className={formClassName} aria-busy={isAnyAuthPending}>
           {!isReset ? (
             <>
               <button
@@ -555,7 +564,7 @@ export function AuthForm({
                     onBlur={() => markFieldTouched("password")}
                     className="field-surface pr-24"
                     autoComplete={isSignup ? "new-password" : "current-password"}
-                    minLength={6}
+                    minLength={isSignup ? 8 : undefined}
                     aria-invalid={passwordError ? true : undefined}
                     aria-describedby={passwordDescriptionIds}
                     required
@@ -571,7 +580,7 @@ export function AuthForm({
                 </div>
                 {isSignup ? (
                   <p id="auth-password-note" className="mt-2 text-xs text-[var(--text-soft)]">
-                    Мінімум 6 символів.
+                    Пароль має містити щонайменше 8 символів, одну цифру, одну велику та одну малу літеру.
                   </p>
                 ) : null}
                 {passwordError ? (
@@ -595,7 +604,7 @@ export function AuthForm({
                       onBlur={() => markFieldTouched("confirmPassword")}
                       className="field-surface pr-24"
                       autoComplete="new-password"
-                      minLength={6}
+                      minLength={8}
                       aria-invalid={confirmPasswordError ? true : undefined}
                       aria-describedby={confirmPasswordDescriptionIds}
                       required
