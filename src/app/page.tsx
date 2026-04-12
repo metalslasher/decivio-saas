@@ -795,8 +795,6 @@ export default function HomePage() {
                 </div>
               </Link>
 
-              <div className="hidden h-10 w-px bg-[rgba(24,26,32,0.1)] md:mx-8 md:block" />
-
               <article className="space-y-1 md:min-w-[20rem]">
                 <p className="font-display text-[1.5rem] font-bold leading-none tracking-[-0.04em] text-[var(--text-strong)] md:text-[1.72rem]">
                   {socialProof.users}
@@ -804,11 +802,7 @@ export default function HomePage() {
                 <p className="text-[0.97rem] font-medium text-[var(--text-muted)]">{socialProof.usersCaption}</p>
               </article>
 
-              <div className="hidden h-10 w-px bg-[rgba(24,26,32,0.1)] md:mx-8 md:block" />
-
               <div className="relative col-span-2 min-w-0 overflow-hidden py-1.5 md:col-auto md:flex-1 md:py-2">
-                <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-10 bg-gradient-to-r from-[var(--bg-surface)] to-transparent md:w-16" />
-                <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-10 bg-gradient-to-l from-[var(--bg-surface)] to-transparent md:w-16" />
                 <div className="roles-marquee-track flex w-max items-center gap-5 px-2 md:gap-6 md:px-3">
                   {[...supportedRoles, ...supportedRoles].map((role, index) => (
                     <span
