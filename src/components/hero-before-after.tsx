@@ -142,7 +142,7 @@ export function HeroBeforeAfter() {
       <div className="pointer-events-none absolute -right-20 top-4 h-[24rem] w-[24rem] rounded-full bg-[radial-gradient(circle,rgba(152,165,255,0.08)_0%,rgba(152,165,255,0.04)_36%,transparent_72%)]" />
 
       <div className="space-y-8 md:space-y-10">
-        <div className="mx-auto flex min-h-[calc(100svh-6rem)] max-w-[58rem] flex-col justify-center space-y-5 text-center md:min-h-[calc(100svh-7rem)]">
+        <div className="mx-auto flex min-h-[calc(100svh-6rem)] max-w-[58rem] flex-col items-center justify-center space-y-6 text-center md:min-h-[calc(100svh-7rem)] md:space-y-7">
           <h1 className="mx-auto min-h-[7.35rem] max-w-[17ch] text-balance font-display text-[2.32rem] font-bold leading-[0.91] tracking-[-0.055em] text-[var(--text-strong)] md:min-h-[10.8rem] md:max-w-[20ch] md:text-[3.9rem]">
             {typedText}
             <span className="hero-caret ml-1 text-[var(--accent-strong)]" aria-hidden="true">
@@ -150,13 +150,13 @@ export function HeroBeforeAfter() {
             </span>
           </h1>
 
-          <p className="mx-auto max-w-[46rem] text-[0.97rem] leading-[1.72] text-[var(--text-muted)] md:text-[1.05rem]">
+          <p className="mx-auto max-w-[48rem] text-[1.08rem] leading-[1.68] text-[rgba(92,103,128,0.94)] md:text-[1.26rem] md:leading-[1.62]">
             {subheadline}
           </p>
 
-          <div className="flex justify-center">
+          <div className="mt-3 flex justify-center md:mt-5">
             <div className="w-full max-w-[22rem] sm:w-auto sm:max-w-none">
-              <div className="flex flex-col items-center gap-2">
+              <div className="flex flex-col items-center gap-3">
                 <Link
                   href="/simulate"
                   className="btn-primary w-full justify-center gap-2.5 px-6 py-3.5 text-[1.03rem] font-extrabold sm:min-w-[15rem] sm:w-auto sm:px-7"
@@ -174,7 +174,7 @@ export function HeroBeforeAfter() {
                     </svg>
                   </span>
                 </Link>
-                <span className="text-[0.84rem] font-medium text-[var(--text-soft)] md:text-[0.9rem]">{ctaMeta}</span>
+                <span className="text-[0.84rem] font-semibold tracking-[0.01em] text-[rgba(129,141,168,0.96)] md:text-[0.92rem]">{ctaMeta}</span>
               </div>
             </div>
           </div>
