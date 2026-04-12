@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { buildAbsoluteUrl } from "@/lib/seo";
 
-const publicRoutes = ["/", "/pricing", "/simulate", "/privacy"] as const;
+const publicRoutes = ["/", "/pricing", "/simulate", "/privacy", "/terms"] as const;
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const lastModified = new Date();

@@ -14,6 +14,7 @@ const footerNav = [
   { href: "/simulate", label: "Симуляція" },
   { href: "/pricing", label: "Ціни" },
   { href: "/privacy", label: "Політика конфіденційності" },
+  { href: "/terms", label: "Умови використання" },
   { href: "/#features", label: "Можливості" },
   { href: "/#reviews", label: "Відгуки" },
   { href: "/#faq", label: "FAQ" }
