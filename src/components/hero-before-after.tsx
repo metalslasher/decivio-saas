@@ -176,13 +176,23 @@ export function HeroBeforeAfter() {
                     </span>
                   </Link>
                   <span className="text-[0.84rem] font-semibold tracking-[0.01em] text-[rgba(140,151,177,0.94)] md:text-[0.94rem]">{ctaMeta}</span>
+                  <Link href="#hero-preview" aria-label="Прокрутити до наступного блоку" className="hero-scroll-cue mt-1.5">
+                    <span className="hero-scroll-cue-shell" aria-hidden="true">
+                      <span className="hero-scroll-cue-dot" />
+                    </span>
+                    <span className="hero-scroll-cue-chevron" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" className="h-4 w-4 fill-none">
+                        <path d="M7 10l5 5 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </span>
+                  </Link>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="relative min-h-[24rem]">
+        <div id="hero-preview" className="relative min-h-[24rem] scroll-mt-24">
           <div className="surface-panel relative overflow-hidden rounded-[2.25rem] p-5 md:p-6">
             <div className="absolute inset-x-12 top-0 h-14 rounded-full bg-gradient-to-r from-[rgba(67,97,255,0.05)] via-[rgba(252,253,255,0.3)] to-[rgba(152,165,255,0.05)] blur-3xl" />
             <div className="relative flex flex-wrap items-center justify-between gap-3 text-sm text-[var(--text-muted)]">
