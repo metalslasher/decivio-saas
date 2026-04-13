@@ -51,7 +51,12 @@ type DetailRow = {
 };
 
 type RiskLevel = CareerSwitchAnalysis["guidance"]["risk_assessment"]["level"];
-type VacancyExample = CareerSwitchAnalysis["guidance"]["market_evidence"]["vacancy_examples"][number];
+type MarketSearchLink = {
+  title: string;
+  description: string;
+  href: string;
+  sourceLabel: string;
+};
 
 const currencyFormatter = new Intl.NumberFormat("uk-UA", { maximumFractionDigits: 0 });
 
@@ -254,6 +259,95 @@ function targetMarketLabel(market: TargetMarket) {
   }
 }
 
+function targetMarketSearchHint(market: TargetMarket) {
+  switch (market) {
+    case "ukraine":
+      return "Україна вакансії";
+    case "remote":
+      return "remote вакансії";
+    case "abroad":
+      return "relocation вакансії";
+    default:
+      return "вакансії";
+  }
+}
+
+function buildGoogleSearchUrl(query: string) {
+  return `https://www.google.com/search?q=${encodeURIComponent(query)}`;
+}
+
+function buildMarketSearchLinks(role: string, market: TargetMarket): MarketSearchLink[] {
+  const marketHint = targetMarketSearchHint(market);
+  const quotedRole = `"${role}"`;
+
+  if (market === "ukraine") {
+    return [
+      {
+        title: "DOU вакансії",
+        description: `Жива видача вакансій ${role} на DOU для українського ринку.`,
+        href: buildGoogleSearchUrl(`site:jobs.dou.ua/vacancies ${quotedRole} ${marketHint}`),
+        sourceLabel: "DOU"
+      },
+      {
+        title: "Djinni",
+        description: `Пошук актуальних вакансій ${role} у форматі українського tech-ринку.`,
+        href: buildGoogleSearchUrl(`site:djinni.co/jobs ${quotedRole} ${marketHint}`),
+        sourceLabel: "Djinni"
+      },
+      {
+        title: "Work.ua / Robota.ua",
+        description: `Швидка перевірка масового попиту на ${role} в Україні.`,
+        href: buildGoogleSearchUrl(`site:work.ua OR site:robota.ua ${quotedRole} ${marketHint}`),
+        sourceLabel: "Work.ua / Robota.ua"
+      }
+    ];
+  }
+
+  if (market === "abroad") {
+    return [
+      {
+        title: "LinkedIn Jobs",
+        description: `Пошук ролей ${role} із фокусом на міжнародні компанії та релокацію.`,
+        href: buildGoogleSearchUrl(`site:linkedin.com/jobs/view ${quotedRole} relocation`),
+        sourceLabel: "LinkedIn"
+      },
+      {
+        title: "DOU Relocate",
+        description: `Видача вакансій ${role}, де часто трапляються міжнародні або relocation-позиції.`,
+        href: buildGoogleSearchUrl(`site:relocate.dou.ua/jobs ${quotedRole}`),
+        sourceLabel: "DOU Relocate"
+      },
+      {
+        title: "Career Pages",
+        description: `Прямі сторінки вакансій компаній із міжнародним наймом під ${role}.`,
+        href: buildGoogleSearchUrl(`site:greenhouse.io OR site:lever.co ${quotedRole} relocation`),
+        sourceLabel: "Career Pages"
+      }
+    ];
+  }
+
+  return [
+    {
+      title: "Djinni",
+      description: `Жива видача remote-вакансій ${role} на tech-ринку.`,
+      href: buildGoogleSearchUrl(`site:djinni.co/jobs ${quotedRole} remote`),
+      sourceLabel: "Djinni"
+    },
+    {
+      title: "DOU вакансії",
+      description: `Пошук віддалених або міжнародних вакансій ${role} на DOU.`,
+      href: buildGoogleSearchUrl(`site:jobs.dou.ua/vacancies ${quotedRole} remote`),
+      sourceLabel: "DOU"
+    },
+    {
+      title: "LinkedIn Jobs",
+      description: `Швидкий перегляд міжнародної видачі вакансій ${role} з віддаленим форматом.`,
+      href: buildGoogleSearchUrl(`site:linkedin.com/jobs/view ${quotedRole} remote`),
+      sourceLabel: "LinkedIn"
+    }
+  ];
+}
+
 function experienceLevelLabel(level: ExperienceLevel) {
   switch (level) {
     case "none":
@@ -341,7 +435,6 @@ function SnapshotPanel({
   summary,
   details,
   confidence,
-  sources,
   caveats
 }: {
   eyebrow: string;
@@ -349,7 +442,6 @@ function SnapshotPanel({
   summary: string;
   details: DetailRow[];
   confidence: string;
-  sources: string[];
   caveats: string[];
 }) {
   return (
@@ -360,7 +452,6 @@ function SnapshotPanel({
       <DetailList items={details} />
       <div className="mt-5 space-y-3 text-[0.93rem] leading-[1.68] text-[var(--text-muted)]">
         <p>Впевненість оцінки: {confidence}</p>
-        <p>Сигнали ринку: {sources.join(", ")}</p>
         <p>Важливо врахувати: {caveats.join(" ")}</p>
       </div>
     </article>
@@ -388,28 +479,23 @@ function MetaChip({ children }: { children: ReactNode }) {
   return <span className="rounded-full border border-[var(--line-soft)] bg-[rgba(255,255,255,0.7)] px-3 py-1.5">{children}</span>;
 }
 
-function VacancyCard({ vacancy }: { vacancy: VacancyExample }) {
+function MarketSearchCard({ item }: { item: MarketSearchLink }) {
   return (
     <article className="surface-soft rounded-[1.5rem] p-4 md:p-5">
       <div className="flex flex-wrap gap-2 text-[0.78rem] font-semibold text-[var(--text-muted)]">
-        <span className="rounded-full border border-[var(--line-soft)] bg-white/80 px-3 py-1.5">{vacancy.source_label}</span>
-        <span className="rounded-full border border-[var(--line-soft)] bg-white/80 px-3 py-1.5">{vacancy.location_label}</span>
-        {vacancy.compensation_hint ? (
-          <span className="rounded-full border border-[var(--line-soft)] bg-white/80 px-3 py-1.5">{vacancy.compensation_hint}</span>
-        ) : null}
+        <span className="rounded-full border border-[var(--line-soft)] bg-white/80 px-3 py-1.5">{item.sourceLabel}</span>
       </div>
 
-      <h3 className="mt-4 panel-title">{vacancy.title}</h3>
-      <p className="mt-2 text-[0.96rem] font-semibold text-[var(--text-strong)]">{vacancy.company}</p>
-      <p className="mt-3 text-[0.92rem] leading-[1.68] text-[var(--text-muted)]">{vacancy.relevance_reason}</p>
+      <h3 className="mt-4 panel-title">{item.title}</h3>
+      <p className="mt-3 text-[0.92rem] leading-[1.68] text-[var(--text-muted)]">{item.description}</p>
 
       <a
-        href={vacancy.url}
+        href={item.href}
         target="_blank"
         rel="noreferrer"
         className="mt-5 inline-flex items-center gap-2 text-[0.95rem] font-semibold text-[var(--accent-strong)] transition hover:text-[var(--accent)]"
       >
-        <span>Відкрити джерело</span>
+        <span>Відкрити живу видачу</span>
         <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" aria-hidden="true">
           <path d="M5 15L15 5M8 5h7v7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
@@ -511,7 +597,6 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
   const comparison = analysis.market_profile.comparison;
   const narrative = analysis.narrative;
   const riskAssessment = analysis.guidance.risk_assessment;
-  const marketEvidence = analysis.guidance.market_evidence;
   const createdAt = meta?.generated_at
     ? formatDate(meta.generated_at)
     : result.created_at
@@ -519,7 +604,7 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
       : simulation.created_at
         ? new Date(simulation.created_at).toLocaleDateString("uk-UA")
         : null;
-  const combinedSources = Array.from(new Set([...currentRole.sources, ...targetRole.sources])).slice(0, 6);
+  const marketSearchLinks = buildMarketSearchLinks(targetRole.canonical_title, inputs.target_market);
 
   const currentDetails: DetailRow[] = [
     { label: "Ваш дохід зараз", value: formatCurrency(inputs.current_income) },
@@ -609,7 +694,6 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
           summary={currentRole.summary}
           details={currentDetails}
           confidence={formatConfidence(currentRole.confidence)}
-          sources={currentRole.sources}
           caveats={currentRole.caveats}
         />
 
@@ -619,76 +703,61 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
           summary={targetRole.summary}
           details={targetDetails}
           confidence={formatConfidence(targetRole.confidence)}
-          sources={targetRole.sources}
           caveats={targetRole.caveats}
         />
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-[1.1fr,0.9fr]">
-        <article className="surface-panel rounded-[2rem] p-5 md:p-6">
-          <p className="label-muted">Що означає цей висновок</p>
-          <h2 className="mt-3 section-title">{comparison.better_long_term_label}</h2>
-          <p className="body-copy mt-3">{comparison.interpretation}</p>
+      <article className="surface-panel rounded-[2rem] p-5 md:p-6">
+        <p className="label-muted">Що означає цей висновок</p>
+        <h2 className="mt-3 section-title">{comparison.better_long_term_label}</h2>
+        <p className="body-copy mt-3">{comparison.interpretation}</p>
 
-          <div className="mt-5 overflow-hidden rounded-[1.5rem] border border-[var(--line-soft)] bg-[rgba(255,255,255,0.52)]">
-            <div className="flex items-start justify-between gap-4 border-b border-[var(--line-soft)] px-4 py-3 text-sm text-[var(--text-muted)] md:px-5">
-              <span>Потенційна стеля поточної ролі</span>
-              <span className="text-right font-medium text-[var(--text-strong)]">
-                {levelLabel(currentRole.best_case_level)} • {formatCurrency(currentRole.best_case_salary_range.median)}
-              </span>
-            </div>
-            <div className="flex items-start justify-between gap-4 border-b border-[var(--line-soft)] px-4 py-3 text-sm text-[var(--text-muted)] md:px-5">
-              <span>Потенційна стеля цільової ролі</span>
-              <span className="text-right font-medium text-[var(--text-strong)]">
-                {levelLabel(targetRole.best_case_level)} • {formatCurrency(targetRole.best_case_salary_range.median)}
-              </span>
-            </div>
-            <div className="flex items-start justify-between gap-4 px-4 py-3 text-sm text-[var(--text-muted)] md:px-5">
-              <span>Різниця між стелями</span>
-              <span className="text-right font-medium text-[var(--text-strong)]">{formatSignedCurrency(comparison.ceiling_gap_median)}</span>
-            </div>
+        <div className="mt-5 overflow-hidden rounded-[1.5rem] border border-[var(--line-soft)] bg-[rgba(255,255,255,0.52)]">
+          <div className="flex items-start justify-between gap-4 border-b border-[var(--line-soft)] px-4 py-3 text-sm text-[var(--text-muted)] md:px-5">
+            <span>Потенційна стеля поточної ролі</span>
+            <span className="text-right font-medium text-[var(--text-strong)]">
+              {levelLabel(currentRole.best_case_level)} • {formatCurrency(currentRole.best_case_salary_range.median)}
+            </span>
           </div>
-        </article>
-
-        <article className="surface-panel rounded-[2rem] p-5 md:p-6">
-          <p className="label-muted">Як формувався висновок</p>
-          <h2 className="mt-3 section-title">Ринковий контекст</h2>
-          <div className="mt-4 space-y-3 text-[0.95rem] leading-[1.72] text-[var(--text-muted)]">
-            <p>Сигнали ринку: {combinedSources.join(", ")}</p>
-            <p>{narrative.disclaimer}</p>
+          <div className="flex items-start justify-between gap-4 border-b border-[var(--line-soft)] px-4 py-3 text-sm text-[var(--text-muted)] md:px-5">
+            <span>Потенційна стеля цільової ролі</span>
+            <span className="text-right font-medium text-[var(--text-strong)]">
+              {levelLabel(targetRole.best_case_level)} • {formatCurrency(targetRole.best_case_salary_range.median)}
+            </span>
           </div>
-        </article>
-      </div>
+          <div className="flex items-start justify-between gap-4 px-4 py-3 text-sm text-[var(--text-muted)] md:px-5">
+            <span>Різниця між стелями</span>
+            <span className="text-right font-medium text-[var(--text-strong)]">{formatSignedCurrency(comparison.ceiling_gap_median)}</span>
+          </div>
+        </div>
+      </article>
 
       <div className="grid gap-4 lg:grid-cols-2">
         <TextList eyebrow="Чому саме такий висновок" title="Ключові аргументи" items={narrative.why_this_result} />
         <TextList eyebrow="Що персоналізувало відповідь" title="Як сервіс врахував саме вас" items={narrative.personalization_notes} />
       </div>
 
-      {marketEvidence.vacancy_examples.length > 0 ? (
-        <article className="surface-panel rounded-[2rem] p-5 md:p-7">
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div>
-              <p className="label-muted">Ринок це підтверджує</p>
-              <h2 className="mt-3 section-title">Актуальні приклади з ринку</h2>
-            </div>
-            <span className="rounded-full border border-[rgba(63,94,255,0.18)] bg-[rgba(238,242,255,0.88)] px-3 py-1.5 text-[0.82rem] font-semibold text-[var(--accent-strong)]">
-              Живі приклади з ринку
-            </span>
+      <article className="surface-panel rounded-[2rem] p-5 md:p-7">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <p className="label-muted">Ринок це підтверджує</p>
+            <h2 className="mt-3 section-title">Де зараз дивитися актуальні вакансії</h2>
           </div>
+          <span className="rounded-full border border-[rgba(63,94,255,0.18)] bg-[rgba(238,242,255,0.88)] px-3 py-1.5 text-[0.82rem] font-semibold text-[var(--accent-strong)]">
+            Живі джерела під ваш сценарій
+          </span>
+        </div>
 
-          <p className="body-copy mt-3 max-w-3xl">{marketEvidence.availability_summary}</p>
-          <p className="mt-3 text-[0.9rem] leading-[1.68] text-[var(--text-muted)]">
-            Це не гарантія оферу, а підтвердження, що такі ролі реально присутні на вибраному ринку зараз. Посилання можуть вести як на конкретну вакансію, так і на актуальне джерело з відповідним оголошенням.
-          </p>
+        <p className="body-copy mt-3 max-w-3xl">
+          Тут немає випадкових назв вакансій або компаній. Кожне посилання відкриває живу видачу під вашу цільову роль і ринок, щоб ви одразу бачили реальний попит.
+        </p>
 
-          <div className="mt-5 grid gap-3 xl:grid-cols-3">
-            {marketEvidence.vacancy_examples.map((vacancy) => (
-              <VacancyCard key={`${vacancy.company}-${vacancy.title}-${vacancy.url}`} vacancy={vacancy} />
-            ))}
-          </div>
-        </article>
-      ) : null}
+        <div className="mt-5 grid gap-3 xl:grid-cols-3">
+          {marketSearchLinks.map((item) => (
+            <MarketSearchCard key={`${item.sourceLabel}-${item.title}`} item={item} />
+          ))}
+        </div>
+      </article>
 
       <article className="surface-panel rounded-[2rem] p-5 md:p-7">
         <p className="label-muted">Що далі</p>

@@ -86,21 +86,6 @@ export type RiskAssessment = {
   summary: string;
 };
 
-export type VacancyExample = {
-  title: string;
-  company: string;
-  location_label: string;
-  source_label: string;
-  url: string;
-  compensation_hint: string | null;
-  relevance_reason: string;
-};
-
-export type MarketEvidence = {
-  availability_summary: string;
-  vacancy_examples: VacancyExample[];
-};
-
 export type CareerSwitchAnalysis = {
   market_profile: {
     current_role: CurrentRoleSnapshot;
@@ -110,7 +95,6 @@ export type CareerSwitchAnalysis = {
   narrative: AnalysisNarrative;
   guidance: {
     risk_assessment: RiskAssessment;
-    market_evidence: MarketEvidence;
   };
 };
 
@@ -162,21 +146,6 @@ const salaryRangeSchema = {
     median: { type: "number" },
     high: { type: "number" },
     currency: { type: "string", enum: ["UAH"] }
-  }
-} as const;
-
-const vacancyExampleSchema = {
-  type: "object",
-  additionalProperties: false,
-  required: ["title", "company", "location_label", "source_label", "url", "compensation_hint", "relevance_reason"],
-  properties: {
-    title: { type: "string" },
-    company: { type: "string" },
-    location_label: { type: "string" },
-    source_label: { type: "string" },
-    url: { type: "string" },
-    compensation_hint: { type: "string" },
-    relevance_reason: { type: "string" }
   }
 } as const;
 
@@ -303,7 +272,7 @@ const careerSwitchAnalysisSchema = {
     guidance: {
       type: "object",
       additionalProperties: false,
-      required: ["risk_assessment", "market_evidence"],
+      required: ["risk_assessment"],
       properties: {
         risk_assessment: {
           type: "object",
@@ -312,18 +281,6 @@ const careerSwitchAnalysisSchema = {
           properties: {
             level: { type: "string", enum: ["low", "medium", "high"] },
             summary: { type: "string" }
-          }
-        },
-        market_evidence: {
-          type: "object",
-          additionalProperties: false,
-          required: ["availability_summary", "vacancy_examples"],
-          properties: {
-            availability_summary: { type: "string" },
-            vacancy_examples: {
-              type: "array",
-              items: vacancyExampleSchema
-            }
           }
         }
       }
@@ -343,19 +300,6 @@ function toNonEmptyString(value: unknown, fieldName: string) {
     throw new Error(`Некоректне поле "${fieldName}" у career_switch_analysis.`);
   }
   return value.trim();
-}
-
-function toNullableString(value: unknown, fieldName: string) {
-  if (value === null) {
-    return null;
-  }
-
-  if (typeof value !== "string") {
-    throw new Error(`Некоректне поле "${fieldName}" у career_switch_analysis.`);
-  }
-
-  const normalized = value.trim();
-  return normalized === "" ? null : normalized;
 }
 
 function toNumber(value: unknown, fieldName: string) {
@@ -397,46 +341,52 @@ function toStringArray(value: unknown, fieldName: string) {
   return items;
 }
 
-function toSafeUrlString(value: unknown, fieldName: string) {
-  const normalized = toNonEmptyString(value, fieldName);
-
-  try {
-    const parsed = new URL(normalized);
-    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
-      throw new Error("unsupported protocol");
-    }
-
-    return parsed.toString();
-  } catch {
-    throw new Error(`Поле "${fieldName}" має містити коректний URL.`);
-  }
-}
-
-function normalizeCompensationHint(value: string | null) {
-  if (!value) {
-    return null;
-  }
-
-  const normalized = value.trim();
+function normalizeMarketSource(item: string) {
+  const normalized = item.trim();
   if (!normalized) {
     return null;
   }
 
   const lowered = normalized.toLowerCase();
-  if (lowered === "не вказано" || lowered === "not specified" || lowered === "n/a") {
+  if (
+    lowered.includes("example.com") ||
+    lowered.includes("placeholder") ||
+    lowered.includes("sample source") ||
+    lowered.includes("test source")
+  ) {
     return null;
+  }
+
+  if (/^https?:\/\//i.test(normalized)) {
+    try {
+      const hostname = new URL(normalized).hostname.replace(/^www\./, "");
+      if (!hostname || hostname === "example.com" || hostname === "localhost" || hostname === "127.0.0.1") {
+        return null;
+      }
+
+      return hostname;
+    } catch {
+      return null;
+    }
   }
 
   return normalized;
 }
 
-function sourceLabelFromUrl(url: string) {
-  try {
-    const hostname = new URL(url).hostname.replace(/^www\./, "");
-    return hostname;
-  } catch {
-    return "джерело";
+function toMarketSourceArray(value: unknown, fieldName: string) {
+  if (!Array.isArray(value)) {
+    throw new Error(`Некоректне поле "${fieldName}" у career_switch_analysis.`);
   }
+
+  const items = Array.from(
+    new Set(
+      value
+        .map((item) => (typeof item === "string" ? normalizeMarketSource(item) : null))
+        .filter((item): item is string => Boolean(item))
+    )
+  );
+
+  return items.length > 0 ? items : ["відкриті ринкові джерела"];
 }
 
 function parseSalaryLevel(value: unknown, fieldName: string): SalaryLevel {
@@ -515,7 +465,7 @@ function parseCurrentRoleSnapshot(value: unknown, fieldName: string): CurrentRol
     best_case_level: parseBestCaseLevel(raw.best_case_level, `${fieldName}.best_case_level`),
     best_case_salary_range: parseSalaryRange(raw.best_case_salary_range, `${fieldName}.best_case_salary_range`),
     confidence: toProbability(raw.confidence, `${fieldName}.confidence`),
-    sources: toStringArray(raw.sources, `${fieldName}.sources`),
+    sources: toMarketSourceArray(raw.sources, `${fieldName}.sources`),
     caveats: toStringArray(raw.caveats, `${fieldName}.caveats`),
     summary: toNonEmptyString(raw.summary, `${fieldName}.summary`)
   };
@@ -543,7 +493,7 @@ function parseTargetRoleSnapshot(value: unknown, fieldName: string): TargetRoleS
       `${fieldName}.probability_of_getting_job_within_12_months`
     ),
     confidence: toProbability(raw.confidence, `${fieldName}.confidence`),
-    sources: toStringArray(raw.sources, `${fieldName}.sources`),
+    sources: toMarketSourceArray(raw.sources, `${fieldName}.sources`),
     caveats: toStringArray(raw.caveats, `${fieldName}.caveats`),
     summary: toNonEmptyString(raw.summary, `${fieldName}.summary`)
   };
@@ -572,35 +522,6 @@ function parseNarrative(value: unknown, fieldName: string): AnalysisNarrative {
     cta_title: toNonEmptyString(raw.cta_title, `${fieldName}.cta_title`),
     cta_body: toNonEmptyString(raw.cta_body, `${fieldName}.cta_body`),
     disclaimer: toNonEmptyString(raw.disclaimer, `${fieldName}.disclaimer`)
-  };
-}
-
-function parseVacancyExample(value: unknown, fieldName: string): VacancyExample {
-  const raw = toObject(value, fieldName);
-
-  return {
-    title: toNonEmptyString(raw.title, `${fieldName}.title`),
-    company: toNonEmptyString(raw.company, `${fieldName}.company`),
-    location_label: toNonEmptyString(raw.location_label, `${fieldName}.location_label`),
-    source_label: toNonEmptyString(raw.source_label, `${fieldName}.source_label`),
-    url: toSafeUrlString(raw.url, `${fieldName}.url`),
-    compensation_hint: normalizeCompensationHint(toNullableString(raw.compensation_hint, `${fieldName}.compensation_hint`)),
-    relevance_reason: toNonEmptyString(raw.relevance_reason, `${fieldName}.relevance_reason`)
-  };
-}
-
-function parseMarketEvidence(value: unknown, fieldName: string): MarketEvidence {
-  const raw = toObject(value, fieldName);
-
-  if (!Array.isArray(raw.vacancy_examples)) {
-    throw new Error(`Некоректне поле "${fieldName}.vacancy_examples" у career_switch_analysis.`);
-  }
-
-  return {
-    availability_summary: toNonEmptyString(raw.availability_summary, `${fieldName}.availability_summary`),
-    vacancy_examples: raw.vacancy_examples.map((item, index) =>
-      parseVacancyExample(item, `${fieldName}.vacancy_examples[${index}]`)
-    )
   };
 }
 
@@ -656,13 +577,6 @@ function deriveFallbackRiskAssessment(targetRole: TargetRoleSnapshot, comparison
   };
 }
 
-function buildFallbackMarketEvidence(targetRole: TargetRoleSnapshot): MarketEvidence {
-  return {
-    availability_summary: `Добірка актуальних вакансій для ролі ${targetRole.canonical_title} з’явиться тут, коли аналіз зможе підтягнути релевантні ринкові приклади з веб-пошуку.`,
-    vacancy_examples: []
-  };
-}
-
 function parseGuidance(
   value: unknown,
   fieldName: string,
@@ -671,16 +585,14 @@ function parseGuidance(
 ) {
   if (value === undefined) {
     return {
-      risk_assessment: deriveFallbackRiskAssessment(targetRole, comparison),
-      market_evidence: buildFallbackMarketEvidence(targetRole)
+      risk_assessment: deriveFallbackRiskAssessment(targetRole, comparison)
     };
   }
 
   const raw = toObject(value, fieldName);
 
   return {
-    risk_assessment: parseRiskAssessment(raw.risk_assessment, `${fieldName}.risk_assessment`),
-    market_evidence: parseMarketEvidence(raw.market_evidence, `${fieldName}.market_evidence`)
+    risk_assessment: parseRiskAssessment(raw.risk_assessment, `${fieldName}.risk_assessment`)
   };
 }
 
@@ -697,9 +609,6 @@ function buildSystemInstructions(currentDate: string) {
     "Відповідь має бути відчутно персоналізованою під вхідні дані. Уникай шаблонних загальних фраз.",
     "У видимому для користувача тексті уникай англіцизмів на кшталт best case, switcher, roadmap, remote. Пиши природною українською.",
     "Додатково поверни м’який індикатор ризику переходу: рівень low|medium|high і коротке пояснення одним-двома реченнями.",
-    "Додатково поверни блок market_evidence: короткий висновок про наявність вакансій і 2-3 реальні приклади вакансій для цільової ролі з прямими URL, якщо веб-пошук дає надійні результати.",
-    "Для vacancy_examples віддавай лише перевірені прямі посилання на сторінки вакансій або сторінки компаній з вакансією. Якщо не можеш впевнено верифікувати посилання, не вигадуй і поверни порожній список.",
-    "Для vacancy_examples показуй лише релевантні цільовому ринку приклади: Україна, міжнародна віддалена робота або локальна робота за кордоном залежно від input.",
     "Безкоштовна сторінка може пояснювати, чому висновок саме такий, але не повинна розкривати повний покроковий план або детальний план виконання.",
     "Заклик до дії має продавати наступний крок, але не розкривати платний функціонал.",
     "Для current_role.summary і target_role.summary пиши простою людською мовою, без канцеляриту.",
@@ -731,198 +640,6 @@ function buildUserInput(input: CareerSwitchAnalysisRequest) {
     null,
     2
   );
-}
-
-function targetMarketEvidenceLabel(targetMarket: TargetMarket) {
-  switch (targetMarket) {
-    case "ukraine":
-      return "ринок України";
-    case "remote":
-      return "міжнародний ринок з віддаленим форматом";
-    case "abroad":
-      return "локальний ринок за кордоном";
-    default:
-      return "обраний ринок";
-  }
-}
-
-function buildVacancyEvidencePrompt(input: CareerSwitchAnalysisRequest) {
-  return [
-    "Знайди до 3 реальних вакансій для цільової ролі.",
-    "Працюй тільки через веб-пошук.",
-    "Пріоритет: вакансії, які найближчі до стартового або перехідного входу. Якщо таких немає, поверни найближчі релевантні й коротко познач, що планка вища.",
-    "Пріоритет джерел: jobs.dou.ua, djinni.co, robota.ua, work.ua, career/company jobs pages.",
-    "Не використовуй сторінки пошукової видачі, агрегатори без конкретної вакансії або сторінки зі списком без окремої позиції, якщо є краща альтернатива.",
-    "Поверни тільки plain text без пояснень поза форматом.",
-    "Перший рядок: SUMMARY || {1 коротке речення про наявність вакансій на ринку}.",
-    "Далі кожну вакансію окремим рядком: VACANCY || {назва ролі} || {компанія} || {локація} || {вилка або 'не вказано'} || {чому це релевантно для такого переходу} || {джерело}.",
-    "Для кожного рядка VACANCY обов’язково прикріпи citation на конкретну сторінку вакансії через вбудовані посилання веб-пошуку.",
-    "Не вставляй raw URL у текст. Не вигадуй вакансії. Якщо надійних прикладів немає, поверни тільки рядок SUMMARY."
-  ].join("\n") +
-    `\n\nЦільова роль: ${input.target_role_text}.\nРинок: ${targetMarketEvidenceLabel(input.target_market)}.\nРівень англійської: ${englishLevelDescriptions[input.english_level]}.\nРелевантний досвід: ${experienceLevelDescriptions[input.target_experience_level]}.`;
-}
-
-type UrlCitation = {
-  type: "url_citation";
-  start_index: number;
-  end_index: number;
-  title: string;
-  url: string;
-};
-
-function extractOutputTextPayload(response: unknown) {
-  if (typeof response !== "object" || response === null || !("output" in response) || !Array.isArray((response as { output?: unknown[] }).output)) {
-    return null;
-  }
-
-  for (const item of (response as { output: unknown[] }).output) {
-    if (typeof item !== "object" || item === null || !("content" in item) || !Array.isArray((item as { content?: unknown[] }).content)) {
-      continue;
-    }
-
-    for (const contentItem of (item as { content: unknown[] }).content) {
-      if (
-        typeof contentItem === "object" &&
-        contentItem !== null &&
-        (contentItem as { type?: string }).type === "output_text" &&
-        typeof (contentItem as { text?: unknown }).text === "string"
-      ) {
-        const annotations = Array.isArray((contentItem as { annotations?: unknown[] }).annotations)
-          ? ((contentItem as { annotations: unknown[] }).annotations.filter(
-              (annotation): annotation is UrlCitation =>
-                typeof annotation === "object" &&
-                annotation !== null &&
-                (annotation as { type?: string }).type === "url_citation" &&
-                typeof (annotation as { url?: unknown }).url === "string" &&
-                typeof (annotation as { title?: unknown }).title === "string" &&
-                typeof (annotation as { start_index?: unknown }).start_index === "number" &&
-                typeof (annotation as { end_index?: unknown }).end_index === "number"
-            ) as UrlCitation[])
-          : [];
-
-        return {
-          text: (contentItem as { text: string }).text,
-          annotations
-        };
-      }
-    }
-  }
-
-  return null;
-}
-
-function parseVacancyEvidenceText(text: string, annotations: UrlCitation[]): MarketEvidence {
-  const rawLines = text.split("\n");
-  const vacancyExamples: VacancyExample[] = [];
-  let availabilitySummary = "Актуальні приклади вакансій не знайдені в межах надійного веб-пошуку.";
-  const vacancyLines: string[] = [];
-
-  for (const rawLine of rawLines) {
-    const line = (rawLine.endsWith("\r") ? rawLine.slice(0, -1) : rawLine).trim();
-    if (!line) {
-      continue;
-    }
-
-    if (line.startsWith("SUMMARY ||")) {
-      const summary = line.slice("SUMMARY ||".length).trim();
-      if (summary) {
-        availabilitySummary = summary;
-      }
-      continue;
-    }
-
-    if (!line.startsWith("VACANCY ||")) {
-      continue;
-    }
-
-    vacancyLines.push(line);
-  }
-
-  vacancyLines.forEach((line, index) => {
-    const parts = line.split("||").map((part) => part.trim());
-    if (parts.length < 7) {
-      return;
-    }
-
-    const citation = annotations[index];
-    if (!citation) {
-      return;
-    }
-
-    try {
-      const sourceLabel =
-        parts.length >= 8
-          ? toNonEmptyString(parts[6], "vacancy.source_label")
-          : sourceLabelFromUrl(citation.url);
-
-      vacancyExamples.push({
-        title: toNonEmptyString(parts[1], "vacancy.title"),
-        company: toNonEmptyString(parts[2], "vacancy.company"),
-        location_label: toNonEmptyString(parts[3], "vacancy.location_label"),
-        compensation_hint: normalizeCompensationHint(toNullableString(parts[4], "vacancy.compensation_hint")),
-        relevance_reason: toNonEmptyString(parts[5], "vacancy.relevance_reason"),
-        source_label: sourceLabel,
-        url: toSafeUrlString(citation.url, "vacancy.url")
-      });
-    } catch {
-      return;
-    }
-  });
-
-  return {
-    availability_summary: availabilitySummary,
-    vacancy_examples: vacancyExamples.slice(0, 3)
-  };
-}
-
-function fallbackVerifiedMarketEvidence(input: CareerSwitchAnalysisRequest): MarketEvidence {
-  return {
-    availability_summary: `Не вдалося надійно підтягнути прямі приклади вакансій для напряму ${input.target_role_text} на ${targetMarketEvidenceLabel(
-      input.target_market
-    )}.`,
-    vacancy_examples: []
-  };
-}
-
-async function fetchVerifiedVacancyEvidence(
-  client: OpenAI,
-  input: CareerSwitchAnalysisRequest,
-  model: string
-): Promise<MarketEvidence> {
-  const response = await client.responses.create({
-    model,
-    instructions: buildVacancyEvidencePrompt(input),
-    input: `Роль: ${input.target_role_text}. Ринок: ${targetMarketEvidenceLabel(input.target_market)}.`,
-    store: false,
-    tools: [
-      {
-        type: "web_search_preview",
-        search_context_size: "high",
-        user_location: {
-          type: "approximate",
-          country: "UA",
-          city: "Kyiv",
-          region: "Kyiv",
-          timezone: "Europe/Kiev"
-        }
-      }
-    ]
-  });
-
-  const payload = extractOutputTextPayload(response);
-  if (!payload) {
-    return fallbackVerifiedMarketEvidence(input);
-  }
-
-  const parsed = parseVacancyEvidenceText(payload.text, payload.annotations);
-  if (parsed.vacancy_examples.length === 0) {
-    return {
-      availability_summary: parsed.availability_summary || fallbackVerifiedMarketEvidence(input).availability_summary,
-      vacancy_examples: []
-    };
-  }
-
-  return parsed;
 }
 
 function getMissingOpenAiEnv() {
@@ -1021,9 +738,6 @@ async function requestAnalysisAttempt(
   }
 
   const analysis = validateCareerSwitchAnalysis(parsed);
-  analysis.guidance.market_evidence = useWebSearch
-    ? await fetchVerifiedVacancyEvidence(client, input, model).catch(() => fallbackVerifiedMarketEvidence(input))
-    : fallbackVerifiedMarketEvidence(input);
   const latencyMs = Date.now() - startedAt;
 
   return {
