@@ -50,6 +50,9 @@ type DetailRow = {
   value: string;
 };
 
+type RiskLevel = CareerSwitchAnalysis["guidance"]["risk_assessment"]["level"];
+type VacancyExample = CareerSwitchAnalysis["guidance"]["market_evidence"]["vacancy_examples"][number];
+
 const currencyFormatter = new Intl.NumberFormat("uk-UA", { maximumFractionDigits: 0 });
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -182,6 +185,32 @@ function formatDate(value: string) {
   return Number.isNaN(date.getTime()) ? null : date.toLocaleDateString("uk-UA");
 }
 
+function riskLevelLabel(level: RiskLevel) {
+  switch (level) {
+    case "low":
+      return "Низький";
+    case "medium":
+      return "Середній";
+    case "high":
+      return "Високий";
+    default:
+      return level;
+  }
+}
+
+function riskLevelClasses(level: RiskLevel) {
+  switch (level) {
+    case "low":
+      return "text-emerald-700";
+    case "medium":
+      return "text-amber-600";
+    case "high":
+      return "text-rose-600";
+    default:
+      return "text-[var(--text-strong)]";
+  }
+}
+
 function levelLabel(level: "junior" | "middle" | "senior" | "lead") {
   switch (level) {
     case "junior":
@@ -264,11 +293,25 @@ function EmptyState({ title, description }: { title: string; description: string
   );
 }
 
-function MetricCard({ label, value, note }: { label: string; value: string; note: string }) {
+function MetricCard({
+  label,
+  value,
+  note,
+  valueClassName
+}: {
+  label: string;
+  value: string;
+  note: string;
+  valueClassName?: string;
+}) {
   return (
     <article className="surface-panel rounded-[1.7rem] p-5 md:p-6">
       <p className="label-muted">{label}</p>
-      <p className="mt-3 font-display text-[1.95rem] font-bold leading-[0.96] tracking-[-0.05em] text-[var(--text-strong)] md:text-[2.2rem]">
+      <p
+        className={`mt-3 font-display text-[1.95rem] font-bold leading-[0.96] tracking-[-0.05em] md:text-[2.2rem] ${
+          valueClassName ?? "text-[var(--text-strong)]"
+        }`}
+      >
         {value}
       </p>
       <p className="mt-2 text-[0.92rem] leading-[1.68] text-[var(--text-muted)]">{note}</p>
@@ -343,6 +386,36 @@ function TextList({ title, eyebrow, items }: { title: string; eyebrow: string; i
 
 function MetaChip({ children }: { children: ReactNode }) {
   return <span className="rounded-full border border-[var(--line-soft)] bg-[rgba(255,255,255,0.7)] px-3 py-1.5">{children}</span>;
+}
+
+function VacancyCard({ vacancy }: { vacancy: VacancyExample }) {
+  return (
+    <article className="surface-soft rounded-[1.5rem] p-4 md:p-5">
+      <div className="flex flex-wrap gap-2 text-[0.78rem] font-semibold text-[var(--text-muted)]">
+        <span className="rounded-full border border-[var(--line-soft)] bg-white/80 px-3 py-1.5">{vacancy.source_label}</span>
+        <span className="rounded-full border border-[var(--line-soft)] bg-white/80 px-3 py-1.5">{vacancy.location_label}</span>
+        {vacancy.compensation_hint ? (
+          <span className="rounded-full border border-[var(--line-soft)] bg-white/80 px-3 py-1.5">{vacancy.compensation_hint}</span>
+        ) : null}
+      </div>
+
+      <h3 className="mt-4 panel-title">{vacancy.title}</h3>
+      <p className="mt-2 text-[0.96rem] font-semibold text-[var(--text-strong)]">{vacancy.company}</p>
+      <p className="mt-3 text-[0.92rem] leading-[1.68] text-[var(--text-muted)]">{vacancy.relevance_reason}</p>
+
+      <a
+        href={vacancy.url}
+        target="_blank"
+        rel="noreferrer"
+        className="mt-5 inline-flex items-center gap-2 text-[0.95rem] font-semibold text-[var(--accent-strong)] transition hover:text-[var(--accent)]"
+      >
+        <span>Відкрити джерело</span>
+        <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" aria-hidden="true">
+          <path d="M5 15L15 5M8 5h7v7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </a>
+    </article>
+  );
 }
 
 export default async function ResultsPage({ searchParams }: ResultsPageProps) {
@@ -437,6 +510,8 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
   const targetRole = analysis.market_profile.target_role;
   const comparison = analysis.market_profile.comparison;
   const narrative = analysis.narrative;
+  const riskAssessment = analysis.guidance.risk_assessment;
+  const marketEvidence = analysis.guidance.market_evidence;
   const createdAt = meta?.generated_at
     ? formatDate(meta.generated_at)
     : result.created_at
@@ -498,7 +573,7 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
         <MetricCard
           label="Ваш дохід зараз"
           value={formatCurrency(inputs.current_income)}
@@ -518,6 +593,12 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
           label="Різниця в стелі ролей"
           value={formatSignedCurrency(comparison.ceiling_gap_median)}
           note="Різниця між потенційною стелею поточної та цільової ролі."
+        />
+        <MetricCard
+          label="Ризик переходу"
+          value={riskLevelLabel(riskAssessment.level)}
+          note={riskAssessment.summary}
+          valueClassName={riskLevelClasses(riskAssessment.level)}
         />
       </div>
 
@@ -583,6 +664,31 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
         <TextList eyebrow="Чому саме такий висновок" title="Ключові аргументи" items={narrative.why_this_result} />
         <TextList eyebrow="Що персоналізувало відповідь" title="Як сервіс врахував саме вас" items={narrative.personalization_notes} />
       </div>
+
+      {marketEvidence.vacancy_examples.length > 0 ? (
+        <article className="surface-panel rounded-[2rem] p-5 md:p-7">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <p className="label-muted">Ринок це підтверджує</p>
+              <h2 className="mt-3 section-title">Актуальні приклади з ринку</h2>
+            </div>
+            <span className="rounded-full border border-[rgba(63,94,255,0.18)] bg-[rgba(238,242,255,0.88)] px-3 py-1.5 text-[0.82rem] font-semibold text-[var(--accent-strong)]">
+              Живі приклади з ринку
+            </span>
+          </div>
+
+          <p className="body-copy mt-3 max-w-3xl">{marketEvidence.availability_summary}</p>
+          <p className="mt-3 text-[0.9rem] leading-[1.68] text-[var(--text-muted)]">
+            Це не гарантія оферу, а підтвердження, що такі ролі реально присутні на вибраному ринку зараз. Посилання можуть вести як на конкретну вакансію, так і на актуальне джерело з відповідним оголошенням.
+          </p>
+
+          <div className="mt-5 grid gap-3 xl:grid-cols-3">
+            {marketEvidence.vacancy_examples.map((vacancy) => (
+              <VacancyCard key={`${vacancy.company}-${vacancy.title}-${vacancy.url}`} vacancy={vacancy} />
+            ))}
+          </div>
+        </article>
+      ) : null}
 
       <article className="surface-panel rounded-[2rem] p-5 md:p-7">
         <p className="label-muted">Що далі</p>

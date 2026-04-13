@@ -130,7 +130,7 @@ function mapTargetMarketLabel(value: string | null) {
     case "ukraine":
       return "Україна";
     case "remote":
-      return "Remote";
+      return "Віддалена робота";
     case "abroad":
       return "За кордоном";
     default:

@@ -8,6 +8,7 @@ export type SalaryLevel = "junior" | "middle" | "senior" | "lead";
 export type VerdictLabel = "stay" | "switch" | "depends";
 export type BetterLongTermDirection = "current_role" | "target_role" | "balanced";
 export type BestCaseLevel = "senior" | "lead";
+export type RiskLevel = "low" | "medium" | "high";
 
 export type CareerSwitchAnalysisRequest = {
   country: "UA";
@@ -80,6 +81,26 @@ export type AnalysisNarrative = {
   disclaimer: string;
 };
 
+export type RiskAssessment = {
+  level: RiskLevel;
+  summary: string;
+};
+
+export type VacancyExample = {
+  title: string;
+  company: string;
+  location_label: string;
+  source_label: string;
+  url: string;
+  compensation_hint: string | null;
+  relevance_reason: string;
+};
+
+export type MarketEvidence = {
+  availability_summary: string;
+  vacancy_examples: VacancyExample[];
+};
+
 export type CareerSwitchAnalysis = {
   market_profile: {
     current_role: CurrentRoleSnapshot;
@@ -87,6 +108,10 @@ export type CareerSwitchAnalysis = {
     comparison: CeilingComparison;
   };
   narrative: AnalysisNarrative;
+  guidance: {
+    risk_assessment: RiskAssessment;
+    market_evidence: MarketEvidence;
+  };
 };
 
 export type CareerSwitchAnalysisResult = {
@@ -119,7 +144,7 @@ const englishLevelDescriptions: Record<EnglishLevel, string> = {
 
 const targetMarketDescriptions: Record<TargetMarket, string> = {
   ukraine: "орієнтир на ринок України",
-  remote: "орієнтир на remote або міжнародний ринок",
+  remote: "орієнтир на віддалену роботу або міжнародний ринок",
   abroad: "орієнтир на локальний ринок за кордоном"
 };
 
@@ -140,10 +165,25 @@ const salaryRangeSchema = {
   }
 } as const;
 
+const vacancyExampleSchema = {
+  type: "object",
+  additionalProperties: false,
+  required: ["title", "company", "location_label", "source_label", "url", "compensation_hint", "relevance_reason"],
+  properties: {
+    title: { type: "string" },
+    company: { type: "string" },
+    location_label: { type: "string" },
+    source_label: { type: "string" },
+    url: { type: "string" },
+    compensation_hint: { type: "string" },
+    relevance_reason: { type: "string" }
+  }
+} as const;
+
 const careerSwitchAnalysisSchema = {
   type: "object",
   additionalProperties: false,
-  required: ["market_profile", "narrative"],
+  required: ["market_profile", "narrative", "guidance"],
   properties: {
     market_profile: {
       type: "object",
@@ -259,6 +299,34 @@ const careerSwitchAnalysisSchema = {
         cta_body: { type: "string" },
         disclaimer: { type: "string" }
       }
+    },
+    guidance: {
+      type: "object",
+      additionalProperties: false,
+      required: ["risk_assessment", "market_evidence"],
+      properties: {
+        risk_assessment: {
+          type: "object",
+          additionalProperties: false,
+          required: ["level", "summary"],
+          properties: {
+            level: { type: "string", enum: ["low", "medium", "high"] },
+            summary: { type: "string" }
+          }
+        },
+        market_evidence: {
+          type: "object",
+          additionalProperties: false,
+          required: ["availability_summary", "vacancy_examples"],
+          properties: {
+            availability_summary: { type: "string" },
+            vacancy_examples: {
+              type: "array",
+              items: vacancyExampleSchema
+            }
+          }
+        }
+      }
     }
   }
 } as const;
@@ -275,6 +343,19 @@ function toNonEmptyString(value: unknown, fieldName: string) {
     throw new Error(`Некоректне поле "${fieldName}" у career_switch_analysis.`);
   }
   return value.trim();
+}
+
+function toNullableString(value: unknown, fieldName: string) {
+  if (value === null) {
+    return null;
+  }
+
+  if (typeof value !== "string") {
+    throw new Error(`Некоректне поле "${fieldName}" у career_switch_analysis.`);
+  }
+
+  const normalized = value.trim();
+  return normalized === "" ? null : normalized;
 }
 
 function toNumber(value: unknown, fieldName: string) {
@@ -316,6 +397,48 @@ function toStringArray(value: unknown, fieldName: string) {
   return items;
 }
 
+function toSafeUrlString(value: unknown, fieldName: string) {
+  const normalized = toNonEmptyString(value, fieldName);
+
+  try {
+    const parsed = new URL(normalized);
+    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+      throw new Error("unsupported protocol");
+    }
+
+    return parsed.toString();
+  } catch {
+    throw new Error(`Поле "${fieldName}" має містити коректний URL.`);
+  }
+}
+
+function normalizeCompensationHint(value: string | null) {
+  if (!value) {
+    return null;
+  }
+
+  const normalized = value.trim();
+  if (!normalized) {
+    return null;
+  }
+
+  const lowered = normalized.toLowerCase();
+  if (lowered === "не вказано" || lowered === "not specified" || lowered === "n/a") {
+    return null;
+  }
+
+  return normalized;
+}
+
+function sourceLabelFromUrl(url: string) {
+  try {
+    const hostname = new URL(url).hostname.replace(/^www\./, "");
+    return hostname;
+  } catch {
+    return "джерело";
+  }
+}
+
 function parseSalaryLevel(value: unknown, fieldName: string): SalaryLevel {
   const normalized = toNonEmptyString(value, fieldName).toLowerCase();
   if (normalized === "junior" || normalized === "middle" || normalized === "senior" || normalized === "lead") {
@@ -346,6 +469,15 @@ function parseVerdictLabel(value: unknown, fieldName: string): VerdictLabel {
     return normalized;
   }
   throw new Error(`Поле "${fieldName}" має бути stay|switch|depends.`);
+}
+
+function parseRiskLevel(value: unknown, fieldName: string): RiskLevel {
+  const normalized = toNonEmptyString(value, fieldName).toLowerCase();
+  if (normalized === "low" || normalized === "medium" || normalized === "high") {
+    return normalized;
+  }
+
+  throw new Error(`Поле "${fieldName}" має бути low|medium|high.`);
 }
 
 function parseSalaryRange(value: unknown, fieldName: string): SalaryRange {
@@ -443,6 +575,115 @@ function parseNarrative(value: unknown, fieldName: string): AnalysisNarrative {
   };
 }
 
+function parseVacancyExample(value: unknown, fieldName: string): VacancyExample {
+  const raw = toObject(value, fieldName);
+
+  return {
+    title: toNonEmptyString(raw.title, `${fieldName}.title`),
+    company: toNonEmptyString(raw.company, `${fieldName}.company`),
+    location_label: toNonEmptyString(raw.location_label, `${fieldName}.location_label`),
+    source_label: toNonEmptyString(raw.source_label, `${fieldName}.source_label`),
+    url: toSafeUrlString(raw.url, `${fieldName}.url`),
+    compensation_hint: normalizeCompensationHint(toNullableString(raw.compensation_hint, `${fieldName}.compensation_hint`)),
+    relevance_reason: toNonEmptyString(raw.relevance_reason, `${fieldName}.relevance_reason`)
+  };
+}
+
+function parseMarketEvidence(value: unknown, fieldName: string): MarketEvidence {
+  const raw = toObject(value, fieldName);
+
+  if (!Array.isArray(raw.vacancy_examples)) {
+    throw new Error(`Некоректне поле "${fieldName}.vacancy_examples" у career_switch_analysis.`);
+  }
+
+  return {
+    availability_summary: toNonEmptyString(raw.availability_summary, `${fieldName}.availability_summary`),
+    vacancy_examples: raw.vacancy_examples.map((item, index) =>
+      parseVacancyExample(item, `${fieldName}.vacancy_examples[${index}]`)
+    )
+  };
+}
+
+function parseRiskAssessment(value: unknown, fieldName: string): RiskAssessment {
+  const raw = toObject(value, fieldName);
+
+  return {
+    level: parseRiskLevel(raw.level, `${fieldName}.level`),
+    summary: toNonEmptyString(raw.summary, `${fieldName}.summary`)
+  };
+}
+
+function deriveFallbackRiskAssessment(targetRole: TargetRoleSnapshot, comparison: CeilingComparison): RiskAssessment {
+  let score = 0;
+
+  if (targetRole.probability_of_getting_job_within_12_months < 0.45) {
+    score += 2;
+  } else if (targetRole.probability_of_getting_job_within_12_months < 0.65) {
+    score += 1;
+  }
+
+  if (targetRole.time_to_first_offer_months.base > 9) {
+    score += 2;
+  } else if (targetRole.time_to_first_offer_months.base > 5) {
+    score += 1;
+  }
+
+  if (targetRole.confidence < 0.45) {
+    score += 1;
+  }
+
+  if (comparison.better_long_term_direction === "current_role") {
+    score += 1;
+  }
+
+  if (score >= 4) {
+    return {
+      level: "high",
+      summary: "На старті перехід виглядає ризикованішим: може знадобитися довший пошук і більше запасу часу на вхід у роль."
+    };
+  }
+
+  if (score >= 2) {
+    return {
+      level: "medium",
+      summary: "Перехід виглядає реалістично, але потребує зібраної підготовки та готовності пройти через помірний період невизначеності."
+    };
+  }
+
+  return {
+    level: "low",
+    summary: "Ризик виглядає помірно низьким: за поточними сигналами вхід у роль реалістичний без надто довгого перехідного періоду."
+  };
+}
+
+function buildFallbackMarketEvidence(targetRole: TargetRoleSnapshot): MarketEvidence {
+  return {
+    availability_summary: `Добірка актуальних вакансій для ролі ${targetRole.canonical_title} з’явиться тут, коли аналіз зможе підтягнути релевантні ринкові приклади з веб-пошуку.`,
+    vacancy_examples: []
+  };
+}
+
+function parseGuidance(
+  value: unknown,
+  fieldName: string,
+  targetRole: TargetRoleSnapshot,
+  comparison: CeilingComparison
+) {
+  if (value === undefined) {
+    return {
+      risk_assessment: deriveFallbackRiskAssessment(targetRole, comparison),
+      market_evidence: buildFallbackMarketEvidence(targetRole)
+    };
+  }
+
+  const raw = toObject(value, fieldName);
+
+  return {
+    risk_assessment: parseRiskAssessment(raw.risk_assessment, `${fieldName}.risk_assessment`),
+    market_evidence: parseMarketEvidence(raw.market_evidence, `${fieldName}.market_evidence`)
+  };
+}
+
 function buildSystemInstructions(currentDate: string) {
   return [
     "Ти досвідчений стратег з кар'єрних переходів для українських спеціалістів.",
@@ -455,6 +696,10 @@ function buildSystemInstructions(currentDate: string) {
     "Усі зарплатні вилки поверни як приблизні щомісячні значення в UAH. Якщо ринок міжнародний або закордонний, конвертуй у UAH-еквівалент і чесно відобрази caveats.",
     "Відповідь має бути відчутно персоналізованою під вхідні дані. Уникай шаблонних загальних фраз.",
     "У видимому для користувача тексті уникай англіцизмів на кшталт best case, switcher, roadmap, remote. Пиши природною українською.",
+    "Додатково поверни м’який індикатор ризику переходу: рівень low|medium|high і коротке пояснення одним-двома реченнями.",
+    "Додатково поверни блок market_evidence: короткий висновок про наявність вакансій і 2-3 реальні приклади вакансій для цільової ролі з прямими URL, якщо веб-пошук дає надійні результати.",
+    "Для vacancy_examples віддавай лише перевірені прямі посилання на сторінки вакансій або сторінки компаній з вакансією. Якщо не можеш впевнено верифікувати посилання, не вигадуй і поверни порожній список.",
+    "Для vacancy_examples показуй лише релевантні цільовому ринку приклади: Україна, міжнародна віддалена робота або локальна робота за кордоном залежно від input.",
     "Безкоштовна сторінка може пояснювати, чому висновок саме такий, але не повинна розкривати повний покроковий план або детальний план виконання.",
     "Заклик до дії має продавати наступний крок, але не розкривати платний функціонал.",
     "Для current_role.summary і target_role.summary пиши простою людською мовою, без канцеляриту.",
@@ -481,11 +726,203 @@ function buildUserInput(input: CareerSwitchAnalysisRequest) {
       transition_priority: input.transition_priority,
       transition_priority_description: transitionPriorityDescriptions[input.transition_priority],
       product_goal:
-        "Безкоштовна сторінка має сказати, що зараз виглядає сильніше: залишатися в поточній ролі чи переходити в цільову. Пояснення має бути персональним, але без повного покрокового плану."
+        "Безкоштовна сторінка має сказати, що зараз виглядає сильніше: залишатися в поточній ролі чи переходити в цільову. Пояснення має бути персональним, але без повного покрокового плану. Окремо потрібні м’яка оцінка ризику та реальні приклади вакансій, якщо веб-пошук може їх підтвердити."
     },
     null,
     2
   );
+}
+
+function targetMarketEvidenceLabel(targetMarket: TargetMarket) {
+  switch (targetMarket) {
+    case "ukraine":
+      return "ринок України";
+    case "remote":
+      return "міжнародний ринок з віддаленим форматом";
+    case "abroad":
+      return "локальний ринок за кордоном";
+    default:
+      return "обраний ринок";
+  }
+}
+
+function buildVacancyEvidencePrompt(input: CareerSwitchAnalysisRequest) {
+  return [
+    "Знайди до 3 реальних вакансій для цільової ролі.",
+    "Працюй тільки через веб-пошук.",
+    "Пріоритет: вакансії, які найближчі до стартового або перехідного входу. Якщо таких немає, поверни найближчі релевантні й коротко познач, що планка вища.",
+    "Пріоритет джерел: jobs.dou.ua, djinni.co, robota.ua, work.ua, career/company jobs pages.",
+    "Не використовуй сторінки пошукової видачі, агрегатори без конкретної вакансії або сторінки зі списком без окремої позиції, якщо є краща альтернатива.",
+    "Поверни тільки plain text без пояснень поза форматом.",
+    "Перший рядок: SUMMARY || {1 коротке речення про наявність вакансій на ринку}.",
+    "Далі кожну вакансію окремим рядком: VACANCY || {назва ролі} || {компанія} || {локація} || {вилка або 'не вказано'} || {чому це релевантно для такого переходу} || {джерело}.",
+    "Для кожного рядка VACANCY обов’язково прикріпи citation на конкретну сторінку вакансії через вбудовані посилання веб-пошуку.",
+    "Не вставляй raw URL у текст. Не вигадуй вакансії. Якщо надійних прикладів немає, поверни тільки рядок SUMMARY."
+  ].join("\n") +
+    `\n\nЦільова роль: ${input.target_role_text}.\nРинок: ${targetMarketEvidenceLabel(input.target_market)}.\nРівень англійської: ${englishLevelDescriptions[input.english_level]}.\nРелевантний досвід: ${experienceLevelDescriptions[input.target_experience_level]}.`;
+}
+
+type UrlCitation = {
+  type: "url_citation";
+  start_index: number;
+  end_index: number;
+  title: string;
+  url: string;
+};
+
+function extractOutputTextPayload(response: unknown) {
+  if (typeof response !== "object" || response === null || !("output" in response) || !Array.isArray((response as { output?: unknown[] }).output)) {
+    return null;
+  }
+
+  for (const item of (response as { output: unknown[] }).output) {
+    if (typeof item !== "object" || item === null || !("content" in item) || !Array.isArray((item as { content?: unknown[] }).content)) {
+      continue;
+    }
+
+    for (const contentItem of (item as { content: unknown[] }).content) {
+      if (
+        typeof contentItem === "object" &&
+        contentItem !== null &&
+        (contentItem as { type?: string }).type === "output_text" &&
+        typeof (contentItem as { text?: unknown }).text === "string"
+      ) {
+        const annotations = Array.isArray((contentItem as { annotations?: unknown[] }).annotations)
+          ? ((contentItem as { annotations: unknown[] }).annotations.filter(
+              (annotation): annotation is UrlCitation =>
+                typeof annotation === "object" &&
+                annotation !== null &&
+                (annotation as { type?: string }).type === "url_citation" &&
+                typeof (annotation as { url?: unknown }).url === "string" &&
+                typeof (annotation as { title?: unknown }).title === "string" &&
+                typeof (annotation as { start_index?: unknown }).start_index === "number" &&
+                typeof (annotation as { end_index?: unknown }).end_index === "number"
+            ) as UrlCitation[])
+          : [];
+
+        return {
+          text: (contentItem as { text: string }).text,
+          annotations
+        };
+      }
+    }
+  }
+
+  return null;
+}
+
+function parseVacancyEvidenceText(text: string, annotations: UrlCitation[]): MarketEvidence {
+  const rawLines = text.split("\n");
+  const vacancyExamples: VacancyExample[] = [];
+  let availabilitySummary = "Актуальні приклади вакансій не знайдені в межах надійного веб-пошуку.";
+  const vacancyLines: string[] = [];
+
+  for (const rawLine of rawLines) {
+    const line = (rawLine.endsWith("\r") ? rawLine.slice(0, -1) : rawLine).trim();
+    if (!line) {
+      continue;
+    }
+
+    if (line.startsWith("SUMMARY ||")) {
+      const summary = line.slice("SUMMARY ||".length).trim();
+      if (summary) {
+        availabilitySummary = summary;
+      }
+      continue;
+    }
+
+    if (!line.startsWith("VACANCY ||")) {
+      continue;
+    }
+
+    vacancyLines.push(line);
+  }
+
+  vacancyLines.forEach((line, index) => {
+    const parts = line.split("||").map((part) => part.trim());
+    if (parts.length < 7) {
+      return;
+    }
+
+    const citation = annotations[index];
+    if (!citation) {
+      return;
+    }
+
+    try {
+      const sourceLabel =
+        parts.length >= 8
+          ? toNonEmptyString(parts[6], "vacancy.source_label")
+          : sourceLabelFromUrl(citation.url);
+
+      vacancyExamples.push({
+        title: toNonEmptyString(parts[1], "vacancy.title"),
+        company: toNonEmptyString(parts[2], "vacancy.company"),
+        location_label: toNonEmptyString(parts[3], "vacancy.location_label"),
+        compensation_hint: normalizeCompensationHint(toNullableString(parts[4], "vacancy.compensation_hint")),
+        relevance_reason: toNonEmptyString(parts[5], "vacancy.relevance_reason"),
+        source_label: sourceLabel,
+        url: toSafeUrlString(citation.url, "vacancy.url")
+      });
+    } catch {
+      return;
+    }
+  });
+
+  return {
+    availability_summary: availabilitySummary,
+    vacancy_examples: vacancyExamples.slice(0, 3)
+  };
+}
+
+function fallbackVerifiedMarketEvidence(input: CareerSwitchAnalysisRequest): MarketEvidence {
+  return {
+    availability_summary: `Не вдалося надійно підтягнути прямі приклади вакансій для напряму ${input.target_role_text} на ${targetMarketEvidenceLabel(
+      input.target_market
+    )}.`,
+    vacancy_examples: []
+  };
+}
+
+async function fetchVerifiedVacancyEvidence(
+  client: OpenAI,
+  input: CareerSwitchAnalysisRequest,
+  model: string
+): Promise<MarketEvidence> {
+  const response = await client.responses.create({
+    model,
+    instructions: buildVacancyEvidencePrompt(input),
+    input: `Роль: ${input.target_role_text}. Ринок: ${targetMarketEvidenceLabel(input.target_market)}.`,
+    store: false,
+    tools: [
+      {
+        type: "web_search_preview",
+        search_context_size: "high",
+        user_location: {
+          type: "approximate",
+          country: "UA",
+          city: "Kyiv",
+          region: "Kyiv",
+          timezone: "Europe/Kiev"
+        }
+      }
+    ]
+  });
+
+  const payload = extractOutputTextPayload(response);
+  if (!payload) {
+    return fallbackVerifiedMarketEvidence(input);
+  }
+
+  const parsed = parseVacancyEvidenceText(payload.text, payload.annotations);
+  if (parsed.vacancy_examples.length === 0) {
+    return {
+      availability_summary: parsed.availability_summary || fallbackVerifiedMarketEvidence(input).availability_summary,
+      vacancy_examples: []
+    };
+  }
+
+  return parsed;
 }
 
 function getMissingOpenAiEnv() {
@@ -584,6 +1021,9 @@ async function requestAnalysisAttempt(
   }
 
   const analysis = validateCareerSwitchAnalysis(parsed);
+  analysis.guidance.market_evidence = useWebSearch
+    ? await fetchVerifiedVacancyEvidence(client, input, model).catch(() => fallbackVerifiedMarketEvidence(input))
+    : fallbackVerifiedMarketEvidence(input);
   const latencyMs = Date.now() - startedAt;
 
   return {
@@ -627,6 +1067,7 @@ export function buildStoredSummaryMetrics(analysis: CareerSwitchAnalysis) {
     ceiling_gap_median: analysis.market_profile.comparison.ceiling_gap_median,
     probability_of_getting_job_within_12_months:
       analysis.market_profile.target_role.probability_of_getting_job_within_12_months,
+    risk_level: analysis.guidance.risk_assessment.level,
     current_best_case_median: analysis.market_profile.current_role.best_case_salary_range.median,
     target_best_case_median: analysis.market_profile.target_role.best_case_salary_range.median,
     current_confidence: analysis.market_profile.current_role.confidence,
@@ -637,14 +1078,18 @@ export function buildStoredSummaryMetrics(analysis: CareerSwitchAnalysis) {
 export function validateCareerSwitchAnalysis(value: unknown): CareerSwitchAnalysis {
   const raw = toObject(value, "career_switch_analysis");
   const marketProfile = toObject(raw.market_profile, "career_switch_analysis.market_profile");
+  const currentRole = parseCurrentRoleSnapshot(marketProfile.current_role, "career_switch_analysis.market_profile.current_role");
+  const targetRole = parseTargetRoleSnapshot(marketProfile.target_role, "career_switch_analysis.market_profile.target_role");
+  const comparison = parseComparison(marketProfile.comparison, "career_switch_analysis.market_profile.comparison");
 
   return {
     market_profile: {
-      current_role: parseCurrentRoleSnapshot(marketProfile.current_role, "career_switch_analysis.market_profile.current_role"),
-      target_role: parseTargetRoleSnapshot(marketProfile.target_role, "career_switch_analysis.market_profile.target_role"),
-      comparison: parseComparison(marketProfile.comparison, "career_switch_analysis.market_profile.comparison")
+      current_role: currentRole,
+      target_role: targetRole,
+      comparison
     },
-    narrative: parseNarrative(raw.narrative, "career_switch_analysis.narrative")
+    narrative: parseNarrative(raw.narrative, "career_switch_analysis.narrative"),
+    guidance: parseGuidance(raw.guidance, "career_switch_analysis.guidance", targetRole, comparison)
   };
 }
 
