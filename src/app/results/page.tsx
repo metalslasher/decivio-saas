@@ -51,12 +51,6 @@ type DetailRow = {
 };
 
 type RiskLevel = CareerSwitchAnalysis["guidance"]["risk_assessment"]["level"];
-type MarketSearchLink = {
-  title: string;
-  description: string;
-  href: string;
-  sourceLabel: string;
-};
 
 const currencyFormatter = new Intl.NumberFormat("uk-UA", { maximumFractionDigits: 0 });
 
@@ -259,95 +253,6 @@ function targetMarketLabel(market: TargetMarket) {
   }
 }
 
-function targetMarketSearchHint(market: TargetMarket) {
-  switch (market) {
-    case "ukraine":
-      return "Україна вакансії";
-    case "remote":
-      return "remote вакансії";
-    case "abroad":
-      return "relocation вакансії";
-    default:
-      return "вакансії";
-  }
-}
-
-function buildGoogleSearchUrl(query: string) {
-  return `https://www.google.com/search?q=${encodeURIComponent(query)}`;
-}
-
-function buildMarketSearchLinks(role: string, market: TargetMarket): MarketSearchLink[] {
-  const marketHint = targetMarketSearchHint(market);
-  const quotedRole = `"${role}"`;
-
-  if (market === "ukraine") {
-    return [
-      {
-        title: "DOU вакансії",
-        description: `Жива видача вакансій ${role} на DOU для українського ринку.`,
-        href: buildGoogleSearchUrl(`site:jobs.dou.ua/vacancies ${quotedRole} ${marketHint}`),
-        sourceLabel: "DOU"
-      },
-      {
-        title: "Djinni",
-        description: `Пошук актуальних вакансій ${role} у форматі українського tech-ринку.`,
-        href: buildGoogleSearchUrl(`site:djinni.co/jobs ${quotedRole} ${marketHint}`),
-        sourceLabel: "Djinni"
-      },
-      {
-        title: "Work.ua / Robota.ua",
-        description: `Швидка перевірка масового попиту на ${role} в Україні.`,
-        href: buildGoogleSearchUrl(`site:work.ua OR site:robota.ua ${quotedRole} ${marketHint}`),
-        sourceLabel: "Work.ua / Robota.ua"
-      }
-    ];
-  }
-
-  if (market === "abroad") {
-    return [
-      {
-        title: "LinkedIn Jobs",
-        description: `Пошук ролей ${role} із фокусом на міжнародні компанії та релокацію.`,
-        href: buildGoogleSearchUrl(`site:linkedin.com/jobs/view ${quotedRole} relocation`),
-        sourceLabel: "LinkedIn"
-      },
-      {
-        title: "DOU Relocate",
-        description: `Видача вакансій ${role}, де часто трапляються міжнародні або relocation-позиції.`,
-        href: buildGoogleSearchUrl(`site:relocate.dou.ua/jobs ${quotedRole}`),
-        sourceLabel: "DOU Relocate"
-      },
-      {
-        title: "Career Pages",
-        description: `Прямі сторінки вакансій компаній із міжнародним наймом під ${role}.`,
-        href: buildGoogleSearchUrl(`site:greenhouse.io OR site:lever.co ${quotedRole} relocation`),
-        sourceLabel: "Career Pages"
-      }
-    ];
-  }
-
-  return [
-    {
-      title: "Djinni",
-      description: `Жива видача remote-вакансій ${role} на tech-ринку.`,
-      href: buildGoogleSearchUrl(`site:djinni.co/jobs ${quotedRole} remote`),
-      sourceLabel: "Djinni"
-    },
-    {
-      title: "DOU вакансії",
-      description: `Пошук віддалених або міжнародних вакансій ${role} на DOU.`,
-      href: buildGoogleSearchUrl(`site:jobs.dou.ua/vacancies ${quotedRole} remote`),
-      sourceLabel: "DOU"
-    },
-    {
-      title: "LinkedIn Jobs",
-      description: `Швидкий перегляд міжнародної видачі вакансій ${role} з віддаленим форматом.`,
-      href: buildGoogleSearchUrl(`site:linkedin.com/jobs/view ${quotedRole} remote`),
-      sourceLabel: "LinkedIn"
-    }
-  ];
-}
-
 function experienceLevelLabel(level: ExperienceLevel) {
   switch (level) {
     case "none":
@@ -479,31 +384,6 @@ function MetaChip({ children }: { children: ReactNode }) {
   return <span className="rounded-full border border-[var(--line-soft)] bg-[rgba(255,255,255,0.7)] px-3 py-1.5">{children}</span>;
 }
 
-function MarketSearchCard({ item }: { item: MarketSearchLink }) {
-  return (
-    <article className="surface-soft rounded-[1.5rem] p-4 md:p-5">
-      <div className="flex flex-wrap gap-2 text-[0.78rem] font-semibold text-[var(--text-muted)]">
-        <span className="rounded-full border border-[var(--line-soft)] bg-white/80 px-3 py-1.5">{item.sourceLabel}</span>
-      </div>
-
-      <h3 className="mt-4 panel-title">{item.title}</h3>
-      <p className="mt-3 text-[0.92rem] leading-[1.68] text-[var(--text-muted)]">{item.description}</p>
-
-      <a
-        href={item.href}
-        target="_blank"
-        rel="noreferrer"
-        className="mt-5 inline-flex items-center gap-2 text-[0.95rem] font-semibold text-[var(--accent-strong)] transition hover:text-[var(--accent)]"
-      >
-        <span>Відкрити живу видачу</span>
-        <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" aria-hidden="true">
-          <path d="M5 15L15 5M8 5h7v7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      </a>
-    </article>
-  );
-}
-
 export default async function ResultsPage({ searchParams }: ResultsPageProps) {
   const simulationId = getSingleParam(searchParams?.simulationId);
 
@@ -604,7 +484,6 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
       : simulation.created_at
         ? new Date(simulation.created_at).toLocaleDateString("uk-UA")
         : null;
-  const marketSearchLinks = buildMarketSearchLinks(targetRole.canonical_title, inputs.target_market);
 
   const currentDetails: DetailRow[] = [
     { label: "Ваш дохід зараз", value: formatCurrency(inputs.current_income) },
@@ -736,28 +615,6 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
         <TextList eyebrow="Чому саме такий висновок" title="Ключові аргументи" items={narrative.why_this_result} />
         <TextList eyebrow="Що персоналізувало відповідь" title="Як сервіс врахував саме вас" items={narrative.personalization_notes} />
       </div>
-
-      <article className="surface-panel rounded-[2rem] p-5 md:p-7">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <p className="label-muted">Ринок це підтверджує</p>
-            <h2 className="mt-3 section-title">Де зараз дивитися актуальні вакансії</h2>
-          </div>
-          <span className="rounded-full border border-[rgba(63,94,255,0.18)] bg-[rgba(238,242,255,0.88)] px-3 py-1.5 text-[0.82rem] font-semibold text-[var(--accent-strong)]">
-            Живі джерела під ваш сценарій
-          </span>
-        </div>
-
-        <p className="body-copy mt-3 max-w-3xl">
-          Тут немає випадкових назв вакансій або компаній. Кожне посилання відкриває живу видачу під вашу цільову роль і ринок, щоб ви одразу бачили реальний попит.
-        </p>
-
-        <div className="mt-5 grid gap-3 xl:grid-cols-3">
-          {marketSearchLinks.map((item) => (
-            <MarketSearchCard key={`${item.sourceLabel}-${item.title}`} item={item} />
-          ))}
-        </div>
-      </article>
 
       <article className="surface-panel rounded-[2rem] p-5 md:p-7">
         <p className="label-muted">Що далі</p>
