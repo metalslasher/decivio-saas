@@ -76,7 +76,7 @@ const englishLevelOptions: Array<{ value: EnglishLevel; label: string }> = [
 
 const targetMarketOptions: Array<{ value: TargetMarket; label: string }> = [
   { value: "ukraine", label: "Україна" },
-  { value: "remote", label: "Remote / міжнародний ринок" },
+  { value: "remote", label: "Віддалена робота / міжнародний ринок" },
   { value: "abroad", label: "Локальна робота за кордоном" }
 ];
 

@@ -42,10 +42,6 @@ type SimulationInputs = {
 };
 
 type AnalysisMeta = {
-  model: string;
-  latency_ms: number;
-  web_search_used: boolean;
-  request_id: string | null;
   generated_at: string;
 };
 
@@ -144,22 +140,13 @@ function extractMeta(value: unknown): AnalysisMeta | null {
     return null;
   }
 
-  const raw = value.meta;
-  const model = toString(raw.model);
-  const latencyMs = toNumber(raw.latency_ms);
-  const generatedAt = toString(raw.generated_at);
-  const requestId = raw.request_id === null ? null : toString(raw.request_id);
-  const webSearchUsed = typeof raw.web_search_used === "boolean" ? raw.web_search_used : null;
+  const generatedAt = toString(value.meta.generated_at);
 
-  if (model === null || latencyMs === null || generatedAt === null || webSearchUsed === null) {
+  if (generatedAt === null) {
     return null;
   }
 
   return {
-    model,
-    latency_ms: latencyMs,
-    web_search_used: webSearchUsed,
-    request_id: requestId,
     generated_at: generatedAt
   };
 }
@@ -230,7 +217,7 @@ function targetMarketLabel(market: TargetMarket) {
     case "ukraine":
       return "Україна";
     case "remote":
-      return "Remote / міжнародний ринок";
+      return "Віддалена робота / міжнародний ринок";
     case "abroad":
       return "Локальна робота за кордоном";
     default:
@@ -260,16 +247,6 @@ function transitionPriorityLabel(priority: TransitionPriority) {
     default:
       return priority;
   }
-}
-
-function verdictClasses(verdictLabel: CareerSwitchAnalysis["narrative"]["verdict_label"]) {
-  if (verdictLabel === "switch") {
-    return "border-emerald-200/70 bg-emerald-50/70 text-emerald-700";
-  }
-  if (verdictLabel === "depends") {
-    return "border-[rgba(63,94,255,0.18)] bg-[rgba(238,242,255,0.82)] text-[var(--accent-strong)]";
-  }
-  return "border-[rgba(24,26,32,0.1)] bg-[rgba(255,255,255,0.72)] text-[var(--text-muted)]";
 }
 
 function EmptyState({ title, description }: { title: string; description: string }) {
@@ -460,7 +437,13 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
   const targetRole = analysis.market_profile.target_role;
   const comparison = analysis.market_profile.comparison;
   const narrative = analysis.narrative;
-  const createdAt = meta?.generated_at ? formatDate(meta.generated_at) : simulation.created_at ? new Date(simulation.created_at).toLocaleDateString("uk-UA") : null;
+  const createdAt = meta?.generated_at
+    ? formatDate(meta.generated_at)
+    : result.created_at
+      ? new Date(result.created_at).toLocaleDateString("uk-UA")
+      : simulation.created_at
+        ? new Date(simulation.created_at).toLocaleDateString("uk-UA")
+        : null;
   const combinedSources = Array.from(new Set([...currentRole.sources, ...targetRole.sources])).slice(0, 6);
 
   const currentDetails: DetailRow[] = [
@@ -470,18 +453,18 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
       value: formatRange(currentRole.current_market_salary_range.low, currentRole.current_market_salary_range.high)
     },
     {
-      label: "Median для Senior",
+      label: "Типовий дохід на рівні Senior",
       value: formatCurrency(currentRole.senior_salary_range.median)
     },
     {
-      label: `Best case (${levelLabel(currentRole.best_case_level)})`,
+      label: `Потенційна стеля (${levelLabel(currentRole.best_case_level)})`,
       value: formatCurrency(currentRole.best_case_salary_range.median)
     }
   ];
 
   const targetDetails: DetailRow[] = [
     {
-      label: `Вхідний рівень для switcher (${levelLabel(targetRole.entry_level_for_switcher)})`,
+      label: `Стартовий рівень для переходу (${levelLabel(targetRole.entry_level_for_switcher)})`,
       value: formatCurrency(targetRole.entry_salary_range.median)
     },
     {
@@ -489,22 +472,19 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
       value: formatRange(targetRole.entry_salary_range.low, targetRole.entry_salary_range.high)
     },
     {
-      label: "Median для Senior",
+      label: "Типовий дохід на рівні Senior",
       value: formatCurrency(targetRole.senior_salary_range.median)
     },
     {
-      label: `Best case (${levelLabel(targetRole.best_case_level)})`,
+      label: `Потенційна стеля (${levelLabel(targetRole.best_case_level)})`,
       value: formatCurrency(targetRole.best_case_salary_range.median)
     }
   ];
 
   return (
-    <section className="mx-auto max-w-6xl space-y-8 py-4 md:space-y-10 md:py-8">
-      <div className="surface-panel rounded-[2.2rem] p-6 md:p-8">
-        <div className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] ${verdictClasses(narrative.verdict_label)}`}>
-          {narrative.verdict_badge}
-        </div>
-        <h1 className="page-title mt-4 max-w-5xl">{narrative.headline}</h1>
+    <section className="space-y-8 py-4 md:space-y-10 md:py-8">
+      <div className="px-1 md:px-2">
+        <h1 className="page-title max-w-5xl">{narrative.headline}</h1>
         <p className="lead-copy mt-4 max-w-3xl">{narrative.summary}</p>
 
         <div className="mt-5 flex flex-wrap gap-3 text-[0.9rem] leading-[1.6] text-[var(--text-soft)]">
@@ -537,7 +517,7 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
         <MetricCard
           label="Різниця в стелі ролей"
           value={formatSignedCurrency(comparison.ceiling_gap_median)}
-          note="Різниця між median best-case для поточної та цільової ролі."
+          note="Різниця між потенційною стелею поточної та цільової ролі."
         />
       </div>
 
@@ -571,13 +551,13 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
 
           <div className="mt-5 overflow-hidden rounded-[1.5rem] border border-[var(--line-soft)] bg-[rgba(255,255,255,0.52)]">
             <div className="flex items-start justify-between gap-4 border-b border-[var(--line-soft)] px-4 py-3 text-sm text-[var(--text-muted)] md:px-5">
-              <span>Best case для поточної ролі</span>
+              <span>Потенційна стеля поточної ролі</span>
               <span className="text-right font-medium text-[var(--text-strong)]">
                 {levelLabel(currentRole.best_case_level)} • {formatCurrency(currentRole.best_case_salary_range.median)}
               </span>
             </div>
             <div className="flex items-start justify-between gap-4 border-b border-[var(--line-soft)] px-4 py-3 text-sm text-[var(--text-muted)] md:px-5">
-              <span>Best case для цільової ролі</span>
+              <span>Потенційна стеля цільової ролі</span>
               <span className="text-right font-medium text-[var(--text-strong)]">
                 {levelLabel(targetRole.best_case_level)} • {formatCurrency(targetRole.best_case_salary_range.median)}
               </span>
@@ -591,10 +571,8 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
 
         <article className="surface-panel rounded-[2rem] p-5 md:p-6">
           <p className="label-muted">Як формувався висновок</p>
-          <h2 className="mt-3 section-title">Ринковий контекст і технічні деталі</h2>
+          <h2 className="mt-3 section-title">Ринковий контекст</h2>
           <div className="mt-4 space-y-3 text-[0.95rem] leading-[1.72] text-[var(--text-muted)]">
-            <p>Модель: {meta?.model ?? "невідомо"}</p>
-            <p>Web search: {meta?.web_search_used ? "так, увімкнено" : "ні, був fallback без пошуку"}</p>
             <p>Сигнали ринку: {combinedSources.join(", ")}</p>
             <p>{narrative.disclaimer}</p>
           </div>
@@ -612,7 +590,6 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
         <p className="body-copy mt-3 max-w-3xl">{narrative.cta_body}</p>
         <div className="mt-5 flex flex-wrap gap-3">
           <Link href="/pricing" className="btn-primary">Перейти до наступного кроку</Link>
-          <Link href="/simulate" className="btn-secondary">Порахувати інший сценарій</Link>
         </div>
       </article>
     </section>

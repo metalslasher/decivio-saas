@@ -71,7 +71,6 @@ export type CeilingComparison = {
 
 export type AnalysisNarrative = {
   verdict_label: VerdictLabel;
-  verdict_badge: string;
   headline: string;
   summary: string;
   why_this_result: string[];
@@ -242,7 +241,6 @@ const careerSwitchAnalysisSchema = {
       additionalProperties: false,
       required: [
         "verdict_label",
-        "verdict_badge",
         "headline",
         "summary",
         "why_this_result",
@@ -253,7 +251,6 @@ const careerSwitchAnalysisSchema = {
       ],
       properties: {
         verdict_label: { type: "string", enum: ["stay", "switch", "depends"] },
-        verdict_badge: { type: "string" },
         headline: { type: "string" },
         summary: { type: "string" },
         why_this_result: { type: "array", items: { type: "string" } },
@@ -436,7 +433,6 @@ function parseNarrative(value: unknown, fieldName: string): AnalysisNarrative {
 
   return {
     verdict_label: parseVerdictLabel(raw.verdict_label, `${fieldName}.verdict_label`),
-    verdict_badge: toNonEmptyString(raw.verdict_badge, `${fieldName}.verdict_badge`),
     headline: toNonEmptyString(raw.headline, `${fieldName}.headline`),
     summary: toNonEmptyString(raw.summary, `${fieldName}.summary`),
     why_this_result: toStringArray(raw.why_this_result, `${fieldName}.why_this_result`),
@@ -449,17 +445,18 @@ function parseNarrative(value: unknown, fieldName: string): AnalysisNarrative {
 
 function buildSystemInstructions(currentDate: string) {
   return [
-    "Ти senior career transition strategist для українських спеціалістів.",
+    "Ти досвідчений стратег з кар'єрних переходів для українських спеціалістів.",
     `Сьогоднішня дата: ${currentDate}.`,
-    "Завдання: повернути один валідний JSON-об'єкт для безкоштовної result page.",
-    "Мета result page: дати персоналізований, зрозумілий і переконливий висновок, який підштовхує людину перейти до глибшого платного плану.",
-    "Використовуй web search, якщо він доступний, щоб спиратися на актуальні сигнали ринку, зарплат і вакансій.",
-    "Не будуй 5-річний графік, не роби break-even модель, не описуй окупність по роках.",
-    "Фокус: поточна роль, цільова роль, шанс входу, senior/lead-style стеля ролей, вплив англійської, цільового ринку і пріоритету користувача.",
-    "Усі зарплатні вилки поверни як приблизні щомісячні значення в UAH. Якщо ринок remote або abroad, конвертуй у UAH еквівалент і чесно відобрази caveats.",
-    "Відповідь має бути відчутно персоналізованою під inputs. Уникай шаблонних загальних фраз.",
-    "Безкоштовна сторінка може пояснювати, чому висновок саме такий, але не повинна розкривати повний покроковий roadmap або детальний execution plan.",
-    "CTA має продавати наступний крок, але не зливати платний функціонал.",
+    "Завдання: повернути один валідний JSON-об'єкт для безкоштовної сторінки результату.",
+    "Мета сторінки результату: дати персоналізований, зрозумілий і переконливий висновок, який підштовхує людину перейти до глибшого платного плану.",
+    "Використовуй веб-пошук, якщо він доступний, щоб спиратися на актуальні сигнали ринку, зарплат і вакансій.",
+    "Не будуй п'ятирічний графік, не роби модель точки окупності, не описуй окупність по роках.",
+    "Фокус: поточна роль, цільова роль, шанс входу, стеля ролей на рівні Senior/Lead, вплив англійської, цільового ринку і пріоритету користувача.",
+    "Усі зарплатні вилки поверни як приблизні щомісячні значення в UAH. Якщо ринок міжнародний або закордонний, конвертуй у UAH-еквівалент і чесно відобрази caveats.",
+    "Відповідь має бути відчутно персоналізованою під вхідні дані. Уникай шаблонних загальних фраз.",
+    "У видимому для користувача тексті уникай англіцизмів на кшталт best case, switcher, roadmap, remote. Пиши природною українською.",
+    "Безкоштовна сторінка може пояснювати, чому висновок саме такий, але не повинна розкривати повний покроковий план або детальний план виконання.",
+    "Заклик до дії має продавати наступний крок, але не розкривати платний функціонал.",
     "Для current_role.summary і target_role.summary пиши простою людською мовою, без канцеляриту.",
     "why_this_result і personalization_notes повинні бути короткими, конкретними і читабельними в UI.",
     "Використовуй conservative confidence і caveats, якщо ринок неоднорідний або дані неповні.",
@@ -484,7 +481,7 @@ function buildUserInput(input: CareerSwitchAnalysisRequest) {
       transition_priority: input.transition_priority,
       transition_priority_description: transitionPriorityDescriptions[input.transition_priority],
       product_goal:
-        "Вільна сторінка має сказати, що зараз виглядає сильніше: залишатися в поточній ролі чи переходити в цільову. Пояснення має бути персональним, але без повного покрокового плану."
+        "Безкоштовна сторінка має сказати, що зараз виглядає сильніше: залишатися в поточній ролі чи переходити в цільову. Пояснення має бути персональним, але без повного покрокового плану."
     },
     null,
     2
