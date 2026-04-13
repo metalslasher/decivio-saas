@@ -112,6 +112,8 @@ OpenAI має повернути один JSON, без тексту навкол
 
 POST /api/market-profile
 
+Status: deprecated. The current product flow no longer uses this standalone endpoint and routes onboarding submissions through `/api/simulations`.
+
 Input:
 
 {
@@ -346,9 +348,7 @@ confidence
 
 8) Deliverables (що Codex має зробити)
 
-API /api/market-profile з кешем у БД
-
-Виклик цього API після завершення онбордингу перед симуляцією
+Deprecated historical note: `/api/market-profile` was an intermediate design idea. The active flow now calls `/api/simulations` directly after onboarding.
 
 Модифікація симуляції: використовувати дані market_profile
 

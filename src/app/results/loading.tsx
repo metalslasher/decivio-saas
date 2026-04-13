@@ -9,12 +9,16 @@ export default function ResultsLoading() {
         <div className="surface-panel h-28 animate-pulse rounded-[1.7rem]" />
         <div className="surface-panel h-28 animate-pulse rounded-[1.7rem]" />
       </div>
-      <div className="surface-panel h-96 animate-pulse rounded-[2rem]" />
       <div className="grid gap-4 lg:grid-cols-2">
         <div className="surface-panel h-80 animate-pulse rounded-[2rem]" />
         <div className="surface-panel h-80 animate-pulse rounded-[2rem]" />
       </div>
-      <div className="surface-panel h-80 animate-pulse rounded-[2rem]" />
+      <div className="surface-panel h-72 animate-pulse rounded-[2rem]" />
+      <div className="grid gap-4 lg:grid-cols-2">
+        <div className="surface-panel h-72 animate-pulse rounded-[2rem]" />
+        <div className="surface-panel h-72 animate-pulse rounded-[2rem]" />
+      </div>
+      <div className="surface-panel h-52 animate-pulse rounded-[2rem]" />
     </section>
   );
 }

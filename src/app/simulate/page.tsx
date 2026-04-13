@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { JsonLd } from "@/components/json-ld";
 import { SimulateOnboardingWizard } from "@/components/simulate-onboarding-wizard";
 import { createBreadcrumbSchema, createMetadata, createSoftwareApplicationSchema } from "@/lib/seo";
@@ -77,12 +76,6 @@ export default function SimulatePage() {
                 </li>
               ))}
             </ul>
-
-            <div className="mt-6">
-              <Link href="/pricing" className="btn-secondary">
-                Подивитися повний набір інструментів
-              </Link>
-            </div>
           </article>
 
           <div className="grid gap-4">

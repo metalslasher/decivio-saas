@@ -2,11 +2,17 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-
-type ExperienceLevel = "none" | "basic" | "practical";
-type EnglishLevel = "basic" | "intermediate" | "upper_intermediate" | "advanced";
-type TargetMarket = "ukraine" | "remote" | "abroad";
-type TransitionPriority = "speed" | "income";
+import {
+  englishLevelOptions,
+  experienceLevelOptions,
+  isSameRoleText,
+  targetMarketOptions,
+  transitionPriorityOptions,
+  type EnglishLevel,
+  type ExperienceLevel,
+  type TargetMarket,
+  type TransitionPriority
+} from "@/lib/career-switch-form";
 
 type WizardForm = {
   current_income: string;
@@ -61,30 +67,6 @@ const initialValues: WizardForm = {
 const inputClassName = "field-surface mt-1";
 const radioCardClassName = "cursor-pointer rounded-[1.35rem] border px-4 py-3 text-sm transition";
 
-const experienceLevelOptions: Array<{ value: ExperienceLevel; label: string }> = [
-  { value: "none", label: "Немає досвіду" },
-  { value: "basic", label: "Є базові знання" },
-  { value: "practical", label: "Є практичний досвід" }
-];
-
-const englishLevelOptions: Array<{ value: EnglishLevel; label: string }> = [
-  { value: "basic", label: "A1-A2 / базовий рівень" },
-  { value: "intermediate", label: "B1 / можу спілкуватися" },
-  { value: "upper_intermediate", label: "B2 / можу проходити інтерв'ю" },
-  { value: "advanced", label: "C1+ / працюю впевнено" }
-];
-
-const targetMarketOptions: Array<{ value: TargetMarket; label: string }> = [
-  { value: "ukraine", label: "Україна" },
-  { value: "remote", label: "Віддалена робота / міжнародний ринок" },
-  { value: "abroad", label: "Локальна робота за кордоном" }
-];
-
-const transitionPriorityOptions: Array<{ value: TransitionPriority; label: string }> = [
-  { value: "speed", label: "Швидше перейти" },
-  { value: "income", label: "Максимізувати дохід" }
-];
-
 function parseNumber(value: string) {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : null;
@@ -94,12 +76,14 @@ function RadioCards<T extends string>({
   name,
   value,
   options,
-  onChange
+  onChange,
+  disabled = false
 }: {
   name: string;
   value: T | "";
   options: Array<{ value: T; label: string }>;
   onChange: (nextValue: T) => void;
+  disabled?: boolean;
 }) {
   return (
     <div className="grid gap-2">
@@ -110,7 +94,7 @@ function RadioCards<T extends string>({
             value === item.value
               ? "border-[rgba(63,94,255,0.22)] bg-[var(--accent-soft)] text-[var(--accent-strong)]"
               : "border-[var(--line-soft)] bg-[rgba(255,255,255,0.8)] text-[var(--text-muted)] hover:border-[rgba(63,94,255,0.16)]"
-          }`}
+          } ${disabled ? "pointer-events-none opacity-60" : ""}`}
         >
           <input
             type="radio"
@@ -119,6 +103,7 @@ function RadioCards<T extends string>({
             checked={value === item.value}
             onChange={() => onChange(item.value)}
             className="sr-only"
+            disabled={disabled}
           />
           {item.label}
         </label>
@@ -187,7 +172,7 @@ export function SimulateOnboardingWizard() {
       }
     }
 
-    if (stepIndex === 2 && values.current_role !== "" && values.current_role === values.target_role) {
+    if (stepIndex === 2 && values.current_role !== "" && isSameRoleText(values.current_role, values.target_role)) {
       nextErrors.target_role = "Цільова роль має відрізнятись від поточної.";
     }
 
@@ -272,7 +257,8 @@ export function SimulateOnboardingWizard() {
         </p>
       </header>
 
-      <div className="surface-panel rounded-[2rem] p-5 md:p-7">
+      <div className="surface-panel relative rounded-[2rem] p-5 md:p-7" aria-busy={isSubmitting}>
+        {isSubmitting ? <div className="absolute inset-0 z-10 rounded-[2rem] bg-white/45 backdrop-blur-[1px]" aria-hidden="true" /> : null}
         <div className="space-y-2">
           <div className="flex items-center justify-between text-xs font-medium uppercase tracking-[0.14em] text-[var(--text-soft)]">
             <span>Крок {currentStep + 1} з {steps.length}</span>
@@ -286,144 +272,154 @@ export function SimulateOnboardingWizard() {
           </div>
         </div>
 
-        <div key={currentStep} className="wizard-step-enter mt-6 space-y-5">
-          <div className="space-y-2">
-            <h2 className="section-title">{currentMeta.title}</h2>
-            <p className="body-copy">{currentMeta.helper}</p>
-          </div>
-
-          {currentStep === 0 ? (
-            <div className="grid gap-4">
-              <label className="text-sm font-medium leading-[1.6] text-[var(--text-muted)]">
-                Поточний чистий дохід (грн/міс)
-                <input
-                  type="number"
-                  min={0}
-                  inputMode="decimal"
-                  value={values.current_income}
-                  onChange={(event) => updateValue("current_income", event.target.value)}
-                  className={inputClassName}
-                  aria-invalid={Boolean(errors.current_income)}
-                />
-                {errors.current_income ? <span className="mt-1 block text-xs text-rose-600">{errors.current_income}</span> : null}
-              </label>
+        <fieldset disabled={isSubmitting} className="relative z-20 min-w-0 border-0 p-0 m-0">
+          <div key={currentStep} className="wizard-step-enter mt-6 space-y-5">
+            <div className="space-y-2">
+              <h2 className="section-title">{currentMeta.title}</h2>
+              <p className="body-copy">{currentMeta.helper}</p>
             </div>
-          ) : null}
 
-          {currentStep === 1 ? (
-            <div className="space-y-4">
-              <label className="block text-sm font-medium leading-[1.6] text-[var(--text-muted)]" htmlFor="current-role">
-                Поточна роль
-                <input
-                  id="current-role"
-                  type="text"
-                  value={values.current_role}
-                  onChange={(event) => updateValue("current_role", event.target.value)}
-                  className={inputClassName}
-                  aria-invalid={Boolean(errors.current_role)}
-                  autoComplete="off"
-                />
-              </label>
-              {errors.current_role ? <span className="block text-xs text-rose-600">{errors.current_role}</span> : null}
-
-              <label className="block text-sm font-medium leading-[1.6] text-[var(--text-muted)]">
-                Стаж у поточній сфері (років)
-                <input
-                  type="number"
-                  min={0}
-                  max={60}
-                  step="0.5"
-                  inputMode="decimal"
-                  value={values.current_experience_years}
-                  onChange={(event) => updateValue("current_experience_years", event.target.value)}
-                  className={inputClassName}
-                  aria-invalid={Boolean(errors.current_experience_years)}
-                />
-                {errors.current_experience_years ? (
-                  <span className="mt-1 block text-xs text-rose-600">{errors.current_experience_years}</span>
-                ) : null}
-              </label>
-            </div>
-          ) : null}
-
-          {currentStep === 2 ? (
-            <div className="space-y-5">
-              <div>
-                <label className="block text-sm font-medium leading-[1.6] text-[var(--text-muted)]" htmlFor="target-role">
-                  Цільова роль
+            {currentStep === 0 ? (
+              <div className="grid gap-4">
+                <label className="text-sm font-medium leading-[1.6] text-[var(--text-muted)]">
+                  Поточний чистий дохід (грн/міс)
                   <input
-                    id="target-role"
-                    type="text"
-                    value={values.target_role}
-                    onChange={(event) => updateValue("target_role", event.target.value)}
+                    type="number"
+                    min={0}
+                    inputMode="decimal"
+                    value={values.current_income}
+                    onChange={(event) => updateValue("current_income", event.target.value)}
                     className={inputClassName}
-                    aria-invalid={Boolean(errors.target_role)}
+                    aria-invalid={Boolean(errors.current_income)}
+                    disabled={isSubmitting}
+                  />
+                  {errors.current_income ? <span className="mt-1 block text-xs text-rose-600">{errors.current_income}</span> : null}
+                </label>
+              </div>
+            ) : null}
+
+            {currentStep === 1 ? (
+              <div className="space-y-4">
+                <label className="block text-sm font-medium leading-[1.6] text-[var(--text-muted)]" htmlFor="current-role">
+                  Поточна роль
+                  <input
+                    id="current-role"
+                    type="text"
+                    value={values.current_role}
+                    onChange={(event) => updateValue("current_role", event.target.value)}
+                    className={inputClassName}
+                    aria-invalid={Boolean(errors.current_role)}
                     autoComplete="off"
+                    disabled={isSubmitting}
                   />
                 </label>
-                {errors.target_role ? <span className="block text-xs text-rose-600">{errors.target_role}</span> : null}
+                {errors.current_role ? <span className="block text-xs text-rose-600">{errors.current_role}</span> : null}
+
+                <label className="block text-sm font-medium leading-[1.6] text-[var(--text-muted)]">
+                  Стаж у поточній сфері (років)
+                  <input
+                    type="number"
+                    min={0}
+                    max={60}
+                    step="0.5"
+                    inputMode="decimal"
+                    value={values.current_experience_years}
+                    onChange={(event) => updateValue("current_experience_years", event.target.value)}
+                    className={inputClassName}
+                    aria-invalid={Boolean(errors.current_experience_years)}
+                    disabled={isSubmitting}
+                  />
+                  {errors.current_experience_years ? (
+                    <span className="mt-1 block text-xs text-rose-600">{errors.current_experience_years}</span>
+                  ) : null}
+                </label>
               </div>
+            ) : null}
 
-              <fieldset className="space-y-2">
-                <legend className="text-sm font-medium leading-[1.6] text-[var(--text-muted)]">Релевантний досвід у цій ролі</legend>
-                <RadioCards
-                  name="experience-level"
-                  value={values.experience_level}
-                  options={experienceLevelOptions}
-                  onChange={(nextValue) => updateValue("experience_level", nextValue)}
-                />
-                {errors.experience_level ? <span className="block text-xs text-rose-600">{errors.experience_level}</span> : null}
-              </fieldset>
-            </div>
-          ) : null}
+            {currentStep === 2 ? (
+              <div className="space-y-5">
+                <div>
+                  <label className="block text-sm font-medium leading-[1.6] text-[var(--text-muted)]" htmlFor="target-role">
+                    Цільова роль
+                    <input
+                      id="target-role"
+                      type="text"
+                      value={values.target_role}
+                      onChange={(event) => updateValue("target_role", event.target.value)}
+                      className={inputClassName}
+                      aria-invalid={Boolean(errors.target_role)}
+                      autoComplete="off"
+                      disabled={isSubmitting}
+                    />
+                  </label>
+                  {errors.target_role ? <span className="block text-xs text-rose-600">{errors.target_role}</span> : null}
+                </div>
 
-          {currentStep === 3 ? (
-            <div className="space-y-5">
-              <fieldset className="space-y-2">
-                <legend className="text-sm font-medium leading-[1.6] text-[var(--text-muted)]">Рівень англійської</legend>
-                <RadioCards
-                  name="english-level"
-                  value={values.english_level}
-                  options={englishLevelOptions}
-                  onChange={(nextValue) => updateValue("english_level", nextValue)}
-                />
-                {errors.english_level ? <span className="block text-xs text-rose-600">{errors.english_level}</span> : null}
-              </fieldset>
+                <fieldset className="space-y-2">
+                  <legend className="text-sm font-medium leading-[1.6] text-[var(--text-muted)]">Релевантний досвід у цій ролі</legend>
+                  <RadioCards
+                    name="experience-level"
+                    value={values.experience_level}
+                    options={experienceLevelOptions}
+                    onChange={(nextValue) => updateValue("experience_level", nextValue)}
+                    disabled={isSubmitting}
+                  />
+                  {errors.experience_level ? <span className="block text-xs text-rose-600">{errors.experience_level}</span> : null}
+                </fieldset>
+              </div>
+            ) : null}
 
-              <fieldset className="space-y-2">
-                <legend className="text-sm font-medium leading-[1.6] text-[var(--text-muted)]">Куди орієнтуєтесь по ринку</legend>
-                <RadioCards
-                  name="target-market"
-                  value={values.target_market}
-                  options={targetMarketOptions}
-                  onChange={(nextValue) => updateValue("target_market", nextValue)}
-                />
-                {errors.target_market ? <span className="block text-xs text-rose-600">{errors.target_market}</span> : null}
-              </fieldset>
+            {currentStep === 3 ? (
+              <div className="space-y-5">
+                <fieldset className="space-y-2">
+                  <legend className="text-sm font-medium leading-[1.6] text-[var(--text-muted)]">Рівень англійської</legend>
+                  <RadioCards
+                    name="english-level"
+                    value={values.english_level}
+                    options={englishLevelOptions}
+                    onChange={(nextValue) => updateValue("english_level", nextValue)}
+                    disabled={isSubmitting}
+                  />
+                  {errors.english_level ? <span className="block text-xs text-rose-600">{errors.english_level}</span> : null}
+                </fieldset>
 
-              <fieldset className="space-y-2">
-                <legend className="text-sm font-medium leading-[1.6] text-[var(--text-muted)]">Що важливіше зараз</legend>
-                <RadioCards
-                  name="transition-priority"
-                  value={values.transition_priority}
-                  options={transitionPriorityOptions}
-                  onChange={(nextValue) => updateValue("transition_priority", nextValue)}
-                />
-                {errors.transition_priority ? (
-                  <span className="block text-xs text-rose-600">{errors.transition_priority}</span>
-                ) : null}
-              </fieldset>
-            </div>
-          ) : null}
+                <fieldset className="space-y-2">
+                  <legend className="text-sm font-medium leading-[1.6] text-[var(--text-muted)]">Куди орієнтуєтесь по ринку</legend>
+                  <RadioCards
+                    name="target-market"
+                    value={values.target_market}
+                    options={targetMarketOptions}
+                    onChange={(nextValue) => updateValue("target_market", nextValue)}
+                    disabled={isSubmitting}
+                  />
+                  {errors.target_market ? <span className="block text-xs text-rose-600">{errors.target_market}</span> : null}
+                </fieldset>
 
-          {requestError ? (
-            <p className="rounded-[1.3rem] border border-[rgba(201,155,134,0.5)] bg-[var(--danger-soft)] px-4 py-3 text-sm text-[var(--danger-strong)]">
-              {requestError}
-            </p>
-          ) : null}
-        </div>
+                <fieldset className="space-y-2">
+                  <legend className="text-sm font-medium leading-[1.6] text-[var(--text-muted)]">Що важливіше зараз</legend>
+                  <RadioCards
+                    name="transition-priority"
+                    value={values.transition_priority}
+                    options={transitionPriorityOptions}
+                    onChange={(nextValue) => updateValue("transition_priority", nextValue)}
+                    disabled={isSubmitting}
+                  />
+                  {errors.transition_priority ? (
+                    <span className="block text-xs text-rose-600">{errors.transition_priority}</span>
+                  ) : null}
+                </fieldset>
+              </div>
+            ) : null}
 
-        <div className="mt-7 flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
+            {requestError ? (
+              <p className="rounded-[1.3rem] border border-[rgba(201,155,134,0.5)] bg-[var(--danger-soft)] px-4 py-3 text-sm text-[var(--danger-strong)]">
+                {requestError}
+              </p>
+            ) : null}
+          </div>
+        </fieldset>
+
+        <div className="relative z-20 mt-7 flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
           <button
             type="button"
             onClick={handleBack}

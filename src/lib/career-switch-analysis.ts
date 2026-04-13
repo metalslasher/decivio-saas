@@ -1,9 +1,10 @@
 import OpenAI from "openai";
-
-export type ExperienceLevel = "none" | "basic" | "practical";
-export type EnglishLevel = "basic" | "intermediate" | "upper_intermediate" | "advanced";
-export type TargetMarket = "ukraine" | "remote" | "abroad";
-export type TransitionPriority = "speed" | "income";
+import type {
+  EnglishLevel,
+  ExperienceLevel,
+  TargetMarket,
+  TransitionPriority
+} from "@/lib/career-switch-form";
 export type SalaryLevel = "junior" | "middle" | "senior" | "lead";
 export type VerdictLabel = "stay" | "switch" | "depends";
 export type BetterLongTermDirection = "current_role" | "target_role" | "balanced";
@@ -38,7 +39,6 @@ export type CurrentRoleSnapshot = {
   best_case_level: BestCaseLevel;
   best_case_salary_range: SalaryRange;
   confidence: number;
-  sources: string[];
   caveats: string[];
   summary: string;
 };
@@ -58,7 +58,6 @@ export type TargetRoleSnapshot = {
   };
   probability_of_getting_job_within_12_months: number;
   confidence: number;
-  sources: string[];
   caveats: string[];
   summary: string;
 };
@@ -78,7 +77,6 @@ export type AnalysisNarrative = {
   personalization_notes: string[];
   cta_title: string;
   cta_body: string;
-  disclaimer: string;
 };
 
 export type RiskAssessment = {
@@ -171,7 +169,6 @@ const careerSwitchAnalysisSchema = {
             "best_case_level",
             "best_case_salary_range",
             "confidence",
-            "sources",
             "caveats",
             "summary"
           ],
@@ -184,7 +181,6 @@ const careerSwitchAnalysisSchema = {
             best_case_level: { type: "string", enum: ["senior", "lead"] },
             best_case_salary_range: salaryRangeSchema,
             confidence: { type: "number" },
-            sources: { type: "array", items: { type: "string" } },
             caveats: { type: "array", items: { type: "string" } },
             summary: { type: "string" }
           }
@@ -203,7 +199,6 @@ const careerSwitchAnalysisSchema = {
             "time_to_first_offer_months",
             "probability_of_getting_job_within_12_months",
             "confidence",
-            "sources",
             "caveats",
             "summary"
           ],
@@ -227,7 +222,6 @@ const careerSwitchAnalysisSchema = {
             },
             probability_of_getting_job_within_12_months: { type: "number" },
             confidence: { type: "number" },
-            sources: { type: "array", items: { type: "string" } },
             caveats: { type: "array", items: { type: "string" } },
             summary: { type: "string" }
           }
@@ -255,8 +249,7 @@ const careerSwitchAnalysisSchema = {
         "why_this_result",
         "personalization_notes",
         "cta_title",
-        "cta_body",
-        "disclaimer"
+        "cta_body"
       ],
       properties: {
         verdict_label: { type: "string", enum: ["stay", "switch", "depends"] },
@@ -265,8 +258,7 @@ const careerSwitchAnalysisSchema = {
         why_this_result: { type: "array", items: { type: "string" } },
         personalization_notes: { type: "array", items: { type: "string" } },
         cta_title: { type: "string" },
-        cta_body: { type: "string" },
-        disclaimer: { type: "string" }
+        cta_body: { type: "string" }
       }
     },
     guidance: {
@@ -339,54 +331,6 @@ function toStringArray(value: unknown, fieldName: string) {
   }
 
   return items;
-}
-
-function normalizeMarketSource(item: string) {
-  const normalized = item.trim();
-  if (!normalized) {
-    return null;
-  }
-
-  const lowered = normalized.toLowerCase();
-  if (
-    lowered.includes("example.com") ||
-    lowered.includes("placeholder") ||
-    lowered.includes("sample source") ||
-    lowered.includes("test source")
-  ) {
-    return null;
-  }
-
-  if (/^https?:\/\//i.test(normalized)) {
-    try {
-      const hostname = new URL(normalized).hostname.replace(/^www\./, "");
-      if (!hostname || hostname === "example.com" || hostname === "localhost" || hostname === "127.0.0.1") {
-        return null;
-      }
-
-      return hostname;
-    } catch {
-      return null;
-    }
-  }
-
-  return normalized;
-}
-
-function toMarketSourceArray(value: unknown, fieldName: string) {
-  if (!Array.isArray(value)) {
-    throw new Error(`Некоректне поле "${fieldName}" у career_switch_analysis.`);
-  }
-
-  const items = Array.from(
-    new Set(
-      value
-        .map((item) => (typeof item === "string" ? normalizeMarketSource(item) : null))
-        .filter((item): item is string => Boolean(item))
-    )
-  );
-
-  return items.length > 0 ? items : ["відкриті ринкові джерела"];
 }
 
 function parseSalaryLevel(value: unknown, fieldName: string): SalaryLevel {
@@ -465,7 +409,6 @@ function parseCurrentRoleSnapshot(value: unknown, fieldName: string): CurrentRol
     best_case_level: parseBestCaseLevel(raw.best_case_level, `${fieldName}.best_case_level`),
     best_case_salary_range: parseSalaryRange(raw.best_case_salary_range, `${fieldName}.best_case_salary_range`),
     confidence: toProbability(raw.confidence, `${fieldName}.confidence`),
-    sources: toMarketSourceArray(raw.sources, `${fieldName}.sources`),
     caveats: toStringArray(raw.caveats, `${fieldName}.caveats`),
     summary: toNonEmptyString(raw.summary, `${fieldName}.summary`)
   };
@@ -493,7 +436,6 @@ function parseTargetRoleSnapshot(value: unknown, fieldName: string): TargetRoleS
       `${fieldName}.probability_of_getting_job_within_12_months`
     ),
     confidence: toProbability(raw.confidence, `${fieldName}.confidence`),
-    sources: toMarketSourceArray(raw.sources, `${fieldName}.sources`),
     caveats: toStringArray(raw.caveats, `${fieldName}.caveats`),
     summary: toNonEmptyString(raw.summary, `${fieldName}.summary`)
   };
@@ -520,8 +462,7 @@ function parseNarrative(value: unknown, fieldName: string): AnalysisNarrative {
     why_this_result: toStringArray(raw.why_this_result, `${fieldName}.why_this_result`),
     personalization_notes: toStringArray(raw.personalization_notes, `${fieldName}.personalization_notes`),
     cta_title: toNonEmptyString(raw.cta_title, `${fieldName}.cta_title`),
-    cta_body: toNonEmptyString(raw.cta_body, `${fieldName}.cta_body`),
-    disclaimer: toNonEmptyString(raw.disclaimer, `${fieldName}.disclaimer`)
+    cta_body: toNonEmptyString(raw.cta_body, `${fieldName}.cta_body`)
   };
 }
 

@@ -4,12 +4,15 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import {
   validateCareerSwitchAnalysis,
-  type CareerSwitchAnalysis,
+  type CareerSwitchAnalysis
+} from "@/lib/career-switch-analysis";
+import {
+  parseStoredCareerSwitchInputs,
   type EnglishLevel,
   type ExperienceLevel,
   type TargetMarket,
   type TransitionPriority
-} from "@/lib/career-switch-analysis";
+} from "@/lib/career-switch-form";
 import { getSupabaseAdminClient } from "@/lib/db/supabase";
 import { GUEST_USER_COOKIE_NAME } from "@/lib/guest-session";
 import { createMetadata } from "@/lib/seo";
@@ -28,17 +31,6 @@ type SearchParams = {
 
 type ResultsPageProps = {
   searchParams?: SearchParams;
-};
-
-type SimulationInputs = {
-  current_income: number;
-  current_role: string;
-  current_experience_years: number;
-  target_role: string;
-  experience_level: ExperienceLevel;
-  english_level: EnglishLevel;
-  target_market: TargetMarket;
-  transition_priority: TransitionPriority;
 };
 
 type AnalysisMeta = {
@@ -62,67 +54,8 @@ function getSingleParam(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : value;
 }
 
-function toNumber(value: unknown) {
-  return typeof value === "number" && Number.isFinite(value) ? value : null;
-}
-
 function toString(value: unknown) {
   return typeof value === "string" && value.trim() !== "" ? value.trim() : null;
-}
-
-function normalizeExperienceLevel(value: unknown): ExperienceLevel | null {
-  return value === "none" || value === "basic" || value === "practical" ? value : null;
-}
-
-function normalizeEnglishLevel(value: unknown): EnglishLevel | null {
-  return value === "basic" || value === "intermediate" || value === "upper_intermediate" || value === "advanced" ? value : null;
-}
-
-function normalizeTargetMarket(value: unknown): TargetMarket | null {
-  return value === "ukraine" || value === "remote" || value === "abroad" ? value : null;
-}
-
-function normalizeTransitionPriority(value: unknown): TransitionPriority | null {
-  return value === "speed" || value === "income" ? value : null;
-}
-
-function normalizeInputs(value: unknown): SimulationInputs | null {
-  if (!isRecord(value)) {
-    return null;
-  }
-
-  const currentIncome = toNumber(value.current_income);
-  const currentRole = toString(value.current_role);
-  const currentExperienceYears = toNumber(value.current_experience_years);
-  const targetRole = toString(value.target_role);
-  const experienceLevel = normalizeExperienceLevel(value.experience_level);
-  const englishLevel = normalizeEnglishLevel(value.english_level);
-  const targetMarket = normalizeTargetMarket(value.target_market);
-  const transitionPriority = normalizeTransitionPriority(value.transition_priority);
-
-  if (
-    currentIncome === null ||
-    currentRole === null ||
-    currentExperienceYears === null ||
-    targetRole === null ||
-    experienceLevel === null ||
-    englishLevel === null ||
-    targetMarket === null ||
-    transitionPriority === null
-  ) {
-    return null;
-  }
-
-  return {
-    current_income: currentIncome,
-    current_role: currentRole,
-    current_experience_years: currentExperienceYears,
-    target_role: targetRole,
-    experience_level: experienceLevel,
-    english_level: englishLevel,
-    target_market: targetMarket,
-    transition_priority: transitionPriority
-  };
 }
 
 function extractAnalysis(value: unknown): CareerSwitchAnalysis | null {
@@ -408,19 +341,19 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
     );
   }
 
-  const guestUserId = cookies().get(GUEST_USER_COOKIE_NAME)?.value ?? null;
-  if (!guestUserId) {
+  const guestSessionToken = cookies().get(GUEST_USER_COOKIE_NAME)?.value ?? null;
+  if (!guestSessionToken) {
     return (
       <EmptyState
         title="Цей результат доступний лише у вашій сесії"
-        description="У поточній версії сервісу результати прив'язані до тимчасового guest-профілю в браузері. Запустіть симуляцію ще раз у цій сесії, щоб відкрити новий результат."
+        description="У поточній версії сервісу результати прив'язані до тимчасової guest-сесії в браузері. Запустіть симуляцію ще раз у цій сесії, щоб відкрити новий результат."
       />
     );
   }
 
   const { data: simulation, error: simulationError } = await supabase
     .from("simulations")
-    .select("id, user_id, inputs, created_at")
+    .select("id, user_id, guest_session_id, inputs, created_at")
     .eq("id", simulationId)
     .maybeSingle();
 
@@ -433,11 +366,14 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
     );
   }
 
-  if (simulation.user_id !== guestUserId) {
+  const simulationOwnerId = toString(simulation.user_id);
+  const simulationGuestSessionId = toString(simulation.guest_session_id);
+
+  if (simulationOwnerId !== guestSessionToken && simulationGuestSessionId !== guestSessionToken) {
     return (
       <EmptyState
         title="Цей результат прив'язаний до іншої сесії"
-        description="У локальному режимі результати прив'язані до тимчасового профілю користувача. Запустіть новий аналіз у поточній сесії."
+        description="У локальному режимі результати прив'язані до тимчасової guest-сесії. Запустіть новий аналіз у поточній сесії."
       />
     );
   }
@@ -459,7 +395,7 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
     );
   }
 
-  const inputs = normalizeInputs(simulation.inputs);
+  const inputs = parseStoredCareerSwitchInputs(simulation.inputs);
   const analysis = extractAnalysis(result.ai_summary);
   const meta = extractMeta(result.ai_summary);
 
