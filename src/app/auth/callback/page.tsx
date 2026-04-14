@@ -185,40 +185,35 @@ export default function AuthCallbackPage() {
     };
   }, [supabase]);
 
+  if (state.status === "loading") {
+    return (
+      <section className="fixed inset-0 z-[80] flex items-center justify-center bg-[radial-gradient(46rem_28rem_at_18%_12%,#edf2ff_0%,transparent_72%),radial-gradient(34rem_24rem_at_82%_10%,#f2f5ff_0%,transparent_68%),linear-gradient(180deg,#fbfcff_0%,#f5f7fb_100%)]">
+        <div role="status" aria-live="polite" aria-label={state.title} className="relative flex h-24 w-24 items-center justify-center">
+          <span className="absolute inset-0 rounded-full border border-[rgba(52,83,244,0.12)] bg-white/80" />
+          <span className="absolute inset-[0.6rem] rounded-full border-[3px] border-[rgba(52,83,244,0.12)] border-t-[var(--accent-strong)] animate-spin" />
+          <span className="absolute h-3.5 w-3.5 rounded-full bg-[var(--accent-strong)] shadow-[0_0_0_8px_rgba(67,97,255,0.12)]" />
+          <span className="sr-only">{state.message}</span>
+        </div>
+      </section>
+    );
+  }
+
   return (
-    <section className="fixed inset-0 z-[80] overflow-y-auto px-5 py-8 sm:px-6 md:px-8">
-      <div className="absolute inset-0 bg-[radial-gradient(46rem_28rem_at_18%_12%,rgba(67,97,255,0.14),transparent_72%),radial-gradient(34rem_24rem_at_82%_10%,rgba(152,165,255,0.14),transparent_68%),linear-gradient(180deg,rgba(251,252,255,0.96),rgba(245,247,251,0.98))]" />
+    <section className="fixed inset-0 z-[80] overflow-y-auto bg-[radial-gradient(46rem_28rem_at_18%_12%,#edf2ff_0%,transparent_72%),radial-gradient(34rem_24rem_at_82%_10%,#f2f5ff_0%,transparent_68%),linear-gradient(180deg,#fbfcff_0%,#f5f7fb_100%)] px-5 py-8 sm:px-6 md:px-8">
+      <div className="mx-auto flex min-h-full max-w-xl items-center justify-center">
+        <div className="surface-panel w-full rounded-[2rem] px-6 py-8 text-left sm:px-8 sm:py-10 sm:text-center">
+          <span className="eyebrow-pill">{state.eyebrow}</span>
+          <h1 className="page-title mt-5 text-balance">{state.title}</h1>
+          <p className="mt-4 text-[0.98rem] leading-[1.75] text-[var(--text-muted)]">{state.message}</p>
 
-      <div className="relative mx-auto flex min-h-full max-w-xl items-center justify-center">
-        <div className="surface-panel w-full rounded-[2rem] px-6 py-8 text-center sm:px-8 sm:py-10">
-          {state.status === "loading" ? (
-            <div role="status" aria-live="polite" className="flex flex-col items-center">
-              <div className="relative flex h-24 w-24 items-center justify-center">
-                <span className="absolute inset-0 rounded-full border border-[rgba(52,83,244,0.12)] bg-[rgba(255,255,255,0.52)]" />
-                <span className="absolute inset-[0.6rem] rounded-full border-[3px] border-[rgba(52,83,244,0.12)] border-t-[var(--accent-strong)] animate-spin" />
-                <span className="absolute h-3.5 w-3.5 rounded-full bg-[var(--accent-strong)] shadow-[0_0_0_8px_rgba(67,97,255,0.12)]" />
-              </div>
-
-              <span className="eyebrow-pill mt-6">{state.eyebrow}</span>
-              <h1 className="page-title mt-5 text-balance">{state.title}</h1>
-              <p className="mt-3 text-[0.98rem] leading-[1.75] text-[var(--text-muted)]">{state.message}</p>
-            </div>
-          ) : (
-            <div className="text-left sm:text-center">
-              <span className="eyebrow-pill">{state.eyebrow}</span>
-              <h1 className="page-title mt-5 text-balance">{state.title}</h1>
-              <p className="mt-4 text-[0.98rem] leading-[1.75] text-[var(--text-muted)]">{state.message}</p>
-
-              <div className="mt-7 flex flex-wrap gap-3 sm:justify-center">
-                <Link href={state.primaryHref} className="btn-primary">
-                  {state.primaryLabel}
-                </Link>
-                <Link href="/" className="btn-secondary">
-                  На головну
-                </Link>
-              </div>
-            </div>
-          )}
+          <div className="mt-7 flex flex-wrap gap-3 sm:justify-center">
+            <Link href={state.primaryHref} className="btn-primary">
+              {state.primaryLabel}
+            </Link>
+            <Link href="/" className="btn-secondary">
+              На головну
+            </Link>
+          </div>
         </div>
       </div>
     </section>
