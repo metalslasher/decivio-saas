@@ -3,7 +3,6 @@
 import type { EmailOtpType } from "@supabase/supabase-js";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
 import { getSupabaseBrowserClient } from "@/lib/db/supabase-browser";
 
 type CallbackState =
@@ -35,8 +34,8 @@ function getFlowCopy(flowType: string) {
   if (flowType === "recovery") {
     return {
       eyebrow: "Зміна пароля",
-      loadingTitle: "Готуємо форму нового пароля",
-      loadingMessage: "Перевіряємо посилання і відкриваємо безпечне оновлення пароля.",
+      loadingTitle: "Відкриваємо зміну пароля",
+      loadingMessage: "Це займе лише кілька секунд.",
       errorTitle: "Не вдалося відкрити зміну пароля",
       errorHref: "/login?next=%2Freset-password",
       errorLabel: "Перейти до входу"
@@ -44,9 +43,9 @@ function getFlowCopy(flowType: string) {
   }
 
   return {
-    eyebrow: "Підтвердження",
-    loadingTitle: "Завершуємо вхід",
-    loadingMessage: "Підтверджуємо акаунт і відкриваємо ваш кабінет.",
+    eyebrow: "Вхід",
+    loadingTitle: "Відкриваємо кабінет",
+    loadingMessage: "Це займе лише кілька секунд.",
     errorTitle: "Не вдалося підтвердити акаунт",
     errorHref: "/login?next=%2Fdashboard",
     errorLabel: "Перейти до входу"
@@ -69,13 +68,12 @@ function mapCallbackErrorMessage(error: unknown) {
 }
 
 export default function AuthCallbackPage() {
-  const router = useRouter();
   const supabase = useMemo(() => getSupabaseBrowserClient(), []);
   const [state, setState] = useState<CallbackState>({
     status: "loading",
-    eyebrow: "Підтвердження",
-    title: "Завершуємо вхід",
-    message: "Підтверджуємо акаунт і відкриваємо ваш кабінет."
+    eyebrow: "Вхід",
+    title: "Відкриваємо кабінет",
+    message: "Це займе лише кілька секунд."
   });
 
   useEffect(() => {
@@ -89,6 +87,7 @@ export default function AuthCallbackPage() {
       const flowCopy = getFlowCopy(flowType);
       const nextPath = resolveNextPath(searchParams, hashParams);
       const urlError = searchParams.get("error_description") ?? searchParams.get("error");
+      const hasHashParams = currentUrl.hash.length > 1;
 
       if (isMounted) {
         setState({
@@ -97,6 +96,10 @@ export default function AuthCallbackPage() {
           title: flowCopy.loadingTitle,
           message: flowCopy.loadingMessage
         });
+      }
+
+      if (hasHashParams) {
+        window.history.replaceState(window.history.state, "", `${currentUrl.pathname}${currentUrl.search}`);
       }
 
       if (urlError) {
@@ -158,8 +161,7 @@ export default function AuthCallbackPage() {
           return;
         }
 
-        router.replace(nextPath);
-        router.refresh();
+        window.location.replace(nextPath);
       } catch (error) {
         if (!isMounted) {
           return;
@@ -181,26 +183,43 @@ export default function AuthCallbackPage() {
     return () => {
       isMounted = false;
     };
-  }, [router, supabase]);
+  }, [supabase]);
 
   return (
-    <section className="mx-auto max-w-2xl py-10 md:py-14">
-      <div className="surface-panel rounded-[2rem] p-6 md:p-8">
-        <span className="eyebrow-pill">{state.eyebrow}</span>
+    <section className="fixed inset-0 z-[80] overflow-y-auto px-5 py-8 sm:px-6 md:px-8">
+      <div className="absolute inset-0 bg-[radial-gradient(46rem_28rem_at_18%_12%,rgba(67,97,255,0.14),transparent_72%),radial-gradient(34rem_24rem_at_82%_10%,rgba(152,165,255,0.14),transparent_68%),linear-gradient(180deg,rgba(251,252,255,0.96),rgba(245,247,251,0.98))]" />
 
-        <h1 className="page-title mt-4 max-w-[14ch]">{state.title}</h1>
-        <p className="lead-copy mt-4">{state.message}</p>
+      <div className="relative mx-auto flex min-h-full max-w-xl items-center justify-center">
+        <div className="surface-panel w-full rounded-[2rem] px-6 py-8 text-center sm:px-8 sm:py-10">
+          {state.status === "loading" ? (
+            <div role="status" aria-live="polite" className="flex flex-col items-center">
+              <div className="relative flex h-24 w-24 items-center justify-center">
+                <span className="absolute inset-0 rounded-full border border-[rgba(52,83,244,0.12)] bg-[rgba(255,255,255,0.52)]" />
+                <span className="absolute inset-[0.6rem] rounded-full border-[3px] border-[rgba(52,83,244,0.12)] border-t-[var(--accent-strong)] animate-spin" />
+                <span className="absolute h-3.5 w-3.5 rounded-full bg-[var(--accent-strong)] shadow-[0_0_0_8px_rgba(67,97,255,0.12)]" />
+              </div>
 
-        {state.status === "error" ? (
-          <div className="mt-6 flex flex-wrap gap-3">
-            <Link href={state.primaryHref} className="btn-primary">
-              {state.primaryLabel}
-            </Link>
-            <Link href="/" className="btn-secondary">
-              На головну
-            </Link>
-          </div>
-        ) : null}
+              <span className="eyebrow-pill mt-6">{state.eyebrow}</span>
+              <h1 className="page-title mt-5 text-balance">{state.title}</h1>
+              <p className="mt-3 text-[0.98rem] leading-[1.75] text-[var(--text-muted)]">{state.message}</p>
+            </div>
+          ) : (
+            <div className="text-left sm:text-center">
+              <span className="eyebrow-pill">{state.eyebrow}</span>
+              <h1 className="page-title mt-5 text-balance">{state.title}</h1>
+              <p className="mt-4 text-[0.98rem] leading-[1.75] text-[var(--text-muted)]">{state.message}</p>
+
+              <div className="mt-7 flex flex-wrap gap-3 sm:justify-center">
+                <Link href={state.primaryHref} className="btn-primary">
+                  {state.primaryLabel}
+                </Link>
+                <Link href="/" className="btn-secondary">
+                  На головну
+                </Link>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </section>
   );

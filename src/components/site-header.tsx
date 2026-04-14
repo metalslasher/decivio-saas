@@ -93,6 +93,10 @@ export function SiteHeader() {
     };
   }, [pathname]);
 
+  if (pathname?.startsWith("/auth/callback")) {
+    return null;
+  }
+
   const isDashboardArea = pathname?.startsWith("/dashboard") ?? false;
   const isDashboardUser = authState.status === "user" && isDashboardArea;
   const logoHref = isDashboardUser ? "/dashboard" : "/";
