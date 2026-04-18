@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useState, type CSSProperties, type FormEvent, type ReactNode } from "react";
 import { useAuthDialog } from "@/components/auth-dialog-provider";
 import { WordmarkLogo } from "@/components/wordmark-logo";
 import { getSupabaseBrowserClient } from "@/lib/db/supabase-browser";
@@ -201,6 +202,15 @@ function CreditCardIcon() {
   );
 }
 
+function SearchIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="11" cy="11" r="6.5" />
+      <path d="M16 16l4 4" />
+    </svg>
+  );
+}
+
 function ActivityIcon() {
   return (
     <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -256,72 +266,72 @@ function BrandBadge() {
 const dashboardNavItems: DashboardNavItem[] = [
   { view: "overview", label: "Головна", helper: "Останній сценарій, модулі й пріоритети.", icon: <HomeIcon /> },
   { view: "scenario", label: "Сценарії", helper: "Останній розрахунок і історія переходів.", icon: <RouteIcon /> },
-  { view: "resume", label: "CV Builder", helper: "Резюме під цільову роль і вакансію.", icon: <ResumeIcon /> },
-  { view: "interviews", label: "Співбесіди", helper: "Питання, mock interview і фідбек.", icon: <InterviewIcon /> },
-  { view: "jobs", label: "Нова робота", helper: "Day One, адаптація й очікування від ролі.", icon: <BriefcaseIcon /> },
-  { view: "offers", label: "Офери", helper: "Порівняння пропозицій і рішень.", icon: <OfferIcon /> },
-  { view: "assistant", label: "AI Assistant", helper: "Контекстний помічник по всьому маршруту.", icon: <SparkIcon /> },
-  { view: "access", label: "Доступ", helper: "Тариф, billing і керування акаунтом.", icon: <CreditCardIcon /> }
+  { view: "resume", label: "Резюме", helper: "Резюме під цільову роль і вакансію.", icon: <ResumeIcon /> },
+  { view: "interviews", label: "Співбесіди", helper: "Питання, пробна співбесіда і відгук.", icon: <InterviewIcon /> },
+  { view: "jobs", label: "Нова робота", helper: "Перші дні, адаптація й очікування від ролі.", icon: <BriefcaseIcon /> },
+  { view: "offers", label: "Пропозиції", helper: "Порівняння пропозицій і рішень.", icon: <OfferIcon /> },
+  { view: "assistant", label: "ШІ-помічник", helper: "Контекстний помічник по всьому маршруту.", icon: <SparkIcon /> },
+  { view: "access", label: "Доступ", helper: "Тариф, оплата і керування акаунтом.", icon: <CreditCardIcon /> }
 ];
 
 const dashboardModules: DashboardModule[] = [
   {
     view: "resume",
-    title: "CV Builder",
-    description: "Окремий робочий простір для адаптації резюме під роль, seniority і конкретну вакансію.",
+    title: "Резюме",
+    description: "Окремий розділ для адаптації резюме під роль, рівень і конкретну вакансію.",
     helper: "Після сильного сценарію це перший логічний крок до ринку.",
-    searchTerms: ["cv", "резюме", "ats", "вакансія"],
+    searchTerms: ["резюме", "cv", "вакансія", "роль"],
     icon: <ResumeIcon />
   },
   {
     view: "interviews",
     title: "Підготовка до співбесід",
-    description: "Місце для питань, mock interview і підсвітки слабких відповідей під цільову роль.",
-    helper: "Працює після сценарію і CV, коли вже зрозуміло, куди ви йдете.",
-    searchTerms: ["співбесіди", "interview", "mock", "питання"],
+    description: "Місце для питань, пробної співбесіди й підсвітки слабких відповідей під цільову роль.",
+    helper: "Працює після сценарію і резюме, коли вже зрозуміло, куди ви йдете.",
+    searchTerms: ["співбесіди", "співбесіда", "пробна", "питання"],
     icon: <InterviewIcon />
   },
   {
     view: "jobs",
-    title: "Нова робота / Day One",
+    title: "Перші дні на новій роботі",
     description: "Окремий модуль про старт у ролі, адаптацію, очікування від команди й перші тижні.",
     helper: "Допомагає перейти від оферу до реальної роботи без хаосу.",
-    searchTerms: ["day one", "нова робота", "адаптація", "онбординг"],
+    searchTerms: ["перші дні", "нова робота", "адаптація", "старт"],
     icon: <BriefcaseIcon />
   },
   {
     view: "offers",
-    title: "Порівняння оферів",
+    title: "Порівняння пропозицій",
     description: "Матриця рішень по зарплаті, ризику, траєкторії й аргументах для переговорів.",
-    helper: "Фінальний decision board, коли пропозиція вже на столі.",
-    searchTerms: ["офер", "offer", "переговори", "зарплата"],
+    helper: "Фінальний блок для рішення, коли пропозиція вже на столі.",
+    searchTerms: ["пропозиція", "офер", "переговори", "зарплата"],
     icon: <OfferIcon />
   },
   {
     view: "assistant",
-    title: "Career AI Assistant",
-    description: "Контекстний AI-шар поверх сценаріїв, CV, вакансій і співбесід із короткими наступними діями.",
+    title: "Кар'єрний ШІ-помічник",
+    description: "Контекстний ШІ-помічник для сценаріїв, резюме, вакансій і співбесід із короткими наступними діями.",
     helper: "Допомагає швидше переходити між модулями й не губити контекст.",
-    searchTerms: ["assistant", "ai", "поради", "помічник"],
+    searchTerms: ["помічник", "ші", "поради", "кроки"],
     icon: <SparkIcon />
   }
 ];
 
 const moduleWorkspaceConfigs: Record<DashboardModule["view"], ModuleWorkspaceConfig> = {
   resume: {
-    eyebrow: "CV Builder",
+    eyebrow: "Резюме",
     title: "Робочий простір для резюме під цільову роль",
-    description: "Цей модуль уже виділено в окремий workspace: тут логічно збирати CV під роль, вакансію й seniority без змішування з іншими задачами кабінету.",
+    description: "Цей модуль уже виділено в окремий розділ: тут логічно збирати резюме під роль, вакансію й рівень без змішування з іншими задачами кабінету.",
     summary: [
       { label: "Вхід", value: "Сценарій, досвід, вакансія" },
-      { label: "Фокус", value: "Досягнення, цифри, relevance" },
-      { label: "Вихід", value: "Чернетка CV + версії під ролі" }
+      { label: "Фокус", value: "Досягнення, цифри, релевантність" },
+      { label: "Вихід", value: "Чернетка резюме та версії під ролі" }
     ],
     columns: [
       {
         title: "Що тут має жити",
-        description: "Окремі зони під базову версію CV, адаптацію під вакансію й бібліотеку варіантів.",
-        items: ["Блок досягнень із цифрами", "Структура під ATS і читабельність", "Швидкий перехід до перевірки вакансії"]
+        description: "Окремі зони під базову версію резюме, адаптацію під вакансію й бібліотеку варіантів.",
+        items: ["Блок досягнень із цифрами", "Структура для систем відбору і читабельність", "Швидкий перехід до перевірки вакансії"]
       },
       {
         title: "Перший реліз",
@@ -337,34 +347,34 @@ const moduleWorkspaceConfigs: Record<DashboardModule["view"], ModuleWorkspaceCon
   },
   interviews: {
     eyebrow: "Співбесіди",
-    title: "Окремий workspace для підготовки до співбесід",
-    description: "Тут буде окремий інтерфейс для recruiter screen, manager interview і практичних питань без змішування з аналітикою переходу.",
+    title: "Окремий розділ для підготовки до співбесід",
+    description: "Тут буде окремий інтерфейс для першої розмови з рекрутером, співбесіди з менеджером і практичних питань без змішування з аналітикою переходу.",
     summary: [
       { label: "Вхід", value: "Роль, рівень, вакансія" },
       { label: "Фокус", value: "Слабкі місця й аргументація" },
-      { label: "Вихід", value: "Пакет питань + mock flow" }
+      { label: "Вихід", value: "Пакет питань + пробний сценарій" }
     ],
     columns: [
       {
         title: "Що тут має жити",
-        description: "Потоки під recruiter call, hiring manager і кейсову частину.",
-        items: ["Добірка питань за роллю", "Сильні й слабкі відповіді", "Mock режим із фідбеком"]
+        description: "Потоки під розмову з рекрутером, співбесіду з менеджером і кейсову частину.",
+        items: ["Добірка питань за роллю", "Сильні й слабкі відповіді", "Пробний режим із відгуком"]
       },
       {
         title: "Перший реліз",
         description: "Сюди можна підключати генерацію запитань, оцінку відповідей і пріоритети тренування.",
-        items: ["Розділення по етапах інтерв'ю", "Коментарі до відповідей", "План тренування по слабких місцях"]
+        items: ["Розділення по етапах співбесіди", "Коментарі до відповідей", "План тренування по слабких місцях"]
       },
       {
         title: "Місце в маршруті",
-        description: "Модуль працює після CV Builder, коли користувач уже рухається до ринку.",
-        items: ["Після підготовки CV", "Перед активними відгуками", "Перед фінальними інтерв'ю"]
+        description: "Модуль працює після розділу з резюме, коли користувач уже рухається до ринку.",
+        items: ["Після підготовки резюме", "Перед активними відгуками", "Перед фінальними співбесідами"]
       }
     ]
   },
   jobs: {
     eyebrow: "Нова робота",
-    title: "Day One workspace для реалістичного старту в ролі",
+    title: "Розділ для реалістичного старту в ролі",
     description: "Окремий модуль про темп роботи, адаптацію, очікування від нової ролі й перші тижні після оферу.",
     summary: [
       { label: "Вхід", value: "Роль, команда, контекст" },
@@ -390,12 +400,12 @@ const moduleWorkspaceConfigs: Record<DashboardModule["view"], ModuleWorkspaceCon
     ]
   },
   offers: {
-    eyebrow: "Офери",
-    title: "Decision board для порівняння оферів",
+    eyebrow: "Пропозиції",
+    title: "Блок рішень для порівняння пропозицій",
     description: "Окремий екран під матрицю доходу, ризику, умов і компромісів. Це логічна фінальна зона прийняття рішення після сценаріїв і співбесід.",
     summary: [
       { label: "Вхід", value: "Поточна роль + 1-2 офери" },
-      { label: "Фокус", value: "Ризик, гроші, timing" },
+      { label: "Фокус", value: "Ризик, гроші, час" },
       { label: "Вихід", value: "Рекомендація по рішенню" }
     ],
     columns: [
@@ -406,20 +416,20 @@ const moduleWorkspaceConfigs: Record<DashboardModule["view"], ModuleWorkspaceCon
       },
       {
         title: "Перший реліз",
-        description: "Сюди логічно підключати параметри оферу, запас міцності та decision summary.",
-        items: ["Форма умов оферу", "Сильні й слабкі сторони", "Висновок по fit і timing"]
+        description: "Сюди логічно підключати параметри пропозиції, запас міцності та підсумок рішення.",
+        items: ["Форма умов пропозиції", "Сильні й слабкі сторони", "Висновок по відповідності й часу"]
       },
       {
         title: "Місце в маршруті",
-        description: "Це останній великий крок перед Day One, коли рішення вже потрібно приймати.",
+        description: "Це останній великий крок перед стартом у новій ролі, коли рішення вже потрібно приймати.",
         items: ["Коли є конкретна пропозиція", "Для порівняння двох маршрутів", "Для переговорів про умови"]
       }
     ]
   },
   assistant: {
-    eyebrow: "AI Assistant",
-    title: "Контекстний AI-помічник поверх усього кабінету",
-    description: "Окремий розділ під AI, який розуміє ваш сценарій, модулі, доступ і може підказувати наступний крок без шуму.",
+    eyebrow: "ШІ-помічник",
+    title: "Контекстний ШІ-помічник для всього кабінету",
+    description: "Окремий розділ для ШІ, який розуміє ваш сценарій, модулі, доступ і може підказувати наступний крок без шуму.",
     summary: [
       { label: "Вхід", value: "Контекст користувача і модулів" },
       { label: "Фокус", value: "Короткі наступні дії" },
@@ -429,16 +439,16 @@ const moduleWorkspaceConfigs: Record<DashboardModule["view"], ModuleWorkspaceCon
       {
         title: "Що тут має жити",
         description: "Чат, швидкі команди й короткі сценарії дій усередині кабінету.",
-        items: ["Промпти для CV і вакансій", "AI по сценаріях та оферах", "Пояснення складних рішень простою мовою"]
+        items: ["Підказки для резюме і вакансій", "ШІ для сценаріїв та пропозицій", "Пояснення складних рішень простою мовою"]
       },
       {
         title: "Перший реліз",
         description: "Сюди добре лягає чат, пам'ять по користувачу й переходи до потрібних модулів.",
-        items: ["Готові запити з dashboard", "Поради на основі останнього сценарію", "Контекстні переходи в модулі"]
+        items: ["Готові запити з головного екрана", "Поради на основі останнього сценарію", "Контекстні переходи в модулі"]
       },
       {
         title: "Місце в маршруті",
-        description: "AI не дублює модулі, а пришвидшує рух між ними й економить увагу.",
+        description: "ШІ не дублює модулі, а пришвидшує рух між ними й економить увагу.",
         items: ["Працює поверх усієї навігації", "Підказує, з чого почати", "Не дає загубитися в наступних кроках"]
       }
     ]
@@ -497,7 +507,7 @@ function mapTargetMarketLabel(value: string | null) {
     case "ukraine":
       return "ринок України";
     case "remote":
-      return "remote-ринок";
+      return "віддалений ринок";
     case "abroad":
       return "ринок за кордоном";
     default:
@@ -518,11 +528,11 @@ function mapPriorityLabel(value: string | null) {
 
 function mapAccessLabel(plan: "free" | "pro", status: "free" | "trial" | "active" | "canceled" | "past_due") {
   if (plan === "pro" && status === "active") {
-    return "Pro активний";
+    return "План Pro активний";
   }
 
   if (plan === "pro" && status === "trial") {
-    return "Пробний Pro";
+    return "Пробний період Pro";
   }
 
   if (plan === "pro" && status === "past_due") {
@@ -530,7 +540,7 @@ function mapAccessLabel(plan: "free" | "pro", status: "free" | "trial" | "active
   }
 
   if (plan === "pro" && status === "canceled") {
-    return "Pro призупинено";
+    return "План Pro призупинено";
   }
 
   return "Базовий доступ";
@@ -613,6 +623,10 @@ function formatSignedMoney(value: number | null) {
   return `${sign}${formatUah(Math.abs(rounded))}`;
 }
 
+function normalizeSearchQuery(value: string | null | undefined) {
+  return value?.trim().toLowerCase() ?? "";
+}
+
 function extractSimulationSnapshot(simulation: SimulationRow, result: SimulationResultRow | null): DashboardSimulation {
   const inputs = isRecord(simulation.inputs) ? simulation.inputs : null;
   const metrics = result?.summary_metrics && isRecord(result.summary_metrics) ? result.summary_metrics : null;
@@ -675,15 +689,15 @@ function buildProgressSteps(totalSimulations: number, subscription: DashboardAcc
       progress: totalSimulations >= 3 ? 100 : totalSimulations === 2 ? 76 : totalSimulations === 1 ? 42 : 0
     },
     {
-      label: "Зібрати CV під цільову роль",
+      label: "Зібрати резюме під цільову роль",
       progress: subscription.plan === "pro" ? (totalSimulations > 0 ? 38 : 10) : 0
     },
     {
-      label: "Пройти mock interview",
+      label: "Пройти пробну співбесіду",
       progress: subscription.plan === "pro" ? (totalSimulations > 0 ? 18 : 0) : 0
     },
     {
-      label: "Оцінити offer-fit",
+      label: "Оцінити відповідність пропозиції",
       progress: 0
     }
   ];
@@ -722,20 +736,20 @@ function buildInsights(
 
   if (!lastSimulation) {
     return [
-      "Почніть зі стартового сценарію, щоб dashboard перестав бути загальним і підлаштувався під ваш маршрут.",
+      "Почніть зі стартового сценарію, щоб головний екран перестав бути загальним і підлаштувався під ваш маршрут.",
       subscription.plan === "pro"
-        ? "У вас уже відкритий повний стек. Після першого сценарію можна одразу йти в CV Builder та підготовку до співбесід."
+        ? "У вас уже відкритий повний набір модулів. Після першого сценарію можна одразу йти в розділ резюме та підготовку до співбесід."
         : "Поки достатньо зібрати один сильний сценарій. Платні модулі логічно підключати вже після цього.",
-      "Навігація в кабінеті побудована по маршруту: сценарії -> CV -> співбесіди -> офери -> Day One."
+      "Навігація в кабінеті побудована по маршруту: сценарії -> резюме -> співбесіди -> пропозиції -> нова робота."
     ];
   }
 
   return [
     verdict ? `${verdict}. Тримайте цей маршрут як базовий фокус кабінету.` : "Останній сценарій уже задає контекст для наступних модулів.",
     probability
-      ? `${probability}. Це хороший орієнтир, щоб вирішити, чи переходити до CV і interview prep вже зараз.`
-      : "Після сценарію логічно перейти до CV і перевірки, як ви виглядаєте під реальні вакансії.",
-    targetMarket ? `Орієнтир зараз: ${targetMarket}. Це впливатиме і на вакансії, і на мову CV, і на вимоги ринку.` : totalSimulations > 1 ? "Спробуйте ще один альтернативний маршрут, щоб бачити не одну точку, а поле рішень." : "Після першого розрахунку варто додати альтернативний сценарій для порівняння."
+      ? `${probability}. Це хороший орієнтир, щоб вирішити, чи переходити до розділу резюме й підготовки до співбесід уже зараз.`
+      : "Після сценарію логічно перейти до резюме й перевірки, як ви виглядаєте під реальні вакансії.",
+    targetMarket ? `Орієнтир зараз: ${targetMarket}. Це впливатиме і на вакансії, і на мову резюме, і на вимоги ринку.` : totalSimulations > 1 ? "Спробуйте ще один альтернативний маршрут, щоб бачити не одну точку, а поле рішень." : "Після першого розрахунку варто додати альтернативний сценарій для порівняння."
   ];
 }
 
@@ -764,8 +778,8 @@ function buildActivityItems(recentSimulations: DashboardSimulation[], subscripti
       description: "Після першого розрахунку тут підтягнуться фокус, історія та рекомендації."
     },
     {
-      title: subscription.plan === "pro" ? "Pro доступ уже активний" : "Базовий доступ активний",
-      description: subscription.plan === "pro" ? "Усі модулі прив'язані до цього акаунта." : "Після апгрейду тут з'явиться billing і межі плану."
+      title: subscription.plan === "pro" ? "План Pro уже активний" : "Базовий доступ активний",
+      description: subscription.plan === "pro" ? "Усі модулі прив'язані до цього акаунта." : "Після оновлення тут з'являться оплата й межі плану."
     }
   ];
 }
@@ -833,7 +847,7 @@ function DashboardGuest({ onLogin, onSignup }: { onLogin: () => void; onSignup: 
             </h1>
             <p className="mt-5 max-w-2xl text-[1rem] leading-[1.78] text-[var(--text-muted)]">
               Після авторизації тут зʼявиться робочий простір зі сценаріями, історією переходів, модульною навігацією, доступом до тарифу
-              та окремими екранами під CV, співбесіди, офери й AI-помічника.
+              та окремими екранами під резюме, співбесіди, пропозиції й ШІ-помічника.
             </p>
 
             <div className="mt-7 flex flex-wrap gap-3">
@@ -848,10 +862,10 @@ function DashboardGuest({ onLogin, onSignup }: { onLogin: () => void; onSignup: 
 
           <div className="grid gap-4 md:grid-cols-2">
             {[
-              ["Ліва shell", "Sidebar живе окремо від контенту й лишається під рукою."],
-              ["Модулі", "Кожен інструмент має свій workspace, а не змішується в один екран."],
+              ["Ліва навігація", "Бокове меню живе окремо від контенту й лишається під рукою."],
+              ["Модулі", "Кожен інструмент має свій розділ, а не змішується в один екран."],
               ["Останній сценарій", "У фокусі завжди останній розрахунок або онбординг, якщо його ще не було."],
-              ["Доступ", "Тариф, billing і керування акаунтом винесені в окремий сервісний розділ."]
+              ["Доступ", "Тариф, оплата й керування акаунтом винесені в окремий сервісний розділ."]
             ].map(([title, description]) => (
               <article key={title} className="surface-panel rounded-[1.7rem] p-5">
                 <h2 className="text-[1.1rem] font-semibold tracking-[-0.03em] text-[var(--text-strong)]">{title}</h2>
@@ -973,10 +987,14 @@ function DashboardSidebar({
         }`}
       >
         <div className="dashboard-sidebar-panel flex h-full flex-col">
-          <div className="flex h-[var(--dashboard-header-height)] items-center justify-between border-b border-[rgba(24,26,32,0.08)] px-4">
-            <Link href="/dashboard" aria-label="Decivio" className="min-w-0">
-              {isCompact ? <BrandBadge /> : <WordmarkLogo className="text-[2.05rem]" />}
-            </Link>
+            <div
+              className={`flex h-[var(--dashboard-header-height)] items-center border-b border-[rgba(24,26,32,0.08)] ${
+                isCompact ? "justify-center px-0" : "justify-between px-4"
+              }`}
+            >
+              <Link href="/dashboard" aria-label="Decivio" className={`min-w-0 ${isCompact ? "mx-auto" : ""}`}>
+                {isCompact ? <BrandBadge /> : <WordmarkLogo className="text-[2.05rem]" />}
+              </Link>
 
             <div className="flex items-center">
               <button type="button" onClick={onCloseMobile} className="dashboard-icon-button lg:hidden" aria-label="Закрити навігацію">
@@ -1040,14 +1058,9 @@ function DashboardSidebar({
                   {isCompact ? <ExpandIcon /> : <CollapseIcon />}
                 </span>
 
-                {!isCompact ? (
-                  <span className="min-w-0">
-                    <span className="block text-sm font-semibold text-[var(--text-strong)]">Компактне меню</span>
-                    <span className="mt-1 block text-[0.82rem] leading-[1.5] text-inherit opacity-80">Згорнути shell до іконок і звільнити більше простору для контенту.</span>
-                  </span>
-                ) : null}
-              </button>
-            </div>
+                  {!isCompact ? <span className="min-w-0 text-sm font-semibold text-[var(--text-strong)]">Згорнути</span> : null}
+                </button>
+              </div>
           ) : null}
         </div>
       </aside>
@@ -1057,11 +1070,17 @@ function DashboardSidebar({
 
 function DashboardTopbar({
   email,
+  searchValue,
+  onSearchChange,
+  onSearchSubmit,
   onOpenMobileSidebar,
   onSignOut,
   isSigningOut
 }: {
   email: string;
+  searchValue: string;
+  onSearchChange: (value: string) => void;
+  onSearchSubmit: (event: FormEvent<HTMLFormElement>) => void;
   onOpenMobileSidebar: () => void;
   onSignOut: () => void;
   isSigningOut: boolean;
@@ -1076,6 +1095,20 @@ function DashboardTopbar({
         <Link href="/dashboard" className="inline-flex items-center lg:hidden" aria-label="Decivio">
           <WordmarkLogo className="text-[2rem]" />
         </Link>
+
+        <form onSubmit={onSearchSubmit} className="hidden min-w-0 flex-1 md:flex">
+          <label className="dashboard-search flex w-full items-center gap-3">
+            <span className="text-[var(--text-soft)]">
+              <SearchIcon />
+            </span>
+            <input
+              value={searchValue}
+              onChange={(event) => onSearchChange(event.target.value)}
+              placeholder="Пошук модулів і дій"
+              className="min-w-0 flex-1 bg-transparent text-sm text-[var(--text-strong)] outline-none placeholder:text-[var(--text-soft)]"
+            />
+          </label>
+        </form>
 
         <div className="ml-auto flex items-center gap-2 md:gap-3">
           <div className="group relative">
@@ -1117,6 +1150,20 @@ function DashboardTopbar({
           </div>
         </div>
       </div>
+
+      <form onSubmit={onSearchSubmit} className="px-4 pb-4 md:hidden">
+        <label className="dashboard-search flex w-full items-center gap-3">
+          <span className="text-[var(--text-soft)]">
+            <SearchIcon />
+          </span>
+          <input
+            value={searchValue}
+            onChange={(event) => onSearchChange(event.target.value)}
+            placeholder="Пошук модулів і дій"
+            className="min-w-0 flex-1 bg-transparent text-sm text-[var(--text-strong)] outline-none placeholder:text-[var(--text-soft)]"
+          />
+        </label>
+      </form>
     </header>
   );
 }
@@ -1126,19 +1173,29 @@ function DashboardOverview({
   totalSimulations,
   subscription,
   recentSimulations,
-  lastSimulation
+  lastSimulation,
+  searchQuery
 }: {
   userDisplayName: string;
   totalSimulations: number;
   subscription: DashboardAccessState;
   recentSimulations: DashboardSimulation[];
   lastSimulation: DashboardSimulation | null;
+  searchQuery: string;
 }) {
   const firstName = getFirstName(userDisplayName);
   const readiness = buildProfileReadiness(totalSimulations, subscription, lastSimulation);
   const progressSteps = buildProgressSteps(totalSimulations, subscription);
   const insights = buildInsights(subscription, totalSimulations, lastSimulation);
   const activityItems = buildActivityItems(recentSimulations, subscription);
+  const filteredModules = dashboardModules.filter((module) => {
+    if (!searchQuery) {
+      return true;
+    }
+
+    const haystack = [module.title, module.description, module.helper, ...module.searchTerms].join(" ").toLowerCase();
+    return haystack.includes(searchQuery);
+  });
   const targetMarket = mapTargetMarketLabel(lastSimulation?.targetMarket ?? null);
   const priority = mapPriorityLabel(lastSimulation?.transitionPriority ?? null);
   const lastVerdict = verdictLabel(lastSimulation?.verdictLabel ?? null);
@@ -1197,7 +1254,7 @@ function DashboardOverview({
             <DashboardMetricCard
               label="Наступний крок"
               value={lastSimulation ? "Перевести сценарій у підготовку" : "Пройти стартовий онбординг"}
-              description={lastSimulation ? "Після сценарію логічно йти в CV Builder або інтерв'ю." : "Онбординг зараз починається через симуляцію."}
+              description={lastSimulation ? "Після сценарію логічно йти в розділ резюме або в підготовку до співбесід." : "Онбординг зараз починається через симуляцію."}
             />
             <DashboardMetricCard
               label="Орієнтир"
@@ -1227,7 +1284,7 @@ function DashboardOverview({
               <span className="surface-soft inline-flex h-11 w-11 items-center justify-center rounded-[1rem] text-[var(--accent-strong)]">
                 <SparkIcon />
               </span>
-              <h2 className="text-[1.45rem] font-semibold leading-[1.06] tracking-[-0.04em] text-[var(--text-strong)]">AI поради на зараз</h2>
+              <h2 className="text-[1.45rem] font-semibold leading-[1.06] tracking-[-0.04em] text-[var(--text-strong)]">Поради від ШІ</h2>
             </div>
 
             <div className="mt-5 space-y-3">
@@ -1316,15 +1373,15 @@ function DashboardOverview({
             <div>
               <p className="text-[0.78rem] font-semibold uppercase tracking-[0.16em] text-[var(--text-soft)]">Тариф і доступ</p>
               <h2 className="mt-1 text-[1.45rem] font-semibold leading-[1.06] tracking-[-0.04em] text-[var(--text-strong)]">
-                {subscription.plan === "pro" ? "Pro Plan" : "Free Plan"}
+                {subscription.plan === "pro" ? "План Pro" : "Базовий план"}
               </h2>
             </div>
           </div>
 
           <p className="mt-5 text-[0.95rem] leading-[1.74] text-[var(--text-muted)]">
             {subscription.currentPeriodEnd
-              ? `Активний до ${formatDateTime(subscription.currentPeriodEnd) ?? "поточної дати"}. Тут же має жити billing, invoices і межі плану.`
-              : "Тариф і керування доступом винесені в окремий сервісний екран, а не змішані з основним dashboard."}
+              ? `Активний до ${formatDateTime(subscription.currentPeriodEnd) ?? "поточної дати"}. Тут же мають жити оплата, рахунки й межі плану.`
+              : "Тариф і керування доступом винесені в окремий сервісний екран, а не змішані з головним екраном кабінету."}
           </p>
 
           <div className="mt-5 space-y-3">
@@ -1353,16 +1410,29 @@ function DashboardOverview({
           <div>
             <h2 className="text-[1.85rem] font-semibold leading-[1.02] tracking-[-0.045em] text-[var(--text-strong)]">Модулі</h2>
             <p className="mt-2 text-[0.96rem] leading-[1.72] text-[var(--text-muted)]">
-              Усі інструменти видно одразу, але dashboard не перевантажений і тримає акцент на наступних діях.
+              Усі інструменти видно одразу, але головний екран не перевантажений і тримає акцент на наступних діях.
             </p>
           </div>
+          {searchQuery ? <DashboardChip tone="default">Пошук: {searchQuery}</DashboardChip> : null}
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {dashboardModules.map((module) => (
-            <DashboardModuleCard key={module.view} module={module} />
-          ))}
-        </div>
+        {filteredModules.length > 0 ? (
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {filteredModules.map((module) => (
+              <DashboardModuleCard key={module.view} module={module} />
+            ))}
+          </div>
+        ) : (
+          <div className="surface-panel rounded-[1.9rem] p-6">
+            <h3 className="text-[1.32rem] font-semibold tracking-[-0.035em] text-[var(--text-strong)]">За цим запитом нічого не знайдено</h3>
+            <p className="mt-3 max-w-2xl text-[0.95rem] leading-[1.72] text-[var(--text-muted)]">
+              Спробуйте інший запит у пошуку зверху або поверніться до повного огляду кабінету, щоб побачити всю структуру.
+            </p>
+            <Link href="/dashboard" className="btn-secondary mt-5">
+              Скинути пошук
+            </Link>
+          </div>
+        )}
       </section>
     </div>
   );
@@ -1424,7 +1494,7 @@ function DashboardScenarioWorkspace({
             {focusTitle}
           </h1>
           <p className="mt-5 max-w-3xl text-[1rem] leading-[1.78] text-[var(--text-muted)]">
-            Це окремий workspace для сценаріїв переходу: останній розрахунок, короткий висновок і історія попередніх маршрутів без змішування з іншими модулями.
+            Це окремий розділ для сценаріїв переходу: останній розрахунок, короткий висновок і історія попередніх маршрутів без змішування з іншими модулями.
           </p>
 
           <div className="mt-7 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -1439,7 +1509,7 @@ function DashboardScenarioWorkspace({
               Перерахувати сценарій
             </Link>
             <Link href={getDashboardHref("resume")} className="btn-secondary">
-              Перейти до CV Builder
+              Перейти до розділу резюме
             </Link>
           </div>
         </article>
@@ -1448,7 +1518,7 @@ function DashboardScenarioWorkspace({
           <h2 className="text-[1.45rem] font-semibold leading-[1.06] tracking-[-0.04em] text-[var(--text-strong)]">Що робити далі</h2>
           <div className="mt-5 space-y-3">
             {[
-              "Зафіксувати цільову роль і перевести її в CV Builder.",
+              "Зафіксувати цільову роль і перевести її в розділ резюме.",
               "Порівняти ще один альтернативний маршрут, якщо рішення все ще неочевидне.",
               "Після сильного сценарію перейти в модулі підготовки до ринку."
             ].map((item) => (
@@ -1464,7 +1534,7 @@ function DashboardScenarioWorkspace({
         <div>
           <h2 className="text-[1.8rem] font-semibold leading-[1.04] tracking-[-0.045em] text-[var(--text-strong)]">Історія сценаріїв</h2>
           <p className="mt-2 text-[0.95rem] leading-[1.72] text-[var(--text-muted)]">
-            Останній сценарій живе в top area, а попередні варіанти зберігаються тут окремо, щоб не забивати головний dashboard.
+            Останній сценарій живе у верхньому блоці, а попередні варіанти зберігаються тут окремо, щоб не забивати головний екран.
           </p>
         </div>
 
@@ -1517,16 +1587,16 @@ function ModuleWorkspace({ moduleView }: { moduleView: DashboardModule["view"] }
 
           <div className="mt-7 grid gap-4 md:grid-cols-3">
             {config.summary.map((item) => (
-              <DashboardMetricCard key={item.label} label={item.label} value={item.value} description="Структура цього workspace уже закладена в кабінеті." />
+              <DashboardMetricCard key={item.label} label={item.label} value={item.value} description="Структура цього розділу вже закладена в кабінеті." />
             ))}
           </div>
         </article>
 
         <article className="surface-panel rounded-[2rem] p-5 md:p-6">
-          <h2 className="text-[1.45rem] font-semibold leading-[1.06] tracking-[-0.04em] text-[var(--text-strong)]">Що важливо по UX</h2>
+          <h2 className="text-[1.45rem] font-semibold leading-[1.06] tracking-[-0.04em] text-[var(--text-strong)]">Що важливо для зручності</h2>
           <div className="mt-5 space-y-3">
             {[
-              "Модуль живе у власному просторі, а не змішується з overview.",
+              "Модуль живе у власному просторі й не змішується з головним екраном.",
               "Його можна підключати окремо без перебудови всього кабінету.",
               "Користувач бачить логіку маршруту: сценарії -> модуль -> наступний крок."
             ].map((item) => (
@@ -1537,7 +1607,7 @@ function ModuleWorkspace({ moduleView }: { moduleView: DashboardModule["view"] }
           </div>
 
           <Link href="/dashboard" className="btn-secondary mt-6 w-full">
-            Повернутися на dashboard
+            Повернутися на головну
           </Link>
         </article>
       </div>
@@ -1588,23 +1658,23 @@ function DashboardAccess({
           </div>
 
           <h1 className="mt-5 max-w-[14ch] text-[2.2rem] font-semibold leading-[0.94] tracking-[-0.055em] text-[var(--text-strong)] md:text-[3.05rem]">
-            План, billing і керування акаунтом в одному місці
+            План, оплата і керування акаунтом в одному місці
           </h1>
           <p className="mt-5 max-w-3xl text-[1rem] leading-[1.78] text-[var(--text-muted)]">
-            Це окремий сервісний екран для всього, що стосується доступу: поточний план, email акаунта, орієнтир по цінах і майбутній billing.
+            Це окремий сервісний екран для всього, що стосується доступу: поточний план, електронна пошта акаунта, орієнтир по цінах і майбутня оплата.
           </p>
 
           <div className="mt-7 grid gap-4 md:grid-cols-3">
             <DashboardMetricCard label="Акаунт" value={email} description="Саме за цим профілем закріплений доступ до модулів." />
             <DashboardMetricCard
               label="Поточний план"
-              value={subscription.plan === "pro" ? "Pro" : "Free"}
-              description={subscription.currentPeriodEnd ? `Активний до ${formatShortDate(subscription.currentPeriodEnd) ?? "поточної дати"}.` : "Базовий доступ без billing."}
+              value={subscription.plan === "pro" ? "План Pro" : "Базовий план"}
+              description={subscription.currentPeriodEnd ? `Активний до ${formatShortDate(subscription.currentPeriodEnd) ?? "поточної дати"}.` : "Базовий доступ без оплати."}
             />
             <DashboardMetricCard
               label="Що далі"
               value={subscription.plan === "pro" ? "Керувати підпискою" : "Оновити план"}
-              description={subscription.plan === "pro" ? "Billing і ліміти плану логічно живуть саме тут." : "Після апгрейду цей екран стане центром керування доступом."}
+              description={subscription.plan === "pro" ? "Оплата і ліміти плану логічно живуть саме тут." : "Після оновлення цей екран стане центром керування доступом."}
             />
           </div>
         </article>
@@ -1673,10 +1743,13 @@ function DashboardAccess({
 }
 
 export function DashboardShell({
-  requestedView
+  requestedView,
+  requestedSearch
 }: {
   requestedView?: string | null;
+  requestedSearch?: string | null;
 }) {
+  const router = useRouter();
   const supabase = useMemo(() => getSupabaseBrowserClient(), []);
   const { openAuthDialog } = useAuthDialog();
   const [state, setState] = useState<DashboardState>({ status: "loading" });
@@ -1684,6 +1757,7 @@ export function DashboardShell({
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isPhoneViewport, setIsPhoneViewport] = useState(false);
+  const [searchValue, setSearchValue] = useState(requestedSearch ?? "");
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -1725,8 +1799,12 @@ export function DashboardShell({
   }, [isSidebarCollapsed]);
 
   useEffect(() => {
+    setSearchValue(requestedSearch ?? "");
+  }, [requestedSearch]);
+
+  useEffect(() => {
     setIsMobileSidebarOpen(false);
-  }, [requestedView]);
+  }, [requestedView, requestedSearch]);
 
   useEffect(() => {
     let isMounted = true;
@@ -1857,6 +1935,18 @@ export function DashboardShell({
     setIsSigningOut(false);
   };
 
+  const handleSearchSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const normalizedQuery = searchValue.trim();
+    if (!normalizedQuery) {
+      router.push("/dashboard");
+      return;
+    }
+
+    router.push(`/dashboard?search=${encodeURIComponent(normalizedQuery)}`);
+  };
+
   if (state.status === "loading") {
     return <DashboardSkeleton />;
   }
@@ -1870,6 +1960,7 @@ export function DashboardShell({
   }
 
   const activeView = getDashboardView(requestedView ?? null);
+  const searchQuery = normalizeSearchQuery(requestedSearch);
   const accessLabel = mapAccessLabel(state.subscription.plan, state.subscription.status);
   const lastSimulation = state.recentSimulations[0] ?? null;
   const moduleView =
@@ -1897,6 +1988,9 @@ export function DashboardShell({
       <div className="lg:pl-[var(--cabinet-sidebar-width)]">
         <DashboardTopbar
           email={state.user.email}
+          searchValue={searchValue}
+          onSearchChange={setSearchValue}
+          onSearchSubmit={handleSearchSubmit}
           onOpenMobileSidebar={() => setIsMobileSidebarOpen(true)}
           onSignOut={handleSignOut}
           isSigningOut={isSigningOut}
@@ -1910,6 +2004,7 @@ export function DashboardShell({
               subscription={state.subscription}
               recentSimulations={state.recentSimulations}
               lastSimulation={lastSimulation}
+              searchQuery={searchQuery}
             />
           ) : null}
 
