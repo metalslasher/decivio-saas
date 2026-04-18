@@ -955,26 +955,20 @@ function DashboardModuleCard({ module }: { module: DashboardModule }) {
 
 function DashboardSidebar({
   activeView,
-  isCollapsed,
+  isCompact,
+  canCompact,
   isMobileOpen,
   onToggleCollapsed,
-  onCloseMobile,
-  totalSimulations,
-  accessLabel,
-  subscription
+  onCloseMobile
 }: {
   activeView: DashboardView;
-  isCollapsed: boolean;
+  isCompact: boolean;
+  canCompact: boolean;
   isMobileOpen: boolean;
   onToggleCollapsed: () => void;
   onCloseMobile: () => void;
-  totalSimulations: number;
-  accessLabel: string;
-  subscription: DashboardAccessState;
 }) {
-  const planLabel = subscription.plan === "pro" ? "Pro активний" : "Pro доступ";
-  const accessHref = subscription.plan === "pro" ? getDashboardHref("access") : "/pricing";
-  const sidebarLinkWidth = isCollapsed ? "justify-center px-0 py-3" : "px-3.5 py-3";
+  const sidebarLinkWidth = isCompact ? "justify-center px-0 py-3" : "px-3.5 py-3";
 
   return (
     <>
@@ -988,25 +982,17 @@ function DashboardSidebar({
       ) : null}
 
       <aside
-        className={`dashboard-sidebar-shell fixed inset-y-0 left-0 z-50 w-[17.25rem] transform transition-transform duration-300 lg:w-[var(--cabinet-sidebar-width)] ${
+        className={`dashboard-sidebar-shell fixed inset-y-0 left-0 z-50 w-[17.25rem] transform transition-transform duration-300 md:w-[var(--cabinet-sidebar-width)] ${
           isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         }`}
       >
         <div className="dashboard-sidebar-panel flex h-full flex-col">
-          <div className="flex h-[5.3rem] items-center justify-between border-b border-[rgba(24,26,32,0.08)] px-4">
+          <div className="flex h-[var(--dashboard-header-height)] items-center justify-between border-b border-[rgba(24,26,32,0.08)] px-4">
             <Link href="/dashboard" aria-label="Decivio" className="min-w-0">
-              {isCollapsed ? <BrandBadge /> : <WordmarkLogo className="text-[2.05rem]" />}
+              {isCompact ? <BrandBadge /> : <WordmarkLogo className="text-[2.05rem]" />}
             </Link>
 
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={onToggleCollapsed}
-                className="dashboard-icon-button hidden lg:inline-flex"
-                aria-label={isCollapsed ? "Розгорнути навігацію" : "Згорнути навігацію"}
-              >
-                {isCollapsed ? <ExpandIcon /> : <CollapseIcon />}
-              </button>
+            <div className="flex items-center">
               <button type="button" onClick={onCloseMobile} className="dashboard-icon-button lg:hidden" aria-label="Закрити навігацію">
                 <CloseIcon />
               </button>
@@ -1014,19 +1000,6 @@ function DashboardSidebar({
           </div>
 
           <div className="flex-1 overflow-y-auto px-3 py-4">
-            <div className={`mb-4 rounded-[1.4rem] border border-[rgba(24,26,32,0.08)] bg-[rgba(255,255,255,0.74)] p-3 ${isCollapsed ? "text-center" : ""}`}>
-              <p className="text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-[var(--text-soft)]">{isCollapsed ? "Стан" : "Швидкий стан"}</p>
-              <div className={`mt-3 ${isCollapsed ? "space-y-2" : "grid gap-3"}`}>
-                <div>
-                  <p className="text-[1.05rem] font-semibold tracking-[-0.03em] text-[var(--text-strong)]">{totalSimulations}</p>
-                  {!isCollapsed ? <p className="text-sm text-[var(--text-muted)]">сценаріїв у кабінеті</p> : null}
-                </div>
-                <div>
-                  <DashboardChip tone={accessTone(subscription.plan, subscription.status)}>{isCollapsed ? subscription.plan.toUpperCase() : accessLabel}</DashboardChip>
-                </div>
-              </div>
-            </div>
-
             <nav className="space-y-1.5" aria-label="Навігація кабінету">
               {dashboardNavItems.map((item) => {
                 const isActive = item.view === activeView;
@@ -1036,7 +1009,7 @@ function DashboardSidebar({
                     key={item.view}
                     href={getDashboardHref(item.view)}
                     onClick={onCloseMobile}
-                    title={isCollapsed ? item.label : undefined}
+                    title={isCompact ? item.label : undefined}
                     aria-label={item.label}
                     className={`group flex items-center gap-3 rounded-[1.25rem] border transition ${sidebarLinkWidth} ${
                       isActive
@@ -1054,7 +1027,7 @@ function DashboardSidebar({
                       {item.icon}
                     </span>
 
-                    {!isCollapsed ? (
+                    {!isCompact ? (
                       <span className="min-w-0">
                         <span className="block text-sm font-semibold">{item.label}</span>
                         <span className="mt-1 block text-[0.82rem] leading-[1.5] text-inherit opacity-80">{item.helper}</span>
@@ -1066,27 +1039,30 @@ function DashboardSidebar({
             </nav>
           </div>
 
-          <div className="border-t border-[rgba(24,26,32,0.08)] p-3">
-            <div className={`rounded-[1.45rem] bg-[linear-gradient(180deg,rgba(63,94,255,0.1),rgba(238,242,255,0.86))] p-4 ${isCollapsed ? "text-center" : ""}`}>
-              <p className="text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-[var(--accent-strong)]">{planLabel}</p>
-              {!isCollapsed ? (
-                <>
-                  <p className="mt-3 text-[0.95rem] leading-[1.68] text-[var(--text-muted)]">
-                    {subscription.plan === "pro"
-                      ? "Billing, межі плану й керування доступом винесені в окремий сервісний розділ."
-                      : "Коли буде потрібен повний стек модулів, апгрейд уже вбудований у цю shell-навігацію."}
-                  </p>
-                  <Link href={accessHref} className="btn-primary mt-5 w-full">
-                    {subscription.plan === "pro" ? "Керувати доступом" : "Відкрити Pro"}
-                  </Link>
-                </>
-              ) : (
-                <Link href={accessHref} className="btn-primary mt-4 !px-0 w-full">
-                  {subscription.plan === "pro" ? "→" : "+"}
-                </Link>
-              )}
+          {canCompact ? (
+            <div className="hidden border-t border-[rgba(24,26,32,0.08)] p-3 md:block">
+              <button
+                type="button"
+                onClick={onToggleCollapsed}
+                className={`group flex w-full items-center gap-3 rounded-[1.35rem] border border-[rgba(24,26,32,0.08)] bg-[rgba(255,255,255,0.76)] p-3 text-left text-[var(--text-muted)] transition hover:border-[rgba(63,94,255,0.14)] hover:bg-[rgba(255,255,255,0.9)] hover:text-[var(--text-strong)] ${
+                  isCompact ? "justify-center" : ""
+                }`}
+                aria-label={isCompact ? "Розгорнути меню" : "Згорнути меню"}
+                title={isCompact ? "Розгорнути меню" : "Згорнути меню"}
+              >
+                <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-[0.95rem] border border-[rgba(24,26,32,0.08)] bg-[rgba(255,255,255,0.86)] text-[var(--text-soft)] transition group-hover:text-[var(--accent-strong)]">
+                  {isCompact ? <ExpandIcon /> : <CollapseIcon />}
+                </span>
+
+                {!isCompact ? (
+                  <span className="min-w-0">
+                    <span className="block text-sm font-semibold text-[var(--text-strong)]">Компактне меню</span>
+                    <span className="mt-1 block text-[0.82rem] leading-[1.5] text-inherit opacity-80">Згорнути shell до іконок і звільнити більше простору для контенту.</span>
+                  </span>
+                ) : null}
+              </button>
             </div>
-          </div>
+          ) : null}
         </div>
       </aside>
     </>
@@ -1116,7 +1092,7 @@ function DashboardTopbar({
 }) {
   return (
     <header className="dashboard-topbar sticky top-0 z-30">
-      <div className="flex items-center gap-3 px-4 py-4 md:px-6 xl:px-8">
+      <div className="flex h-[var(--dashboard-header-height)] items-center gap-3 px-4 md:px-6 xl:px-8">
         <button type="button" onClick={onOpenMobileSidebar} className="dashboard-icon-button lg:hidden" aria-label="Відкрити навігацію">
           <MenuIcon />
         </button>
@@ -1794,7 +1770,25 @@ export function DashboardShell({
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [isPhoneViewport, setIsPhoneViewport] = useState(false);
   const [searchValue, setSearchValue] = useState(requestedSearch ?? "");
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const syncViewportMode = () => {
+      setIsPhoneViewport(window.innerWidth < 768);
+    };
+
+    syncViewportMode();
+    window.addEventListener("resize", syncViewportMode);
+
+    return () => {
+      window.removeEventListener("resize", syncViewportMode);
+    };
+  }, []);
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -1989,21 +1983,22 @@ export function DashboardShell({
     activeView === "resume" || activeView === "interviews" || activeView === "jobs" || activeView === "offers" || activeView === "assistant"
       ? activeView
       : null;
+  const canCompactSidebar = !isPhoneViewport;
+  const isSidebarCompact = canCompactSidebar && isSidebarCollapsed;
   const shellStyle = {
-    "--cabinet-sidebar-width": isSidebarCollapsed ? "5.75rem" : "17.25rem"
+    "--cabinet-sidebar-width": isSidebarCompact ? "5.75rem" : "17.25rem",
+    "--dashboard-header-height": "5.3rem"
   } as CSSProperties;
 
   return (
     <section className="dashboard-shell-screen dashboard-shell" style={shellStyle}>
       <DashboardSidebar
         activeView={activeView}
-        isCollapsed={isSidebarCollapsed}
+        isCompact={isSidebarCompact}
+        canCompact={canCompactSidebar}
         isMobileOpen={isMobileSidebarOpen}
         onToggleCollapsed={() => setIsSidebarCollapsed((current) => !current)}
         onCloseMobile={() => setIsMobileSidebarOpen(false)}
-        totalSimulations={state.totalSimulations}
-        accessLabel={accessLabel}
-        subscription={state.subscription}
       />
 
       <div className="lg:pl-[var(--cabinet-sidebar-width)]">
