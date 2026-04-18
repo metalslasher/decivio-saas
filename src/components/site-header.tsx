@@ -158,31 +158,34 @@ export function SiteHeader() {
                 </span>
               ) : authState.status === "user" ? (
                 <div className="hidden items-center gap-3 md:flex">
-                  <Link href="/dashboard" className="btn-primary !px-5 !py-2.5">
+                  <Link href="/dashboard" className="account-cta-pill">
                     У кабінет
                   </Link>
 
-                  <Link
-                    href="/dashboard?view=access"
-                    className="hidden items-center gap-3 rounded-full border border-[var(--line-soft)] bg-[rgba(255,255,255,0.74)] px-2.5 py-2 text-[var(--text-strong)] shadow-[inset_0_1px_0_rgba(255,255,255,0.92)] lg:inline-flex"
-                  >
-                    <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[rgba(238,242,255,0.92)] text-sm font-semibold text-[var(--accent-strong)]">
-                      {profileInitials}
-                    </span>
-                    <span className="min-w-0">
-                      <span className="block text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-[var(--text-soft)]">Профіль</span>
-                      <span className="block max-w-[10rem] truncate text-sm font-semibold text-[var(--text-strong)]">{profileLabel}</span>
-                    </span>
-                  </Link>
+                  <div className="group relative">
+                    <Link href="/dashboard?view=access" className="account-profile-pill">
+                      <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[rgba(238,242,255,0.92)] text-sm font-semibold text-[var(--accent-strong)]">
+                        {profileInitials}
+                      </span>
+                      <span className="hidden min-w-0 lg:block">
+                        <span className="block text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-[var(--text-soft)]">Профіль</span>
+                        <span className="block max-w-[10rem] truncate text-sm font-semibold text-[var(--text-strong)]">{profileLabel}</span>
+                      </span>
+                    </Link>
 
-                  <button
-                    type="button"
-                    onClick={handleSignOut}
-                    disabled={isSigningOut}
-                    className="inline-flex items-center justify-center px-2 text-[1rem] font-semibold text-[var(--accent-strong)] transition hover:text-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    {isSigningOut ? "Виходимо..." : "Вийти"}
-                  </button>
+                    <div className="pointer-events-none absolute right-0 top-full z-40 translate-y-1 pt-2 opacity-0 transition-all duration-150 ease-out group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:translate-y-0 group-focus-within:opacity-100">
+                      <div className="account-menu-panel min-w-[11.5rem] p-2">
+                        <button
+                          type="button"
+                          onClick={handleSignOut}
+                          disabled={isSigningOut}
+                          className="account-menu-action disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          {isSigningOut ? "Виходимо..." : "Вийти"}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               ) : (
                 <>
