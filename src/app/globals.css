@@ -142,6 +142,222 @@ main {
   box-shadow: 0 30px 72px -50px rgba(14, 16, 22, 0.72);
 }
 
+.dashboard-screen {
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+}
+
+.dashboard-workspace {
+  position: relative;
+  overflow: clip;
+  background:
+    radial-gradient(60rem 32rem at 12% 12%, rgba(86, 97, 188, 0.22), transparent 72%),
+    radial-gradient(46rem 24rem at 92% 6%, rgba(58, 64, 132, 0.18), transparent 70%),
+    radial-gradient(32rem 20rem at 72% 38%, rgba(24, 98, 76, 0.14), transparent 72%),
+    linear-gradient(180deg, #090b13 0%, #0f1220 34%, #0d111b 100%);
+}
+
+.dashboard-workspace::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent 16%),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+  background-size: auto, 72px 72px, 72px 72px;
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.7), transparent 82%);
+  pointer-events: none;
+}
+
+.workspace-card {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background:
+    linear-gradient(180deg, rgba(20, 24, 36, 0.94), rgba(15, 18, 30, 0.92)),
+    linear-gradient(135deg, rgba(137, 149, 255, 0.06), transparent 58%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 28px 64px -44px rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(20px);
+}
+
+.workspace-card-muted {
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.035)),
+    linear-gradient(135deg, rgba(132, 145, 255, 0.035), transparent 58%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.workspace-card-accent {
+  border: 1px solid rgba(171, 181, 255, 0.2);
+  background:
+    radial-gradient(28rem 18rem at 100% 0%, rgba(186, 193, 255, 0.18), transparent 60%),
+    linear-gradient(180deg, rgba(55, 37, 92, 0.96), rgba(27, 20, 46, 0.94));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 30px 68px -48px rgba(27, 20, 46, 0.82);
+}
+
+.workspace-card-light {
+  border: 1px solid rgba(255, 255, 255, 0.56);
+  background:
+    linear-gradient(180deg, rgba(252, 252, 254, 0.98), rgba(240, 242, 247, 0.96)),
+    radial-gradient(30rem 12rem at 100% 0%, rgba(167, 176, 255, 0.12), transparent 58%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.92),
+    0 24px 56px -40px rgba(0, 0, 0, 0.42);
+}
+
+.workspace-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  padding: 0.42rem 0.82rem;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.workspace-chip-neutral {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.workspace-chip-accent {
+  border: 1px solid rgba(154, 164, 255, 0.22);
+  background: rgba(114, 127, 255, 0.14);
+  color: rgba(232, 236, 255, 0.92);
+}
+
+.workspace-chip-success {
+  border: 1px solid rgba(74, 222, 128, 0.22);
+  background: rgba(52, 211, 153, 0.14);
+  color: rgba(210, 255, 232, 0.94);
+}
+
+.workspace-chip-gold {
+  border: 1px solid rgba(246, 194, 94, 0.2);
+  background: rgba(246, 194, 94, 0.12);
+  color: rgba(255, 233, 181, 0.94);
+}
+
+.workspace-button-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background: linear-gradient(180deg, #fbfbfd 0%, #eceef5 100%);
+  padding: 0.9rem 1.4rem;
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: #10131c;
+  box-shadow: 0 20px 40px -28px rgba(255, 255, 255, 0.28);
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    opacity 180ms ease;
+}
+
+.workspace-button-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 24px 44px -30px rgba(255, 255, 255, 0.32);
+}
+
+.workspace-button-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+  padding: 0.9rem 1.4rem;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.88);
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    background-color 180ms ease,
+    color 180ms ease;
+}
+
+.workspace-button-secondary:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+
+.workspace-button-dark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background: #0d1018;
+  padding: 0.9rem 1.4rem;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #f8f9fc;
+  transition:
+    transform 180ms ease,
+    background-color 180ms ease;
+}
+
+.workspace-button-dark:hover {
+  transform: translateY(-1px);
+  background: #080b12;
+}
+
+.workspace-icon-button {
+  display: inline-flex;
+  height: 2.75rem;
+  width: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.76);
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    background-color 180ms ease,
+    color 180ms ease;
+}
+
+.workspace-icon-button:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+
+.workspace-search-field {
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.03)),
+    linear-gradient(135deg, rgba(125, 137, 255, 0.06), transparent 54%);
+  padding: 0.85rem 1.1rem;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  transition:
+    border-color 180ms ease,
+    background-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.workspace-search-field:focus-within {
+  border-color: rgba(171, 181, 255, 0.28);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.04)),
+    linear-gradient(135deg, rgba(125, 137, 255, 0.08), transparent 54%);
+  box-shadow: 0 0 0 4px rgba(123, 138, 255, 0.08);
+}
+
 .eyebrow-pill {
   display: inline-flex;
   align-items: center;
