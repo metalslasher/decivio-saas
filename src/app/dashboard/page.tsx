@@ -4,7 +4,6 @@ import { createMetadata } from "@/lib/seo";
 type DashboardPageProps = {
   searchParams?: {
     view?: string;
-    search?: string;
   };
 };
 
@@ -16,5 +15,5 @@ export const metadata = createMetadata({
 });
 
 export default function DashboardPage({ searchParams }: DashboardPageProps) {
-  return <DashboardShell requestedView={searchParams?.view} requestedSearch={searchParams?.search} />;
+  return <DashboardShell requestedView={searchParams?.view} />;
 }

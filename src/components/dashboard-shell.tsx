@@ -1,8 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState, type CSSProperties, type FormEvent, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from "react";
 import { useAuthDialog } from "@/components/auth-dialog-provider";
 import { WordmarkLogo } from "@/components/wordmark-logo";
 import { getSupabaseBrowserClient } from "@/lib/db/supabase-browser";
@@ -198,15 +197,6 @@ function CreditCardIcon() {
       <rect x="3" y="5.5" width="18" height="13" rx="2.5" />
       <path d="M3 10h18" />
       <path d="M7.5 14.5h3.5" />
-    </svg>
-  );
-}
-
-function SearchIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="11" cy="11" r="6.5" />
-      <path d="M16 16l4 4" />
     </svg>
   );
 }
@@ -621,10 +611,6 @@ function formatSignedMoney(value: number | null) {
   const rounded = Math.round(value);
   const sign = rounded > 0 ? "+" : rounded < 0 ? "-" : "";
   return `${sign}${formatUah(Math.abs(rounded))}`;
-}
-
-function normalizeSearchQuery(value: string | null | undefined) {
-  return value?.trim().toLowerCase() ?? "";
 }
 
 function extractSimulationSnapshot(simulation: SimulationRow, result: SimulationResultRow | null): DashboardSimulation {
@@ -1071,22 +1057,12 @@ function DashboardSidebar({
 
 function DashboardTopbar({
   email,
-  searchValue,
-  onSearchChange,
-  onSearchSubmit,
   onOpenMobileSidebar,
-  suggestedActionHref,
-  suggestedActionLabel,
   onSignOut,
   isSigningOut
 }: {
   email: string;
-  searchValue: string;
-  onSearchChange: (value: string) => void;
-  onSearchSubmit: (event: FormEvent<HTMLFormElement>) => void;
   onOpenMobileSidebar: () => void;
-  suggestedActionHref: string;
-  suggestedActionLabel: string;
   onSignOut: () => void;
   isSigningOut: boolean;
 }) {
@@ -1101,29 +1077,7 @@ function DashboardTopbar({
           <WordmarkLogo className="text-[2rem]" />
         </Link>
 
-        <form onSubmit={onSearchSubmit} className="hidden min-w-0 flex-1 md:flex">
-          <label className="dashboard-search flex w-full items-center gap-3">
-            <span className="text-[var(--text-soft)]">
-              <SearchIcon />
-            </span>
-            <input
-              value={searchValue}
-              onChange={(event) => onSearchChange(event.target.value)}
-              placeholder="Пошук модулів, сценаріїв і дій"
-              className="min-w-0 flex-1 bg-transparent text-sm text-[var(--text-strong)] outline-none placeholder:text-[var(--text-soft)]"
-            />
-          </label>
-        </form>
-
         <div className="ml-auto flex items-center gap-2 md:gap-3">
-          <Link href={suggestedActionHref} className="btn-primary hidden lg:inline-flex">
-            {suggestedActionLabel}
-          </Link>
-
-          <Link href={getDashboardHref("scenario")} className="dashboard-icon-button hidden sm:inline-flex" aria-label="Відкрити історію сценаріїв">
-            <ActivityIcon />
-          </Link>
-
           <div className="group relative">
             <button type="button" className="account-profile-pill" aria-haspopup="menu" aria-label="Відкрити меню акаунта">
               <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[rgba(238,242,255,0.92)] text-sm font-semibold text-[var(--accent-strong)]">
@@ -1163,20 +1117,6 @@ function DashboardTopbar({
           </div>
         </div>
       </div>
-
-      <form onSubmit={onSearchSubmit} className="px-4 pb-4 md:hidden">
-        <label className="dashboard-search flex w-full items-center gap-3">
-          <span className="text-[var(--text-soft)]">
-            <SearchIcon />
-          </span>
-          <input
-            value={searchValue}
-            onChange={(event) => onSearchChange(event.target.value)}
-            placeholder="Пошук модулів, сценаріїв і дій"
-            className="min-w-0 flex-1 bg-transparent text-sm text-[var(--text-strong)] outline-none placeholder:text-[var(--text-soft)]"
-          />
-        </label>
-      </form>
     </header>
   );
 }
@@ -1186,30 +1126,19 @@ function DashboardOverview({
   totalSimulations,
   subscription,
   recentSimulations,
-  lastSimulation,
-  searchQuery
+  lastSimulation
 }: {
   userDisplayName: string;
   totalSimulations: number;
   subscription: DashboardAccessState;
   recentSimulations: DashboardSimulation[];
   lastSimulation: DashboardSimulation | null;
-  searchQuery: string;
 }) {
   const firstName = getFirstName(userDisplayName);
   const readiness = buildProfileReadiness(totalSimulations, subscription, lastSimulation);
   const progressSteps = buildProgressSteps(totalSimulations, subscription);
   const insights = buildInsights(subscription, totalSimulations, lastSimulation);
   const activityItems = buildActivityItems(recentSimulations, subscription);
-  const filteredModules = dashboardModules.filter((module) => {
-    if (!searchQuery) {
-      return true;
-    }
-
-    const haystack = [module.title, module.description, module.helper, ...module.searchTerms].join(" ").toLowerCase();
-    return haystack.includes(searchQuery);
-  });
-
   const targetMarket = mapTargetMarketLabel(lastSimulation?.targetMarket ?? null);
   const priority = mapPriorityLabel(lastSimulation?.transitionPriority ?? null);
   const lastVerdict = verdictLabel(lastSimulation?.verdictLabel ?? null);
@@ -1427,26 +1356,13 @@ function DashboardOverview({
               Усі інструменти видно одразу, але dashboard не перевантажений і тримає акцент на наступних діях.
             </p>
           </div>
-          {searchQuery ? <DashboardChip tone="accent">Пошук: {searchQuery}</DashboardChip> : null}
         </div>
 
-        {filteredModules.length > 0 ? (
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {filteredModules.map((module) => (
-              <DashboardModuleCard key={module.view} module={module} />
-            ))}
-          </div>
-        ) : (
-          <div className="surface-panel rounded-[1.9rem] p-6">
-            <h3 className="text-[1.32rem] font-semibold tracking-[-0.035em] text-[var(--text-strong)]">За цим запитом модулі не знайдено</h3>
-            <p className="mt-3 max-w-2xl text-[0.95rem] leading-[1.72] text-[var(--text-muted)]">
-              Спробуйте інший запит у пошуку зверху або поверніться до повного огляду кабінету, щоб побачити всю структуру.
-            </p>
-            <Link href="/dashboard" className="btn-secondary mt-5">
-              Скинути пошук
-            </Link>
-          </div>
-        )}
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {dashboardModules.map((module) => (
+            <DashboardModuleCard key={module.view} module={module} />
+          ))}
+        </div>
       </section>
     </div>
   );
@@ -1757,13 +1673,10 @@ function DashboardAccess({
 }
 
 export function DashboardShell({
-  requestedView,
-  requestedSearch
+  requestedView
 }: {
   requestedView?: string | null;
-  requestedSearch?: string | null;
 }) {
-  const router = useRouter();
   const supabase = useMemo(() => getSupabaseBrowserClient(), []);
   const { openAuthDialog } = useAuthDialog();
   const [state, setState] = useState<DashboardState>({ status: "loading" });
@@ -1771,7 +1684,6 @@ export function DashboardShell({
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isPhoneViewport, setIsPhoneViewport] = useState(false);
-  const [searchValue, setSearchValue] = useState(requestedSearch ?? "");
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -1813,12 +1725,8 @@ export function DashboardShell({
   }, [isSidebarCollapsed]);
 
   useEffect(() => {
-    setSearchValue(requestedSearch ?? "");
-  }, [requestedSearch]);
-
-  useEffect(() => {
     setIsMobileSidebarOpen(false);
-  }, [requestedView, requestedSearch]);
+  }, [requestedView]);
 
   useEffect(() => {
     let isMounted = true;
@@ -1949,18 +1857,6 @@ export function DashboardShell({
     setIsSigningOut(false);
   };
 
-  const handleSearchSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    const normalizedQuery = searchValue.trim();
-    if (!normalizedQuery) {
-      router.push("/dashboard");
-      return;
-    }
-
-    router.push(`/dashboard?search=${encodeURIComponent(normalizedQuery)}`);
-  };
-
   if (state.status === "loading") {
     return <DashboardSkeleton />;
   }
@@ -1974,11 +1870,8 @@ export function DashboardShell({
   }
 
   const activeView = getDashboardView(requestedView ?? null);
-  const searchQuery = normalizeSearchQuery(requestedSearch);
   const accessLabel = mapAccessLabel(state.subscription.plan, state.subscription.status);
   const lastSimulation = state.recentSimulations[0] ?? null;
-  const suggestedActionHref = lastSimulation ? getDashboardHref("scenario") : "/simulate";
-  const suggestedActionLabel = lastSimulation ? "Останній сценарій" : "Почати онбординг";
   const moduleView =
     activeView === "resume" || activeView === "interviews" || activeView === "jobs" || activeView === "offers" || activeView === "assistant"
       ? activeView
@@ -2004,12 +1897,7 @@ export function DashboardShell({
       <div className="lg:pl-[var(--cabinet-sidebar-width)]">
         <DashboardTopbar
           email={state.user.email}
-          searchValue={searchValue}
-          onSearchChange={setSearchValue}
-          onSearchSubmit={handleSearchSubmit}
           onOpenMobileSidebar={() => setIsMobileSidebarOpen(true)}
-          suggestedActionHref={suggestedActionHref}
-          suggestedActionLabel={suggestedActionLabel}
           onSignOut={handleSignOut}
           isSigningOut={isSigningOut}
         />
@@ -2022,7 +1910,6 @@ export function DashboardShell({
               subscription={state.subscription}
               recentSimulations={state.recentSimulations}
               lastSimulation={lastSimulation}
-              searchQuery={searchQuery}
             />
           ) : null}
 
