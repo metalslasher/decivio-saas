@@ -10,7 +10,7 @@ type DashboardPageProps = {
 
 export const metadata = createMetadata({
   title: "Кабінет",
-  description: "Особистий career workspace користувача Decivio.",
+  description: "Особистий кабінет користувача Decivio.",
   path: "/dashboard",
   noIndex: true
 });
