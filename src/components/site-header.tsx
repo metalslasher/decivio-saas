@@ -22,7 +22,7 @@ type AuthState =
 
 function getInitials(email: string) {
   const localPart = email.split("@")[0]?.trim() ?? "";
-  const normalized = localPart.replace(/[^a-zA-Zа-яА-ЯіїєІЇЄґҐ0-9]+/g, " ").trim();
+  const normalized = localPart.replace(/[^a-zA-Zа-яА-ЯіїєІЇЄҐґ0-9]+/g, " ").trim();
   const parts = normalized.split(/\s+/).filter(Boolean);
 
   if (parts.length >= 2) {
@@ -34,6 +34,36 @@ function getInitials(email: string) {
 
 function getShortProfileLabel(email: string) {
   return email.split("@")[0]?.trim() ?? email;
+}
+
+function CabinetIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="account-menu-icon" fill="none" aria-hidden="true">
+      <path d="M4 11.5L12 5l8 6.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M6.5 10.5V19h11V10.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M10 19v-4.5h4V19" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function BillingIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="account-menu-icon" fill="none" aria-hidden="true">
+      <rect x="3" y="5.5" width="18" height="13" rx="2.5" stroke="currentColor" strokeWidth="1.8" />
+      <path d="M3 10h18" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      <path d="M7.5 14.5h3.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function LogoutIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="account-menu-icon" fill="none" aria-hidden="true">
+      <path d="M14 7l5 5-5 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M8 12h11" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      <path d="M10 5H6.8A1.8 1.8 0 0 0 5 6.8v10.4A1.8 1.8 0 0 0 6.8 19H10" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  );
 }
 
 export function SiteHeader() {
@@ -157,13 +187,9 @@ export function SiteHeader() {
                   Сесія...
                 </span>
               ) : authState.status === "user" ? (
-                <div className="hidden items-center gap-3 md:flex">
-                  <Link href="/dashboard" className="account-cta-pill">
-                    У кабінет
-                  </Link>
-
+                <div className="hidden items-center md:flex">
                   <div className="group relative">
-                    <Link href="/dashboard?view=access" className="account-profile-pill">
+                    <button type="button" className="account-profile-pill" aria-haspopup="menu" aria-label="Відкрити меню акаунта">
                       <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[rgba(238,242,255,0.92)] text-sm font-semibold text-[var(--accent-strong)]">
                         {profileInitials}
                       </span>
@@ -171,17 +197,22 @@ export function SiteHeader() {
                         <span className="block text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-[var(--text-soft)]">Профіль</span>
                         <span className="block max-w-[10rem] truncate text-sm font-semibold text-[var(--text-strong)]">{profileLabel}</span>
                       </span>
-                    </Link>
+                    </button>
 
                     <div className="pointer-events-none absolute right-0 top-full z-40 translate-y-1 pt-2 opacity-0 transition-all duration-150 ease-out group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:translate-y-0 group-focus-within:opacity-100">
-                      <div className="account-menu-panel min-w-[11.5rem] p-2">
-                        <button
-                          type="button"
-                          onClick={handleSignOut}
-                          disabled={isSigningOut}
-                          className="account-menu-action disabled:cursor-not-allowed disabled:opacity-60"
-                        >
-                          {isSigningOut ? "Виходимо..." : "Вийти"}
+                      <div className="account-menu-panel min-w-[14rem] p-2">
+                        <Link href="/dashboard" className="account-menu-link">
+                          <CabinetIcon />
+                          <span>Кабінет</span>
+                        </Link>
+                        <Link href="/dashboard?view=access" className="account-menu-link">
+                          <BillingIcon />
+                          <span>Оплата</span>
+                        </Link>
+                        <div className="account-menu-divider" />
+                        <button type="button" onClick={handleSignOut} disabled={isSigningOut} className="account-menu-link account-menu-link-danger disabled:cursor-not-allowed disabled:opacity-60">
+                          <LogoutIcon />
+                          <span>{isSigningOut ? "Виходимо..." : "Вийти"}</span>
                         </button>
                       </div>
                     </div>
@@ -240,22 +271,31 @@ export function SiteHeader() {
 
               {authState.status === "user" ? (
                 <>
-                  <Link href="/dashboard" onClick={() => setIsOpen(false)} className="btn-primary mt-2">
-                    У кабінет
-                  </Link>
-                  <Link
-                    href="/dashboard?view=access"
-                    onClick={() => setIsOpen(false)}
-                    className="flex items-center gap-3 rounded-2xl border border-[var(--line-soft)] bg-[rgba(255,255,255,0.76)] px-3 py-3 text-sm font-semibold text-[var(--text-muted)]"
-                  >
-                    <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[rgba(238,242,255,0.92)] text-sm font-semibold text-[var(--accent-strong)]">
+                  <div className="mt-2 flex items-center gap-3 rounded-[1.5rem] border border-[var(--line-soft)] bg-[rgba(255,255,255,0.78)] px-3 py-3">
+                    <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[rgba(238,242,255,0.92)] text-sm font-semibold text-[var(--accent-strong)]">
                       {profileInitials}
                     </span>
-                    <span className="truncate">{profileLabel}</span>
-                  </Link>
-                  <button type="button" onClick={handleSignOut} disabled={isSigningOut} className="btn-secondary mt-1">
-                    {isSigningOut ? "Виходимо..." : "Вийти"}
-                  </button>
+                    <span className="min-w-0">
+                      <span className="block text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-[var(--text-soft)]">Профіль</span>
+                      <span className="block truncate text-sm font-semibold text-[var(--text-strong)]">{profileLabel}</span>
+                    </span>
+                  </div>
+
+                  <div className="account-menu-panel mt-1 p-2">
+                    <Link href="/dashboard" onClick={() => setIsOpen(false)} className="account-menu-link">
+                      <CabinetIcon />
+                      <span>Кабінет</span>
+                    </Link>
+                    <Link href="/dashboard?view=access" onClick={() => setIsOpen(false)} className="account-menu-link">
+                      <BillingIcon />
+                      <span>Оплата</span>
+                    </Link>
+                    <div className="account-menu-divider" />
+                    <button type="button" onClick={handleSignOut} disabled={isSigningOut} className="account-menu-link account-menu-link-danger disabled:cursor-not-allowed disabled:opacity-60">
+                      <LogoutIcon />
+                      <span>{isSigningOut ? "Виходимо..." : "Вийти"}</span>
+                    </button>
+                  </div>
                 </>
               ) : (
                 <>
