@@ -957,6 +957,9 @@ function DashboardSidebar({
   isCompact,
   canCompact,
   isMobileOpen,
+  searchValue,
+  onSearchChange,
+  onSearchSubmit,
   onToggleCollapsed,
   onCloseMobile
 }: {
@@ -964,6 +967,9 @@ function DashboardSidebar({
   isCompact: boolean;
   canCompact: boolean;
   isMobileOpen: boolean;
+  searchValue: string;
+  onSearchChange: (value: string) => void;
+  onSearchSubmit: (event: FormEvent<HTMLFormElement>) => void;
   onToggleCollapsed: () => void;
   onCloseMobile: () => void;
 }) {
@@ -1040,6 +1046,27 @@ function DashboardSidebar({
                 );
               })}
             </nav>
+          </div>
+
+          <div className="border-t border-[rgba(24,26,32,0.08)] p-3 md:hidden">
+            <form
+              onSubmit={(event) => {
+                onSearchSubmit(event);
+                onCloseMobile();
+              }}
+            >
+              <label className="dashboard-search flex w-full items-center gap-3">
+                <span className="text-[var(--text-soft)]">
+                  <SearchIcon />
+                </span>
+                <input
+                  value={searchValue}
+                  onChange={(event) => onSearchChange(event.target.value)}
+                  placeholder="Пошук модулів і дій"
+                  className="min-w-0 flex-1 bg-transparent text-sm text-[var(--text-strong)] outline-none placeholder:text-[var(--text-soft)]"
+                />
+              </label>
+            </form>
           </div>
 
           {canCompact ? (
@@ -1149,20 +1176,6 @@ function DashboardTopbar({
           </div>
         </div>
       </div>
-
-      <form onSubmit={onSearchSubmit} className="px-4 pb-4 md:hidden">
-        <label className="dashboard-search flex w-full items-center gap-3">
-          <span className="text-[var(--text-soft)]">
-            <SearchIcon />
-          </span>
-          <input
-            value={searchValue}
-            onChange={(event) => onSearchChange(event.target.value)}
-            placeholder="Пошук модулів і дій"
-            className="min-w-0 flex-1 bg-transparent text-sm text-[var(--text-strong)] outline-none placeholder:text-[var(--text-soft)]"
-          />
-        </label>
-      </form>
     </header>
   );
 }
@@ -1995,6 +2008,9 @@ export function DashboardShell({
         isCompact={isSidebarCompact}
         canCompact={canCompactSidebar}
         isMobileOpen={isMobileSidebarOpen}
+        searchValue={searchValue}
+        onSearchChange={setSearchValue}
+        onSearchSubmit={handleSearchSubmit}
         onToggleCollapsed={() => setIsSidebarCollapsed((current) => !current)}
         onCloseMobile={() => setIsMobileSidebarOpen(false)}
       />
