@@ -131,7 +131,7 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-50">
       <div className="w-full">
-        <nav style={headerStyle} className="mirror-header relative w-full overflow-hidden px-4 py-3 md:px-6 md:py-4 lg:px-8">
+        <nav style={headerStyle} className="mirror-header relative w-full overflow-visible px-4 py-3 md:px-6 md:py-4 lg:px-8">
           <div className="relative z-[1] flex items-center justify-between gap-4">
             <div className="flex items-center gap-5">
               <Link href="/" aria-label="Decivio" className="inline-flex items-center">
