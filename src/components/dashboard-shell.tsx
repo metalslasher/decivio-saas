@@ -270,8 +270,7 @@ const dashboardNavItems: DashboardNavItem[] = [
   { view: "interviews", label: "Співбесіди", helper: "Питання, пробна співбесіда і відгук.", icon: <InterviewIcon /> },
   { view: "jobs", label: "Нова робота", helper: "Перші дні, адаптація й очікування від ролі.", icon: <BriefcaseIcon /> },
   { view: "offers", label: "Пропозиції", helper: "Порівняння пропозицій і рішень.", icon: <OfferIcon /> },
-  { view: "assistant", label: "ШІ-помічник", helper: "Контекстний помічник по всьому маршруту.", icon: <SparkIcon /> },
-  { view: "access", label: "Доступ", helper: "Тариф, оплата і керування акаунтом.", icon: <CreditCardIcon /> }
+  { view: "assistant", label: "ШІ-помічник", helper: "Контекстний помічник по всьому маршруту.", icon: <SparkIcon /> }
 ];
 
 const dashboardModules: DashboardModule[] = [
@@ -1196,6 +1195,21 @@ function DashboardOverview({
     const haystack = [module.title, module.description, module.helper, ...module.searchTerms].join(" ").toLowerCase();
     return haystack.includes(searchQuery);
   });
+
+  useEffect(() => {
+    if (!searchQuery) {
+      return;
+    }
+
+    const frameId = window.requestAnimationFrame(() => {
+      document.getElementById("dashboard-modules")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+
+    return () => {
+      window.cancelAnimationFrame(frameId);
+    };
+  }, [searchQuery]);
+
   const targetMarket = mapTargetMarketLabel(lastSimulation?.targetMarket ?? null);
   const priority = mapPriorityLabel(lastSimulation?.transitionPriority ?? null);
   const lastVerdict = verdictLabel(lastSimulation?.verdictLabel ?? null);
@@ -1405,7 +1419,7 @@ function DashboardOverview({
         </article>
       </div>
 
-      <section className="space-y-4">
+      <section id="dashboard-modules" className="space-y-4 scroll-mt-28">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <h2 className="text-[1.85rem] font-semibold leading-[1.02] tracking-[-0.045em] text-[var(--text-strong)]">Модулі</h2>
