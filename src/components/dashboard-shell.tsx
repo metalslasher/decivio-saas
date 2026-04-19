@@ -1754,24 +1754,14 @@ function DashboardModuleCard({ module }: { module: DashboardModule }) {
 }
 
 function DashboardAccountMenuContent({
-  showDashboardLink = false,
   onSignOut,
   isSigningOut,
 }: {
-  showDashboardLink?: boolean;
   onSignOut: () => void;
   isSigningOut: boolean;
 }) {
   return (
     <>
-      {showDashboardLink ? (
-        <Link href="/dashboard" className="account-menu-link">
-          <span className="account-menu-icon">
-            <HomeIcon />
-          </span>
-          <span>Кабінет</span>
-        </Link>
-      ) : null}
       <Link href={getDashboardHref("profile")} className="account-menu-link">
         <span className="account-menu-icon">
           <UserIcon />
@@ -2117,11 +2107,7 @@ function DashboardTopbar({
 
             <div className="pointer-events-none absolute right-0 top-full z-40 translate-y-1 pt-2 opacity-0 transition-all duration-150 ease-out group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:translate-y-0 group-focus-within:opacity-100">
               <div className="account-menu-panel min-w-[14rem] p-2">
-                <DashboardAccountMenuContent
-                  showDashboardLink
-                  onSignOut={onSignOut}
-                  isSigningOut={isSigningOut}
-                />
+                <DashboardAccountMenuContent onSignOut={onSignOut} isSigningOut={isSigningOut} />
               </div>
             </div>
           </div>
