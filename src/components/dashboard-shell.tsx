@@ -20,6 +20,7 @@ import {
 } from "@/lib/career-switch-form";
 import { getSupabaseBrowserClient } from "@/lib/db/supabase-browser";
 import { GUEST_USER_COOKIE_NAME } from "@/lib/guest-session";
+import { emitProfileUpdated } from "@/lib/profile-broadcast";
 import {
   createEmptyProfileContext,
   jobSearchStageOptions,
@@ -1516,7 +1517,6 @@ function DashboardTopbar({
             <button type="button" className="account-profile-pill" aria-haspopup="menu" aria-label="Відкрити меню акаунта">
               <DashboardAvatar label={displayName} avatarUrl={avatarUrl} sizeClassName="h-9 w-9" textClassName="text-sm font-semibold" />
               <span className="hidden min-w-0 lg:block">
-                <span className="block text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-[var(--text-soft)]">Профіль</span>
                 <span className="block max-w-[10rem] truncate text-sm font-semibold text-[var(--text-strong)]">{getShortProfileLabel(displayName, email)}</span>
               </span>
             </button>
@@ -2943,6 +2943,11 @@ export function DashboardShell({
   };
 
   const handleProfileSaved = (profile: DashboardUserProfile) => {
+    emitProfileUpdated({
+      fullName: profile.fullName,
+      avatarUrl: profile.avatarUrl
+    });
+
     setState((current) => {
       if (current.status !== "ready") {
         return current;

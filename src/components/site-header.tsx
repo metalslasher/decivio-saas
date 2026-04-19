@@ -7,6 +7,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useAuthDialog } from "@/components/auth-dialog-provider";
 import { WordmarkLogo } from "@/components/wordmark-logo";
 import { getSupabaseBrowserClient } from "@/lib/db/supabase-browser";
+import { PROFILE_UPDATED_EVENT, isBroadcastProfilePayload } from "@/lib/profile-broadcast";
 
 const publicNavItems = [
   { href: "/#features", label: "Можливості" },
@@ -18,22 +19,54 @@ const publicNavItems = [
 type AuthState =
   | { status: "loading" }
   | { status: "guest" }
-  | { status: "user"; email: string };
+  | { status: "user"; email: string; displayName: string; avatarUrl: string | null };
 
-function getInitials(email: string) {
+function formatDisplayName(fullName: string | null | undefined, email: string) {
+  const normalizedName = fullName?.trim();
+
+  if (normalizedName) {
+    return normalizedName;
+  }
+
   const localPart = email.split("@")[0]?.trim() ?? "";
-  const normalized = localPart.replace(/[^a-zA-Zа-яА-ЯіїєІЇЄҐґ0-9]+/g, " ").trim();
+  if (!localPart) {
+    return "Кабінет";
+  }
+
+  return localPart.charAt(0).toUpperCase() + localPart.slice(1);
+}
+
+function getInitials(value: string) {
+  const normalized = value.replace(/[^a-zA-Zа-яА-ЯіїєІЇЄҐґ0-9]+/g, " ").trim();
   const parts = normalized.split(/\s+/).filter(Boolean);
 
   if (parts.length >= 2) {
     return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
   }
 
-  return (parts[0] ?? localPart.slice(0, 2) ?? "DC").slice(0, 2).toUpperCase();
+  return (parts[0] ?? normalized.slice(0, 2) ?? "DC").slice(0, 2).toUpperCase();
 }
 
-function getShortProfileLabel(email: string) {
+function getShortProfileLabel(displayName: string, email: string) {
+  const normalized = displayName.trim();
+  if (normalized) {
+    return normalized;
+  }
+
   return email.split("@")[0]?.trim() ?? email;
+}
+
+function ProfileAvatar({ label, avatarUrl }: { label: string; avatarUrl: string | null }) {
+  return (
+    <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[rgba(238,242,255,0.92)] text-sm font-semibold text-[var(--accent-strong)]">
+      {avatarUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={avatarUrl} alt={label} className="h-full w-full object-cover" />
+      ) : (
+        getInitials(label)
+      )}
+    </span>
+  );
 }
 
 function CabinetIcon() {
@@ -79,25 +112,78 @@ export function SiteHeader() {
   useEffect(() => {
     let isMounted = true;
 
-    supabase.auth.getSession().then(({ data }) => {
+    const loadAuthState = async (sessionUser: { id: string; email?: string | null } | null | undefined) => {
       if (!isMounted) {
         return;
       }
 
-      const email = data.session?.user?.email?.trim();
-      setAuthState(email ? { status: "user", email } : { status: "guest" });
+      const email = sessionUser?.email?.trim();
+      if (!sessionUser?.id || !email) {
+        setAuthState({ status: "guest" });
+        return;
+      }
+
+      let fullName: string | null = null;
+      let avatarUrl: string | null = null;
+
+      try {
+        const { data } = await supabase.from("profiles").select("*").eq("id", sessionUser.id).maybeSingle();
+        fullName = typeof data?.full_name === "string" && data.full_name.trim() !== "" ? data.full_name.trim() : null;
+        avatarUrl = typeof data?.avatar_url === "string" && data.avatar_url.trim() !== "" ? data.avatar_url.trim() : null;
+      } catch {
+        fullName = null;
+        avatarUrl = null;
+      }
+
+      if (!isMounted) {
+        return;
+      }
+
+      setAuthState({
+        status: "user",
+        email,
+        displayName: formatDisplayName(fullName, email),
+        avatarUrl
+      });
+    };
+
+    supabase.auth.getSession().then(({ data }) => {
+      void loadAuthState(data.session?.user ?? null);
     });
 
     const {
       data: { subscription }
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      const email = session?.user?.email?.trim();
-      setAuthState(email ? { status: "user", email } : { status: "guest" });
+      void loadAuthState(session?.user ?? null);
     });
+
+    const handleProfileUpdated = (event: Event) => {
+      const customEvent = event as CustomEvent<unknown>;
+      const detail = customEvent.detail;
+
+      if (!isBroadcastProfilePayload(detail)) {
+        return;
+      }
+
+      setAuthState((current) => {
+        if (current.status !== "user") {
+          return current;
+        }
+
+        return {
+          ...current,
+          displayName: formatDisplayName(detail.fullName, current.email),
+          avatarUrl: detail.avatarUrl
+        };
+      });
+    };
+
+    window.addEventListener(PROFILE_UPDATED_EVENT, handleProfileUpdated as EventListener);
 
     return () => {
       isMounted = false;
       subscription.unsubscribe();
+      window.removeEventListener(PROFILE_UPDATED_EVENT, handleProfileUpdated as EventListener);
     };
   }, [supabase]);
 
@@ -138,8 +224,7 @@ export function SiteHeader() {
 
   const effectiveHeaderProgress = Math.max(headerProgress, isOpen ? 1 : 0);
   const headerStyle = { "--mirror-progress": effectiveHeaderProgress } as CSSProperties;
-  const profileLabel = authState.status === "user" ? getShortProfileLabel(authState.email) : null;
-  const profileInitials = authState.status === "user" ? getInitials(authState.email) : null;
+  const profileLabel = authState.status === "user" ? getShortProfileLabel(authState.displayName, authState.email) : null;
 
   const handleSignOut = async () => {
     setIsSigningOut(true);
@@ -190,11 +275,8 @@ export function SiteHeader() {
                 <div className="hidden items-center md:flex">
                   <div className="group relative">
                     <button type="button" className="account-profile-pill" aria-haspopup="menu" aria-label="Відкрити меню акаунта">
-                      <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[rgba(238,242,255,0.92)] text-sm font-semibold text-[var(--accent-strong)]">
-                        {profileInitials}
-                      </span>
+                      <ProfileAvatar label={authState.displayName} avatarUrl={authState.avatarUrl} />
                       <span className="hidden min-w-0 lg:block">
-                        <span className="block text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-[var(--text-soft)]">Профіль</span>
                         <span className="block max-w-[10rem] truncate text-sm font-semibold text-[var(--text-strong)]">{profileLabel}</span>
                       </span>
                     </button>
@@ -272,12 +354,10 @@ export function SiteHeader() {
               {authState.status === "user" ? (
                 <>
                   <div className="mt-2 flex items-center gap-3 rounded-[1.5rem] border border-[var(--line-soft)] bg-[rgba(255,255,255,0.78)] px-3 py-3">
-                    <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[rgba(238,242,255,0.92)] text-sm font-semibold text-[var(--accent-strong)]">
-                      {profileInitials}
-                    </span>
+                    <ProfileAvatar label={authState.displayName} avatarUrl={authState.avatarUrl} />
                     <span className="min-w-0">
-                      <span className="block text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-[var(--text-soft)]">Профіль</span>
                       <span className="block truncate text-sm font-semibold text-[var(--text-strong)]">{profileLabel}</span>
+                      <span className="block break-all text-xs text-[var(--text-soft)]">{authState.email}</span>
                     </span>
                   </div>
 
