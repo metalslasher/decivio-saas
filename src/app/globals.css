@@ -185,6 +185,17 @@ main {
   backdrop-filter: blur(18px);
 }
 
+.dashboard-sidebar-scrollarea {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.dashboard-sidebar-scrollarea::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
 .dashboard-topbar {
   border-bottom: 1px solid rgba(24, 26, 32, 0.08);
   background:

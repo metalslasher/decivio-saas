@@ -1842,8 +1842,8 @@ function DashboardSidebarAccount({
 }) {
   const profileLabel = getShortProfileLabel(displayName, email);
   const menuPositionClass = isCompact
-    ? "left-full bottom-0 ml-3"
-    : "bottom-full left-0 right-0 mb-3";
+    ? "left-full bottom-0 pl-3"
+    : "bottom-full left-0 right-0 pb-3";
   const panelWidthClass = isCompact ? "min-w-[15rem]" : "w-full min-w-[16rem]";
 
   return (
@@ -1974,7 +1974,7 @@ function DashboardSidebar({
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto px-3 py-4">
+          <div className="dashboard-sidebar-scrollarea flex-1 overflow-y-auto px-3 py-4">
             <nav className="space-y-1.5" aria-label="Навігація кабінету">
               {dashboardNavItems.map((item) => {
                 const isActive = item.view === activeView;
