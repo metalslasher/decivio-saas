@@ -79,6 +79,15 @@ function CabinetIcon() {
   );
 }
 
+function ProfileIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="account-menu-icon" fill="none" aria-hidden="true">
+      <circle cx="12" cy="8" r="3.2" stroke="currentColor" strokeWidth="1.8" />
+      <path d="M5 19c1.7-3.4 4.2-5.1 7-5.1s5.3 1.7 7 5.1" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 function BillingIcon() {
   return (
     <svg viewBox="0 0 24 24" className="account-menu-icon" fill="none" aria-hidden="true">
@@ -287,6 +296,10 @@ export function SiteHeader() {
                           <CabinetIcon />
                           <span>Кабінет</span>
                         </Link>
+                        <Link href="/dashboard?view=profile" className="account-menu-link">
+                          <ProfileIcon />
+                          <span>Профіль</span>
+                        </Link>
                         <Link href="/dashboard?view=access" className="account-menu-link">
                           <BillingIcon />
                           <span>Оплата</span>
@@ -365,6 +378,10 @@ export function SiteHeader() {
                     <Link href="/dashboard" onClick={() => setIsOpen(false)} className="account-menu-link">
                       <CabinetIcon />
                       <span>Кабінет</span>
+                    </Link>
+                    <Link href="/dashboard?view=profile" onClick={() => setIsOpen(false)} className="account-menu-link">
+                      <ProfileIcon />
+                      <span>Профіль</span>
                     </Link>
                     <Link href="/dashboard?view=access" onClick={() => setIsOpen(false)} className="account-menu-link">
                       <BillingIcon />
