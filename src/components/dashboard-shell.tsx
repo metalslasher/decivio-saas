@@ -1230,123 +1230,61 @@ function DashboardOverview({
         ? `Фокус на переході в ${lastSimulation.targetRole}`
         : "Почнімо зі стартового сценарію переходу";
 
-  const comparisonCards = [
-    {
-      title: lastSimulation?.currentRole ? `Залишитись у ${lastSimulation.currentRole}` : "Залишитись у поточній ролі",
-      description: "Базова лінія, від якої ми відштовхуємось у порівнянні.",
-      note: "Найнижча невизначеність"
-    },
-    {
-      title: lastSimulation?.targetRole ? `Перейти в ${lastSimulation.targetRole}` : "Перейти в новий напрям",
-      description: lastVerdict ?? "Основний сценарій переходу, який зараз варто тримати у фокусі.",
-      note: probability ?? "Ключовий сценарій"
-    },
-    {
-      title: "Проміжний маршрут",
-      description: targetMarket ? `Орієнтир на ${targetMarket}.` : "М'якший сценарій із меншим стресом на старті.",
-      note: priority ?? "Можна порівняти окремо"
-    }
-  ];
-
   return (
     <div className="space-y-6">
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.14fr),23rem]">
-        <article className="dashboard-spotlight-card rounded-[2.3rem] p-6 md:p-8">
-          <div className="flex flex-wrap items-center gap-2">
-            <DashboardChip tone={lastSimulation ? "success" : "accent"}>{lastSimulation ? "Останній сценарій" : "Перша симуляція"}</DashboardChip>
-            {targetMarket ? <DashboardChip tone="default">{targetMarket}</DashboardChip> : null}
-            {priority ? <DashboardChip tone="accent">{priority}</DashboardChip> : null}
-          </div>
-
-          <h1 className="mt-5 max-w-[14ch] text-[2.35rem] font-semibold leading-[0.92] tracking-[-0.055em] text-[var(--text-strong)] md:text-[3.25rem]">
-            {focusTitle}
-          </h1>
-          <p className="mt-5 max-w-3xl text-[1rem] leading-[1.78] text-[var(--text-muted)]">
-            {lastSimulation
-              ? `${firstName}, головний екран кабінету збирає в одному місці останній сценарій, історію переходів, доступ до модулів і зрозумілі наступні кроки.`
-              : `${firstName}, поки ви ще не проходили першу симуляцію. Після першого розрахунку в топі з'явиться останній сценарій, а історія поїде в окремий розділ.`}
-          </p>
-
-          <div className="mt-7 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            <DashboardMetricCard
-              label={moneyDelta ? "Потенціал стелі" : "Сценарії"}
-              value={moneyDelta ?? `${totalSimulations}`}
-              description={moneyDelta ? "Орієнтовний розрив із поточною стелею доходу." : "Збережено в кабінеті й доступно в історії."}
-            />
-            <DashboardMetricCard
-              label="Наступний крок"
-              value={lastSimulation ? "Перевести сценарій у підготовку" : "Пройти першу симуляцію"}
-              description={lastSimulation ? "Після сценарію логічно йти в розділ резюме або в підготовку до співбесід." : "Симуляція запускає весь маршрут у кабінеті."}
-            />
-            <DashboardMetricCard
-              label="Орієнтир"
-              value={probability ?? "Роль ще не визначена"}
-              description={lastVerdict ?? "Після першого розрахунку тут з'явиться персональний висновок."}
-            />
-            <DashboardMetricCard
-              label="Готовність профілю"
-              value={`${readiness}%`}
-              description="Зростає разом зі сценаріями, модулями та опрацюванням ринку."
-            />
-          </div>
-
-          <div className="mt-7 flex flex-wrap gap-3">
-            <Link href={lastSimulation ? getDashboardHref("scenario") : "/simulate"} className="btn-primary">
-              {lastSimulation ? "Відкрити сценарії" : "Пройти симуляцію"}
-            </Link>
-            {lastSimulation ? (
-              <Link href="/simulate" className="btn-secondary">
-                Нова симуляція
-              </Link>
-            ) : null}
-          </div>
-        </article>
-
-        <div className="space-y-6">
-          <article className="surface-panel rounded-[2rem] p-5 md:p-6">
-            <div className="flex items-center gap-3">
-              <span className="surface-soft inline-flex h-11 w-11 items-center justify-center rounded-[1rem] text-[var(--accent-strong)]">
-                <SparkIcon />
-              </span>
-              <h2 className="text-[1.45rem] font-semibold leading-[1.06] tracking-[-0.04em] text-[var(--text-strong)]">Поради від ШІ</h2>
-            </div>
-
-            <div className="mt-5 space-y-3">
-              {insights.map((insight) => (
-                <div key={insight} className="surface-soft rounded-[1.25rem] p-4">
-                  <p className="text-[0.94rem] leading-[1.72] text-[var(--text-muted)]">{insight}</p>
-                </div>
-              ))}
-            </div>
-          </article>
-
-          <article id="activity" className="surface-panel rounded-[2rem] p-5 md:p-6">
-            <div className="flex items-center gap-3">
-              <span className="surface-soft inline-flex h-11 w-11 items-center justify-center rounded-[1rem] text-[var(--accent-strong)]">
-                <ActivityIcon />
-              </span>
-              <h2 className="text-[1.45rem] font-semibold leading-[1.06] tracking-[-0.04em] text-[var(--text-strong)]">Остання активність</h2>
-            </div>
-
-            <div className="mt-5 space-y-3">
-              {activityItems.map((item) => (
-                <div key={`${item.title}-${item.description}`} className="rounded-[1.2rem] border border-[rgba(24,26,32,0.08)] bg-[rgba(255,255,255,0.74)] p-4">
-                  <div className="flex items-start gap-3">
-                    <span className="mt-1.5 inline-flex h-2.5 w-2.5 shrink-0 rounded-full bg-[var(--accent)]/75" />
-                    <div>
-                      <p className="text-[0.94rem] leading-[1.62] text-[var(--text-strong)]">{item.title}</p>
-                      <p className="mt-1 text-[0.82rem] text-[var(--text-soft)]">{item.description}</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </article>
+      <article className="dashboard-spotlight-card rounded-[2.3rem] p-6 md:p-8">
+        <div className="flex flex-wrap items-center gap-2">
+          <DashboardChip tone={lastSimulation ? "success" : "accent"}>{lastSimulation ? "Останній сценарій" : "Перша симуляція"}</DashboardChip>
+          {targetMarket ? <DashboardChip tone="default">{targetMarket}</DashboardChip> : null}
+          {priority ? <DashboardChip tone="accent">{priority}</DashboardChip> : null}
         </div>
-      </div>
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr),minmax(0,1fr),22rem]">
-        <article className="surface-panel rounded-[2rem] p-5 md:p-6">
+        <h1 className="mt-5 max-w-[14ch] text-[2.35rem] font-semibold leading-[0.92] tracking-[-0.055em] text-[var(--text-strong)] md:text-[3.25rem]">
+          {focusTitle}
+        </h1>
+        <p className="mt-5 max-w-3xl text-[1rem] leading-[1.78] text-[var(--text-muted)]">
+          {lastSimulation
+            ? `${firstName}, головний екран кабінету збирає в одному місці останній сценарій, історію переходів, доступ до модулів і зрозумілі наступні кроки.`
+            : `${firstName}, поки ви ще не проходили першу симуляцію. Після першого розрахунку в топі з'явиться останній сценарій, а історія поїде в окремий розділ.`}
+        </p>
+
+        <div className="mt-7 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <DashboardMetricCard
+            label={moneyDelta ? "Потенціал стелі" : "Сценарії"}
+            value={moneyDelta ?? `${totalSimulations}`}
+            description={moneyDelta ? "Орієнтовний розрив із поточною стелею доходу." : "Збережено в кабінеті й доступно в історії."}
+          />
+          <DashboardMetricCard
+            label="Наступний крок"
+            value={lastSimulation ? "Перевести сценарій у підготовку" : "Пройти першу симуляцію"}
+            description={lastSimulation ? "Після сценарію логічно йти в розділ резюме або в підготовку до співбесід." : "Симуляція запускає весь маршрут у кабінеті."}
+          />
+          <DashboardMetricCard
+            label="Орієнтир"
+            value={probability ?? "Роль ще не визначена"}
+            description={lastVerdict ?? "Після першого розрахунку тут з'явиться персональний висновок."}
+          />
+          <DashboardMetricCard
+            label="Готовність профілю"
+            value={`${readiness}%`}
+            description="Зростає разом зі сценаріями, модулями та опрацюванням ринку."
+          />
+        </div>
+
+        <div className="mt-7 flex flex-wrap gap-3">
+          <Link href={lastSimulation ? getDashboardHref("scenario") : "/simulate"} className="btn-primary">
+            {lastSimulation ? "Відкрити сценарії" : "Пройти симуляцію"}
+          </Link>
+          {lastSimulation ? (
+            <Link href="/simulate" className="btn-secondary">
+              Нова симуляція
+            </Link>
+          ) : null}
+        </div>
+      </article>
+
+      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-12">
+        <article className="surface-panel rounded-[2rem] p-5 md:col-span-2 md:p-6 xl:col-span-7">
           <h2 className="text-[1.5rem] font-semibold leading-[1.06] tracking-[-0.04em] text-[var(--text-strong)]">План прогресу</h2>
           <p className="mt-3 text-[0.95rem] leading-[1.72] text-[var(--text-muted)]">
             Це зона, яка тримає людину не в хаосі модулів, а в послідовному маршруті переходу.
@@ -1359,37 +1297,24 @@ function DashboardOverview({
           </div>
         </article>
 
-        <article className="surface-panel rounded-[2rem] p-5 md:p-6">
-          <h2 className="text-[1.5rem] font-semibold leading-[1.06] tracking-[-0.04em] text-[var(--text-strong)]">Порівняння сценаріїв</h2>
-          <p className="mt-3 text-[0.95rem] leading-[1.72] text-[var(--text-muted)]">
-            Не один напрям, а поле для рішення. Тут краще тримати короткі сценарні блоки без перевантаження текстом.
-          </p>
+        <article className="surface-panel rounded-[2rem] p-5 md:p-6 xl:col-span-5">
+          <div className="flex items-center gap-3">
+            <span className="surface-soft inline-flex h-11 w-11 items-center justify-center rounded-[1rem] text-[var(--accent-strong)]">
+              <SparkIcon />
+            </span>
+            <h2 className="text-[1.45rem] font-semibold leading-[1.06] tracking-[-0.04em] text-[var(--text-strong)]">Поради від ШІ</h2>
+          </div>
 
-          <div className="mt-6 space-y-4">
-            {comparisonCards.map((card, index) => (
-              <div
-                key={card.title}
-                className={`rounded-[1.4rem] border p-4 ${
-                  index === 1
-                    ? "border-[rgba(52,211,153,0.26)] bg-[rgba(236,253,245,0.78)]"
-                    : "border-[rgba(24,26,32,0.08)] bg-[rgba(255,255,255,0.74)]"
-                }`}
-              >
-                <div className="flex items-start justify-between gap-4">
-                  <div className="min-w-0">
-                    <h3 className="text-[1.08rem] font-semibold leading-[1.2] tracking-[-0.03em] text-[var(--text-strong)]">{card.title}</h3>
-                    <p className="mt-2 text-[0.92rem] leading-[1.68] text-[var(--text-muted)]">{card.description}</p>
-                  </div>
-                  <span className="max-w-[9rem] text-right text-[0.78rem] font-semibold uppercase tracking-[0.14em] text-[var(--text-soft)]">
-                    {card.note}
-                  </span>
-                </div>
+          <div className="mt-5 space-y-3">
+            {insights.map((insight) => (
+              <div key={insight} className="surface-soft rounded-[1.25rem] p-4">
+                <p className="text-[0.94rem] leading-[1.72] text-[var(--text-muted)]">{insight}</p>
               </div>
             ))}
           </div>
         </article>
 
-        <article className="surface-panel rounded-[2rem] p-5 md:p-6">
+        <article className="surface-panel rounded-[2rem] p-5 md:p-6 xl:col-span-5">
           <div className="flex items-center gap-3">
             <span className="surface-soft inline-flex h-11 w-11 items-center justify-center rounded-[1rem] text-[var(--accent-strong)]">
               <CreditCardIcon />
@@ -1426,6 +1351,29 @@ function DashboardOverview({
           <Link href={getDashboardHref("access")} className="btn-secondary mt-6 w-full">
             Відкрити доступ
           </Link>
+        </article>
+
+        <article id="activity" className="surface-panel rounded-[2rem] p-5 md:col-span-2 md:p-6 xl:col-span-7">
+          <div className="flex items-center gap-3">
+            <span className="surface-soft inline-flex h-11 w-11 items-center justify-center rounded-[1rem] text-[var(--accent-strong)]">
+              <ActivityIcon />
+            </span>
+            <h2 className="text-[1.45rem] font-semibold leading-[1.06] tracking-[-0.04em] text-[var(--text-strong)]">Остання активність</h2>
+          </div>
+
+          <div className="mt-5 grid gap-3 lg:grid-cols-2">
+            {activityItems.map((item) => (
+              <div key={`${item.title}-${item.description}`} className="rounded-[1.2rem] border border-[rgba(24,26,32,0.08)] bg-[rgba(255,255,255,0.74)] p-4">
+                <div className="flex items-start gap-3">
+                  <span className="mt-1.5 inline-flex h-2.5 w-2.5 shrink-0 rounded-full bg-[var(--accent)]/75" />
+                  <div>
+                    <p className="text-[0.94rem] leading-[1.62] text-[var(--text-strong)]">{item.title}</p>
+                    <p className="mt-1 text-[0.82rem] text-[var(--text-soft)]">{item.description}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </article>
       </div>
 
