@@ -146,6 +146,7 @@ main {
   width: 100vw;
   margin-left: calc(50% - 50vw);
   margin-top: calc(clamp(1rem, 1.8vw, 2rem) * -1);
+  margin-bottom: calc(clamp(5rem, 6vw, 6.5rem) * -1);
 }
 
 .dashboard-shell {

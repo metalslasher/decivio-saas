@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState, type CSSProperties, type FormEvent, type ReactNode } from "react";
 import { useAuthDialog } from "@/components/auth-dialog-provider";
+import { BrandBadge } from "@/components/brand-badge";
 import { WordmarkLogo } from "@/components/wordmark-logo";
 import { getSupabaseBrowserClient } from "@/lib/db/supabase-browser";
 import { GUEST_USER_COOKIE_NAME } from "@/lib/guest-session";
@@ -252,14 +253,6 @@ function ExpandIcon() {
       <path d="M15 6l5 6-5 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
       <path d="M4 5v14" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
     </svg>
-  );
-}
-
-function BrandBadge() {
-  return (
-    <span className="inline-flex h-10 w-10 items-center justify-center rounded-[1rem] bg-[linear-gradient(180deg,#5b72ff_0%,#4563ff_100%)] text-[1.05rem] font-extrabold text-white shadow-[0_16px_28px_-18px_rgba(67,97,255,0.42)]">
-      D
-    </span>
   );
 }
 
@@ -998,7 +991,7 @@ function DashboardSidebar({
               }`}
             >
               <Link href="/dashboard" aria-label="Decivio" className={`min-w-0 ${isCompact ? "mx-auto" : ""}`}>
-                {isCompact ? <BrandBadge /> : <WordmarkLogo className="text-[2.05rem]" />}
+                {isCompact ? <BrandBadge size="sidebar" /> : <WordmarkLogo className="text-[2.05rem]" />}
               </Link>
 
             <div className="flex items-center">
@@ -1062,7 +1055,8 @@ function DashboardSidebar({
                 <input
                   value={searchValue}
                   onChange={(event) => onSearchChange(event.target.value)}
-                  placeholder="Пошук модулів і дій"
+                  aria-label="Пошук"
+                  placeholder="Пошук"
                   className="min-w-0 flex-1 bg-transparent text-sm text-[var(--text-strong)] outline-none placeholder:text-[var(--text-soft)]"
                 />
               </label>
@@ -1130,7 +1124,8 @@ function DashboardTopbar({
             <input
               value={searchValue}
               onChange={(event) => onSearchChange(event.target.value)}
-              placeholder="Пошук модулів і дій"
+              aria-label="Пошук"
+              placeholder="Пошук"
               className="min-w-0 flex-1 bg-transparent text-sm text-[var(--text-strong)] outline-none placeholder:text-[var(--text-soft)]"
             />
           </label>
