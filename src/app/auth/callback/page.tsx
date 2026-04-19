@@ -3,6 +3,7 @@
 import type { EmailOtpType } from "@supabase/supabase-js";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { claimGuestSimulations } from "@/lib/auth-session-client";
 import { getSupabaseBrowserClient } from "@/lib/db/supabase-browser";
 
 type CallbackState =
@@ -125,18 +126,21 @@ export default function AuthCallbackPage() {
         const accessToken = hashParams.get("access_token");
         const refreshToken = hashParams.get("refresh_token");
         const hashError = hashParams.get("error_description") ?? hashParams.get("error");
+        let sessionAccessToken: string | null = null;
 
         if (hashError) {
           throw new Error(hashError);
         }
 
         if (code) {
-          const { error } = await supabase.auth.exchangeCodeForSession(code);
+          const { data, error } = await supabase.auth.exchangeCodeForSession(code);
           if (error) {
             throw error;
           }
+
+          sessionAccessToken = data.session?.access_token ?? null;
         } else if (accessToken && refreshToken) {
-          const { error } = await supabase.auth.setSession({
+          const { data, error } = await supabase.auth.setSession({
             access_token: accessToken,
             refresh_token: refreshToken
           });
@@ -144,8 +148,10 @@ export default function AuthCallbackPage() {
           if (error) {
             throw error;
           }
+
+          sessionAccessToken = data.session?.access_token ?? accessToken;
         } else if (tokenHash && type) {
-          const { error } = await supabase.auth.verifyOtp({
+          const { data, error } = await supabase.auth.verifyOtp({
             token_hash: tokenHash,
             type: type as EmailOtpType
           });
@@ -153,9 +159,13 @@ export default function AuthCallbackPage() {
           if (error) {
             throw error;
           }
+
+          sessionAccessToken = data.session?.access_token ?? null;
         } else {
           throw new Error("У посиланні бракує службових параметрів авторизації.");
         }
+
+        await claimGuestSimulations(sessionAccessToken);
 
         if (!isMounted) {
           return;

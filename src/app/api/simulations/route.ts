@@ -4,8 +4,10 @@ import { NextResponse } from "next/server";
 import { buildStoredSummaryMetrics, generateCareerSwitchAnalysis } from "@/lib/career-switch-analysis";
 import { parseCareerSwitchFormPayload } from "@/lib/career-switch-form";
 import { getSupabaseAdminClient } from "@/lib/db/supabase";
+import { claimGuestSimulationsForUser } from "@/lib/guest-simulation-transfer";
 import { GUEST_USER_COOKIE_MAX_AGE, GUEST_USER_COOKIE_NAME } from "@/lib/guest-session";
 import { resolveGuestSessionIdentity } from "@/lib/guest-session-server";
+import { getAuthenticatedUserIdFromRequest } from "@/lib/request-auth";
 import { consumeRateLimit } from "@/lib/request-rate-limit";
 
 const SIMULATION_RATE_LIMIT = {
@@ -69,10 +71,11 @@ function analysisUnavailableErrorMessage(error: unknown) {
   return message;
 }
 
-function ownerColumns(identity: Awaited<ReturnType<typeof resolveGuestSessionIdentity>>) {
-  return identity.kind === "guest_session"
-    ? { user_id: null, guest_session_id: identity.id }
-    : { user_id: identity.id, guest_session_id: null };
+function ownerColumns(owner: { userId: string | null; guestSessionId: string | null }) {
+  return {
+    user_id: owner.userId,
+    guest_session_id: owner.guestSessionId
+  };
 }
 
 async function applySimulationRateLimit(supabase: SupabaseClient, request: Request, existingGuestId: string | null) {
@@ -139,6 +142,18 @@ export async function POST(request: Request) {
   const cookieStore = cookies();
   const existingGuestId = cookieStore.get(GUEST_USER_COOKIE_NAME)?.value ?? null;
 
+  let authenticatedUserId: string | null = null;
+  try {
+    authenticatedUserId = await getAuthenticatedUserIdFromRequest(supabase, request);
+  } catch (error) {
+    return NextResponse.json(
+      {
+        error: supabaseUnavailableErrorMessage(error, "Не вдалося підтвердити авторизовану сесію.")
+      },
+      { status: 401 }
+    );
+  }
+
   let rateLimit;
   try {
     rateLimit = await applySimulationRateLimit(supabase, request, existingGuestId);
@@ -165,19 +180,46 @@ export async function POST(request: Request) {
     );
   }
 
-  let guestIdentity;
-  try {
-    guestIdentity = await resolveGuestSessionIdentity(supabase, existingGuestId);
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Не вдалося підготувати guest session.";
-    return NextResponse.json(
-      {
-        error: isMissingGuestSessionSchema(message)
-          ? "Guest session не налаштовано. Застосуйте останні міграції Supabase."
-          : supabaseUnavailableErrorMessage(error, "Не вдалося підготувати guest session.")
-      },
-      { status: 500 }
-    );
+  let shouldClearGuestCookie = false;
+  let createdGuestSession = false;
+  let simulationOwner: { userId: string | null; guestSessionId: string | null };
+
+  if (authenticatedUserId) {
+    if (existingGuestId) {
+      try {
+        await claimGuestSimulationsForUser(supabase, authenticatedUserId, existingGuestId);
+        shouldClearGuestCookie = true;
+      } catch {
+        shouldClearGuestCookie = false;
+      }
+    }
+
+    simulationOwner = {
+      userId: authenticatedUserId,
+      guestSessionId: null
+    };
+  } else {
+    let guestIdentity;
+
+    try {
+      guestIdentity = await resolveGuestSessionIdentity(supabase, existingGuestId);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Не вдалося підготувати guest session.";
+      return NextResponse.json(
+        {
+          error: isMissingGuestSessionSchema(message)
+            ? "Guest session не налаштовано. Застосуйте останні міграції Supabase."
+            : supabaseUnavailableErrorMessage(error, "Не вдалося підготувати guest session.")
+        },
+        { status: 500 }
+      );
+    }
+
+    simulationOwner =
+      guestIdentity.kind === "guest_session"
+        ? { userId: null, guestSessionId: guestIdentity.id }
+        : { userId: guestIdentity.id, guestSessionId: null };
+    createdGuestSession = guestIdentity.kind === "guest_session" && guestIdentity.isNew;
   }
 
   let analysisResult;
@@ -206,12 +248,12 @@ export async function POST(request: Request) {
     ...parsed.value,
     country: "UA"
   };
-  const simulationOwner = ownerColumns(guestIdentity);
+  const simulationOwnerColumns = ownerColumns(simulationOwner);
 
   const { data: simulation, error: simulationError } = await supabase
     .from("simulations")
     .insert({
-      ...simulationOwner,
+      ...simulationOwnerColumns,
       scenario_type: "career_switch",
       status: "pending",
       inputs: simulationInputsForStorage
@@ -243,7 +285,7 @@ export async function POST(request: Request) {
 
   const { error: resultInsertError } = await supabase.from("simulation_results").insert({
     simulation_id: simulation.id,
-    ...simulationOwner,
+    ...simulationOwnerColumns,
     summary_metrics: buildStoredSummaryMetrics(analysisResult.analysis),
     series: {},
     ai_summary: {
@@ -281,20 +323,24 @@ export async function POST(request: Request) {
       simulationId: simulation.id,
       status: "completed",
       redirectTo: "/results",
-      createdGuestSession: guestIdentity.kind === "guest_session" && guestIdentity.isNew
+      createdGuestSession
     },
     { status: 201 }
   );
 
-  response.cookies.set({
-    name: GUEST_USER_COOKIE_NAME,
-    value: guestIdentity.id,
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
-    maxAge: GUEST_USER_COOKIE_MAX_AGE
-  });
+  if (simulationOwner.guestSessionId) {
+    response.cookies.set({
+      name: GUEST_USER_COOKIE_NAME,
+      value: simulationOwner.guestSessionId,
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
+      maxAge: GUEST_USER_COOKIE_MAX_AGE
+    });
+  } else if (shouldClearGuestCookie && existingGuestId) {
+    response.cookies.delete(GUEST_USER_COOKIE_NAME);
+  }
 
   return response;
 }

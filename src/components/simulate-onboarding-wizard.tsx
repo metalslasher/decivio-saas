@@ -1,7 +1,9 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { getSupabaseBrowserClient } from "@/lib/db/supabase-browser";
+import { buildAuthorizedHeaders, getAccessTokenFromSupabase } from "@/lib/auth-session-client";
 import {
   englishLevelOptions,
   experienceLevelOptions,
@@ -114,6 +116,7 @@ function RadioCards<T extends string>({
 
 export function SimulateOnboardingWizard() {
   const router = useRouter();
+  const supabase = useMemo(() => getSupabaseBrowserClient(), []);
   const [currentStep, setCurrentStep] = useState(0);
   const [values, setValues] = useState<WizardForm>(initialValues);
   const [errors, setErrors] = useState<FieldErrors>({});
@@ -212,11 +215,12 @@ export function SimulateOnboardingWizard() {
     setIsSubmitting(true);
 
     try {
+      const accessToken = await getAccessTokenFromSupabase(supabase);
       const response = await fetch("/api/simulations", {
         method: "POST",
-        headers: {
+        headers: buildAuthorizedHeaders(accessToken, {
           "Content-Type": "application/json"
-        },
+        }),
         body: JSON.stringify({
           current_income: Number(values.current_income),
           current_role: values.current_role,

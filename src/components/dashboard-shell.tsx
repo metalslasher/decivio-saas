@@ -728,7 +728,7 @@ function buildInsights(
 
   if (!lastSimulation) {
     return [
-      "Почніть зі стартового сценарію, щоб головний екран перестав бути загальним і підлаштувався під ваш маршрут.",
+      "Почніть із першої симуляції, щоб головний екран перестав бути загальним і підлаштувався під ваш маршрут.",
       subscription.plan === "pro"
         ? "У вас уже відкритий повний набір модулів. Після першого сценарію можна одразу йти в розділ резюме та підготовку до співбесід."
         : "Поки достатньо зібрати один сильний сценарій. Платні модулі логічно підключати вже після цього.",
@@ -1253,7 +1253,7 @@ function DashboardOverview({
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.14fr),23rem]">
         <article className="dashboard-spotlight-card rounded-[2.3rem] p-6 md:p-8">
           <div className="flex flex-wrap items-center gap-2">
-            <DashboardChip tone={lastSimulation ? "success" : "accent"}>{lastSimulation ? "Останній сценарій" : "Стартовий онбординг"}</DashboardChip>
+            <DashboardChip tone={lastSimulation ? "success" : "accent"}>{lastSimulation ? "Останній сценарій" : "Перша симуляція"}</DashboardChip>
             {targetMarket ? <DashboardChip tone="default">{targetMarket}</DashboardChip> : null}
             {priority ? <DashboardChip tone="accent">{priority}</DashboardChip> : null}
           </div>
@@ -1264,7 +1264,7 @@ function DashboardOverview({
           <p className="mt-5 max-w-3xl text-[1rem] leading-[1.78] text-[var(--text-muted)]">
             {lastSimulation
               ? `${firstName}, головний екран кабінету збирає в одному місці останній сценарій, історію переходів, доступ до модулів і зрозумілі наступні кроки.`
-              : `${firstName}, поки ви ще не проходили сценарний онбординг. Після першого розрахунку в топі з'явиться останній сценарій, а історія поїде в окремий розділ.`}
+              : `${firstName}, поки ви ще не проходили першу симуляцію. Після першого розрахунку в топі з'явиться останній сценарій, а історія поїде в окремий розділ.`}
           </p>
 
           <div className="mt-7 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -1275,8 +1275,8 @@ function DashboardOverview({
             />
             <DashboardMetricCard
               label="Наступний крок"
-              value={lastSimulation ? "Перевести сценарій у підготовку" : "Пройти стартовий онбординг"}
-              description={lastSimulation ? "Після сценарію логічно йти в розділ резюме або в підготовку до співбесід." : "Онбординг зараз починається через симуляцію."}
+              value={lastSimulation ? "Перевести сценарій у підготовку" : "Пройти першу симуляцію"}
+              description={lastSimulation ? "Після сценарію логічно йти в розділ резюме або в підготовку до співбесід." : "Симуляція запускає весь маршрут у кабінеті."}
             />
             <DashboardMetricCard
               label="Орієнтир"
@@ -1292,11 +1292,13 @@ function DashboardOverview({
 
           <div className="mt-7 flex flex-wrap gap-3">
             <Link href={lastSimulation ? getDashboardHref("scenario") : "/simulate"} className="btn-primary">
-              {lastSimulation ? "Відкрити сценарії" : "Почати онбординг"}
+              {lastSimulation ? "Відкрити сценарії" : "Пройти симуляцію"}
             </Link>
-            <Link href="/simulate" className="btn-secondary">
-              Нова симуляція
-            </Link>
+            {lastSimulation ? (
+              <Link href="/simulate" className="btn-secondary">
+                Нова симуляція
+              </Link>
+            ) : null}
           </div>
         </article>
 
@@ -1481,7 +1483,7 @@ function DashboardScenarioWorkspace({
           </p>
           <div className="mt-7 flex flex-wrap gap-3">
             <Link href="/simulate" className="btn-primary">
-              Почати онбординг
+              Пройти симуляцію
             </Link>
             <Link href="/dashboard" className="btn-secondary">
               Повернутися на головну

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { claimGuestSimulations } from "@/lib/auth-session-client";
 import { getSupabaseBrowserClient } from "@/lib/db/supabase-browser";
 
 export type AuthView = "login" | "signup" | "reset";
@@ -254,12 +255,18 @@ export function AuthForm({
 
     supabase.auth
       .getSession()
-      .then(({ data }) => {
+      .then(async ({ data }) => {
         if (!isMounted) {
           return;
         }
 
         if (data.session) {
+          await claimGuestSimulations(data.session.access_token);
+
+          if (!isMounted) {
+            return;
+          }
+
           onClose?.();
           router.replace(redirectTo);
           router.refresh();
@@ -387,6 +394,7 @@ export function AuthForm({
         }
 
         if (data.session) {
+          await claimGuestSimulations(data.session.access_token);
           onClose?.();
           router.replace(redirectTo);
           router.refresh();
@@ -397,7 +405,7 @@ export function AuthForm({
         return;
       }
 
-      const { error: signInError } = await supabase.auth.signInWithPassword({
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password
       });
@@ -407,6 +415,7 @@ export function AuthForm({
         return;
       }
 
+      await claimGuestSimulations(data.session?.access_token ?? null);
       onClose?.();
       router.replace(redirectTo);
       router.refresh();
