@@ -551,6 +551,33 @@ function toNumber(value: unknown) {
   return typeof value === "number" && Number.isFinite(value) ? value : null;
 }
 
+function getErrorMessage(error: unknown) {
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  if (typeof error === "string") {
+    return error;
+  }
+
+  if (typeof error === "object" && error !== null && "message" in error) {
+    const value = (error as { message?: unknown }).message;
+    return typeof value === "string" ? value : "Unknown error";
+  }
+
+  return "Unknown error";
+}
+
+function isMissingProfileExtensionSchema(error: unknown) {
+  const message = getErrorMessage(error).toLowerCase();
+  return message.includes("profile_context") || message.includes("avatar_url");
+}
+
+function isMissingAvatarStorageSetup(error: unknown) {
+  const message = getErrorMessage(error).toLowerCase();
+  return message.includes("avatars") && (message.includes("bucket") || message.includes("storage") || message.includes("not found"));
+}
+
 function formatDisplayName(fullName: string | null | undefined, email: string) {
   const normalizedName = fullName?.trim();
 
@@ -2005,14 +2032,25 @@ function DashboardProfileWorkspace({
     setIsSaving(true);
 
     try {
-      const { error } = await supabase
+      const baseProfileUpdate = {
+        full_name: nextFullName,
+        timezone: nextTimezone
+      };
+
+      let usedFallbackSave = false;
+      let { error } = await supabase
         .from("profiles")
         .update({
-          full_name: nextFullName,
-          timezone: nextTimezone,
+          ...baseProfileUpdate,
           profile_context: nextContext
         })
         .eq("id", userId);
+
+      if (error && isMissingProfileExtensionSchema(error)) {
+        usedFallbackSave = true;
+        const fallbackResponse = await supabase.from("profiles").update(baseProfileUpdate).eq("id", userId);
+        error = fallbackResponse.error;
+      }
 
       if (error) {
         setSaveError(error.message);
@@ -2028,9 +2066,13 @@ function DashboardProfileWorkspace({
       };
 
       onProfileSaved(nextProfile);
-      setSaveNotice("Профіль оновлено.");
+      setSaveNotice(
+        usedFallbackSave
+          ? "Основні дані профілю оновлено. Для повного збереження додаткового контексту потрібно застосувати останню міграцію бази даних."
+          : "Профіль оновлено."
+      );
     } catch (error) {
-      setSaveError(error instanceof Error ? error.message : "Не вдалося зберегти профіль.");
+      setSaveError(getErrorMessage(error) || "Не вдалося зберегти профіль.");
     } finally {
       setIsSaving(false);
     }
@@ -2067,7 +2109,11 @@ function DashboardProfileWorkspace({
       });
 
       if (uploadError) {
-        setAvatarError(uploadError.message);
+        setAvatarError(
+          isMissingAvatarStorageSetup(uploadError)
+            ? "Аватари ще не ввімкнені на поточній базі даних. Потрібно застосувати останню міграцію Supabase."
+            : uploadError.message
+        );
         return;
       }
 
@@ -2076,7 +2122,11 @@ function DashboardProfileWorkspace({
       const { error: profileError } = await supabase.from("profiles").update({ avatar_url: nextAvatarUrl }).eq("id", userId);
 
       if (profileError) {
-        setAvatarError(profileError.message);
+        setAvatarError(
+          isMissingProfileExtensionSchema(profileError)
+            ? "Поле для аватара ще не доступне в поточній базі даних. Потрібно застосувати останню міграцію Supabase."
+            : profileError.message
+        );
         return;
       }
 
@@ -2104,7 +2154,11 @@ function DashboardProfileWorkspace({
       const { error } = await supabase.from("profiles").update({ avatar_url: null }).eq("id", userId);
 
       if (error) {
-        setAvatarError(error.message);
+        setAvatarError(
+          isMissingProfileExtensionSchema(error)
+            ? "Поле для аватара ще не доступне в поточній базі даних. Потрібно застосувати останню міграцію Supabase."
+            : error.message
+        );
         return;
       }
 
@@ -2116,7 +2170,7 @@ function DashboardProfileWorkspace({
       });
       setAvatarNotice("Аватар прибрано.");
     } catch (error) {
-      setAvatarError(error instanceof Error ? error.message : "Не вдалося прибрати аватар.");
+      setAvatarError(getErrorMessage(error) || "Не вдалося прибрати аватар.");
     } finally {
       setIsAvatarBusy(false);
     }
@@ -2785,7 +2839,7 @@ export function DashboardShell({
       }
 
       const [profileResponse, subscriptionResponse, countResponse, simulationsResponse] = await Promise.all([
-        supabase.from("profiles").select("email, full_name, timezone, avatar_url, profile_context").eq("id", userId).maybeSingle(),
+        supabase.from("profiles").select("*").eq("id", userId).maybeSingle(),
         supabase.from("subscriptions").select("status, plan, current_period_end").eq("user_id", userId).maybeSingle(),
         simulationsCountQuery,
         simulationsListQuery
