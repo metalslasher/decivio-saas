@@ -84,8 +84,11 @@ type DashboardSimulation = {
   targetMarket: string | null;
   transitionPriority: string | null;
   verdictLabel: string | null;
+  riskLevel: string | null;
   probabilityOfGettingJob: number | null;
   ceilingGapMedian: number | null;
+  currentBestCaseMedian: number | null;
+  targetBestCaseMedian: number | null;
   profileContextSeed: Partial<ProfileContext>;
 };
 
@@ -1229,6 +1232,19 @@ function probabilityLabel(value: number | null) {
   return `${Math.round(normalized)}% шанс входу`;
 }
 
+function riskLevelLabel(value: string | null) {
+  switch (value) {
+    case "low":
+      return "низький";
+    case "medium":
+      return "середній";
+    case "high":
+      return "високий";
+    default:
+      return null;
+  }
+}
+
 function formatDateTime(value: string | null) {
   if (!value) {
     return null;
@@ -1278,10 +1294,13 @@ function extractSimulationSnapshot(
     targetMarket: inputs?.target_market ?? null,
     transitionPriority: inputs?.transition_priority ?? null,
     verdictLabel: toNonEmptyString(metrics?.verdict_label),
+    riskLevel: toNonEmptyString(metrics?.risk_level),
     probabilityOfGettingJob: toNumber(
       metrics?.probability_of_getting_job_within_12_months,
     ),
     ceilingGapMedian: toNumber(metrics?.ceiling_gap_median),
+    currentBestCaseMedian: toNumber(metrics?.current_best_case_median),
+    targetBestCaseMedian: toNumber(metrics?.target_best_case_median),
     profileContextSeed: inputs
       ? {
           current_income: inputs.current_income,
@@ -2118,21 +2137,18 @@ function DashboardTopbar({
 }
 
 function DashboardOverview({
-  userDisplayName,
   totalSimulations,
   profile,
   subscription,
   recentSimulations,
   lastSimulation,
 }: {
-  userDisplayName: string;
   totalSimulations: number;
   profile: DashboardUserProfile;
   subscription: DashboardAccessState;
   recentSimulations: DashboardSimulation[];
   lastSimulation: DashboardSimulation | null;
 }) {
-  const firstName = getFirstName(userDisplayName);
   const progressSteps = buildProgressSteps(
     totalSimulations,
     subscription,
@@ -2154,22 +2170,43 @@ function DashboardOverview({
   const probability = probabilityLabel(
     lastSimulation?.probabilityOfGettingJob ?? null,
   );
+  const riskLevel = riskLevelLabel(lastSimulation?.riskLevel ?? null);
   const moneyDelta = formatSignedMoney(
     lastSimulation?.ceilingGapMedian ?? null,
   );
+  const currentCeiling =
+    lastSimulation?.currentBestCaseMedian !== null &&
+    lastSimulation?.currentBestCaseMedian !== undefined
+      ? formatUah(Math.round(lastSimulation.currentBestCaseMedian))
+      : null;
+  const targetCeiling =
+    lastSimulation?.targetBestCaseMedian !== null &&
+    lastSimulation?.targetBestCaseMedian !== undefined
+      ? formatUah(Math.round(lastSimulation.targetBestCaseMedian))
+      : null;
+  const lastUpdatedLabel = formatShortDate(lastSimulation?.createdAt ?? null);
   const focusTitle =
     lastSimulation?.currentRole && lastSimulation.targetRole
       ? `${lastSimulation.currentRole} -> ${lastSimulation.targetRole}`
       : lastSimulation?.targetRole
         ? `Фокус на переході в ${lastSimulation.targetRole}`
         : "Почнімо зі стартового сценарію переходу";
+  const heroSummary = lastSimulation
+    ? [
+        lastVerdict ? `${lastVerdict}.` : null,
+        probability ? `Поточний орієнтир — ${probability}.` : null,
+        riskLevel ? `Рівень ризику переходу: ${riskLevel}.` : null,
+      ]
+        .filter(Boolean)
+        .join(" ")
+    : "Після першої симуляції тут з'явиться коротке зведення з вердиктом, шансом входу, доходом і ризиком переходу.";
 
   return (
     <div className="space-y-6">
       <article className="dashboard-spotlight-card rounded-[2.3rem] p-6 md:p-8">
         <div className="flex flex-wrap items-center gap-2">
-          <DashboardChip tone={lastSimulation ? "success" : "accent"}>
-            {lastSimulation ? "Останній сценарій" : "Перша симуляція"}
+          <DashboardChip tone={lastSimulation ? "default" : "accent"}>
+            {lastUpdatedLabel ? `Оновлено ${lastUpdatedLabel}` : "Готово до старту"}
           </DashboardChip>
           {targetMarket ? (
             <DashboardChip tone="default">{targetMarket}</DashboardChip>
@@ -2179,65 +2216,51 @@ function DashboardOverview({
           ) : null}
         </div>
 
-        <h1 className="mt-5 max-w-[14ch] text-[2.35rem] font-semibold leading-[0.92] tracking-[-0.055em] text-[var(--text-strong)] md:text-[3.25rem]">
+        <h1 className="mt-5 text-[2.35rem] font-semibold leading-[0.92] tracking-[-0.055em] text-[var(--text-strong)] md:text-[3.45rem] xl:text-[4.35rem]">
           {focusTitle}
         </h1>
-        <p className="mt-5 max-w-3xl text-[1rem] leading-[1.78] text-[var(--text-muted)]">
-          {lastSimulation
-            ? `${firstName}, головний екран кабінету збирає в одному місці останній сценарій, історію переходів, доступ до модулів і зрозумілі наступні кроки.`
-            : `${firstName}, поки ви ще не проходили першу симуляцію. Після першого розрахунку в топі з'явиться останній сценарій, а історія поїде в окремий розділ.`}
+        <p className="mt-5 max-w-4xl text-[1rem] leading-[1.78] text-[var(--text-muted)]">
+          {heroSummary}
         </p>
 
         <div className="mt-7 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <DashboardMetricCard
-            label={moneyDelta ? "Потенціал стелі" : "Сценарії"}
-            value={moneyDelta ?? `${totalSimulations}`}
+            label="Поточна стеля"
+            value={currentCeiling ?? "Ще не пораховано"}
+            description={
+              currentCeiling
+                ? "Орієнтир по верхній межі доходу в поточній ролі."
+                : "Після першого результату тут з'явиться базовий орієнтир для порівняння."
+            }
+          />
+          <DashboardMetricCard
+            label="Цільова стеля"
+            value={targetCeiling ?? "Ще не пораховано"}
+            description={
+              targetCeiling
+                ? "Орієнтир по верхній межі доходу після переходу."
+                : "Цільова роль покаже свою стелю після першого розрахунку."
+            }
+          />
+          <DashboardMetricCard
+            label="Різниця в стелі"
+            value={moneyDelta ?? "Ще не пораховано"}
             description={
               moneyDelta
-                ? "Орієнтовний розрив із поточною стелею доходу."
-                : "Збережено в кабінеті й доступно в історії."
+                ? "Орієнтовний розрив між поточною та цільовою стелею доходу."
+                : "Після першого результату тут з'явиться різниця між двома напрямами."
             }
           />
           <DashboardMetricCard
-            label="Наступний крок"
-            value={
-              lastSimulation
-                ? "Перевести сценарій у підготовку"
-                : "Пройти першу симуляцію"
-            }
+            label="Шанс входу"
+            value={probability ?? "Ще не пораховано"}
             description={
-              lastSimulation
-                ? "Після сценарію логічно йти в розділ резюме або в підготовку до співбесід."
-                : "Симуляція запускає весь маршрут у кабінеті."
+              riskLevel
+                ? `Рівень ризику переходу: ${riskLevel}.`
+                : lastVerdict ??
+                  "Після першого результату тут з'явиться орієнтир по шансах входу."
             }
           />
-          <DashboardMetricCard
-            label="Орієнтир"
-            value={probability ?? "Роль ще не визначена"}
-            description={
-              lastVerdict ??
-              "Після першого розрахунку тут з'явиться персональний висновок."
-            }
-          />
-          <DashboardMetricCard
-            label="Профіль"
-            value={`${profile.completion}%`}
-            description="Заповненість даних, які підтягуються в модулі та персональні підказки."
-          />
-        </div>
-
-        <div className="mt-7 flex flex-wrap gap-3">
-          <Link
-            href={lastSimulation ? getDashboardHref("scenario") : "/simulate"}
-            className="btn-primary"
-          >
-            {lastSimulation ? "Відкрити сценарії" : "Пройти симуляцію"}
-          </Link>
-          {lastSimulation ? (
-            <Link href="/simulate" className="btn-secondary">
-              Нова симуляція
-            </Link>
-          ) : null}
         </div>
       </article>
 
@@ -4057,7 +4080,6 @@ export function DashboardShell({
         <div className="space-y-6 px-4 py-6 md:px-6 xl:px-8">
           {activeView === "overview" ? (
             <DashboardOverview
-              userDisplayName={state.user.displayName}
               totalSimulations={state.totalSimulations}
               profile={state.profile}
               subscription={state.subscription}
