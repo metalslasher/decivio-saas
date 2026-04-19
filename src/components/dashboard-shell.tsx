@@ -350,7 +350,6 @@ function ExpandIcon() {
 const dashboardNavItems: DashboardNavItem[] = [
   { view: "overview", label: "Головна", helper: "Останній сценарій, модулі й пріоритети.", icon: <HomeIcon /> },
   { view: "scenario", label: "Сценарії", helper: "Останній розрахунок і історія переходів.", icon: <RouteIcon /> },
-  { view: "profile", label: "Профіль", helper: "Контекст, дані акаунта й персоналізація.", icon: <UserIcon /> },
   { view: "resume", label: "Резюме", helper: "Резюме під цільову роль і вакансію.", icon: <ResumeIcon /> },
   { view: "interviews", label: "Співбесіди", helper: "Питання, пробна співбесіда і відгук.", icon: <InterviewIcon /> },
   { view: "jobs", label: "Нова робота", helper: "Перші дні, адаптація й очікування від ролі.", icon: <BriefcaseIcon /> },
@@ -1243,8 +1242,8 @@ function DashboardMetricCard({ label, value, description }: { label: string; val
   return (
     <article className="surface-soft rounded-[1.45rem] p-4 md:p-5">
       <p className="text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-[var(--text-soft)]">{label}</p>
-      <p className="mt-3 text-[1.18rem] font-semibold leading-[1.15] tracking-[-0.03em] text-[var(--text-strong)]">{value}</p>
-      <p className="mt-2 text-[0.9rem] leading-[1.68] text-[var(--text-muted)]">{description}</p>
+      <p className="mt-3 break-words text-[1.18rem] font-semibold leading-[1.15] tracking-[-0.03em] text-[var(--text-strong)] [overflow-wrap:anywhere]">{value}</p>
+      <p className="mt-2 break-words text-[0.9rem] leading-[1.68] text-[var(--text-muted)] [overflow-wrap:anywhere]">{description}</p>
     </article>
   );
 }
@@ -1967,7 +1966,8 @@ function DashboardProfileWorkspace({
     [profile.avatarUrl, profile.context, profile.fullName]
   );
 
-  const profileLabel = draft.full_name.trim() || email;
+  const profileHeading = getShortProfileLabel(draft.full_name.trim(), email);
+  const profileAvatarLabel = draft.full_name.trim() || email;
   const profileCurrentRole = normalizeOptionalInput(draft.current_role);
   const profileTargetRole = normalizeOptionalInput(draft.target_role);
   const workPreference = mapWorkPreferenceLabel(draft.work_preference || null);
@@ -2238,11 +2238,13 @@ function DashboardProfileWorkspace({
 
         <article className="surface-panel rounded-[2rem] p-5 md:p-6">
           <div className="flex items-start gap-4">
-            <DashboardAvatar label={profileLabel} avatarUrl={draft.avatar_url} sizeClassName="h-20 w-20" textClassName="text-xl font-semibold" />
+            <DashboardAvatar label={profileAvatarLabel} avatarUrl={draft.avatar_url} sizeClassName="h-20 w-20" textClassName="text-xl font-semibold" />
             <div className="min-w-0">
               <p className="text-[0.78rem] font-semibold uppercase tracking-[0.16em] text-[var(--text-soft)]">Ваш профіль</p>
-              <h2 className="mt-2 text-[1.45rem] font-semibold leading-[1.06] tracking-[-0.04em] text-[var(--text-strong)]">{profileLabel}</h2>
-              <p className="mt-2 text-[0.92rem] leading-[1.7] text-[var(--text-muted)]">{email}</p>
+              <h2 className="mt-2 break-words text-[1.45rem] font-semibold leading-[1.06] tracking-[-0.04em] text-[var(--text-strong)] [overflow-wrap:anywhere]">
+                {profileHeading}
+              </h2>
+              <p className="mt-2 break-all text-[0.92rem] leading-[1.7] text-[var(--text-muted)]">{email}</p>
             </div>
           </div>
 
