@@ -2,11 +2,12 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { buildStoredSummaryMetrics, generateCareerSwitchAnalysis } from "@/lib/career-switch-analysis";
-import { parseCareerSwitchFormPayload } from "@/lib/career-switch-form";
+import { parseCareerSwitchFormPayload, type CareerSwitchFormInput } from "@/lib/career-switch-form";
 import { getSupabaseAdminClient } from "@/lib/db/supabase";
 import { claimGuestSimulationsForUser } from "@/lib/guest-simulation-transfer";
 import { GUEST_USER_COOKIE_MAX_AGE, GUEST_USER_COOKIE_NAME } from "@/lib/guest-session";
 import { resolveGuestSessionIdentity } from "@/lib/guest-session-server";
+import { buildOnboardingProfileContext, mergeProfileContext, parseProfileContext } from "@/lib/profile-context";
 import { getAuthenticatedUserIdFromRequest } from "@/lib/request-auth";
 import { consumeRateLimit } from "@/lib/request-rate-limit";
 
@@ -76,6 +77,26 @@ function ownerColumns(owner: { userId: string | null; guestSessionId: string | n
     user_id: owner.userId,
     guest_session_id: owner.guestSessionId
   };
+}
+
+async function syncProfileContextFromSimulation(
+  supabase: SupabaseClient,
+  userId: string,
+  payload: CareerSwitchFormInput
+) {
+  try {
+    const { data: profileRow, error: profileError } = await supabase.from("profiles").select("profile_context").eq("id", userId).maybeSingle();
+
+    if (profileError) {
+      return;
+    }
+
+    const nextProfileContext = mergeProfileContext(parseProfileContext(profileRow?.profile_context), buildOnboardingProfileContext(payload));
+
+    await supabase.from("profiles").update({ profile_context: nextProfileContext }).eq("id", userId);
+  } catch {
+    // Profile sync is secondary: simulation flow should still complete if this fails.
+  }
 }
 
 async function applySimulationRateLimit(supabase: SupabaseClient, request: Request, existingGuestId: string | null) {
@@ -316,6 +337,10 @@ export async function POST(request: Request) {
       },
       { status: 500 }
     );
+  }
+
+  if (authenticatedUserId) {
+    await syncProfileContextFromSimulation(supabase, authenticatedUserId, parsed.value);
   }
 
   const response = NextResponse.json(

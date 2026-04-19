@@ -1,16 +1,38 @@
 "use client";
 
+import type { SupabaseClient } from "@supabase/supabase-js";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState, type CSSProperties, type FormEvent, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type ChangeEvent, type FormEvent, type ReactNode } from "react";
 import { useAuthDialog } from "@/components/auth-dialog-provider";
 import { BrandBadge } from "@/components/brand-badge";
 import { WordmarkLogo } from "@/components/wordmark-logo";
+import {
+  englishLevelOptions,
+  experienceLevelOptions,
+  parseStoredCareerSwitchInputs,
+  targetMarketOptions,
+  transitionPriorityOptions,
+  type EnglishLevel,
+  type ExperienceLevel,
+  type TargetMarket,
+  type TransitionPriority
+} from "@/lib/career-switch-form";
 import { getSupabaseBrowserClient } from "@/lib/db/supabase-browser";
 import { GUEST_USER_COOKIE_NAME } from "@/lib/guest-session";
+import {
+  createEmptyProfileContext,
+  jobSearchStageOptions,
+  mergeProfileContext,
+  parseProfileContext,
+  workPreferenceOptions,
+  type JobSearchStage,
+  type ProfileContext,
+  type WorkPreference
+} from "@/lib/profile-context";
 import { formatUah, pricingPlans } from "@/lib/pricing";
 
-type DashboardView = "overview" | "scenario" | "resume" | "interviews" | "jobs" | "offers" | "assistant" | "access";
+type DashboardView = "overview" | "scenario" | "profile" | "resume" | "interviews" | "jobs" | "offers" | "assistant" | "access";
 
 type ChipTone = "default" | "accent" | "success" | "gold";
 
@@ -25,6 +47,7 @@ type DashboardState =
         email: string;
         displayName: string;
       };
+      profile: DashboardUserProfile;
       subscription: {
         plan: "free" | "pro";
         status: "free" | "trial" | "active" | "canceled" | "past_due";
@@ -45,11 +68,23 @@ type DashboardSimulation = {
   verdictLabel: string | null;
   probabilityOfGettingJob: number | null;
   ceilingGapMedian: number | null;
+  profileContextSeed: Partial<ProfileContext>;
+};
+
+type DashboardUserProfile = {
+  fullName: string | null;
+  timezone: string | null;
+  avatarUrl: string | null;
+  context: ProfileContext;
+  completion: number;
 };
 
 type ProfileRow = {
   email?: string | null;
   full_name?: string | null;
+  timezone?: string | null;
+  avatar_url?: string | null;
+  profile_context?: unknown;
 };
 
 type SubscriptionRow = {
@@ -76,6 +111,12 @@ type DashboardAccessState = {
   currentPeriodEnd: string | null;
 };
 
+type DashboardProgressStep = {
+  label: string;
+  progress: number;
+  href?: string;
+};
+
 type DashboardNavItem = {
   view: DashboardView;
   label: string;
@@ -84,7 +125,7 @@ type DashboardNavItem = {
 };
 
 type DashboardModule = {
-  view: Exclude<DashboardView, "overview" | "scenario" | "access">;
+  view: Exclude<DashboardView, "overview" | "scenario" | "profile" | "access">;
   title: string;
   description: string;
   helper: string;
@@ -102,6 +143,27 @@ type ModuleWorkspaceConfig = {
     description: string;
     items: string[];
   }>;
+};
+
+type ProfileDraft = {
+  full_name: string;
+  timezone: string;
+  avatar_url: string | null;
+  city: string;
+  current_income: string;
+  current_role: string;
+  current_experience_years: string;
+  target_role: string;
+  experience_level: ExperienceLevel | "";
+  english_level: EnglishLevel | "";
+  target_market: TargetMarket | "";
+  transition_priority: TransitionPriority | "";
+  weekly_learning_hours: string;
+  work_preference: WorkPreference | "";
+  job_search_stage: JobSearchStage | "";
+  linkedin_url: string;
+  portfolio_url: string;
+  focus_note: string;
 };
 
 const dateFormatter = new Intl.DateTimeFormat("uk-UA", {
@@ -203,6 +265,35 @@ function CreditCardIcon() {
   );
 }
 
+function UserIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="8" r="3.2" />
+      <path d="M5 19c1.7-3.4 4.2-5.1 7-5.1s5.3 1.7 7 5.1" />
+    </svg>
+  );
+}
+
+function LockIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="5" y="10" width="14" height="10" rx="2.5" />
+      <path d="M8 10V7.8A4 4 0 0 1 12 4a4 4 0 0 1 4 3.8V10" />
+      <path d="M12 14v2.6" />
+    </svg>
+  );
+}
+
+function UploadIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 16V5" />
+      <path d="M7.5 9.5L12 5l4.5 4.5" />
+      <path d="M5 18.5h14" />
+    </svg>
+  );
+}
+
 function SearchIcon() {
   return (
     <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -259,11 +350,12 @@ function ExpandIcon() {
 const dashboardNavItems: DashboardNavItem[] = [
   { view: "overview", label: "Головна", helper: "Останній сценарій, модулі й пріоритети.", icon: <HomeIcon /> },
   { view: "scenario", label: "Сценарії", helper: "Останній розрахунок і історія переходів.", icon: <RouteIcon /> },
+  { view: "profile", label: "Профіль", helper: "Контекст, дані акаунта й персоналізація.", icon: <UserIcon /> },
   { view: "resume", label: "Резюме", helper: "Резюме під цільову роль і вакансію.", icon: <ResumeIcon /> },
   { view: "interviews", label: "Співбесіди", helper: "Питання, пробна співбесіда і відгук.", icon: <InterviewIcon /> },
   { view: "jobs", label: "Нова робота", helper: "Перші дні, адаптація й очікування від ролі.", icon: <BriefcaseIcon /> },
   { view: "offers", label: "Пропозиції", helper: "Порівняння пропозицій і рішень.", icon: <OfferIcon /> },
-  { view: "assistant", label: "ШІ-помічник", helper: "Контекстний помічник по всьому маршруту.", icon: <SparkIcon /> }
+  { view: "assistant", label: "Помічник", helper: "Контекстні підказки по всьому маршруту.", icon: <SparkIcon /> }
 ];
 
 const dashboardModules: DashboardModule[] = [
@@ -301,10 +393,10 @@ const dashboardModules: DashboardModule[] = [
   },
   {
     view: "assistant",
-    title: "Кар'єрний ШІ-помічник",
-    description: "Контекстний ШІ-помічник для сценаріїв, резюме, вакансій і співбесід із короткими наступними діями.",
+    title: "Кар'єрний помічник",
+    description: "Контекстний помічник для сценаріїв, резюме, вакансій і співбесід із короткими наступними діями.",
     helper: "Допомагає швидше переходити між модулями й не губити контекст.",
-    searchTerms: ["помічник", "ші", "поради", "кроки"],
+    searchTerms: ["помічник", "поради", "кроки", "контекст"],
     icon: <SparkIcon />
   }
 ];
@@ -419,9 +511,9 @@ const moduleWorkspaceConfigs: Record<DashboardModule["view"], ModuleWorkspaceCon
     ]
   },
   assistant: {
-    eyebrow: "ШІ-помічник",
-    title: "Контекстний ШІ-помічник для всього кабінету",
-    description: "Окремий розділ для ШІ, який розуміє ваш сценарій, модулі, доступ і може підказувати наступний крок без шуму.",
+    eyebrow: "Помічник",
+    title: "Контекстний помічник для всього кабінету",
+    description: "Окремий розділ із короткими підказками, який розуміє ваш сценарій, модулі, доступ і може запропонувати наступний крок без шуму.",
     summary: [
       { label: "Вхід", value: "Контекст користувача і модулів" },
       { label: "Фокус", value: "Короткі наступні дії" },
@@ -431,7 +523,7 @@ const moduleWorkspaceConfigs: Record<DashboardModule["view"], ModuleWorkspaceCon
       {
         title: "Що тут має жити",
         description: "Чат, швидкі команди й короткі сценарії дій усередині кабінету.",
-        items: ["Підказки для резюме і вакансій", "ШІ для сценаріїв та пропозицій", "Пояснення складних рішень простою мовою"]
+        items: ["Підказки для резюме і вакансій", "Поради для сценаріїв та пропозицій", "Пояснення складних рішень простою мовою"]
       },
       {
         title: "Перший реліз",
@@ -440,7 +532,7 @@ const moduleWorkspaceConfigs: Record<DashboardModule["view"], ModuleWorkspaceCon
       },
       {
         title: "Місце в маршруті",
-        description: "ШІ не дублює модулі, а пришвидшує рух між ними й економить увагу.",
+        description: "Помічник не дублює модулі, а пришвидшує рух між ними й економить увагу.",
         items: ["Працює поверх усієї навігації", "Підказує, з чого почати", "Не дає загубитися в наступних кроках"]
       }
     ]
@@ -478,20 +570,24 @@ function getFirstName(displayName: string) {
   return displayName.trim().split(/\s+/)[0] ?? displayName;
 }
 
-function getShortProfileLabel(email: string) {
+function getShortProfileLabel(displayName: string, email: string) {
+  const normalized = displayName.trim();
+  if (normalized) {
+    return normalized;
+  }
+
   return email.split("@")[0]?.trim() ?? email;
 }
 
-function getInitials(email: string) {
-  const localPart = email.split("@")[0]?.trim() ?? "";
-  const normalized = localPart.replace(/[^a-zA-Zа-яА-ЯіїєІЇЄґҐ0-9]+/g, " ").trim();
+function getInitials(value: string) {
+  const normalized = value.replace(/[^a-zA-Zа-яА-ЯіїєІЇЄґҐ0-9]+/g, " ").trim();
   const parts = normalized.split(/\s+/).filter(Boolean);
 
   if (parts.length >= 2) {
     return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
   }
 
-  return (parts[0] ?? localPart.slice(0, 2) ?? "DC").slice(0, 2).toUpperCase();
+  return (parts[0] ?? normalized.slice(0, 2) ?? "DC").slice(0, 2).toUpperCase();
 }
 
 function mapTargetMarketLabel(value: string | null) {
@@ -515,6 +611,217 @@ function mapPriorityLabel(value: string | null) {
       return "зростання доходу";
     default:
       return null;
+  }
+}
+
+function mapExperienceLevelLabel(value: ExperienceLevel | null) {
+  return experienceLevelOptions.find((item) => item.value === value)?.label ?? null;
+}
+
+function mapEnglishLevelLabel(value: EnglishLevel | null) {
+  return englishLevelOptions.find((item) => item.value === value)?.label ?? null;
+}
+
+function mapWorkPreferenceLabel(value: WorkPreference | null) {
+  return workPreferenceOptions.find((item) => item.value === value)?.label ?? null;
+}
+
+function mapJobSearchStageLabel(value: JobSearchStage | null) {
+  return jobSearchStageOptions.find((item) => item.value === value)?.label ?? null;
+}
+
+function buildProfileCompletion(fullName: string | null, avatarUrl: string | null, context: ProfileContext) {
+  let completion = 0;
+
+  if (fullName) {
+    completion += 10;
+  }
+
+  if (avatarUrl) {
+    completion += 8;
+  }
+
+  if (context.current_role) {
+    completion += 10;
+  }
+
+  if (context.target_role) {
+    completion += 10;
+  }
+
+  if (context.current_income !== null) {
+    completion += 7;
+  }
+
+  if (context.current_experience_years !== null) {
+    completion += 7;
+  }
+
+  if (context.experience_level) {
+    completion += 7;
+  }
+
+  if (context.english_level) {
+    completion += 7;
+  }
+
+  if (context.target_market) {
+    completion += 7;
+  }
+
+  if (context.transition_priority) {
+    completion += 7;
+  }
+
+  if (context.city) {
+    completion += 6;
+  }
+
+  if (context.weekly_learning_hours !== null) {
+    completion += 6;
+  }
+
+  if (context.work_preference) {
+    completion += 6;
+  }
+
+  if (context.job_search_stage) {
+    completion += 6;
+  }
+
+  if (context.linkedin_url || context.portfolio_url) {
+    completion += 6;
+  }
+
+  return Math.min(completion, 100);
+}
+
+function buildMissingProfileItems(context: ProfileContext, fullName: string | null, avatarUrl: string | null) {
+  const items: string[] = [];
+
+  if (!fullName) {
+    items.push("Додайте ім'я, щоб персоналізувати кабінет.");
+  }
+
+  if (!avatarUrl) {
+    items.push("Завантажте аватар, щоб профіль був завершеним.");
+  }
+
+  if (!context.target_role) {
+    items.push("Уточніть цільову роль для модулів і сценаріїв.");
+  }
+
+  if (!context.target_market) {
+    items.push("Вкажіть ринок, на який орієнтуєтесь.");
+  }
+
+  if (context.weekly_learning_hours === null) {
+    items.push("Додайте свій темп підготовки на тиждень.");
+  }
+
+  if (!context.job_search_stage) {
+    items.push("Позначте стадію пошуку, щоб поради були точнішими.");
+  }
+
+  if (!context.linkedin_url && !context.portfolio_url) {
+    items.push("Додайте хоча б одне зовнішнє посилання на профіль або портфоліо.");
+  }
+
+  return items.slice(0, 5);
+}
+
+function buildProfileContextSeed(simulation: DashboardSimulation | null) {
+  return simulation?.profileContextSeed ?? {};
+}
+
+function getBrowserTimeZone() {
+  if (typeof Intl === "undefined") {
+    return null;
+  }
+
+  const value = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  return typeof value === "string" && value.trim() !== "" ? value.trim() : null;
+}
+
+function toDraftValue(value: string | number | null | undefined) {
+  return value === null || value === undefined ? "" : String(value);
+}
+
+function buildProfileDraft(profile: DashboardUserProfile, fallbackTimeZone: string | null): ProfileDraft {
+  return {
+    full_name: profile.fullName ?? "",
+    timezone: profile.timezone ?? fallbackTimeZone ?? "",
+    avatar_url: profile.avatarUrl,
+    city: profile.context.city ?? "",
+    current_income: toDraftValue(profile.context.current_income),
+    current_role: profile.context.current_role ?? "",
+    current_experience_years: toDraftValue(profile.context.current_experience_years),
+    target_role: profile.context.target_role ?? "",
+    experience_level: profile.context.experience_level ?? "",
+    english_level: profile.context.english_level ?? "",
+    target_market: profile.context.target_market ?? "",
+    transition_priority: profile.context.transition_priority ?? "",
+    weekly_learning_hours: toDraftValue(profile.context.weekly_learning_hours),
+    work_preference: profile.context.work_preference ?? "",
+    job_search_stage: profile.context.job_search_stage ?? "",
+    linkedin_url: profile.context.linkedin_url ?? "",
+    portfolio_url: profile.context.portfolio_url ?? "",
+    focus_note: profile.context.focus_note ?? ""
+  };
+}
+
+function normalizeOptionalInput(value: string) {
+  const normalized = value.trim();
+  return normalized === "" ? null : normalized;
+}
+
+function parseOptionalNumberInput(
+  value: string,
+  label: string,
+  { min = 0, max, integer = false }: { min?: number; max?: number; integer?: boolean } = {}
+) {
+  const normalized = value.trim();
+
+  if (!normalized) {
+    return { value: null as number | null, error: null as string | null };
+  }
+
+  const parsed = Number(normalized.replace(",", "."));
+  if (!Number.isFinite(parsed)) {
+    return { value: null, error: `${label}: введіть коректне число.` };
+  }
+
+  if (parsed < min) {
+    return { value: null, error: `${label}: значення не може бути меншим за ${min}.` };
+  }
+
+  if (typeof max === "number" && parsed > max) {
+    return { value: null, error: `${label}: значення має бути не більшим за ${max}.` };
+  }
+
+  if (integer && !Number.isInteger(parsed)) {
+    return { value: null, error: `${label}: введіть ціле число.` };
+  }
+
+  return { value: parsed, error: null };
+}
+
+function normalizeOptionalUrl(value: string, label: string) {
+  const normalized = value.trim();
+
+  if (!normalized) {
+    return { value: null as string | null, error: null as string | null };
+  }
+
+  try {
+    const url = new URL(normalized);
+    if (url.protocol !== "http:" && url.protocol !== "https:") {
+      return { value: null, error: `${label}: використовуйте лише http або https.` };
+    }
+
+    return { value: url.toString(), error: null };
+  } catch {
+    return { value: null, error: `${label}: введіть коректне посилання.` };
   }
 }
 
@@ -620,26 +927,39 @@ function normalizeSearchQuery(value: string | null | undefined) {
 }
 
 function extractSimulationSnapshot(simulation: SimulationRow, result: SimulationResultRow | null): DashboardSimulation {
-  const inputs = isRecord(simulation.inputs) ? simulation.inputs : null;
+  const inputs = parseStoredCareerSwitchInputs(simulation.inputs);
   const metrics = result?.summary_metrics && isRecord(result.summary_metrics) ? result.summary_metrics : null;
 
   return {
     id: simulation.id,
     createdAt: simulation.created_at,
     status: toNonEmptyString(simulation.status) ?? "pending",
-    currentRole: toNonEmptyString(inputs?.current_role),
-    targetRole: toNonEmptyString(inputs?.target_role),
-    targetMarket: toNonEmptyString(inputs?.target_market),
-    transitionPriority: toNonEmptyString(inputs?.transition_priority),
+    currentRole: inputs?.current_role ?? null,
+    targetRole: inputs?.target_role ?? null,
+    targetMarket: inputs?.target_market ?? null,
+    transitionPriority: inputs?.transition_priority ?? null,
     verdictLabel: toNonEmptyString(metrics?.verdict_label),
     probabilityOfGettingJob: toNumber(metrics?.probability_of_getting_job_within_12_months),
-    ceilingGapMedian: toNumber(metrics?.ceiling_gap_median)
+    ceilingGapMedian: toNumber(metrics?.ceiling_gap_median),
+    profileContextSeed: inputs
+      ? {
+          current_income: inputs.current_income,
+          current_role: inputs.current_role,
+          current_experience_years: inputs.current_experience_years,
+          target_role: inputs.target_role,
+          experience_level: inputs.experience_level,
+          english_level: inputs.english_level,
+          target_market: inputs.target_market,
+          transition_priority: inputs.transition_priority
+        }
+      : {}
   };
 }
 
 function getDashboardView(value: string | null): DashboardView {
   switch (value) {
     case "scenario":
+    case "profile":
     case "resume":
     case "interviews":
     case "jobs":
@@ -670,57 +990,46 @@ function isValidGuestSessionId(value: string | null) {
   return typeof value === "string" && uuidPattern.test(value);
 }
 
-function buildProgressSteps(totalSimulations: number, subscription: DashboardAccessState) {
+function buildProgressSteps(totalSimulations: number, subscription: DashboardAccessState, profileCompletion: number): DashboardProgressStep[] {
   return [
     {
+      label: "Заповнити профіль",
+      progress: profileCompletion,
+      href: getDashboardHref("profile")
+    },
+    {
       label: "Заповнити стартовий сценарій переходу",
-      progress: totalSimulations > 0 ? 100 : 12
+      progress: totalSimulations > 0 ? 100 : 12,
+      href: totalSimulations > 0 ? getDashboardHref("scenario") : "/simulate"
     },
     {
       label: "Порівняти 2-3 маршрути переходу",
-      progress: totalSimulations >= 3 ? 100 : totalSimulations === 2 ? 76 : totalSimulations === 1 ? 42 : 0
+      progress: totalSimulations >= 3 ? 100 : totalSimulations === 2 ? 76 : totalSimulations === 1 ? 42 : 0,
+      href: getDashboardHref("scenario")
     },
     {
       label: "Зібрати резюме під цільову роль",
-      progress: subscription.plan === "pro" ? (totalSimulations > 0 ? 38 : 10) : 0
+      progress: subscription.plan === "pro" ? (totalSimulations > 0 ? 38 : 10) : 0,
+      href: getDashboardHref("resume")
     },
     {
       label: "Пройти пробну співбесіду",
-      progress: subscription.plan === "pro" ? (totalSimulations > 0 ? 18 : 0) : 0
+      progress: subscription.plan === "pro" ? (totalSimulations > 0 ? 18 : 0) : 0,
+      href: getDashboardHref("interviews")
     },
     {
       label: "Оцінити відповідність пропозиції",
-      progress: 0
+      progress: 0,
+      href: getDashboardHref("offers")
     }
   ];
-}
-
-function buildProfileReadiness(totalSimulations: number, subscription: DashboardAccessState, lastSimulation: DashboardSimulation | null) {
-  let readiness = 22;
-
-  if (totalSimulations > 0) {
-    readiness += 26;
-  }
-
-  if (subscription.plan === "pro") {
-    readiness += 18;
-  }
-
-  if (lastSimulation?.probabilityOfGettingJob !== null) {
-    readiness += 12;
-  }
-
-  if (totalSimulations > 2) {
-    readiness += 9;
-  }
-
-  return Math.min(readiness, 94);
 }
 
 function buildInsights(
   subscription: DashboardAccessState,
   totalSimulations: number,
-  lastSimulation: DashboardSimulation | null
+  lastSimulation: DashboardSimulation | null,
+  profileCompletion: number
 ) {
   const verdict = verdictLabel(lastSimulation?.verdictLabel ?? null);
   const probability = probabilityLabel(lastSimulation?.probabilityOfGettingJob ?? null);
@@ -728,7 +1037,9 @@ function buildInsights(
 
   if (!lastSimulation) {
     return [
-      "Почніть із першої симуляції, щоб головний екран перестав бути загальним і підлаштувався під ваш маршрут.",
+      profileCompletion < 60
+        ? "Спершу дозаповніть профіль, щоб кабінет і модулі підлаштовувались під ваш контекст точніше."
+        : "Почніть із першої симуляції, щоб головний екран перестав бути загальним і підлаштувався під ваш маршрут.",
       subscription.plan === "pro"
         ? "У вас уже відкритий повний набір модулів. Після першого сценарію можна одразу йти в розділ резюме та підготовку до співбесід."
         : "Поки достатньо зібрати один сильний сценарій. Платні модулі логічно підключати вже після цього.",
@@ -741,7 +1052,13 @@ function buildInsights(
     probability
       ? `${probability}. Це хороший орієнтир, щоб вирішити, чи переходити до розділу резюме й підготовки до співбесід уже зараз.`
       : "Після сценарію логічно перейти до резюме й перевірки, як ви виглядаєте під реальні вакансії.",
-    targetMarket ? `Орієнтир зараз: ${targetMarket}. Це впливатиме і на вакансії, і на мову резюме, і на вимоги ринку.` : totalSimulations > 1 ? "Спробуйте ще один альтернативний маршрут, щоб бачити не одну точку, а поле рішень." : "Після першого розрахунку варто додати альтернативний сценарій для порівняння."
+    profileCompletion < 80
+      ? `Профіль заповнений на ${profileCompletion}%. Дозаповніть його, щоб поради в модулях були точнішими.`
+      : targetMarket
+        ? `Орієнтир зараз: ${targetMarket}. Це впливатиме і на вакансії, і на мову резюме, і на вимоги ринку.`
+        : totalSimulations > 1
+          ? "Спробуйте ще один альтернативний маршрут, щоб бачити не одну точку, а поле рішень."
+          : "Після першого розрахунку варто додати альтернативний сценарій для порівняння."
   ];
 }
 
@@ -839,7 +1156,7 @@ function DashboardGuest({ onLogin, onSignup }: { onLogin: () => void; onSignup: 
             </h1>
             <p className="mt-5 max-w-2xl text-[1rem] leading-[1.78] text-[var(--text-muted)]">
               Після авторизації тут зʼявиться робочий простір зі сценаріями, історією переходів, модульною навігацією, доступом до тарифу
-              та окремими екранами під резюме, співбесіди, пропозиції й ШІ-помічника.
+              та окремими екранами під резюме, співбесіди, пропозиції й помічника.
             </p>
 
             <div className="mt-7 flex flex-wrap gap-3">
@@ -905,12 +1222,35 @@ function DashboardMetricCard({ label, value, description }: { label: string; val
   );
 }
 
-function DashboardProgressRow({ label, progress }: { label: string; progress: number }) {
+function DashboardAvatar({
+  label,
+  avatarUrl,
+  sizeClassName,
+  textClassName
+}: {
+  label: string;
+  avatarUrl: string | null;
+  sizeClassName: string;
+  textClassName?: string;
+}) {
   return (
+    <span className={`inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-[rgba(238,242,255,0.92)] text-[var(--accent-strong)] ${sizeClassName}`}>
+      {avatarUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={avatarUrl} alt={label} className="h-full w-full object-cover" />
+      ) : (
+        <span className={textClassName ?? "text-sm font-semibold"}>{getInitials(label)}</span>
+      )}
+    </span>
+  );
+}
+
+function DashboardProgressRow({ label, progress, href }: DashboardProgressStep) {
+  const content = (
     <div className="space-y-2.5">
       <div className="flex items-center justify-between gap-3">
         <p className="text-[0.95rem] leading-[1.55] text-[var(--text-strong)]">{label}</p>
-        <span className="text-sm font-semibold text-[var(--text-muted)]">{progress}%</span>
+        <span className={`text-sm font-semibold ${href ? "text-[var(--accent-strong)]" : "text-[var(--text-muted)]"}`}>{progress}%</span>
       </div>
       <div className="h-2 overflow-hidden rounded-full bg-[rgba(223,229,241,0.85)]">
         <div
@@ -923,6 +1263,16 @@ function DashboardProgressRow({ label, progress }: { label: string; progress: nu
         />
       </div>
     </div>
+  );
+
+  if (!href) {
+    return content;
+  }
+
+  return (
+    <Link href={href} className="-mx-2 block rounded-[1.2rem] p-2 transition hover:bg-[rgba(255,255,255,0.56)]">
+      {content}
+    </Link>
   );
 }
 
@@ -1089,7 +1439,9 @@ function DashboardSidebar({
 }
 
 function DashboardTopbar({
+  displayName,
   email,
+  avatarUrl,
   searchValue,
   onSearchChange,
   onSearchSubmit,
@@ -1097,7 +1449,9 @@ function DashboardTopbar({
   onSignOut,
   isSigningOut
 }: {
+  displayName: string;
   email: string;
+  avatarUrl: string | null;
   searchValue: string;
   onSearchChange: (value: string) => void;
   onSearchSubmit: (event: FormEvent<HTMLFormElement>) => void;
@@ -1134,12 +1488,10 @@ function DashboardTopbar({
         <div className="ml-auto flex items-center gap-2 md:gap-3">
           <div className="group relative">
             <button type="button" className="account-profile-pill" aria-haspopup="menu" aria-label="Відкрити меню акаунта">
-              <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[rgba(238,242,255,0.92)] text-sm font-semibold text-[var(--accent-strong)]">
-                {getInitials(email)}
-              </span>
+              <DashboardAvatar label={displayName} avatarUrl={avatarUrl} sizeClassName="h-9 w-9" textClassName="text-sm font-semibold" />
               <span className="hidden min-w-0 lg:block">
                 <span className="block text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-[var(--text-soft)]">Профіль</span>
-                <span className="block max-w-[10rem] truncate text-sm font-semibold text-[var(--text-strong)]">{getShortProfileLabel(email)}</span>
+                <span className="block max-w-[10rem] truncate text-sm font-semibold text-[var(--text-strong)]">{getShortProfileLabel(displayName, email)}</span>
               </span>
             </button>
 
@@ -1151,11 +1503,17 @@ function DashboardTopbar({
                   </span>
                   <span>Кабінет</span>
                 </Link>
+                <Link href={getDashboardHref("profile")} className="account-menu-link">
+                  <span className="account-menu-icon">
+                    <UserIcon />
+                  </span>
+                  <span>Профіль</span>
+                </Link>
                 <Link href={getDashboardHref("access")} className="account-menu-link">
                   <span className="account-menu-icon">
                     <CreditCardIcon />
                   </span>
-                  <span>Оплата</span>
+                  <span>Доступ</span>
                 </Link>
                 <div className="account-menu-divider" />
                 <button type="button" onClick={onSignOut} disabled={isSigningOut} className="account-menu-link account-menu-link-danger disabled:cursor-not-allowed disabled:opacity-60">
@@ -1178,6 +1536,7 @@ function DashboardTopbar({
 function DashboardOverview({
   userDisplayName,
   totalSimulations,
+  profile,
   subscription,
   recentSimulations,
   lastSimulation,
@@ -1185,15 +1544,15 @@ function DashboardOverview({
 }: {
   userDisplayName: string;
   totalSimulations: number;
+  profile: DashboardUserProfile;
   subscription: DashboardAccessState;
   recentSimulations: DashboardSimulation[];
   lastSimulation: DashboardSimulation | null;
   searchQuery: string;
 }) {
   const firstName = getFirstName(userDisplayName);
-  const readiness = buildProfileReadiness(totalSimulations, subscription, lastSimulation);
-  const progressSteps = buildProgressSteps(totalSimulations, subscription);
-  const insights = buildInsights(subscription, totalSimulations, lastSimulation);
+  const progressSteps = buildProgressSteps(totalSimulations, subscription, profile.completion);
+  const insights = buildInsights(subscription, totalSimulations, lastSimulation, profile.completion);
   const activityItems = buildActivityItems(recentSimulations, subscription);
   const filteredModules = dashboardModules.filter((module) => {
     if (!searchQuery) {
@@ -1265,9 +1624,9 @@ function DashboardOverview({
             description={lastVerdict ?? "Після першого розрахунку тут з'явиться персональний висновок."}
           />
           <DashboardMetricCard
-            label="Готовність профілю"
-            value={`${readiness}%`}
-            description="Зростає разом зі сценаріями, модулями та опрацюванням ринку."
+            label="Профіль"
+            value={`${profile.completion}%`}
+            description="Заповненість даних, які підтягуються в модулі та персональні підказки."
           />
         </div>
 
@@ -1292,7 +1651,7 @@ function DashboardOverview({
 
           <div className="mt-6 space-y-5">
             {progressSteps.map((step) => (
-              <DashboardProgressRow key={step.label} label={step.label} progress={step.progress} />
+              <DashboardProgressRow key={step.label} {...step} />
             ))}
           </div>
         </article>
@@ -1302,7 +1661,7 @@ function DashboardOverview({
             <span className="surface-soft inline-flex h-11 w-11 items-center justify-center rounded-[1rem] text-[var(--accent-strong)]">
               <SparkIcon />
             </span>
-            <h2 className="text-[1.45rem] font-semibold leading-[1.06] tracking-[-0.04em] text-[var(--text-strong)]">Поради від ШІ</h2>
+            <h2 className="text-[1.45rem] font-semibold leading-[1.06] tracking-[-0.04em] text-[var(--text-strong)]">Поради</h2>
           </div>
 
           <div className="mt-5 space-y-3">
@@ -1540,6 +1899,605 @@ function DashboardScenarioWorkspace({
           })}
         </div>
       </section>
+    </div>
+  );
+}
+
+function DashboardProfileWorkspace({
+  supabase,
+  userId,
+  email,
+  profile,
+  onProfileSaved
+}: {
+  supabase: SupabaseClient;
+  userId: string;
+  email: string;
+  profile: DashboardUserProfile;
+  onProfileSaved: (profile: DashboardUserProfile) => void;
+}) {
+  const browserTimeZone = useMemo(() => getBrowserTimeZone(), []);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [draft, setDraft] = useState<ProfileDraft>(() => buildProfileDraft(profile, browserTimeZone));
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [saveNotice, setSaveNotice] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [avatarError, setAvatarError] = useState<string | null>(null);
+  const [avatarNotice, setAvatarNotice] = useState<string | null>(null);
+  const [isAvatarBusy, setIsAvatarBusy] = useState(false);
+  const [nextPassword, setNextPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [passwordNotice, setPasswordNotice] = useState<string | null>(null);
+  const [isPasswordSaving, setIsPasswordSaving] = useState(false);
+
+  const updateDraft = <K extends keyof ProfileDraft>(key: K, value: ProfileDraft[K]) => {
+    setDraft((current) => ({ ...current, [key]: value }));
+  };
+
+  const missingItems = useMemo(
+    () => buildMissingProfileItems(profile.context, profile.fullName, profile.avatarUrl),
+    [profile.avatarUrl, profile.context, profile.fullName]
+  );
+
+  const profileLabel = draft.full_name.trim() || email;
+  const profileCurrentRole = normalizeOptionalInput(draft.current_role);
+  const profileTargetRole = normalizeOptionalInput(draft.target_role);
+  const workPreference = mapWorkPreferenceLabel(draft.work_preference || null);
+  const jobSearchStage = mapJobSearchStageLabel(draft.job_search_stage || null);
+
+  const handleProfileSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setSaveError(null);
+    setSaveNotice(null);
+
+    const currentIncome = parseOptionalNumberInput(draft.current_income, "Поточний дохід");
+    if (currentIncome.error) {
+      setSaveError(currentIncome.error);
+      return;
+    }
+
+    const currentExperienceYears = parseOptionalNumberInput(draft.current_experience_years, "Стаж у поточній сфері", { max: 60 });
+    if (currentExperienceYears.error) {
+      setSaveError(currentExperienceYears.error);
+      return;
+    }
+
+    const weeklyLearningHours = parseOptionalNumberInput(draft.weekly_learning_hours, "Години на підготовку за тиждень", { max: 80, integer: true });
+    if (weeklyLearningHours.error) {
+      setSaveError(weeklyLearningHours.error);
+      return;
+    }
+
+    const linkedinUrl = normalizeOptionalUrl(draft.linkedin_url, "LinkedIn");
+    if (linkedinUrl.error) {
+      setSaveError(linkedinUrl.error);
+      return;
+    }
+
+    const portfolioUrl = normalizeOptionalUrl(draft.portfolio_url, "Портфоліо");
+    if (portfolioUrl.error) {
+      setSaveError(portfolioUrl.error);
+      return;
+    }
+
+    const nextContext: ProfileContext = {
+      city: normalizeOptionalInput(draft.city),
+      current_income: currentIncome.value,
+      current_role: normalizeOptionalInput(draft.current_role),
+      current_experience_years: currentExperienceYears.value,
+      target_role: normalizeOptionalInput(draft.target_role),
+      experience_level: draft.experience_level || null,
+      english_level: draft.english_level || null,
+      target_market: draft.target_market || null,
+      transition_priority: draft.transition_priority || null,
+      weekly_learning_hours: weeklyLearningHours.value,
+      work_preference: draft.work_preference || null,
+      job_search_stage: draft.job_search_stage || null,
+      linkedin_url: linkedinUrl.value,
+      portfolio_url: portfolioUrl.value,
+      focus_note: normalizeOptionalInput(draft.focus_note)
+    };
+
+    const nextFullName = normalizeOptionalInput(draft.full_name);
+    const nextTimezone = normalizeOptionalInput(draft.timezone);
+
+    setIsSaving(true);
+
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .update({
+          full_name: nextFullName,
+          timezone: nextTimezone,
+          profile_context: nextContext
+        })
+        .eq("id", userId);
+
+      if (error) {
+        setSaveError(error.message);
+        return;
+      }
+
+      const nextProfile = {
+        fullName: nextFullName,
+        timezone: nextTimezone,
+        avatarUrl: draft.avatar_url,
+        context: nextContext,
+        completion: buildProfileCompletion(nextFullName, draft.avatar_url, nextContext)
+      };
+
+      onProfileSaved(nextProfile);
+      setSaveNotice("Профіль оновлено.");
+    } catch (error) {
+      setSaveError(error instanceof Error ? error.message : "Не вдалося зберегти профіль.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleAvatarUpload = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+
+    if (!file) {
+      return;
+    }
+
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+      setAvatarError("Аватар підтримує лише PNG, JPG або WEBP.");
+      return;
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+      setAvatarError("Розмір аватара має бути до 2 MB.");
+      return;
+    }
+
+    setAvatarError(null);
+    setAvatarNotice(null);
+    setIsAvatarBusy(true);
+
+    try {
+      const avatarPath = `${userId}/avatar`;
+      const { error: uploadError } = await supabase.storage.from("avatars").upload(avatarPath, file, {
+        upsert: true,
+        cacheControl: "3600",
+        contentType: file.type
+      });
+
+      if (uploadError) {
+        setAvatarError(uploadError.message);
+        return;
+      }
+
+      const { data } = supabase.storage.from("avatars").getPublicUrl(avatarPath);
+      const nextAvatarUrl = `${data.publicUrl}?v=${Date.now()}`;
+      const { error: profileError } = await supabase.from("profiles").update({ avatar_url: nextAvatarUrl }).eq("id", userId);
+
+      if (profileError) {
+        setAvatarError(profileError.message);
+        return;
+      }
+
+      updateDraft("avatar_url", nextAvatarUrl);
+      onProfileSaved({
+        ...profile,
+        avatarUrl: nextAvatarUrl,
+        completion: buildProfileCompletion(profile.fullName, nextAvatarUrl, profile.context)
+      });
+      setAvatarNotice("Аватар оновлено.");
+    } catch (error) {
+      setAvatarError(error instanceof Error ? error.message : "Не вдалося оновити аватар.");
+    } finally {
+      setIsAvatarBusy(false);
+    }
+  };
+
+  const handleRemoveAvatar = async () => {
+    setAvatarError(null);
+    setAvatarNotice(null);
+    setIsAvatarBusy(true);
+
+    try {
+      await supabase.storage.from("avatars").remove([`${userId}/avatar`]);
+      const { error } = await supabase.from("profiles").update({ avatar_url: null }).eq("id", userId);
+
+      if (error) {
+        setAvatarError(error.message);
+        return;
+      }
+
+      updateDraft("avatar_url", null);
+      onProfileSaved({
+        ...profile,
+        avatarUrl: null,
+        completion: buildProfileCompletion(profile.fullName, null, profile.context)
+      });
+      setAvatarNotice("Аватар прибрано.");
+    } catch (error) {
+      setAvatarError(error instanceof Error ? error.message : "Не вдалося прибрати аватар.");
+    } finally {
+      setIsAvatarBusy(false);
+    }
+  };
+
+  const handlePasswordSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setPasswordError(null);
+    setPasswordNotice(null);
+
+    if (nextPassword.length < 6) {
+      setPasswordError("Пароль має містити щонайменше 6 символів.");
+      return;
+    }
+
+    if (nextPassword !== confirmPassword) {
+      setPasswordError("Паролі не збігаються.");
+      return;
+    }
+
+    setIsPasswordSaving(true);
+
+    try {
+      const { error } = await supabase.auth.updateUser({ password: nextPassword });
+
+      if (error) {
+        setPasswordError(error.message);
+        return;
+      }
+
+      setNextPassword("");
+      setConfirmPassword("");
+      setPasswordNotice("Пароль оновлено.");
+    } catch (error) {
+      setPasswordError(error instanceof Error ? error.message : "Не вдалося оновити пароль.");
+    } finally {
+      setIsPasswordSaving(false);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.12fr),22rem]">
+        <article className="dashboard-spotlight-card rounded-[2.3rem] p-6 md:p-8">
+          <div className="flex flex-wrap items-center gap-2">
+            <DashboardChip tone="accent">Профіль</DashboardChip>
+            <DashboardChip tone={profile.completion >= 80 ? "success" : "default"}>{profile.completion}% заповнення</DashboardChip>
+          </div>
+
+          <h1 className="mt-5 max-w-[15ch] text-[2.2rem] font-semibold leading-[0.94] tracking-[-0.055em] text-[var(--text-strong)] md:text-[3.05rem]">
+            Контекст, який працює на всі модулі
+          </h1>
+          <p className="mt-5 max-w-3xl text-[1rem] leading-[1.78] text-[var(--text-muted)]">
+            Тут зібрані ваші базові дані, кар&rsquo;єрний контекст і додаткові сигнали для персоналізації. Саме цей профіль може підживлювати
+            сценарії, резюме, співбесіди та подальші сервіси без повторного введення.
+          </p>
+
+          <div className="mt-7 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            <DashboardMetricCard label="Поточна роль" value={profileCurrentRole ?? "ще не вказано"} description="Підтягується з онбордингу або редагується вручну." />
+            <DashboardMetricCard label="Цільова роль" value={profileTargetRole ?? "ще не вказано"} description="Головний орієнтир для модулів і сценаріїв." />
+            <DashboardMetricCard label="Формат роботи" value={workPreference ?? "ще не вказано"} description="Дає контекст для вакансій і очікувань від ролі." />
+            <DashboardMetricCard label="Стадія пошуку" value={jobSearchStage ?? "ще не вказано"} description="Допомагає підлаштовувати наступні кроки під ваш ритм." />
+          </div>
+        </article>
+
+        <article className="surface-panel rounded-[2rem] p-5 md:p-6">
+          <div className="flex items-start gap-4">
+            <DashboardAvatar label={profileLabel} avatarUrl={draft.avatar_url} sizeClassName="h-20 w-20" textClassName="text-xl font-semibold" />
+            <div className="min-w-0">
+              <p className="text-[0.78rem] font-semibold uppercase tracking-[0.16em] text-[var(--text-soft)]">Ваш профіль</p>
+              <h2 className="mt-2 text-[1.45rem] font-semibold leading-[1.06] tracking-[-0.04em] text-[var(--text-strong)]">{profileLabel}</h2>
+              <p className="mt-2 text-[0.92rem] leading-[1.7] text-[var(--text-muted)]">{email}</p>
+            </div>
+          </div>
+
+          <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleAvatarUpload} />
+
+          <div className="mt-5 grid gap-3">
+            <button type="button" onClick={() => fileInputRef.current?.click()} disabled={isAvatarBusy} className="btn-secondary w-full disabled:cursor-not-allowed disabled:opacity-70">
+              <span className="inline-flex items-center gap-2">
+                <UploadIcon />
+                {isAvatarBusy ? "Оновлюємо..." : "Оновити аватар"}
+              </span>
+            </button>
+            {draft.avatar_url ? (
+              <button type="button" onClick={handleRemoveAvatar} disabled={isAvatarBusy} className="btn-secondary w-full disabled:cursor-not-allowed disabled:opacity-70">
+                Прибрати аватар
+              </button>
+            ) : null}
+          </div>
+
+          {avatarError ? (
+            <p className="mt-4 rounded-[1.2rem] border border-[rgba(201,155,134,0.5)] bg-[var(--danger-soft)] px-4 py-3 text-sm text-[var(--danger-strong)]">
+              {avatarError}
+            </p>
+          ) : null}
+
+          {avatarNotice ? (
+            <p className="mt-4 rounded-[1.2rem] border border-[rgba(63,94,255,0.16)] bg-[var(--accent-soft)] px-4 py-3 text-sm text-[var(--accent-strong)]">
+              {avatarNotice}
+            </p>
+          ) : null}
+
+          <div className="mt-5 space-y-3">
+            {missingItems.length > 0 ? (
+              missingItems.map((item) => (
+                <div key={item} className="surface-soft rounded-[1.2rem] p-4">
+                  <p className="text-[0.92rem] leading-[1.68] text-[var(--text-muted)]">{item}</p>
+                </div>
+              ))
+            ) : (
+              <div className="surface-soft rounded-[1.2rem] p-4">
+                <p className="text-[0.92rem] leading-[1.68] text-[var(--text-muted)]">Профіль виглядає зібрано. Його контекст уже можна використовувати по всьому кабінету.</p>
+              </div>
+            )}
+          </div>
+        </article>
+      </div>
+
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.08fr),22rem]">
+        <form onSubmit={handleProfileSubmit} className="space-y-6">
+          <article className="surface-panel rounded-[2rem] p-5 md:p-6">
+            <div>
+              <h2 className="text-[1.45rem] font-semibold leading-[1.06] tracking-[-0.04em] text-[var(--text-strong)]">Основне</h2>
+              <p className="mt-3 text-[0.94rem] leading-[1.72] text-[var(--text-muted)]">
+                Базові дані профілю та сигнали, які варто не тягнути з кожного нового сценарію окремо.
+              </p>
+            </div>
+
+            <div className="mt-5 grid gap-4 md:grid-cols-2">
+              <label className="block text-sm font-medium leading-[1.6] text-[var(--text-muted)]">
+                Ім&rsquo;я
+                <input value={draft.full_name} onChange={(event) => updateDraft("full_name", event.target.value)} className="field-surface mt-1" placeholder="Як до вас звертатись" />
+              </label>
+
+              <label className="block text-sm font-medium leading-[1.6] text-[var(--text-muted)]">
+                Email
+                <input value={email} readOnly className="field-surface mt-1 opacity-75" />
+              </label>
+
+              <label className="block text-sm font-medium leading-[1.6] text-[var(--text-muted)]">
+                Часовий пояс
+                <input value={draft.timezone} onChange={(event) => updateDraft("timezone", event.target.value)} className="field-surface mt-1" placeholder="Europe/Kiev" />
+              </label>
+
+              <label className="block text-sm font-medium leading-[1.6] text-[var(--text-muted)]">
+                Місто / база
+                <input value={draft.city} onChange={(event) => updateDraft("city", event.target.value)} className="field-surface mt-1" placeholder="Київ" />
+              </label>
+
+              <label className="block text-sm font-medium leading-[1.6] text-[var(--text-muted)]">
+                Бажаний формат роботи
+                <select value={draft.work_preference} onChange={(event) => updateDraft("work_preference", event.target.value as WorkPreference | "")} className="field-surface mt-1">
+                  <option value="">Оберіть формат</option>
+                  {workPreferenceOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="block text-sm font-medium leading-[1.6] text-[var(--text-muted)]">
+                Стадія пошуку
+                <select value={draft.job_search_stage} onChange={(event) => updateDraft("job_search_stage", event.target.value as JobSearchStage | "")} className="field-surface mt-1">
+                  <option value="">Оберіть стадію</option>
+                  {jobSearchStageOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+          </article>
+
+          <article className="surface-panel rounded-[2rem] p-5 md:p-6">
+            <div>
+              <h2 className="text-[1.45rem] font-semibold leading-[1.06] tracking-[-0.04em] text-[var(--text-strong)]">Кар&rsquo;єрний контекст</h2>
+              <p className="mt-3 text-[0.94rem] leading-[1.72] text-[var(--text-muted)]">
+                Ці поля підтягуються з останнього онбордингу, але тут їх можна тримати як стабільну базу для всіх модулів.
+              </p>
+            </div>
+
+            <div className="mt-5 grid gap-4 md:grid-cols-2">
+              <label className="block text-sm font-medium leading-[1.6] text-[var(--text-muted)]">
+                Поточна роль
+                <input value={draft.current_role} onChange={(event) => updateDraft("current_role", event.target.value)} className="field-surface mt-1" placeholder="Наприклад, Sales Manager" />
+              </label>
+
+              <label className="block text-sm font-medium leading-[1.6] text-[var(--text-muted)]">
+                Цільова роль
+                <input value={draft.target_role} onChange={(event) => updateDraft("target_role", event.target.value)} className="field-surface mt-1" placeholder="Наприклад, Product Manager" />
+              </label>
+
+              <label className="block text-sm font-medium leading-[1.6] text-[var(--text-muted)]">
+                Поточний чистий дохід, грн/міс
+                <input value={draft.current_income} onChange={(event) => updateDraft("current_income", event.target.value)} className="field-surface mt-1" inputMode="numeric" placeholder="35000" />
+              </label>
+
+              <label className="block text-sm font-medium leading-[1.6] text-[var(--text-muted)]">
+                Стаж у поточній сфері
+                <input value={draft.current_experience_years} onChange={(event) => updateDraft("current_experience_years", event.target.value)} className="field-surface mt-1" inputMode="decimal" placeholder="4" />
+              </label>
+
+              <label className="block text-sm font-medium leading-[1.6] text-[var(--text-muted)]">
+                Релевантний досвід
+                <select value={draft.experience_level} onChange={(event) => updateDraft("experience_level", event.target.value as ExperienceLevel | "")} className="field-surface mt-1">
+                  <option value="">Оберіть рівень</option>
+                  {experienceLevelOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="block text-sm font-medium leading-[1.6] text-[var(--text-muted)]">
+                Англійська
+                <select value={draft.english_level} onChange={(event) => updateDraft("english_level", event.target.value as EnglishLevel | "")} className="field-surface mt-1">
+                  <option value="">Оберіть рівень</option>
+                  {englishLevelOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="block text-sm font-medium leading-[1.6] text-[var(--text-muted)]">
+                Ринок
+                <select value={draft.target_market} onChange={(event) => updateDraft("target_market", event.target.value as TargetMarket | "")} className="field-surface mt-1">
+                  <option value="">Оберіть ринок</option>
+                  {targetMarketOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="block text-sm font-medium leading-[1.6] text-[var(--text-muted)]">
+                Пріоритет переходу
+                <select value={draft.transition_priority} onChange={(event) => updateDraft("transition_priority", event.target.value as TransitionPriority | "")} className="field-surface mt-1">
+                  <option value="">Оберіть пріоритет</option>
+                  {transitionPriorityOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+          </article>
+
+          <article className="surface-panel rounded-[2rem] p-5 md:p-6">
+            <div>
+              <h2 className="text-[1.45rem] font-semibold leading-[1.06] tracking-[-0.04em] text-[var(--text-strong)]">Додатковий контекст</h2>
+              <p className="mt-3 text-[0.94rem] leading-[1.72] text-[var(--text-muted)]">
+                Це дані, які допомагають видавати точніші підказки вже після реєстрації і не змушують вас щоразу пояснювати контекст заново.
+              </p>
+            </div>
+
+            <div className="mt-5 grid gap-4 md:grid-cols-2">
+              <label className="block text-sm font-medium leading-[1.6] text-[var(--text-muted)]">
+                Години на підготовку за тиждень
+                <input value={draft.weekly_learning_hours} onChange={(event) => updateDraft("weekly_learning_hours", event.target.value)} className="field-surface mt-1" inputMode="numeric" placeholder="6" />
+              </label>
+
+              <label className="block text-sm font-medium leading-[1.6] text-[var(--text-muted)]">
+                LinkedIn
+                <input value={draft.linkedin_url} onChange={(event) => updateDraft("linkedin_url", event.target.value)} className="field-surface mt-1" placeholder="https://linkedin.com/in/..." />
+              </label>
+
+              <label className="block text-sm font-medium leading-[1.6] text-[var(--text-muted)] md:col-span-2">
+                Портфоліо / сайт
+                <input value={draft.portfolio_url} onChange={(event) => updateDraft("portfolio_url", event.target.value)} className="field-surface mt-1" placeholder="https://..." />
+              </label>
+
+              <label className="block text-sm font-medium leading-[1.6] text-[var(--text-muted)] md:col-span-2">
+                Фокус на найближчі 90 днів
+                <textarea
+                  value={draft.focus_note}
+                  onChange={(event) => updateDraft("focus_note", event.target.value)}
+                  className="field-surface mt-1 min-h-[8rem] resize-y"
+                  placeholder="Наприклад: підготувати резюме, пройти 2 пробні співбесіди і вийти на 10 релевантних відгуків."
+                  maxLength={280}
+                />
+              </label>
+            </div>
+
+            {saveError ? (
+              <p className="mt-5 rounded-[1.2rem] border border-[rgba(201,155,134,0.5)] bg-[var(--danger-soft)] px-4 py-3 text-sm text-[var(--danger-strong)]">
+                {saveError}
+              </p>
+            ) : null}
+
+            {saveNotice ? (
+              <p className="mt-5 rounded-[1.2rem] border border-[rgba(63,94,255,0.16)] bg-[var(--accent-soft)] px-4 py-3 text-sm text-[var(--accent-strong)]">
+                {saveNotice}
+              </p>
+            ) : null}
+
+            <div className="mt-5 flex flex-wrap gap-3">
+              <button type="submit" disabled={isSaving} className="btn-primary disabled:cursor-not-allowed disabled:opacity-70">
+                {isSaving ? "Зберігаємо..." : "Зберегти профіль"}
+              </button>
+              <Link href="/dashboard" className="btn-secondary">
+                На головну
+              </Link>
+            </div>
+          </article>
+        </form>
+
+        <div className="space-y-6">
+          <article className="surface-panel rounded-[2rem] p-5 md:p-6">
+            <div className="flex items-center gap-3">
+              <span className="surface-soft inline-flex h-11 w-11 items-center justify-center rounded-[1rem] text-[var(--accent-strong)]">
+                <LockIcon />
+              </span>
+              <h2 className="text-[1.45rem] font-semibold leading-[1.06] tracking-[-0.04em] text-[var(--text-strong)]">Пароль</h2>
+            </div>
+
+            <form onSubmit={handlePasswordSubmit} className="mt-5 space-y-4">
+              <label className="block text-sm font-medium leading-[1.6] text-[var(--text-muted)]">
+                Новий пароль
+                <input
+                  type="password"
+                  value={nextPassword}
+                  onChange={(event) => setNextPassword(event.target.value)}
+                  className="field-surface mt-1"
+                  autoComplete="new-password"
+                />
+              </label>
+
+              <label className="block text-sm font-medium leading-[1.6] text-[var(--text-muted)]">
+                Повторіть пароль
+                <input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(event) => setConfirmPassword(event.target.value)}
+                  className="field-surface mt-1"
+                  autoComplete="new-password"
+                />
+              </label>
+
+              {passwordError ? (
+                <p className="rounded-[1.2rem] border border-[rgba(201,155,134,0.5)] bg-[var(--danger-soft)] px-4 py-3 text-sm text-[var(--danger-strong)]">
+                  {passwordError}
+                </p>
+              ) : null}
+
+              {passwordNotice ? (
+                <p className="rounded-[1.2rem] border border-[rgba(63,94,255,0.16)] bg-[var(--accent-soft)] px-4 py-3 text-sm text-[var(--accent-strong)]">
+                  {passwordNotice}
+                </p>
+              ) : null}
+
+              <button type="submit" disabled={isPasswordSaving} className="btn-secondary w-full disabled:cursor-not-allowed disabled:opacity-70">
+                {isPasswordSaving ? "Оновлюємо..." : "Оновити пароль"}
+              </button>
+            </form>
+          </article>
+
+          <article className="surface-panel rounded-[2rem] p-5 md:p-6">
+            <h2 className="text-[1.45rem] font-semibold leading-[1.06] tracking-[-0.04em] text-[var(--text-strong)]">Що використовується далі</h2>
+            <div className="mt-5 space-y-3">
+              {[
+                `Роль і ринок: ${mapTargetMarketLabel(draft.target_market || null) ?? "ще не вказані повністю"}.`,
+                `Рівень англійської: ${mapEnglishLevelLabel(draft.english_level || null) ?? "ще не вказано"}.`,
+                `Релевантний досвід: ${mapExperienceLevelLabel(draft.experience_level || null) ?? "ще не вказано"}.`,
+                `Темп підготовки: ${draft.weekly_learning_hours.trim() ? `${draft.weekly_learning_hours.trim()} год/тиждень` : "ще не заданий"}.`
+              ].map((item) => (
+                <div key={item} className="surface-soft rounded-[1.2rem] p-4">
+                  <p className="text-[0.92rem] leading-[1.68] text-[var(--text-muted)]">{item}</p>
+                </div>
+              ))}
+            </div>
+          </article>
+        </div>
+      </div>
     </div>
   );
 }
@@ -1827,7 +2785,7 @@ export function DashboardShell({
       }
 
       const [profileResponse, subscriptionResponse, countResponse, simulationsResponse] = await Promise.all([
-        supabase.from("profiles").select("email, full_name").eq("id", userId).maybeSingle(),
+        supabase.from("profiles").select("email, full_name, timezone, avatar_url, profile_context").eq("id", userId).maybeSingle(),
         supabase.from("subscriptions").select("status, plan, current_period_end").eq("user_id", userId).maybeSingle(),
         simulationsCountQuery,
         simulationsListQuery
@@ -1837,7 +2795,7 @@ export function DashboardShell({
         return;
       }
 
-      if (countResponse.error || simulationsResponse.error) {
+      if (profileResponse.error || countResponse.error || simulationsResponse.error || subscriptionResponse.error) {
         setState({ status: "error", message: "Не вдалося завантажити дані кабінету. Спробуйте ще раз трохи пізніше." });
         return;
       }
@@ -1861,6 +2819,8 @@ export function DashboardShell({
       const subscriptionRow = (subscriptionResponse.data ?? null) as SubscriptionRow | null;
       const email = session.user.email?.trim() || profile?.email?.trim() || "account@decivio.local";
       const recentSimulations = simulations.map((item) => extractSimulationSnapshot(item, resultMap.get(item.id) ?? null));
+      const profileContext = mergeProfileContext(parseProfileContext(profile?.profile_context), buildProfileContextSeed(recentSimulations[0] ?? null));
+      const profileCompletion = buildProfileCompletion(profile?.full_name?.trim() ?? null, profile?.avatar_url?.trim() ?? null, profileContext);
       const derivedPlan = subscriptionRow?.plan === "pro" ? "pro" : "free";
       const derivedStatus =
         subscriptionRow?.status === "active" ||
@@ -1876,6 +2836,13 @@ export function DashboardShell({
           id: userId,
           email,
           displayName: formatDisplayName(profile?.full_name, email)
+        },
+        profile: {
+          fullName: profile?.full_name?.trim() ?? null,
+          timezone: profile?.timezone?.trim() ?? null,
+          avatarUrl: profile?.avatar_url?.trim() ?? null,
+          context: profileContext,
+          completion: profileCompletion
         },
         subscription: {
           plan: derivedPlan,
@@ -1917,6 +2884,23 @@ export function DashboardShell({
     }
 
     router.push(`/dashboard?search=${encodeURIComponent(normalizedQuery)}`);
+  };
+
+  const handleProfileSaved = (profile: DashboardUserProfile) => {
+    setState((current) => {
+      if (current.status !== "ready") {
+        return current;
+      }
+
+      return {
+        ...current,
+        user: {
+          ...current.user,
+          displayName: formatDisplayName(profile.fullName, current.user.email)
+        },
+        profile
+      };
+    });
   };
 
   if (state.status === "loading") {
@@ -1962,7 +2946,9 @@ export function DashboardShell({
 
       <div className="lg:pl-[var(--cabinet-sidebar-width)]">
         <DashboardTopbar
+          displayName={state.user.displayName}
           email={state.user.email}
+          avatarUrl={state.profile.avatarUrl}
           searchValue={searchValue}
           onSearchChange={setSearchValue}
           onSearchSubmit={handleSearchSubmit}
@@ -1976,6 +2962,7 @@ export function DashboardShell({
             <DashboardOverview
               userDisplayName={state.user.displayName}
               totalSimulations={state.totalSimulations}
+              profile={state.profile}
               subscription={state.subscription}
               recentSimulations={state.recentSimulations}
               lastSimulation={lastSimulation}
@@ -1984,6 +2971,16 @@ export function DashboardShell({
           ) : null}
 
           {activeView === "scenario" ? <DashboardScenarioWorkspace recentSimulations={state.recentSimulations} /> : null}
+
+          {activeView === "profile" ? (
+            <DashboardProfileWorkspace
+              supabase={supabase}
+              userId={state.user.id}
+              email={state.user.email}
+              profile={state.profile}
+              onProfileSaved={handleProfileSaved}
+            />
+          ) : null}
 
           {moduleView ? <ModuleWorkspace moduleView={moduleView} /> : null}
 
