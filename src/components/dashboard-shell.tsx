@@ -84,6 +84,7 @@ type DashboardSimulation = {
   targetMarket: string | null;
   transitionPriority: string | null;
   verdictLabel: string | null;
+  betterLongTermDirection: string | null;
   riskLevel: string | null;
   probabilityOfGettingJob: number | null;
   ceilingGapMedian: number | null;
@@ -1245,6 +1246,39 @@ function riskLevelLabel(value: string | null) {
   }
 }
 
+function buildLongTermDirectionInsight(
+  value: string | null,
+  simulation: Pick<DashboardSimulation, "currentRole" | "targetRole"> | null,
+) {
+  switch (value) {
+    case "current_role":
+      return simulation?.currentRole
+        ? `У довшій перспективі сильнішим виглядає поточний напрям: ${simulation.currentRole}. Цільову роль краще тестувати через альтернативні сценарії.`
+        : "У довшій перспективі сильнішим виглядає поточний напрям, тому цільову роль краще тестувати через альтернативні сценарії.";
+    case "target_role":
+      return simulation?.targetRole
+        ? `У довшій перспективі сильнішим виглядає ${simulation.targetRole}. Саме цей напрям варто тримати як базовий для наступних модулів.`
+        : "У довшій перспективі сильнішим виглядає цільовий напрям. Саме його варто тримати як базовий для наступних модулів.";
+    case "balanced":
+      return "У довшій перспективі обидва напрями виглядають близько, тому рішення краще приймати через порівняння кількох маршрутів, а не одного сценарію.";
+    default:
+      return null;
+  }
+}
+
+function moduleSummaryDescription(label: string) {
+  switch (label) {
+    case "Вхід":
+      return "Що саме модуль бере за основу перед стартом.";
+    case "Фокус":
+      return "На чому тримається головна цінність цього розділу.";
+    case "Вихід":
+      return "Що користувач має отримати на виході з цього модуля.";
+    default:
+      return "Ключовий зріз цього розділу.";
+  }
+}
+
 function formatDateTime(value: string | null) {
   if (!value) {
     return null;
@@ -1294,6 +1328,7 @@ function extractSimulationSnapshot(
     targetMarket: inputs?.target_market ?? null,
     transitionPriority: inputs?.transition_priority ?? null,
     verdictLabel: toNonEmptyString(metrics?.verdict_label),
+    betterLongTermDirection: toNonEmptyString(metrics?.better_long_term_direction),
     riskLevel: toNonEmptyString(metrics?.risk_level),
     probabilityOfGettingJob: toNumber(
       metrics?.probability_of_getting_job_within_12_months,
@@ -2185,6 +2220,10 @@ function DashboardOverview({
       ? formatUah(Math.round(lastSimulation.targetBestCaseMedian))
       : null;
   const lastUpdatedLabel = formatShortDate(lastSimulation?.createdAt ?? null);
+  const longTermDirectionInsight = buildLongTermDirectionInsight(
+    lastSimulation?.betterLongTermDirection ?? null,
+    lastSimulation,
+  );
   const focusTitle =
     lastSimulation?.currentRole && lastSimulation.targetRole
       ? `${lastSimulation.currentRole} -> ${lastSimulation.targetRole}`
@@ -2192,13 +2231,10 @@ function DashboardOverview({
         ? `Фокус на переході в ${lastSimulation.targetRole}`
         : "Почнімо зі стартового сценарію переходу";
   const heroSummary = lastSimulation
-    ? [
-        lastVerdict ? `${lastVerdict}.` : null,
-        probability ? `Поточний орієнтир — ${probability}.` : null,
-        riskLevel ? `Рівень ризику переходу: ${riskLevel}.` : null,
-      ]
-        .filter(Boolean)
-        .join(" ")
+    ? longTermDirectionInsight ??
+      (lastVerdict
+        ? `${lastVerdict}.`
+        : "Останній розрахунок уже можна тримати як базовий фокус для наступних модулів.")
     : "Після першої симуляції тут з'явиться коротке зведення з вердиктом, шансом входу, доходом і ризиком переходу.";
 
   return (
@@ -2453,6 +2489,16 @@ function DashboardScenarioWorkspace({
   const market = mapTargetMarketLabel(latest.targetMarket);
   const priority = mapPriorityLabel(latest.transitionPriority);
   const moneyDelta = formatSignedMoney(latest.ceilingGapMedian);
+  const longTermDirectionInsight = buildLongTermDirectionInsight(
+    latest.betterLongTermDirection,
+    latest,
+  );
+  const latestUpdatedLabel = formatDateTime(latest.createdAt);
+  const scenarioSummary =
+    longTermDirectionInsight ??
+    (latestUpdatedLabel
+      ? `Останній розрахунок збережено ${latestUpdatedLabel}. Тут зручно тримати робочий сценарій і повертатися до нього перед наступними модулями.`
+      : "Тут зручно тримати робочий сценарій і повертатися до нього перед наступними модулями.");
 
   return (
     <div className="space-y-6">
@@ -2472,9 +2518,7 @@ function DashboardScenarioWorkspace({
             {focusTitle}
           </h1>
           <p className="mt-5 max-w-3xl text-[1rem] leading-[1.78] text-[var(--text-muted)]">
-            Це окремий розділ для сценаріїв переходу: останній розрахунок,
-            короткий висновок і історія попередніх маршрутів без змішування з
-            іншими модулями.
+            {scenarioSummary}
           </p>
 
           <div className="mt-7 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -2536,8 +2580,8 @@ function DashboardScenarioWorkspace({
             Історія сценаріїв
           </h2>
           <p className="mt-2 text-[0.95rem] leading-[1.72] text-[var(--text-muted)]">
-            Останній сценарій живе у верхньому блоці, а попередні варіанти
-            зберігаються тут окремо, щоб не забивати головний екран.
+            Усі попередні розрахунки зберігаються тут у хронології, щоб можна було
+            повернутись до них і порівняти маршрути між собою.
           </p>
         </div>
 
@@ -2655,6 +2699,10 @@ function DashboardProfileWorkspace({
   const profileTargetRole = normalizeOptionalInput(draft.target_role);
   const workPreference = mapWorkPreferenceLabel(draft.work_preference || null);
   const jobSearchStage = mapJobSearchStageLabel(draft.job_search_stage || null);
+  const profileHeroSummary =
+    missingItems.length > 0
+      ? "Тут видно короткий зріз профілю, а нижче можна дозібрати стабільний контекст без повторного введення в кожному новому сценарії."
+      : "Профіль уже зібраний: нижче можна швидко оновити основні дані, пароль і додатковий контекст в одному місці.";
 
   const handleProfileSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -2953,10 +3001,7 @@ function DashboardProfileWorkspace({
             Контекст, який працює на всі модулі
           </h1>
           <p className="mt-5 max-w-3xl text-[1rem] leading-[1.78] text-[var(--text-muted)]">
-            Тут зібрані ваші базові дані, кар&rsquo;єрний контекст і додаткові
-            сигнали для персоналізації. Саме цей профіль може підживлювати
-            сценарії, резюме, співбесіди та подальші сервіси без повторного
-            введення.
+            {profileHeroSummary}
           </p>
 
           <div className="mt-7 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -3466,14 +3511,14 @@ function DashboardProfileWorkspace({
 
           <article className="surface-panel rounded-[2rem] p-5 md:p-6">
             <h2 className="text-[1.45rem] font-semibold leading-[1.06] tracking-[-0.04em] text-[var(--text-strong)]">
-              Що використовується далі
+              Де профіль спрацює
             </h2>
             <div className="mt-5 space-y-3">
               {[
-                `Роль і ринок: ${mapTargetMarketLabel(draft.target_market || null) ?? "ще не вказані повністю"}.`,
-                `Рівень англійської: ${mapEnglishLevelLabel(draft.english_level || null) ?? "ще не вказано"}.`,
-                `Релевантний досвід: ${mapExperienceLevelLabel(draft.experience_level || null) ?? "ще не вказано"}.`,
-                `Темп підготовки: ${draft.weekly_learning_hours.trim() ? `${draft.weekly_learning_hours.trim()} год/тиждень` : "ще не заданий"}.`,
+                "Сценарії використовують ролі, ринок і пріоритет переходу для нових розрахунків.",
+                "Резюме та вакансії підтягують англійську, досвід і формат роботи без повторного введення.",
+                "Співбесіди спираються на стадію пошуку й темп підготовки, щоб радити реалістичні наступні кроки.",
+                "Пропозиції та нова робота використовують зарплатний контекст і ваші очікування від переходу.",
               ].map((item) => (
                 <div key={item} className="surface-soft rounded-[1.2rem] p-4">
                   <p className="text-[0.92rem] leading-[1.68] text-[var(--text-muted)]">
@@ -3514,7 +3559,7 @@ function ModuleWorkspace({
                 key={item.label}
                 label={item.label}
                 value={item.value}
-                description="Структура цього розділу вже закладена в кабінеті."
+                description={moduleSummaryDescription(item.label)}
               />
             ))}
           </div>
