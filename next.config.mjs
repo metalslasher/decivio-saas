@@ -28,6 +28,8 @@ function buildContentSecurityPolicy() {
       "https://www.google-analytics.com",
       "https://region1.google-analytics.com",
       "https://www.clarity.ms",
+      "https://scripts.clarity.ms",
+      "https://*.clarity.ms",
       "https://tagmanager.google.com"
     ],
     "script-src-attr": ["'none'"],
@@ -48,6 +50,8 @@ function buildContentSecurityPolicy() {
       "https://stats.g.doubleclick.net",
       "https://www.clarity.ms",
       "https://c.clarity.ms",
+      "https://scripts.clarity.ms",
+      "https://*.clarity.ms",
       "https://ssl.gstatic.com",
       "https://www.gstatic.com",
       "https://tagmanager.google.com"
