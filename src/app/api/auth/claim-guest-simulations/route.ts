@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { getSupabaseAdminClient } from "@/lib/db/supabase";
+import { getSupabaseServiceRoleClient } from "@/lib/db/supabase";
 import { claimGuestSimulationsForUser } from "@/lib/guest-simulation-transfer";
 import { GUEST_USER_COOKIE_NAME } from "@/lib/guest-session";
 import { getAuthenticatedUserIdFromRequest } from "@/lib/request-auth";
@@ -9,7 +9,7 @@ export async function POST(request: Request) {
   let supabase;
 
   try {
-    supabase = getSupabaseAdminClient();
+    supabase = getSupabaseServiceRoleClient();
   } catch (error) {
     return NextResponse.json(
       {

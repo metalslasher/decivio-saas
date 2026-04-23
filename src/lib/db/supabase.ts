@@ -1,3 +1,5 @@
+import "server-only";
+
 import { createClient } from "@supabase/supabase-js";
 
 function getMissingEnvVars(variableNames: string[]) {
@@ -7,7 +9,7 @@ function getMissingEnvVars(variableNames: string[]) {
   });
 }
 
-export function getSupabaseAdminClient() {
+export function getSupabaseServiceRoleClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   const missing = getMissingEnvVars(["NEXT_PUBLIC_SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY"]);
@@ -22,3 +24,5 @@ export function getSupabaseAdminClient() {
 
   return createClient(url, serviceRoleKey);
 }
+
+export const getSupabaseAdminClient = getSupabaseServiceRoleClient;

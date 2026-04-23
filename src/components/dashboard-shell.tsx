@@ -28,6 +28,7 @@ import {
 } from "@/lib/career-switch-form";
 import { getSupabaseBrowserClient } from "@/lib/db/supabase-browser";
 import { GUEST_USER_COOKIE_NAME } from "@/lib/guest-session";
+import { PASSWORD_POLICY_HINT, validateStrongPassword } from "@/lib/password-policy";
 import { emitProfileUpdated } from "@/lib/profile-broadcast";
 import {
   createEmptyProfileContext,
@@ -2950,8 +2951,9 @@ function DashboardProfileWorkspace({
     setPasswordError(null);
     setPasswordNotice(null);
 
-    if (nextPassword.length < 6) {
-      setPasswordError("Пароль має містити щонайменше 6 символів.");
+    const passwordValidationError = validateStrongPassword(nextPassword);
+    if (passwordValidationError) {
+      setPasswordError(passwordValidationError);
       return;
     }
 
@@ -3475,6 +3477,9 @@ function DashboardProfileWorkspace({
                   autoComplete="new-password"
                 />
               </label>
+              <p className="text-xs leading-[1.72] text-[var(--text-soft)]">
+                {PASSWORD_POLICY_HINT}
+              </p>
 
               <label className="block text-sm font-medium leading-[1.6] text-[var(--text-muted)]">
                 Повторіть пароль

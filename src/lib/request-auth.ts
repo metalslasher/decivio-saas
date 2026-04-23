@@ -1,6 +1,11 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-function getBearerToken(request: Request) {
+export type AuthenticatedRequestUser = {
+  accessToken: string;
+  userId: string;
+};
+
+export function getBearerTokenFromRequest(request: Request) {
   const authorization = request.headers.get("authorization")?.trim();
 
   if (!authorization) {
@@ -15,8 +20,11 @@ function getBearerToken(request: Request) {
   return token;
 }
 
-export async function getAuthenticatedUserIdFromRequest(supabase: SupabaseClient, request: Request) {
-  const accessToken = getBearerToken(request);
+export async function getAuthenticatedUserFromRequest(
+  supabase: SupabaseClient,
+  request: Request
+): Promise<AuthenticatedRequestUser | null> {
+  const accessToken = getBearerTokenFromRequest(request);
 
   if (!accessToken) {
     return null;
@@ -31,5 +39,13 @@ export async function getAuthenticatedUserIdFromRequest(supabase: SupabaseClient
     throw new Error(error?.message ?? "Не вдалося підтвердити авторизацію.");
   }
 
-  return user.id;
+  return {
+    accessToken,
+    userId: user.id
+  };
+}
+
+export async function getAuthenticatedUserIdFromRequest(supabase: SupabaseClient, request: Request) {
+  const authenticatedUser = await getAuthenticatedUserFromRequest(supabase, request);
+  return authenticatedUser?.userId ?? null;
 }

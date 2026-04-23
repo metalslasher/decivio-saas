@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { claimGuestSimulations } from "@/lib/auth-session-client";
 import { getSupabaseBrowserClient } from "@/lib/db/supabase-browser";
+import { PASSWORD_MIN_LENGTH, PASSWORD_POLICY_HINT, validateStrongPassword } from "@/lib/password-policy";
 
 export type AuthView = "login" | "signup" | "reset";
 
@@ -120,13 +121,7 @@ function getPasswordValidationError(value: string, view: AuthView) {
   }
 
   if (view === "signup") {
-    if (value.length < 8) {
-      return "Пароль має містити щонайменше 8 символів.";
-    }
-
-    if (!/[a-z]/.test(value) || !/[A-Z]/.test(value) || !/\d/.test(value)) {
-      return "Пароль має містити цифру, велику та малу літеру.";
-    }
+    return validateStrongPassword(value);
   }
 
   return null;
@@ -586,7 +581,7 @@ export function AuthForm({
                     onBlur={() => markFieldTouched("password")}
                     className="field-surface pr-24"
                     autoComplete={isSignup ? "new-password" : "current-password"}
-                    minLength={isSignup ? 8 : undefined}
+                    minLength={isSignup ? PASSWORD_MIN_LENGTH : undefined}
                     aria-invalid={passwordError ? true : undefined}
                     aria-describedby={passwordDescriptionIds}
                     required
@@ -602,7 +597,7 @@ export function AuthForm({
                 </div>
                 {isSignup ? (
                   <p id="auth-password-note" className="mt-2 text-xs text-[var(--text-soft)]">
-                    Пароль має містити щонайменше 8 символів, одну цифру, одну велику та одну малу літеру.
+                    {PASSWORD_POLICY_HINT}
                   </p>
                 ) : null}
                 {passwordError ? (
@@ -626,7 +621,7 @@ export function AuthForm({
                       onBlur={() => markFieldTouched("confirmPassword")}
                       className="field-surface pr-24"
                       autoComplete="new-password"
-                      minLength={8}
+                      minLength={PASSWORD_MIN_LENGTH}
                       aria-invalid={confirmPasswordError ? true : undefined}
                       aria-describedby={confirmPasswordDescriptionIds}
                       required

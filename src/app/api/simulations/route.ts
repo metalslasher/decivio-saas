@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { buildStoredSummaryMetrics, generateCareerSwitchAnalysis } from "@/lib/career-switch-analysis";
 import { parseCareerSwitchFormPayload, type CareerSwitchFormInput } from "@/lib/career-switch-form";
-import { getSupabaseAdminClient } from "@/lib/db/supabase";
+import { getSupabaseServiceRoleClient } from "@/lib/db/supabase";
 import { claimGuestSimulationsForUser } from "@/lib/guest-simulation-transfer";
 import { GUEST_USER_COOKIE_MAX_AGE, GUEST_USER_COOKIE_NAME } from "@/lib/guest-session";
 import { resolveGuestSessionIdentity } from "@/lib/guest-session-server";
@@ -149,7 +149,7 @@ export async function POST(request: Request) {
 
   let supabase: SupabaseClient;
   try {
-    supabase = getSupabaseAdminClient();
+    supabase = getSupabaseServiceRoleClient();
   } catch (error) {
     const details = error instanceof Error ? error.message : "unknown";
     return NextResponse.json(

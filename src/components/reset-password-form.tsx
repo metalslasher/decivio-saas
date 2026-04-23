@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { getSupabaseBrowserClient } from "@/lib/db/supabase-browser";
+import { PASSWORD_MIN_LENGTH, PASSWORD_POLICY_HINT, validateStrongPassword } from "@/lib/password-policy";
 
 type ResetPasswordState =
   | { status: "loading" }
@@ -71,8 +72,9 @@ export function ResetPasswordForm() {
     setError(null);
     setNotice(null);
 
-    if (password.length < 6) {
-      setError("Пароль має містити щонайменше 6 символів.");
+    const passwordValidationError = validateStrongPassword(password);
+    if (passwordValidationError) {
+      setError(passwordValidationError);
       return;
     }
 
@@ -141,6 +143,7 @@ export function ResetPasswordForm() {
           <p className="mt-3 text-[0.98rem] leading-[1.72] text-[var(--text-muted)]">
             Встановіть новий пароль для вашого акаунта Decivio.
           </p>
+          <p className="mt-3 text-xs leading-[1.72] text-[var(--text-soft)]">{PASSWORD_POLICY_HINT}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
@@ -152,7 +155,7 @@ export function ResetPasswordForm() {
               onChange={(event) => setPassword(event.target.value)}
               className="field-surface mt-1"
               autoComplete="new-password"
-              minLength={6}
+              minLength={PASSWORD_MIN_LENGTH}
               required
             />
           </label>
@@ -165,7 +168,7 @@ export function ResetPasswordForm() {
               onChange={(event) => setConfirmPassword(event.target.value)}
               className="field-surface mt-1"
               autoComplete="new-password"
-              minLength={6}
+              minLength={PASSWORD_MIN_LENGTH}
               required
             />
           </label>
