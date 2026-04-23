@@ -13,18 +13,29 @@ type RateLimitRow = {
   retry_after_seconds: number;
 };
 
-function getRequestIp(headers: Headers) {
-  const forwardedFor = headers.get("x-forwarded-for");
-  if (forwardedFor) {
-    const [firstIp] = forwardedFor.split(",");
-    if (firstIp?.trim()) {
-      return firstIp.trim();
-    }
+const IP_HEADER_CANDIDATES = [
+  "x-forwarded-for",
+  "x-vercel-forwarded-for",
+  "cf-connecting-ip",
+  "x-real-ip"
+] as const;
+
+function readClientIpFromHeader(headers: Headers, headerName: (typeof IP_HEADER_CANDIDATES)[number]) {
+  const headerValue = headers.get(headerName);
+  if (!headerValue) {
+    return null;
   }
 
-  const realIp = headers.get("x-real-ip");
-  if (realIp?.trim()) {
-    return realIp.trim();
+  const [firstIp] = headerValue.split(",");
+  return firstIp?.trim() || null;
+}
+
+function getRequestIp(headers: Headers) {
+  for (const headerName of IP_HEADER_CANDIDATES) {
+    const clientIp = readClientIpFromHeader(headers, headerName);
+    if (clientIp) {
+      return clientIp;
+    }
   }
 
   return "unknown";

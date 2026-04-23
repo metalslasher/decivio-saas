@@ -4,23 +4,49 @@ import { getSupabaseServiceRoleClient } from "@/lib/db/supabase";
 import { getSupabaseUserServerClient } from "@/lib/db/supabase-server";
 import { GUEST_USER_COOKIE_NAME } from "@/lib/guest-session";
 import { getAuthenticatedUserFromRequest } from "@/lib/request-auth";
+import { consumeRateLimit } from "@/lib/request-rate-limit";
 import { buildSimulationResultsPayload } from "@/lib/simulation-results-payload";
 
 const uuidPattern =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
-function errorResponse(status: number, title: string, description: string) {
+const SIMULATION_RESULTS_RATE_LIMIT = {
+  limit: 60,
+  windowSeconds: 10 * 60,
+} as const;
+
+function errorResponse(
+  status: number,
+  title: string,
+  description: string,
+  headers?: HeadersInit,
+) {
   return NextResponse.json(
     {
       title,
       description,
     },
-    { status },
+    { status, headers },
   );
 }
 
 function isUuid(value: string | null | undefined): value is string {
   return typeof value === "string" && uuidPattern.test(value);
+}
+
+function buildRateLimitSubjectHint(
+  userId: string | null,
+  guestSessionId: string | null,
+) {
+  if (userId?.trim()) {
+    return `user:${userId.trim()}`;
+  }
+
+  if (guestSessionId?.trim()) {
+    return `guest:${guestSessionId.trim()}`;
+  }
+
+  return "anonymous";
 }
 
 export async function GET(
@@ -63,6 +89,41 @@ export async function GET(
       error instanceof Error
         ? error.message
         : "Спробуйте оновити сторінку та увійти ще раз.",
+    );
+  }
+
+  const guestSessionId = cookies().get(GUEST_USER_COOKIE_NAME)?.value ?? null;
+
+  let rateLimit;
+  try {
+    rateLimit = await consumeRateLimit(serviceSupabase, {
+      route: "/api/simulations/[simulationId]",
+      subjectHint: buildRateLimitSubjectHint(
+        authenticatedUser?.userId ?? null,
+        guestSessionId,
+      ),
+      headers: request.headers,
+      limit: SIMULATION_RESULTS_RATE_LIMIT.limit,
+      windowSeconds: SIMULATION_RESULTS_RATE_LIMIT.windowSeconds,
+    });
+  } catch (error) {
+    return errorResponse(
+      500,
+      "Не вдалося застосувати обмеження запитів",
+      error instanceof Error
+        ? error.message
+        : "Спробуйте оновити сторінку ще раз через кілька секунд.",
+    );
+  }
+
+  if (!rateLimit.allowed) {
+    return errorResponse(
+      429,
+      "Забагато спроб за короткий час",
+      "Зачекайте кілька хвилин і спробуйте відкрити результат ще раз.",
+      {
+        "Retry-After": String(rateLimit.retryAfterSeconds),
+      },
     );
   }
 
@@ -131,7 +192,6 @@ export async function GET(
     });
   }
 
-  const guestSessionId = cookies().get(GUEST_USER_COOKIE_NAME)?.value ?? null;
   if (!isUuid(guestSessionId)) {
     return errorResponse(
       403,

@@ -16,6 +16,24 @@ const SIMULATION_RATE_LIMIT = {
   windowSeconds: 10 * 60
 } as const;
 
+function buildRateLimitSubjectHint({
+  userId,
+  guestSessionId
+}: {
+  userId: string | null;
+  guestSessionId: string | null;
+}) {
+  if (userId?.trim()) {
+    return `user:${userId.trim()}`;
+  }
+
+  if (guestSessionId?.trim()) {
+    return `guest:${guestSessionId.trim()}`;
+  }
+
+  return "anonymous";
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
@@ -99,11 +117,15 @@ async function syncProfileContextFromSimulation(
   }
 }
 
-async function applySimulationRateLimit(supabase: SupabaseClient, request: Request, existingGuestId: string | null) {
+async function applySimulationRateLimit(
+  supabase: SupabaseClient,
+  request: Request,
+  subjectHint: string
+) {
   try {
     return await consumeRateLimit(supabase, {
       route: "/api/simulations",
-      subjectHint: existingGuestId?.trim() || "anonymous",
+      subjectHint,
       headers: request.headers,
       limit: SIMULATION_RATE_LIMIT.limit,
       windowSeconds: SIMULATION_RATE_LIMIT.windowSeconds
@@ -177,7 +199,14 @@ export async function POST(request: Request) {
 
   let rateLimit;
   try {
-    rateLimit = await applySimulationRateLimit(supabase, request, existingGuestId);
+    rateLimit = await applySimulationRateLimit(
+      supabase,
+      request,
+      buildRateLimitSubjectHint({
+        userId: authenticatedUserId,
+        guestSessionId: existingGuestId
+      })
+    );
   } catch (error) {
     return NextResponse.json(
       {
