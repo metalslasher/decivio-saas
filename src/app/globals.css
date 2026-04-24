@@ -818,6 +818,100 @@ main {
   animation: hero-scroll-chevron 1.8s ease-in-out infinite;
 }
 
+.hero-trajectory-decor {
+  pointer-events: none;
+  position: absolute;
+  left: 50%;
+  top: 5.2rem;
+  z-index: 0;
+  height: min(42rem, calc(100svh - 6rem));
+  width: 100vw;
+  transform: translateX(-50%);
+  opacity: 0.72;
+}
+
+.hero-trajectory-main,
+.hero-trajectory-orbit {
+  fill: none;
+  vector-effect: non-scaling-stroke;
+}
+
+.hero-trajectory-main {
+  stroke: url("#hero-trajectory-line");
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 10 16;
+  opacity: 0.82;
+}
+
+.hero-trajectory-orbit {
+  stroke: rgba(63, 94, 255, 0.12);
+  stroke-width: 1.4;
+  stroke-linecap: round;
+  stroke-dasharray: 12 22;
+}
+
+.hero-trajectory-orbit--wide {
+  stroke: rgba(63, 94, 255, 0.1);
+  stroke-width: 1.2;
+}
+
+.hero-trajectory-chip {
+  filter: drop-shadow(0 18px 30px rgba(63, 94, 255, 0.13));
+}
+
+.hero-trajectory-icon {
+  fill: none;
+  stroke: var(--accent-strong);
+  stroke-width: 3.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.hero-trajectory-dot {
+  fill: var(--accent-strong);
+  opacity: 0.16;
+}
+
+@media (max-width: 1024px) {
+  .hero-trajectory-decor {
+    top: 5.8rem;
+    height: min(40rem, calc(100svh - 5.5rem));
+    opacity: 0.42;
+  }
+
+  .hero-trajectory-chip--left,
+  .hero-trajectory-chip--right-bottom {
+    opacity: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .hero-trajectory-decor {
+    top: 5rem;
+    height: min(34rem, calc(100svh - 5rem));
+    opacity: 0.3;
+  }
+
+  .hero-trajectory-main {
+    stroke-width: 1.7;
+    stroke-dasharray: 8 18;
+  }
+
+  .hero-trajectory-orbit {
+    opacity: 0.55;
+  }
+
+  .hero-trajectory-chip {
+    opacity: 0;
+  }
+
+  .hero-trajectory-dot {
+    opacity: 0.1;
+  }
+}
+
 .timeline-marker {
   box-shadow: 0 0 0 0 rgba(63, 94, 255, 0.28);
   animation: marker-pulse 2.2s ease-in-out infinite;
