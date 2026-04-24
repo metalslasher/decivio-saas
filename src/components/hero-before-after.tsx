@@ -73,33 +73,6 @@ const legendNext = "\u041d\u043e\u0432\u0430 \u0440\u043e\u043b\u044c: DevOps";
 const axisYearSuffix = "\u0440\u0456\u043a";
 const axisMoneySuffix = "\u0442\u0438\u0441.";
 
-const heroSignals = [
-  {
-    label: "\u041c\u0430\u0440\u0448\u0440\u0443\u0442",
-    value: "PPC \u2192 DevOps",
-    icon: "route",
-    className: "hero-signal-card--route"
-  },
-  {
-    label: "\u041f\u0440\u043e\u0433\u043d\u043e\u0437",
-    value: "+42%",
-    icon: "forecast",
-    className: "hero-signal-card--forecast"
-  },
-  {
-    label: "\u041f\u043b\u0430\u043d",
-    value: "12 \u043a\u0440\u043e\u043a\u0456\u0432",
-    icon: "plan",
-    className: "hero-signal-card--plan"
-  },
-  {
-    label: "\u0420\u0438\u0437\u0438\u043a",
-    value: "\u0421\u0435\u0440\u0435\u0434\u043d\u0456\u0439",
-    icon: "risk",
-    className: "hero-signal-card--risk"
-  }
-] as const;
-
 type ChartPoint = { x: number; y: number };
 
 function toChartPoint(value: number, index: number, total: number): ChartPoint {
@@ -185,43 +158,6 @@ function renderTypedHeadline(segments: readonly HeroHeadlineSegment[], visibleLe
   });
 }
 
-function renderHeroSignalIcon(icon: (typeof heroSignals)[number]["icon"]) {
-  if (icon === "route") {
-    return (
-      <svg viewBox="0 0 24 24" className="h-5 w-5 fill-none" aria-hidden="true">
-        <path d="M5 17c4.8 0 3.4-10 8.4-10H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-        <path d="M15 3l4 4-4 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M5 17h.01" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" />
-      </svg>
-    );
-  }
-
-  if (icon === "forecast") {
-    return (
-      <svg viewBox="0 0 24 24" className="h-5 w-5 fill-none" aria-hidden="true">
-        <path d="M4 16.5l4.2-4 3.4 3.1L19 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M15 8h4v4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    );
-  }
-
-  if (icon === "plan") {
-    return (
-      <svg viewBox="0 0 24 24" className="h-5 w-5 fill-none" aria-hidden="true">
-        <path d="M7 6h11M7 12h11M7 18h11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-        <path d="M4 6h.01M4 12h.01M4 18h.01" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
-      </svg>
-    );
-  }
-
-  return (
-    <svg viewBox="0 0 24 24" className="h-5 w-5 fill-none" aria-hidden="true">
-      <path d="M12 4l7 3v5.2c0 4.1-2.8 6.6-7 7.8-4.2-1.2-7-3.7-7-7.8V7l7-3Z" stroke="currentColor" strokeWidth="1.9" strokeLinejoin="round" />
-      <path d="M9.5 12.2l1.6 1.6 3.6-4" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
 export function HeroBeforeAfter() {
   const [headlineIndex, setHeadlineIndex] = useState(0);
   const [typedText, setTypedText] = useState("");
@@ -268,28 +204,8 @@ export function HeroBeforeAfter() {
       <div className="pointer-events-none absolute -right-20 top-4 h-[24rem] w-[24rem] rounded-full bg-[radial-gradient(circle,rgba(152,165,255,0.08)_0%,rgba(152,165,255,0.04)_36%,transparent_72%)]" />
 
       <div className="space-y-8 md:space-y-10">
-        <div className="relative mx-auto flex min-h-[calc(100svh-6rem)] max-w-[88rem] items-center justify-center px-4 md:min-h-[calc(100svh-7rem)] sm:px-6 lg:px-8">
-          <div className="pointer-events-none absolute inset-0" aria-hidden="true">
-            {heroSignals.map((signal, index) => (
-              <div
-                key={signal.label}
-                className={`hero-signal-card ${signal.className}`}
-                style={{ animationDelay: `${index * 0.45}s` }}
-              >
-                <span className="hero-signal-icon">{renderHeroSignalIcon(signal.icon)}</span>
-                <span className="hidden min-w-0 text-left sm:block">
-                  <span className="block text-[0.68rem] font-semibold uppercase tracking-[0.12em] text-[var(--text-soft)]">
-                    {signal.label}
-                  </span>
-                  <span className="mt-0.5 block whitespace-nowrap font-display text-[0.96rem] font-bold leading-none tracking-[-0.03em] text-[var(--text-strong)] md:text-[1.06rem]">
-                    {signal.value}
-                  </span>
-                </span>
-              </div>
-            ))}
-          </div>
-
-          <div className="relative z-10 flex w-full max-w-[60rem] flex-col items-center space-y-6 text-center sm:space-y-7 md:-translate-y-8 lg:-translate-y-10">
+        <div className="mx-auto flex min-h-[calc(100svh-6rem)] max-w-[64rem] items-center justify-center md:min-h-[calc(100svh-7rem)]">
+          <div className="flex w-full max-w-[60rem] flex-col items-center space-y-6 text-center sm:space-y-7 md:-translate-y-8 lg:-translate-y-10">
             <h1 className="mx-auto min-h-[6.7rem] max-w-[12ch] text-balance font-display text-[2.08rem] font-bold leading-[0.92] tracking-[-0.06em] text-[var(--text-strong)] sm:min-h-[7.8rem] sm:text-[2.7rem] md:min-h-[8.5rem] md:max-w-[15ch] md:text-[3.55rem] lg:min-h-[8rem] lg:max-w-[16ch] lg:text-[3.45rem] xl:max-w-[17ch] xl:text-[3.6rem]">
               {typedHeadline}
               <span className="hero-caret ml-1 text-[var(--accent-strong)]" aria-hidden="true">
