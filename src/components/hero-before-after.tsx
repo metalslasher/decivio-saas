@@ -270,6 +270,12 @@ function HeroPathDecor() {
             opacity={0.12 + (index % 4) * 0.08}
           />
         ))}
+
+        <path className="hero-roadmap-line hero-roadmap-line--glow" d="M398 132 C334 166 354 236 264 278 C176 320 196 392 112 432" />
+        <path className="hero-roadmap-line" d="M398 132 C334 166 354 236 264 278 C176 320 196 392 112 432" />
+        <circle className="hero-roadmap-node" cx="398" cy="132" r="10" />
+        <circle className="hero-roadmap-node" cx="264" cy="278" r="10" />
+        <circle className="hero-roadmap-node" cx="112" cy="432" r="10" />
       </svg>
 
       <div className="hero-path-card hero-path-card--goal" aria-hidden="true">
@@ -367,7 +373,7 @@ export function HeroBeforeAfter() {
           </div>
 
           <div className="relative z-10 flex w-full max-w-[60rem] flex-col items-center space-y-6 text-center sm:space-y-7 md:-translate-y-8 lg:-translate-y-10">
-            <h1 className="mx-auto min-h-[6.7rem] max-w-[12ch] text-balance font-display text-[2.08rem] font-bold leading-[0.92] tracking-[-0.06em] text-[var(--text-strong)] sm:min-h-[7.8rem] sm:text-[2.7rem] md:min-h-[8.5rem] md:max-w-[15ch] md:text-[3.55rem] lg:min-h-[8rem] lg:max-w-[16ch] lg:text-[3.45rem] xl:max-w-[17ch] xl:text-[3.6rem]">
+            <h1 className="mx-auto min-h-[7.3rem] max-w-[12ch] text-balance font-display text-[2.08rem] font-bold leading-[1.02] tracking-[-0.045em] text-[var(--text-strong)] sm:min-h-[8.3rem] sm:text-[2.7rem] md:min-h-[9.3rem] md:max-w-[15ch] md:text-[3.35rem] lg:min-h-[8.7rem] lg:max-w-[16ch] lg:text-[3.22rem] xl:max-w-[17ch] xl:text-[3.38rem]">
               {typedHeadline}
               <span className="hero-caret ml-1 text-[var(--accent-strong)]" aria-hidden="true">
                 |

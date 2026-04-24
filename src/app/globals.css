@@ -820,13 +820,13 @@ main {
 
 .hero-compass-decor {
   position: absolute;
-  left: max(-18rem, -22vw);
-  top: 51%;
-  width: clamp(22rem, 36vw, 38rem);
+  left: max(-19rem, -24vw);
+  top: 58%;
+  width: clamp(21rem, 33vw, 35rem);
   aspect-ratio: 1;
   transform: translateY(-42%);
-  filter: drop-shadow(0 26px 52px rgba(63, 94, 255, 0.16));
-  opacity: 0.82;
+  filter: drop-shadow(0 24px 46px rgba(63, 94, 255, 0.12));
+  opacity: 0.58;
 }
 
 .hero-compass-orbit {
@@ -840,7 +840,7 @@ main {
 
 .hero-compass-chip {
   position: absolute;
-  right: -0.75rem;
+  right: -0.15rem;
   top: 28%;
   display: inline-flex;
   height: 4rem;
@@ -868,12 +868,12 @@ main {
 
 .hero-path-decor {
   position: absolute;
-  right: max(-2rem, -3vw);
-  bottom: clamp(0.3rem, 4vh, 2.8rem);
-  width: clamp(22rem, 34vw, 35rem);
+  right: max(0.4rem, 1.5vw);
+  bottom: clamp(1.4rem, 6vh, 4rem);
+  width: clamp(21rem, 30vw, 31rem);
   aspect-ratio: 0.87;
   filter: drop-shadow(0 30px 58px rgba(63, 94, 255, 0.16));
-  opacity: 0.9;
+  opacity: 0.82;
 }
 
 .hero-path-shadow {
@@ -885,7 +885,7 @@ main {
   display: inline-flex;
   align-items: center;
   gap: 0.82rem;
-  min-width: 10.4rem;
+  min-width: 9.9rem;
   border-radius: 1.15rem;
   border: 1px solid rgba(255, 255, 255, 0.78);
   background: rgba(255, 255, 255, 0.86);
@@ -910,27 +910,46 @@ main {
 }
 
 .hero-path-card--goal {
-  right: 27%;
-  top: 30%;
+  right: 8%;
+  top: 22%;
 }
 
 .hero-path-card--plan {
-  left: 4%;
-  top: 52%;
+  left: 10%;
+  top: 48%;
   animation-delay: 0.35s;
 }
 
 .hero-path-card--analysis {
-  left: -8%;
+  left: 0;
   bottom: 12%;
   animation-delay: 0.72s;
+}
+
+.hero-roadmap-line {
+  fill: none;
+  stroke: rgba(63, 94, 255, 0.5);
+  stroke-width: 5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.hero-roadmap-line--glow {
+  stroke: rgba(63, 94, 255, 0.12);
+  stroke-width: 20;
+}
+
+.hero-roadmap-node {
+  fill: #ffffff;
+  stroke: rgba(63, 94, 255, 0.48);
+  stroke-width: 5;
 }
 
 @media (max-width: 1120px) {
   .hero-compass-decor {
     left: max(-15rem, -30vw);
     width: clamp(18rem, 34vw, 28rem);
-    opacity: 0.42;
+    opacity: 0.28;
   }
 
   .hero-compass-chip {
@@ -938,9 +957,9 @@ main {
   }
 
   .hero-path-decor {
-    right: -8rem;
+    right: -7rem;
     width: clamp(20rem, 38vw, 28rem);
-    opacity: 0.5;
+    opacity: 0.32;
   }
 
   .hero-path-card {
@@ -950,10 +969,10 @@ main {
 
 @media (max-width: 767px) {
   .hero-compass-decor {
-    left: -9.5rem;
-    top: 29%;
+    left: -11rem;
+    top: 36%;
     width: 18rem;
-    opacity: 0.22;
+    opacity: 0.16;
   }
 
   .hero-compass-orbit,
@@ -962,10 +981,10 @@ main {
   }
 
   .hero-path-decor {
-    right: -9rem;
+    right: -10.5rem;
     bottom: 1.5rem;
     width: 20rem;
-    opacity: 0.3;
+    opacity: 0.18;
   }
 
   .hero-path-card {
