@@ -158,65 +158,6 @@ function renderTypedHeadline(segments: readonly HeroHeadlineSegment[], visibleLe
   });
 }
 
-function HeroTrajectoryDecor() {
-  return (
-    <div className="hero-trajectory-decor" aria-hidden="true">
-      <svg viewBox="0 0 1440 720" className="h-full w-full" preserveAspectRatio="none">
-        <defs>
-          <linearGradient id="hero-trajectory-line" x1="0%" y1="50%" x2="100%" y2="50%">
-            <stop offset="0%" stopColor="var(--accent-strong)" stopOpacity="0" />
-            <stop offset="18%" stopColor="var(--accent-strong)" stopOpacity="0.22" />
-            <stop offset="50%" stopColor="var(--accent-strong)" stopOpacity="0.06" />
-            <stop offset="82%" stopColor="var(--accent-strong)" stopOpacity="0.22" />
-            <stop offset="100%" stopColor="var(--accent-strong)" stopOpacity="0" />
-          </linearGradient>
-          <radialGradient id="hero-trajectory-node" cx="50%" cy="42%" r="70%">
-            <stop offset="0%" stopColor="#ffffff" />
-            <stop offset="68%" stopColor="#f5f7ff" />
-            <stop offset="100%" stopColor="#e7ecff" />
-          </radialGradient>
-        </defs>
-
-        <path className="hero-trajectory-orbit hero-trajectory-orbit--wide" d="M-80 470 C145 250 356 258 510 388 C684 536 820 426 980 288 C1124 164 1290 190 1520 330" />
-        <path className="hero-trajectory-orbit" d="M-90 530 C164 368 342 448 500 518 C690 602 844 506 1000 372 C1162 232 1308 248 1528 420" />
-        <path className="hero-trajectory-main" d="M-70 500 C170 314 340 330 500 438 C685 562 820 480 984 338 C1144 198 1298 216 1510 360" />
-
-        <g className="hero-trajectory-chip hero-trajectory-chip--left" transform="translate(250 406)">
-          <circle r="39" fill="url(#hero-trajectory-node)" />
-          <circle r="38" fill="none" stroke="rgba(255,255,255,0.86)" strokeWidth="1.5" />
-          <path d="M-11-5v-6a6 6 0 0 1 6-6h10a6 6 0 0 1 6 6v6" className="hero-trajectory-icon" />
-          <path d="M-20-3h40v25a5 5 0 0 1-5 5h-30a5 5 0 0 1-5-5V-3Z" className="hero-trajectory-icon" />
-          <path d="M-20 8h40M0 5v8" className="hero-trajectory-icon" />
-        </g>
-
-        <g className="hero-trajectory-chip hero-trajectory-chip--right-top" transform="translate(1190 250)">
-          <circle r="39" fill="url(#hero-trajectory-node)" />
-          <circle r="38" fill="none" stroke="rgba(255,255,255,0.86)" strokeWidth="1.5" />
-          <path d="M0 24a24 24 0 1 0-24-24A24 24 0 0 0 0 24Z" className="hero-trajectory-icon" />
-          <path d="M0 12a12 12 0 1 0-12-12A12 12 0 0 0 0 12Z" className="hero-trajectory-icon" />
-          <path d="M0 0 17-17M13-17h4v4" className="hero-trajectory-icon" />
-        </g>
-
-        <g className="hero-trajectory-chip hero-trajectory-chip--right-bottom" transform="translate(1138 500)">
-          <circle r="39" fill="url(#hero-trajectory-node)" />
-          <circle r="38" fill="none" stroke="rgba(255,255,255,0.86)" strokeWidth="1.5" />
-          <path d="M-14 19h28M-9 28h18M0-28a25 25 0 0 0-15 44c4 3 5 6 5 12h20c0-6 1-9 5-12A25 25 0 0 0 0-28Z" className="hero-trajectory-icon" />
-        </g>
-
-        {Array.from({ length: 22 }).map((_, index) => (
-          <circle
-            key={index}
-            cx={120 + index * 58}
-            cy={index % 2 === 0 ? 304 + (index % 5) * 18 : 456 - (index % 4) * 16}
-            r={index % 3 === 0 ? 3.2 : 2.2}
-            className="hero-trajectory-dot"
-          />
-        ))}
-      </svg>
-    </div>
-  );
-}
-
 export function HeroBeforeAfter() {
   const [headlineIndex, setHeadlineIndex] = useState(0);
   const [typedText, setTypedText] = useState("");
@@ -258,13 +199,12 @@ export function HeroBeforeAfter() {
   }, []);
 
   return (
-    <section className="relative overflow-hidden pt-2 md:pt-4">
+    <section className="relative pt-2 md:pt-4">
       <div className="pointer-events-none absolute -left-24 top-10 h-[26rem] w-[26rem] rounded-full bg-[radial-gradient(circle,rgba(74,108,255,0.10)_0%,rgba(74,108,255,0.05)_36%,transparent_72%)]" />
       <div className="pointer-events-none absolute -right-20 top-4 h-[24rem] w-[24rem] rounded-full bg-[radial-gradient(circle,rgba(152,165,255,0.08)_0%,rgba(152,165,255,0.04)_36%,transparent_72%)]" />
-      <HeroTrajectoryDecor />
 
       <div className="space-y-8 md:space-y-10">
-        <div className="relative z-10 mx-auto flex min-h-[calc(100svh-6rem)] max-w-[64rem] items-center justify-center md:min-h-[calc(100svh-7rem)]">
+        <div className="mx-auto flex min-h-[calc(100svh-6rem)] max-w-[64rem] items-center justify-center md:min-h-[calc(100svh-7rem)]">
           <div className="flex w-full max-w-[60rem] flex-col items-center space-y-6 text-center sm:space-y-7 md:-translate-y-8 lg:-translate-y-10">
             <h1 className="mx-auto min-h-[6.7rem] max-w-[12ch] text-balance font-display text-[2.08rem] font-bold leading-[0.92] tracking-[-0.06em] text-[var(--text-strong)] sm:min-h-[7.8rem] sm:text-[2.7rem] md:min-h-[8.5rem] md:max-w-[15ch] md:text-[3.55rem] lg:min-h-[8rem] lg:max-w-[16ch] lg:text-[3.45rem] xl:max-w-[17ch] xl:text-[3.6rem]">
               {typedHeadline}
