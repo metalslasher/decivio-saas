@@ -109,6 +109,18 @@ async function monoRequest<T>(pathname: string, options: MonoRequestOptions = {}
 
   if (!response.ok) {
     const responseText = await response.text();
+    const normalizedResponseText = responseText.toLowerCase();
+
+    if (
+      pathname === "/api/merchant/subscription/create" &&
+      response.status === 400 &&
+      normalizedResponseText.includes("h2h not allowed")
+    ) {
+      throw new Error(
+        "У mono ще не активовано оплати по підписці для цього терміналу або інтеграційного токена. Потрібно дочекатися схвалення заявки на рекурентні платежі в mono. Поки можна тестувати річний план, бо він іде через звичайний invoice."
+      );
+    }
+
     throw new Error(`mono API ${options.method ?? "GET"} ${pathname} failed with ${response.status}: ${responseText}`);
   }
 
