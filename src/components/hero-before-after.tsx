@@ -206,7 +206,7 @@ export function HeroBeforeAfter() {
       <div className="space-y-8 md:space-y-10">
         <div className="mx-auto flex min-h-[calc(100svh-6rem)] max-w-[64rem] items-center justify-center md:min-h-[calc(100svh-7rem)]">
           <div className="flex w-full max-w-[60rem] flex-col items-center space-y-6 text-center sm:space-y-7 md:-translate-y-8 lg:-translate-y-10">
-            <h1 className="mx-auto min-h-[6.7rem] max-w-[12ch] text-balance font-display text-[2.08rem] font-bold leading-[0.92] tracking-[-0.06em] text-[var(--text-strong)] sm:min-h-[7.8rem] sm:text-[2.7rem] md:min-h-[8.5rem] md:max-w-[15ch] md:text-[3.55rem] lg:min-h-[8.8rem] lg:max-w-[16ch] lg:text-[3.85rem] xl:max-w-[17ch] xl:text-[4.1rem]">
+            <h1 className="mx-auto min-h-[6.7rem] max-w-[12ch] text-balance font-display text-[2.08rem] font-bold leading-[0.92] tracking-[-0.06em] text-[var(--text-strong)] sm:min-h-[7.8rem] sm:text-[2.7rem] md:min-h-[8.5rem] md:max-w-[15ch] md:text-[3.55rem] lg:min-h-[8rem] lg:max-w-[16ch] lg:text-[3.45rem] xl:max-w-[17ch] xl:text-[3.6rem]">
               {typedHeadline}
               <span className="hero-caret ml-1 text-[var(--accent-strong)]" aria-hidden="true">
                 |
