@@ -288,8 +288,8 @@ export function HeroBeforeAfter() {
   }, []);
 
   return (
-    <section className="relative pt-3 md:pt-5">
-      <div className="mx-auto grid max-w-[80rem] items-center gap-9 py-9 pb-12 md:gap-10 md:py-12 md:pb-14 lg:min-h-[calc(100svh-8rem)] lg:grid-cols-[0.92fr_1.08fr] lg:gap-12 lg:py-8 xl:gap-14">
+    <section className="relative pt-0 md:pt-1 lg:pt-0">
+      <div className="mx-auto grid max-w-[80rem] items-center gap-8 py-7 pb-10 md:gap-8 md:py-8 md:pb-10 lg:min-h-[clamp(30rem,calc(100svh-34rem),34rem)] lg:grid-cols-[0.92fr_1.08fr] lg:gap-10 lg:py-3 xl:gap-12">
         <div className="relative z-10 flex flex-col items-center text-center lg:items-start lg:text-left">
           <h1 className="min-h-[8.9rem] max-w-[12.5ch] font-display text-[2.28rem] font-extrabold leading-[0.96] tracking-normal text-[var(--text-strong)] sm:min-h-[8.4rem] sm:max-w-[13.5ch] sm:text-[2.85rem] md:min-h-[9.2rem] md:text-[3.15rem] lg:min-h-[8.4rem] lg:max-w-[36rem] lg:text-[2.85rem] xl:min-h-[8.8rem] xl:max-w-[39rem] xl:text-[3.05rem]">
             {typedHeadline}
