@@ -736,9 +736,9 @@ export default function HomePage() {
             <div className="surface-panel mx-auto grid max-w-[80rem] overflow-hidden rounded-[1.9rem] sm:grid-cols-3">
               <Link
                 href="#reviews"
-                className="group flex min-h-[8.2rem] flex-col justify-center gap-3 px-5 py-5 transition-opacity hover:opacity-85 md:min-h-[8.5rem] md:px-7"
+                className="group flex min-h-[8.2rem] flex-col items-center justify-center gap-3 px-5 py-5 text-center transition-opacity hover:opacity-85 sm:items-start sm:text-left md:min-h-[8.5rem] md:px-7"
               >
-                <div className="flex flex-wrap items-center gap-3">
+                <div className="flex flex-wrap items-center justify-center gap-3 sm:justify-start">
                   <div className="flex items-center gap-1" aria-label="Рейтинг 4.5 із 5">
                     {Array.from({ length: 5 }).map((_, index) => {
                       const starNumber = index + 1;
@@ -770,15 +770,7 @@ export default function HomePage() {
                 </p>
               </Link>
 
-              <article className="flex min-h-[8.2rem] items-center gap-4 border-t border-[rgba(22,29,43,0.08)] px-5 py-5 sm:border-l sm:border-t-0 md:min-h-[8.5rem] md:px-7">
-                <span className="surface-soft flex h-[3.25rem] w-[3.25rem] shrink-0 items-center justify-center rounded-full text-[var(--accent-strong)] md:h-[3.75rem] md:w-[3.75rem]">
-                  <svg viewBox="0 0 24 24" className="h-6 w-6 md:h-7 md:w-7" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                    <path d="M8 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z" />
-                    <path d="M16.5 10a3 3 0 1 0 0-6" />
-                    <path d="M3.5 20c0-3.2 2.5-5.8 5.8-5.8 2.2 0 4.1 1.1 5.1 2.8" />
-                    <path d="M14.8 20c.6-1.5 1.8-2.7 3.7-2.7 1.1 0 2 .3 2.7.9" />
-                  </svg>
-                </span>
+              <article className="flex min-h-[8.2rem] flex-col items-center justify-center border-t border-[rgba(22,29,43,0.08)] px-5 py-5 text-center sm:items-start sm:border-l sm:border-t-0 sm:text-left md:min-h-[8.5rem] md:px-7">
                 <div className="min-w-0">
                   <p className="font-display text-[1.65rem] font-bold leading-none tracking-[-0.04em] text-[var(--text-strong)] md:text-[1.9rem]">
                     {socialProof.users}
@@ -789,16 +781,9 @@ export default function HomePage() {
                 </div>
               </article>
 
-              <article className="flex min-h-[8.2rem] items-center gap-4 border-t border-[rgba(22,29,43,0.08)] px-5 py-5 sm:border-l sm:border-t-0 md:min-h-[8.5rem] md:px-7">
-                <span className="surface-soft flex h-[3.25rem] w-[3.25rem] shrink-0 items-center justify-center rounded-full text-[var(--accent-strong)] md:h-[3.75rem] md:w-[3.75rem]">
-                  <svg viewBox="0 0 24 24" className="h-6 w-6 md:h-7 md:w-7" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                    <path d="M9 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z" />
-                    <path d="M3.8 20c0-3.2 2.5-5.8 5.8-5.8 1.7 0 3.1.6 4.2 1.6" />
-                    <path d="M15.5 17.5l2 2 3.7-4.2" />
-                  </svg>
-                </span>
+              <article className="flex min-h-[8.2rem] flex-col items-center justify-center border-t border-[rgba(22,29,43,0.08)] px-5 py-5 text-center sm:items-start sm:border-l sm:border-t-0 sm:text-left md:min-h-[8.5rem] md:px-7">
                 <div className="min-w-0">
-                  <p className="font-display text-[1.65rem] font-bold leading-none tracking-[-0.04em] text-[var(--accent-strong)] md:text-[1.9rem]">
+                  <p className="font-display text-[1.65rem] font-bold leading-none tracking-[-0.04em] text-[var(--text-strong)] md:text-[1.9rem]">
                     100%
                   </p>
                   <p className="mt-2 max-w-[13rem] text-[1.02rem] font-semibold leading-[1.25] text-[var(--text-muted)] md:text-[1.14rem]">
