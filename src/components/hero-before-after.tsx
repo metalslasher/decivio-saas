@@ -3,14 +3,6 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-const chartData = [
-  { year: "1", stay: 34, next: 28 },
-  { year: "2", stay: 38, next: 45 },
-  { year: "3", stay: 42, next: 61 },
-  { year: "4", stay: 46, next: 78 },
-  { year: "5", stay: 51, next: 93 }
-];
-
 const chartWidth = 560;
 const chartHeight = 250;
 const chartPadding = 22;
@@ -22,11 +14,61 @@ type HeroHeadlineSegment = {
   accent?: boolean;
 };
 
-const heroHeadlineSegments = [
-  { text: "Отримайте " },
-  { text: "покроковий план", accent: true },
-  { text: " зміни професії" }
-] as const satisfies readonly HeroHeadlineSegment[];
+type HeroScenario = {
+  fullText: string;
+  segments: readonly HeroHeadlineSegment[];
+  role: string;
+  nextValues: readonly number[];
+};
+
+const chartData = [
+  { year: "1", stay: 34 },
+  { year: "2", stay: 38 },
+  { year: "3", stay: 42 },
+  { year: "4", stay: 46 },
+  { year: "5", stay: 51 }
+] as const;
+
+const heroScenarios = [
+  {
+    fullText: "Отримайте покроковий план зміни професії",
+    segments: [
+      { text: "Отримайте " },
+      { text: "покроковий план", accent: true },
+      { text: " зміни професії" }
+    ],
+    role: "DevOps Engineer",
+    nextValues: [28, 45, 61, 78, 93]
+  },
+  {
+    fullText: "Оцініть свій дохід у новій кар’єрі ще до старту",
+    segments: [
+      { text: "Оцініть свій " },
+      { text: "дохід", accent: true },
+      { text: " у новій кар’єрі ще до старту" }
+    ],
+    role: "Data Analyst",
+    nextValues: [31, 47, 60, 73, 86]
+  },
+  {
+    fullText: "Порівняйте напрямки та оберіть найвигідніший",
+    segments: [
+      { text: "Порівняйте напрямки та оберіть " },
+      { text: "найвигідніший", accent: true }
+    ],
+    role: "Product Manager",
+    nextValues: [30, 43, 56, 68, 81]
+  },
+  {
+    fullText: "Знайдіть роботу, яка дійсно вам підходить",
+    segments: [
+      { text: "Знайдіть роботу, яка " },
+      { text: "дійсно вам підходить", accent: true }
+    ],
+    role: "UX/UI Designer",
+    nextValues: [29, 42, 54, 66, 79]
+  }
+] as const satisfies readonly HeroScenario[];
 
 const subheadline =
   "Усе для переходу в нову кар’єру з прогнозованим результатом і зрозумілим планом дій.";
@@ -86,28 +128,47 @@ function buildSmoothAreaPath(points: ChartPoint[]) {
   return `${buildSmoothPath(points)} L ${endX} ${baselineY} L ${startX} ${baselineY} Z`;
 }
 
-const nextPoints = chartData.map((item, index) => toChartPoint(item.next, index, chartData.length));
-const nextPath = buildSmoothPath(nextPoints);
-const nextAreaPath = buildSmoothAreaPath(nextPoints);
-
-const horizonYears = chartData.length;
 const stayLastValue = chartData[chartData.length - 1]?.stay ?? 0;
-const nextLastValue = chartData[chartData.length - 1]?.next ?? 0;
-const growthPercent = stayLastValue > 0 ? Math.round(((nextLastValue - stayLastValue) / stayLastValue) * 100) : 0;
 
-const finalForecastPoint = nextPoints[nextPoints.length - 1];
+function getForecastPoints(scenario: HeroScenario) {
+  return scenario.nextValues.map((value, index) => toChartPoint(value, index, chartData.length));
+}
 
-function renderHeadlineSegments(segments: readonly HeroHeadlineSegment[]) {
-  return segments.map((segment, index) => {
+function getGrowthPercent(scenario: HeroScenario) {
+  const nextLastValue = scenario.nextValues[scenario.nextValues.length - 1] ?? 0;
+  return stayLastValue > 0 ? Math.round(((nextLastValue - stayLastValue) / stayLastValue) * 100) : 0;
+}
+
+function renderTypedHeadline(segments: readonly HeroHeadlineSegment[], visibleLength: number) {
+  let remaining = visibleLength;
+
+  return segments.flatMap((segment, index) => {
+    if (remaining <= 0) {
+      return [];
+    }
+
+    const visibleText = segment.text.slice(0, remaining);
+    remaining -= visibleText.length;
+
+    if (!visibleText) {
+      return [];
+    }
+
     return (
       <span key={`${index}-${segment.text}`} className={segment.accent ? "text-warm" : undefined}>
-        {segment.text}
+        {visibleText}
       </span>
     );
   });
 }
 
-function HeroForecastCard() {
+function HeroForecastCard({ scenario }: { scenario: HeroScenario }) {
+  const nextPoints = getForecastPoints(scenario);
+  const nextPath = buildSmoothPath(nextPoints);
+  const nextAreaPath = buildSmoothAreaPath(nextPoints);
+  const growthPercent = getGrowthPercent(scenario);
+  const finalForecastPoint = nextPoints[nextPoints.length - 1];
+
   return (
     <div id="hero-preview" className="hero-forecast-card">
       <div className="absolute -right-12 -top-16 h-44 w-44 rounded-full bg-[rgba(67,97,255,0.12)] blur-3xl" />
@@ -118,19 +179,21 @@ function HeroForecastCard() {
           <div className="hero-career-pill">
             <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[rgba(238,242,255,0.94)] text-[var(--accent-strong)]">
               <svg viewBox="0 0 24 24" className="h-[1.125rem] w-[1.125rem] fill-none" aria-hidden="true">
-                <path d="M4 16l5-5 3 3 7-8M15 6h4v4" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M9 7V6.4A3.4 3.4 0 0 1 12.4 3h0A3.4 3.4 0 0 1 15.8 6.4V7" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" />
+                <rect x="4" y="7" width="16" height="12" rx="2.6" stroke="currentColor" strokeWidth="1.9" />
+                <path d="M4 12h16M10 12v1.5h4V12" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </span>
             <span className="min-w-0">
               <span className="block text-[0.68rem] font-semibold text-[rgba(102,112,133,0.78)]">Ваша наступна кар’єра</span>
-              <span className="block truncate text-[0.86rem] font-extrabold text-[var(--text-strong)]">DevOps Engineer</span>
+              <span className="block truncate text-[0.86rem] font-extrabold text-[var(--text-strong)]">{scenario.role}</span>
             </span>
           </div>
 
           <div className="hero-growth-pill">
             <span className="block text-[1.8rem] font-extrabold leading-none text-[#28b86f]">+{growthPercent}%</span>
             <span className="mt-1 block max-w-[5.5rem] text-[0.68rem] font-semibold leading-[1.16] text-[rgba(92,103,128,0.9)]">
-              до доходу за {horizonYears} років
+              до доходу
             </span>
           </div>
         </div>
@@ -185,8 +248,36 @@ function HeroForecastCard() {
 }
 
 export function HeroBeforeAfter() {
+  const [scenarioIndex, setScenarioIndex] = useState(0);
+  const [typedText, setTypedText] = useState<string>(heroScenarios[0].fullText);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [ctaIndex, setCtaIndex] = useState(0);
-  const headline = renderHeadlineSegments(heroHeadlineSegments);
+  const activeScenario = heroScenarios[scenarioIndex];
+  const typedHeadline = renderTypedHeadline(activeScenario.segments, typedText.length);
+
+  useEffect(() => {
+    if (!isDeleting && typedText === activeScenario.fullText) {
+      const pauseTimer = setTimeout(() => setIsDeleting(true), 1500);
+      return () => clearTimeout(pauseTimer);
+    }
+
+    if (isDeleting && typedText.length === 0) {
+      setIsDeleting(false);
+      setScenarioIndex((prev) => (prev + 1) % heroScenarios.length);
+      return;
+    }
+
+    const speed = isDeleting ? 26 : 44;
+    const typingTimer = setTimeout(() => {
+      setTypedText((prev) =>
+        isDeleting
+          ? activeScenario.fullText.slice(0, Math.max(0, prev.length - 1))
+          : activeScenario.fullText.slice(0, prev.length + 1)
+      );
+    }, speed);
+
+    return () => clearTimeout(typingTimer);
+  }, [activeScenario, isDeleting, typedText]);
 
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -197,14 +288,14 @@ export function HeroBeforeAfter() {
   }, []);
 
   return (
-    <section className="relative overflow-hidden pt-3 md:pt-5">
-      <div className="pointer-events-none absolute -left-24 top-8 h-[26rem] w-[26rem] rounded-full bg-[radial-gradient(circle,rgba(74,108,255,0.11)_0%,rgba(74,108,255,0.05)_36%,transparent_72%)]" />
-      <div className="pointer-events-none absolute -right-28 top-2 h-[28rem] w-[28rem] rounded-full bg-[radial-gradient(circle,rgba(152,165,255,0.1)_0%,rgba(152,165,255,0.04)_38%,transparent_72%)]" />
-
-      <div className="mx-auto grid max-w-[78rem] items-center gap-8 py-8 md:py-10 lg:min-h-[calc(100svh-7rem)] lg:grid-cols-2 lg:gap-8 xl:gap-12">
+    <section className="relative pt-3 md:pt-5">
+      <div className="mx-auto grid max-w-[80rem] items-center gap-9 py-9 pb-12 md:gap-10 md:py-12 md:pb-14 lg:min-h-[calc(100svh-8rem)] lg:grid-cols-[0.92fr_1.08fr] lg:gap-12 lg:py-8 xl:gap-14">
         <div className="relative z-10 flex flex-col items-center text-center lg:items-start lg:text-left">
-          <h1 className="max-w-[12.5ch] font-display text-[2.28rem] font-extrabold leading-[0.96] tracking-normal text-[var(--text-strong)] sm:max-w-[13.5ch] sm:text-[2.85rem] md:text-[3.15rem] lg:max-w-[36rem] lg:text-[2.85rem] xl:max-w-[39rem] xl:text-[3.05rem]">
-            {headline}
+          <h1 className="min-h-[8.9rem] max-w-[12.5ch] font-display text-[2.28rem] font-extrabold leading-[0.96] tracking-normal text-[var(--text-strong)] sm:min-h-[8.4rem] sm:max-w-[13.5ch] sm:text-[2.85rem] md:min-h-[9.2rem] md:text-[3.15rem] lg:min-h-[8.4rem] lg:max-w-[36rem] lg:text-[2.85rem] xl:min-h-[8.8rem] xl:max-w-[39rem] xl:text-[3.05rem]">
+            {typedHeadline}
+            <span className="hero-caret ml-1 text-[var(--accent-strong)]" aria-hidden="true">
+              |
+            </span>
           </h1>
 
           <p className="mt-6 max-w-[21rem] text-balance text-[1rem] font-medium leading-[1.66] text-[rgba(92,103,128,0.94)] sm:max-w-[30rem] sm:text-[1.08rem] md:max-w-[34rem] md:text-[1.16rem] md:leading-[1.62]">
@@ -213,12 +304,12 @@ export function HeroBeforeAfter() {
 
           <div className="mt-7 flex w-full max-w-[18rem] flex-col items-center gap-3.5 sm:max-w-[22rem] lg:items-start">
             <Link href="/simulate" className="hero-main-cta w-full sm:w-auto">
-              <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white text-[var(--accent-strong)] shadow-[0_10px_24px_-18px_rgba(22,29,43,0.26)]">
+              <span className="hero-main-cta-label transition-opacity duration-200">{ctaLabels[ctaIndex]}</span>
+              <span className="hero-main-cta-icon">
                 <svg viewBox="0 0 24 24" className="h-5 w-5 fill-none" aria-hidden="true">
                   <path d="M4 16l5-5 3 3 8-8M15 6h5v5" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </span>
-              <span className="transition-opacity duration-200">{ctaLabels[ctaIndex]}</span>
             </Link>
 
             <span className="inline-flex items-center gap-2 text-[0.84rem] font-semibold text-[rgba(140,151,177,0.94)] md:text-[0.92rem]">
@@ -231,8 +322,8 @@ export function HeroBeforeAfter() {
           </div>
         </div>
 
-        <div className="relative z-10 mx-auto w-full max-w-[21.5rem] sm:max-w-[38rem] lg:max-w-none">
-          <HeroForecastCard />
+        <div className="relative z-10 mx-auto w-full max-w-[18.75rem] sm:max-w-[38rem] lg:max-w-none">
+          <HeroForecastCard key={activeScenario.role} scenario={activeScenario} />
         </div>
       </div>
     </section>
