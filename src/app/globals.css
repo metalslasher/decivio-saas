@@ -768,6 +768,68 @@ main {
   animation: hero-caret-blink 1s steps(1, end) infinite;
 }
 
+.hero-navigation-art {
+  pointer-events: none;
+  position: absolute;
+  left: 50%;
+  top: clamp(3.8rem, 7svh, 5.6rem);
+  z-index: 0;
+  width: min(111vw, 124rem);
+  aspect-ratio: 1672 / 941;
+  transform: translateX(-50%);
+  background-image: url("/images/hero-navigation-bg.png");
+  background-position: center top;
+  background-repeat: no-repeat;
+  background-size: contain;
+  opacity: 0.92;
+  user-select: none;
+}
+
+.hero-navigation-art::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 45% 38% at 50% 36%, rgba(251, 252, 255, 0.88), rgba(251, 252, 255, 0.52) 42%, transparent 70%);
+}
+
+.hero-navigation-art--mobile {
+  display: none;
+  width: min(94vw, 52rem);
+  aspect-ratio: 941 / 1672;
+  background-image: url("/images/hero-navigation-bg-mobile.png");
+  opacity: 0.54;
+}
+
+@media (max-width: 1180px) {
+  .hero-navigation-art--desktop {
+    width: 126vw;
+    opacity: 0.76;
+  }
+}
+
+@media (max-width: 900px) {
+  .hero-navigation-art--desktop {
+    display: none;
+  }
+
+  .hero-navigation-art--mobile {
+    display: block;
+    top: clamp(4rem, 8svh, 5.75rem);
+  }
+
+  .hero-navigation-art::after {
+    background: radial-gradient(ellipse 56% 34% at 50% 35%, rgba(251, 252, 255, 0.92), rgba(251, 252, 255, 0.62) 48%, transparent 76%);
+  }
+}
+
+@media (max-width: 640px) {
+  .hero-navigation-art--mobile {
+    top: 3.9rem;
+    width: 112vw;
+    opacity: 0.5;
+  }
+}
+
 .hero-scroll-cue {
   display: inline-flex;
   flex-direction: column;
