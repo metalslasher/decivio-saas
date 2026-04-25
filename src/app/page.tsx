@@ -191,6 +191,37 @@ const socialProof = {
   ratingValue: 4.5
 } as const;
 
+const painPoints = [
+  {
+    title: "Хочете змінити сферу, але не бачите безпечного маршруту",
+    description: "Замість випадкових порад ви отримуєте напрям, ризики та зрозумілу послідовність дій."
+  },
+  {
+    title: "Не розумієте, чи окупиться перехід",
+    description: "Decivio показує прогноз доходу й допомагає оцінити рішення не лише по стартовій зарплаті."
+  },
+  {
+    title: "Складно обрати між кількома ролями",
+    description: "Порівнюєте сценарії й бачите, де більше потенціалу саме для вашого досвіду та цілей."
+  },
+  {
+    title: "Є страх втратити темп або гроші на старті",
+    description: "Бачите ризиковий період і розумієте, який запас часу та ресурсів краще закласти."
+  },
+  {
+    title: "Втомилися від хаотичних порад",
+    description: "Отримуєте не мотиваційні фрази, а практичний план переходу з конкретними пріоритетами."
+  },
+  {
+    title: "Не знаєте, як виглядати сильніше для рекрутера",
+    description: "Сервіс підказує, що посилити в резюме, підготовці та аргументах під цільову роль."
+  },
+  {
+    title: "Сумніваєтесь, чи вистачить вашого досвіду",
+    description: "Розумієте, які сильні сторони вже можна використати, а які прогалини варто закрити першими."
+  }
+] as const;
+
 const reviews = [
   {
     name: "Ірина Коваль",
@@ -795,6 +826,59 @@ export default function HomePage() {
           </Reveal>
         </section>
 
+        <section id="career-pains" className="relative py-4 md:py-6">
+          <div className="pointer-events-none absolute left-1/2 top-[38%] h-64 w-[88%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[rgba(63,94,255,0.055)] blur-3xl md:h-80" />
+          <div className="relative mx-0 grid w-full max-w-[22rem] min-w-0 gap-5 sm:mx-auto sm:max-w-[80rem] lg:grid-cols-[0.9fr_1.1fr] lg:items-start lg:gap-6 xl:gap-8">
+            <div className="min-w-0 lg:sticky lg:top-28 lg:self-start">
+              <Reveal className="min-w-0">
+                <div className="surface-panel relative w-full min-w-0 overflow-hidden rounded-[2rem] px-5 py-6 text-center sm:text-left md:px-7 md:py-8 lg:px-8 lg:py-9">
+                  <div className="pointer-events-none absolute -right-16 -top-20 h-44 w-44 rounded-full bg-[rgba(63,94,255,0.08)] blur-3xl" />
+                  <span className="eyebrow-pill">Для тих, хто хоче ясності</span>
+                  <h2 className="mt-5 max-w-full break-words font-display text-[1.18rem] font-bold leading-[1.2] tracking-[-0.03em] text-[var(--text-strong)] [overflow-wrap:anywhere] sm:text-[1.5rem] md:text-[2rem] lg:text-[2.25rem]">
+                    Ми поруч, щоб зробити ваш шлях до нової роботи{" "}
+                    <span className="text-[var(--accent-strong)]">простішим і результативнішим</span>.
+                  </h2>
+                  <p className="mt-4 max-w-full break-words text-[0.9rem] leading-[1.72] text-[var(--text-muted)] [overflow-wrap:anywhere] md:text-[1.04rem]">
+                    За допомогою наших інструментів і практичних підказок ви швидше виходите на співбесіди, краще виглядаєте на ринку
+                    та рухаєтесь до карʼєри, яку справді хочете.
+                  </p>
+                  <div className="mt-6 flex justify-center sm:justify-start">
+                    <Link href="/simulate" className="btn-primary w-full max-w-[18rem] px-4 py-3 text-center text-[0.82rem] leading-tight sm:w-auto sm:max-w-full sm:px-7 md:px-8 md:text-[0.94rem]">
+                      Отримати прогноз зміни кар’єри
+                    </Link>
+                  </div>
+                </div>
+              </Reveal>
+            </div>
+
+            <Reveal className="min-w-0" delayMs={80}>
+              <div className="grid min-w-0 gap-3 md:grid-cols-2 lg:grid-cols-1">
+                {painPoints.map((item, index) => (
+                  <article
+                    key={item.title}
+                    className="surface-panel group relative w-full min-w-0 overflow-hidden rounded-[1.55rem] px-4 py-4 md:px-5 md:py-5 lg:min-h-[116px]"
+                  >
+                    <div className="pointer-events-none absolute -right-10 top-0 h-20 w-32 rounded-full bg-[rgba(63,94,255,0.045)] blur-2xl transition-opacity duration-200 group-hover:opacity-80" />
+                    <div className="relative flex gap-4">
+                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[rgba(63,94,255,0.08)] font-display text-[0.78rem] font-bold text-[var(--accent-strong)]">
+                        {String(index + 1).padStart(2, "0")}
+                      </span>
+                      <div className="min-w-0">
+                        <h3 className="break-words font-display text-[1.08rem] font-bold leading-[1.18] tracking-[-0.025em] text-[var(--text-strong)] [overflow-wrap:anywhere] md:text-[1.18rem]">
+                          {item.title}
+                        </h3>
+                        <p className="mt-2 break-words text-[0.9rem] leading-[1.62] text-[var(--text-muted)] [overflow-wrap:anywhere] md:text-[0.95rem]">
+                          {item.description}
+                        </p>
+                      </div>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </Reveal>
+          </div>
+        </section>
+
         <section id="process" className="relative py-4 md:py-6">
           <Reveal>
             <div className="grid gap-5 md:grid-cols-3 md:gap-6">
@@ -823,25 +907,6 @@ export default function HomePage() {
                   </div>
                 </article>
               ))}
-            </div>
-          </Reveal>
-        </section>
-
-        <section className="relative py-4 md:py-6">
-          <div className="pointer-events-none absolute left-1/2 top-1/2 h-40 w-[82%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[rgba(63,94,255,0.06)] blur-3xl md:h-48" />
-          <Reveal className="relative mx-auto max-w-[980px] px-4 py-6 text-center md:px-8 md:py-8">
-            <h2 className="mx-auto max-w-4xl text-balance font-display text-[1.26rem] font-bold leading-[1.26] tracking-[-0.035em] text-[var(--text-strong)] md:text-[1.9rem]">
-              Ми поруч, щоб зробити ваш шлях до нової роботи{" "}
-              <span className="text-[var(--accent-strong)]">простішим і результативнішим</span>.
-            </h2>
-            <p className="mx-auto mt-4 max-w-3xl text-[0.95rem] leading-[1.72] text-[var(--text-muted)] md:text-[1.04rem]">
-              За допомогою наших інструментів і практичних підказок ви швидше виходите на співбесіди, краще виглядаєте на ринку
-              та рухаєтесь до карʼєри, яку справді хочете.
-            </p>
-            <div className="mt-4 flex justify-center md:mt-5">
-              <Link href="/simulate" className="btn-primary px-7 py-3 md:px-8">
-                Отримати прогноз зміни кар’єри
-              </Link>
             </div>
           </Reveal>
         </section>
