@@ -144,45 +144,6 @@ const featureShowcases = [
 
 type FeatureShowcase = (typeof featureShowcases)[number];
 
-const steps = [
-  {
-    label: "01",
-    title: "Вводите дані",
-    description: "Дохід, поточна роль, досвід і напрям переходу.",
-    icon: (
-      <svg viewBox="0 0 24 24" className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth="1.8">
-        <rect x="5" y="4" width="14" height="16" rx="2.5" />
-        <path d="M9 9h6" />
-        <path d="M9 13h6" />
-        <path d="M9 17h4" />
-      </svg>
-    )
-  },
-  {
-    label: "02",
-    title: "Збираємо контекст",
-    description: "Зіставляємо ваш профіль із ринком і напрямом переходу.",
-    icon: (
-      <svg viewBox="0 0 24 24" className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth="1.8">
-        <path d="M5 18l4-4 3 2 7-8" />
-        <path d="M16 8h3v3" />
-        <path d="M5 5v14h14" />
-      </svg>
-    )
-  },
-  {
-    label: "03",
-    title: "Бачите висновок",
-    description: "Отримуєте чіткий висновок і розуміння, куди рухатись далі.",
-    icon: (
-      <svg viewBox="0 0 24 24" className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth="1.8">
-        <circle cx="12" cy="12" r="8" />
-        <path d="M9.5 12.5l1.7 1.7 3.6-4.2" />
-      </svg>
-    )
-  }
-];
-
 const socialProof = {
   users: "1 200+",
   usersCaption: "успішних змін кар'єри",
@@ -879,88 +840,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section id="process" className="relative py-4 md:py-6">
-          <Reveal>
-            <div className="grid gap-5 md:grid-cols-3 md:gap-6">
-              {steps.map((step) => (
-                <article
-                  key={step.title}
-                  className="surface-panel relative overflow-hidden rounded-[2rem] px-5 py-6 md:min-h-[272px] md:px-6 md:py-7"
-                >
-                  <span className="pointer-events-none absolute right-3 top-2 font-display text-[5.6rem] font-semibold leading-none tracking-[-0.06em] text-[rgba(63,94,255,0.08)] md:text-[6.8rem]">
-                    {step.label}
-                  </span>
-
-                  <div className="relative flex h-full flex-col">
-                    <div className="surface-soft flex h-16 w-16 items-center justify-center rounded-[1.35rem] text-[var(--accent-strong)] shadow-[0_14px_28px_-24px_rgba(67,97,255,0.14)]">
-                      {step.icon}
-                    </div>
-
-                    <div className="mt-7 space-y-3">
-                      <h3 className="font-display text-[1.3rem] font-bold leading-[1.04] tracking-[-0.04em] text-[var(--text-strong)] md:text-[1.46rem]">
-                        {step.title}
-                      </h3>
-                      <p className="max-w-[22ch] text-[0.92rem] leading-[1.68] text-[var(--text-muted)] md:text-[0.97rem]">
-                        {step.description}
-                      </p>
-                    </div>
-                  </div>
-                </article>
-              ))}
-            </div>
-          </Reveal>
-        </section>
       </div>
-
-      <section id="reviews" className="relative">
-        <Reveal>
-          <div className="relative">
-            <div className="overflow-hidden px-1 pt-8 md:px-2 md:pt-10">
-              <div className="reviews-marquee-track flex w-max gap-5">
-                {[...reviews, ...reviews].map((review, index) => (
-                  <article
-                    key={`${review.name}-${index}`}
-                    aria-hidden={index >= reviews.length}
-                  className="surface-panel relative flex min-h-[315px] w-[20.5rem] flex-none flex-col overflow-hidden rounded-[2rem] px-6 py-6 md:w-[21.5rem]"
-                  >
-                    <span className="pointer-events-none absolute left-4 top-2 font-display text-[4.6rem] leading-none text-[rgba(74,108,255,0.08)]">
-                      “
-                    </span>
-
-                    <p className="relative max-w-[28ch] text-[1.01rem] leading-[1.8] text-[var(--text-strong)]">
-                      {review.quote}
-                    </p>
-
-                    <div className="mt-auto pt-8">
-                      <div className="flex items-center justify-center gap-1.5">
-                        {Array.from({ length: 5 }).map((_, starIndex) => {
-                          const filled = starIndex < review.rating;
-
-                          return (
-                            <svg
-                              key={`${review.name}-${index}-${starIndex}`}
-                              viewBox="0 0 24 24"
-                              className={`h-6 w-6 ${filled ? "fill-[var(--accent)] text-[var(--accent)]" : "fill-[#eceef3] text-[#eceef3]"}`}
-                              aria-hidden="true"
-                            >
-                              <path d="M12 2.5l2.9 5.88 6.49.94-4.7 4.58 1.11 6.47L12 17.3l-5.8 3.07 1.11-6.47-4.7-4.58 6.49-.94L12 2.5z" />
-                            </svg>
-                          );
-                        })}
-                      </div>
-
-                      <div className="mt-4 text-center">
-                        <p className="font-display text-[1.18rem] font-semibold text-[var(--text-strong)] md:text-[1.24rem]">{review.name}</p>
-                        <p className="mt-1 text-sm text-[var(--text-muted)]">{review.role}</p>
-                      </div>
-                    </div>
-                  </article>
-                ))}
-              </div>
-            </div>
-          </div>
-        </Reveal>
-      </section>
 
       <section id="features" className="mt-8 space-y-8 md:mt-10 md:space-y-10">
         {featureShowcases.map((item, index) => {
@@ -1002,6 +882,56 @@ export default function HomePage() {
             </Reveal>
           );
         })}
+      </section>
+
+      <section id="reviews" className="relative mt-10 md:mt-14">
+        <Reveal>
+          <div className="relative">
+            <div className="overflow-hidden px-1 pt-8 md:px-2 md:pt-10">
+              <div className="reviews-marquee-track flex w-max gap-5">
+                {[...reviews, ...reviews].map((review, index) => (
+                  <article
+                    key={`${review.name}-${index}`}
+                    aria-hidden={index >= reviews.length}
+                    className="surface-panel relative flex min-h-[315px] w-[20.5rem] flex-none flex-col overflow-hidden rounded-[2rem] px-6 py-6 md:w-[21.5rem]"
+                  >
+                    <span className="pointer-events-none absolute left-4 top-2 font-display text-[4.6rem] leading-none text-[rgba(74,108,255,0.08)]">
+                      “
+                    </span>
+
+                    <p className="relative max-w-[28ch] text-[1.01rem] leading-[1.8] text-[var(--text-strong)]">
+                      {review.quote}
+                    </p>
+
+                    <div className="mt-auto pt-8">
+                      <div className="flex items-center justify-center gap-1.5">
+                        {Array.from({ length: 5 }).map((_, starIndex) => {
+                          const filled = starIndex < review.rating;
+
+                          return (
+                            <svg
+                              key={`${review.name}-${index}-${starIndex}`}
+                              viewBox="0 0 24 24"
+                              className={`h-6 w-6 ${filled ? "fill-[var(--accent)] text-[var(--accent)]" : "fill-[#eceef3] text-[#eceef3]"}`}
+                              aria-hidden="true"
+                            >
+                              <path d="M12 2.5l2.9 5.88 6.49.94-4.7 4.58 1.11 6.47L12 17.3l-5.8 3.07 1.11-6.47-4.7-4.58 6.49-.94L12 2.5z" />
+                            </svg>
+                          );
+                        })}
+                      </div>
+
+                      <div className="mt-4 text-center">
+                        <p className="font-display text-[1.18rem] font-semibold text-[var(--text-strong)] md:text-[1.24rem]">{review.name}</p>
+                        <p className="mt-1 text-sm text-[var(--text-muted)]">{review.role}</p>
+                      </div>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </div>
+          </div>
+        </Reveal>
       </section>
 
       <section id="faq" className="mt-16 md:mt-24">
