@@ -303,7 +303,7 @@ export function HeroBeforeAfter() {
           </p>
 
           <div className="mt-7 flex w-full max-w-[18rem] flex-col items-center gap-3.5 sm:max-w-[22rem] lg:items-start">
-            <Link href="/simulate" className="hero-main-cta w-full sm:w-auto">
+            <Link href="/simulate" className="hero-main-cta">
               <span className="hero-main-cta-label transition-opacity duration-200">{ctaLabels[ctaIndex]}</span>
               <span className="hero-main-cta-icon">
                 <svg viewBox="0 0 24 24" className="h-5 w-5 fill-none" aria-hidden="true">
