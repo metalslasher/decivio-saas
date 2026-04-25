@@ -768,65 +768,99 @@ main {
   animation: hero-caret-blink 1s steps(1, end) infinite;
 }
 
-.hero-navigation-art {
+.hero-visual {
   pointer-events: none;
   position: absolute;
-  left: 50%;
-  top: clamp(3.8rem, 7svh, 5.6rem);
   z-index: 0;
-  width: min(111vw, 124rem);
-  aspect-ratio: 1672 / 941;
-  transform: translateX(-50%);
-  background-image: url("/images/hero-navigation-bg.png");
-  background-position: center top;
+  background-position: center;
   background-repeat: no-repeat;
   background-size: contain;
-  opacity: 0.92;
   user-select: none;
 }
 
-.hero-navigation-art::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(ellipse 45% 38% at 50% 36%, rgba(251, 252, 255, 0.88), rgba(251, 252, 255, 0.52) 42%, transparent 70%);
+.hero-visual--compass {
+  left: clamp(-16rem, calc(50% - 60rem), -11rem);
+  top: clamp(-2.75rem, -4svh, -1.25rem);
+  width: clamp(32rem, 40vw, 47rem);
+  aspect-ratio: 999 / 932;
+  background-image: url("/images/hero-compass.png");
+  filter: drop-shadow(0 2rem 3rem rgba(58, 78, 170, 0.14));
+  opacity: 0.66;
+  transform: rotate(-4deg);
 }
 
-.hero-navigation-art--mobile {
-  display: none;
-  width: min(94vw, 52rem);
-  aspect-ratio: 941 / 1672;
-  background-image: url("/images/hero-navigation-bg-mobile.png");
-  opacity: 0.54;
+.hero-visual--compass::after {
+  content: "";
+  position: absolute;
+  inset: 23% 2% 8% 23%;
+  border: 1px dashed rgba(67, 97, 255, 0.16);
+  border-radius: 50%;
+  transform: rotate(13deg);
+}
+
+.hero-visual--route {
+  right: clamp(-7rem, calc(50% - 55rem), 5rem);
+  top: clamp(-2.5rem, -3svh, -1rem);
+  width: clamp(23rem, 31vw, 38rem);
+  aspect-ratio: 941 / 1620;
+  background-image: url("/images/hero-route.png");
+  filter: drop-shadow(0 2.2rem 3.2rem rgba(58, 78, 170, 0.16));
+  opacity: 0.74;
+}
+
+@media (min-width: 1500px) {
+  .hero-visual--compass {
+    left: -17.5rem;
+    width: 43rem;
+  }
 }
 
 @media (max-width: 1180px) {
-  .hero-navigation-art--desktop {
-    width: 126vw;
-    opacity: 0.76;
+  .hero-visual--compass {
+    left: -16rem;
+    top: -0.75rem;
+    width: clamp(30rem, 62vw, 40rem);
+    opacity: 0.5;
+  }
+
+  .hero-visual--route {
+    right: -8rem;
+    top: -0.25rem;
+    width: clamp(19rem, 38vw, 27rem);
+    opacity: 0.56;
   }
 }
 
 @media (max-width: 900px) {
-  .hero-navigation-art--desktop {
-    display: none;
+  .hero-visual--compass {
+    left: -18rem;
+    top: 0.5rem;
+    width: clamp(28rem, 80vw, 34rem);
+    opacity: 0.24;
   }
 
-  .hero-navigation-art--mobile {
-    display: block;
-    top: clamp(4rem, 8svh, 5.75rem);
-  }
-
-  .hero-navigation-art::after {
-    background: radial-gradient(ellipse 56% 34% at 50% 35%, rgba(251, 252, 255, 0.92), rgba(251, 252, 255, 0.62) 48%, transparent 76%);
+  .hero-visual--route {
+    right: -4.75rem;
+    top: 31rem;
+    bottom: auto;
+    width: clamp(17rem, 48vw, 22rem);
+    opacity: 0.38;
   }
 }
 
 @media (max-width: 640px) {
-  .hero-navigation-art--mobile {
-    top: 3.9rem;
-    width: 112vw;
-    opacity: 0.5;
+  .hero-visual--compass {
+    left: -14.5rem;
+    top: 0.75rem;
+    width: 25rem;
+    opacity: 0.22;
+  }
+
+  .hero-visual--route {
+    right: 2rem;
+    top: 25.5rem;
+    width: 14.5rem;
+    opacity: 0.36;
   }
 }
 

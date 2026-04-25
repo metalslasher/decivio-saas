@@ -202,8 +202,8 @@ export function HeroBeforeAfter() {
     <section className="relative isolate pt-2 md:pt-4">
       <div className="pointer-events-none absolute -left-24 top-10 z-0 h-[26rem] w-[26rem] rounded-full bg-[radial-gradient(circle,rgba(74,108,255,0.10)_0%,rgba(74,108,255,0.05)_36%,transparent_72%)]" />
       <div className="pointer-events-none absolute -right-20 top-4 z-0 h-[24rem] w-[24rem] rounded-full bg-[radial-gradient(circle,rgba(152,165,255,0.08)_0%,rgba(152,165,255,0.04)_36%,transparent_72%)]" />
-      <div className="hero-navigation-art hero-navigation-art--desktop" aria-hidden="true" />
-      <div className="hero-navigation-art hero-navigation-art--mobile" aria-hidden="true" />
+      <div className="hero-visual hero-visual--compass" aria-hidden="true" />
+      <div className="hero-visual hero-visual--route" aria-hidden="true" />
 
       <div className="relative z-10 space-y-8 md:space-y-10">
         <div className="mx-auto flex min-h-[calc(100svh-6rem)] max-w-[64rem] items-center justify-center md:min-h-[calc(100svh-7rem)]">
