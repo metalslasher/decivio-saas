@@ -15,50 +15,18 @@ const chartWidth = 560;
 const chartHeight = 250;
 const chartPadding = 22;
 const maxValue = 100;
-const chartCurveInset = 1.5;
+const chartCurveInset = 22;
 
 type HeroHeadlineSegment = {
   text: string;
   accent?: boolean;
 };
 
-type HeroHeadline = {
-  fullText: string;
-  segments: readonly HeroHeadlineSegment[];
-};
-
-const heroHeadlines = [
-  {
-    fullText: "Оцініть свій дохід у новій кар’єрі ще до старту",
-    segments: [
-      { text: "Оцініть свій " },
-      { text: "дохід", accent: true },
-      { text: " у новій кар’єрі ще до старту" }
-    ]
-  },
-  {
-    fullText: "Порівняйте напрямки та оберіть найвигідніший",
-    segments: [
-      { text: "Порівняйте напрямки та оберіть " },
-      { text: "найвигідніший", accent: true }
-    ]
-  },
-  {
-    fullText: "Отримайте покроковий план зміни професії",
-    segments: [
-      { text: "Отримайте " },
-      { text: "покроковий план", accent: true },
-      { text: " зміни професії" }
-    ]
-  },
-  {
-    fullText: "Знайдіть роботу, яка дійсно вам підходить",
-    segments: [
-      { text: "Знайдіть роботу, яка " },
-      { text: "дійсно вам підходить", accent: true }
-    ]
-  }
-] as const satisfies readonly HeroHeadline[];
+const heroHeadlineSegments = [
+  { text: "Отримайте " },
+  { text: "покроковий план", accent: true },
+  { text: " зміни професії" }
+] as const satisfies readonly HeroHeadlineSegment[];
 
 const subheadline =
   "Усе для переходу в нову кар’єру з прогнозованим результатом і зрозумілим планом дій.";
@@ -68,10 +36,7 @@ const ctaLabels = [
   "Почати зміну кар’єри"
 ] as const;
 const ctaMeta = "\u0411\u0435\u0437\u043a\u043e\u0448\u0442\u043e\u0432\u043d\u043e \u2022 2\u20133 \u0445\u0432\u0438\u043b\u0438\u043d\u0438";
-const legendStay = "\u041f\u043e\u0442\u043e\u0447\u043d\u0430 \u0440\u043e\u043b\u044c: PPC Specialist";
-const legendNext = "\u041d\u043e\u0432\u0430 \u0440\u043e\u043b\u044c: DevOps";
 const axisYearSuffix = "\u0440\u0456\u043a";
-const axisMoneySuffix = "\u0442\u0438\u0441.";
 
 type ChartPoint = { x: number; y: number };
 
@@ -121,9 +86,7 @@ function buildSmoothAreaPath(points: ChartPoint[]) {
   return `${buildSmoothPath(points)} L ${endX} ${baselineY} L ${startX} ${baselineY} Z`;
 }
 
-const stayPoints = chartData.map((item, index) => toChartPoint(item.stay, index, chartData.length));
 const nextPoints = chartData.map((item, index) => toChartPoint(item.next, index, chartData.length));
-const stayPath = buildSmoothPath(stayPoints);
 const nextPath = buildSmoothPath(nextPoints);
 const nextAreaPath = buildSmoothAreaPath(nextPoints);
 
@@ -131,64 +94,99 @@ const horizonYears = chartData.length;
 const stayLastValue = chartData[chartData.length - 1]?.stay ?? 0;
 const nextLastValue = chartData[chartData.length - 1]?.next ?? 0;
 const growthPercent = stayLastValue > 0 ? Math.round(((nextLastValue - stayLastValue) / stayLastValue) * 100) : 0;
-const growthBadge = `${growthPercent >= 0 ? "+" : ""}${growthPercent}% \u0434\u043e \u0434\u043e\u0445\u043e\u0434\u0443 \u0437\u0430 ${horizonYears} \u0440\u043e\u043a\u0456\u0432`;
 
-const yAxisTicks = [100, 80, 60, 40, 20];
+const finalForecastPoint = nextPoints[nextPoints.length - 1];
 
-function renderTypedHeadline(segments: readonly HeroHeadlineSegment[], visibleLength: number) {
-  let remaining = visibleLength;
-
-  return segments.flatMap((segment, index) => {
-    if (remaining <= 0) {
-      return [];
-    }
-
-    const visibleText = segment.text.slice(0, remaining);
-    remaining -= visibleText.length;
-
-    if (!visibleText) {
-      return [];
-    }
-
+function renderHeadlineSegments(segments: readonly HeroHeadlineSegment[]) {
+  return segments.map((segment, index) => {
     return (
       <span key={`${index}-${segment.text}`} className={segment.accent ? "text-warm" : undefined}>
-        {visibleText}
+        {segment.text}
       </span>
     );
   });
 }
 
+function HeroForecastCard() {
+  return (
+    <div id="hero-preview" className="hero-forecast-card">
+      <div className="absolute -right-12 -top-16 h-44 w-44 rounded-full bg-[rgba(67,97,255,0.12)] blur-3xl" />
+      <div className="absolute -bottom-16 left-10 h-40 w-40 rounded-full bg-[rgba(152,165,255,0.14)] blur-3xl" />
+
+      <div className="relative z-10 flex h-full min-h-[16.5rem] flex-col justify-between p-3.5 sm:min-h-[23rem] sm:p-5 md:p-6 lg:min-h-[24rem]">
+        <div className="flex items-start justify-between gap-3">
+          <div className="hero-career-pill">
+            <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[rgba(238,242,255,0.94)] text-[var(--accent-strong)]">
+              <svg viewBox="0 0 24 24" className="h-[1.125rem] w-[1.125rem] fill-none" aria-hidden="true">
+                <path d="M4 16l5-5 3 3 7-8M15 6h4v4" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </span>
+            <span className="min-w-0">
+              <span className="block text-[0.68rem] font-semibold text-[rgba(102,112,133,0.78)]">Ваша наступна кар’єра</span>
+              <span className="block truncate text-[0.86rem] font-extrabold text-[var(--text-strong)]">DevOps Engineer</span>
+            </span>
+          </div>
+
+          <div className="hero-growth-pill">
+            <span className="block text-[1.8rem] font-extrabold leading-none text-[#28b86f]">+{growthPercent}%</span>
+            <span className="mt-1 block max-w-[5.5rem] text-[0.68rem] font-semibold leading-[1.16] text-[rgba(92,103,128,0.9)]">
+              до доходу за {horizonYears} років
+            </span>
+          </div>
+        </div>
+
+        <div className="relative mt-3 h-[10rem] sm:mt-4 sm:h-[15rem] md:h-[16rem]">
+          <svg viewBox={`0 0 ${chartWidth} ${chartHeight}`} className="hero-forecast-svg" aria-hidden="true" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="hero-forecast-card-area" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="var(--chart-transition)" stopOpacity="0.2" />
+                <stop offset="100%" stopColor="var(--chart-transition)" stopOpacity="0.02" />
+              </linearGradient>
+            </defs>
+
+            {nextPoints.map((point, index) => (
+              <line
+                key={`guide-${chartData[index].year}`}
+                x1={point.x}
+                x2={point.x}
+                y1={point.y + 8}
+                y2={chartHeight - chartPadding}
+                className="hero-forecast-guide"
+              />
+            ))}
+
+            <path d={nextAreaPath} className="hero-forecast-area" />
+            <path d={nextPath} className="hero-forecast-line" pathLength={1} />
+            {finalForecastPoint ? (
+              <circle cx={finalForecastPoint.x} cy={finalForecastPoint.y} r="17" className="hero-forecast-end-glow" />
+            ) : null}
+            {nextPoints.map((point, index) => (
+              <circle
+                key={`point-${chartData[index].year}`}
+                cx={point.x}
+                cy={point.y}
+                r={index === nextPoints.length - 1 ? 8 : 4.6}
+                className={index === nextPoints.length - 1 ? "hero-forecast-dot hero-forecast-dot--end" : "hero-forecast-dot"}
+              />
+            ))}
+          </svg>
+
+          <div className="hero-forecast-labels">
+            {chartData.map((item) => (
+              <span key={item.year}>
+                {item.year} {axisYearSuffix}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function HeroBeforeAfter() {
-  const [headlineIndex, setHeadlineIndex] = useState(0);
-  const [typedText, setTypedText] = useState("");
-  const [isDeleting, setIsDeleting] = useState(false);
   const [ctaIndex, setCtaIndex] = useState(0);
-  const activeHeadline = heroHeadlines[headlineIndex];
-  const typedHeadline = renderTypedHeadline(activeHeadline.segments, typedText.length);
-
-  useEffect(() => {
-    if (!isDeleting && typedText === activeHeadline.fullText) {
-      const pauseTimer = setTimeout(() => setIsDeleting(true), 1500);
-      return () => clearTimeout(pauseTimer);
-    }
-
-    if (isDeleting && typedText.length === 0) {
-      setIsDeleting(false);
-      setHeadlineIndex((prev) => (prev + 1) % heroHeadlines.length);
-      return;
-    }
-
-    const speed = isDeleting ? 26 : 44;
-    const typingTimer = setTimeout(() => {
-      setTypedText((prev) =>
-        isDeleting
-          ? activeHeadline.fullText.slice(0, Math.max(0, prev.length - 1))
-          : activeHeadline.fullText.slice(0, prev.length + 1)
-      );
-    }, speed);
-
-    return () => clearTimeout(typingTimer);
-  }, [activeHeadline, isDeleting, typedText]);
+  const headline = renderHeadlineSegments(heroHeadlineSegments);
 
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -199,126 +197,42 @@ export function HeroBeforeAfter() {
   }, []);
 
   return (
-    <section className="relative pt-2 md:pt-4">
-      <div className="pointer-events-none absolute -left-24 top-10 h-[26rem] w-[26rem] rounded-full bg-[radial-gradient(circle,rgba(74,108,255,0.10)_0%,rgba(74,108,255,0.05)_36%,transparent_72%)]" />
-      <div className="pointer-events-none absolute -right-20 top-4 h-[24rem] w-[24rem] rounded-full bg-[radial-gradient(circle,rgba(152,165,255,0.08)_0%,rgba(152,165,255,0.04)_36%,transparent_72%)]" />
+    <section className="relative overflow-hidden pt-3 md:pt-5">
+      <div className="pointer-events-none absolute -left-24 top-8 h-[26rem] w-[26rem] rounded-full bg-[radial-gradient(circle,rgba(74,108,255,0.11)_0%,rgba(74,108,255,0.05)_36%,transparent_72%)]" />
+      <div className="pointer-events-none absolute -right-28 top-2 h-[28rem] w-[28rem] rounded-full bg-[radial-gradient(circle,rgba(152,165,255,0.1)_0%,rgba(152,165,255,0.04)_38%,transparent_72%)]" />
 
-      <div className="space-y-8 md:space-y-10">
-        <div className="mx-auto flex min-h-[calc(100svh-6rem)] max-w-[64rem] items-center justify-center md:min-h-[calc(100svh-7rem)]">
-          <div className="flex w-full max-w-[60rem] flex-col items-center space-y-6 text-center sm:space-y-7 md:-translate-y-8 lg:-translate-y-10">
-            <h1 className="mx-auto min-h-[6.7rem] max-w-[12ch] text-balance font-display text-[2.08rem] font-bold leading-[0.92] tracking-[-0.06em] text-[var(--text-strong)] sm:min-h-[7.8rem] sm:text-[2.7rem] md:min-h-[8.5rem] md:max-w-[15ch] md:text-[3.55rem] lg:min-h-[8rem] lg:max-w-[16ch] lg:text-[3.45rem] xl:max-w-[17ch] xl:text-[3.6rem]">
-              {typedHeadline}
-              <span className="hero-caret ml-1 text-[var(--accent-strong)]" aria-hidden="true">
-                |
+      <div className="mx-auto grid max-w-[78rem] items-center gap-8 py-8 md:py-10 lg:min-h-[calc(100svh-7rem)] lg:grid-cols-2 lg:gap-8 xl:gap-12">
+        <div className="relative z-10 flex flex-col items-center text-center lg:items-start lg:text-left">
+          <h1 className="max-w-[12.5ch] font-display text-[2.28rem] font-extrabold leading-[0.96] tracking-normal text-[var(--text-strong)] sm:max-w-[13.5ch] sm:text-[2.85rem] md:text-[3.15rem] lg:max-w-[36rem] lg:text-[2.85rem] xl:max-w-[39rem] xl:text-[3.05rem]">
+            {headline}
+          </h1>
+
+          <p className="mt-6 max-w-[21rem] text-balance text-[1rem] font-medium leading-[1.66] text-[rgba(92,103,128,0.94)] sm:max-w-[30rem] sm:text-[1.08rem] md:max-w-[34rem] md:text-[1.16rem] md:leading-[1.62]">
+            {subheadline}
+          </p>
+
+          <div className="mt-7 flex w-full max-w-[18rem] flex-col items-center gap-3.5 sm:max-w-[22rem] lg:items-start">
+            <Link href="/simulate" className="hero-main-cta w-full sm:w-auto">
+              <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white text-[var(--accent-strong)] shadow-[0_10px_24px_-18px_rgba(22,29,43,0.26)]">
+                <svg viewBox="0 0 24 24" className="h-5 w-5 fill-none" aria-hidden="true">
+                  <path d="M4 16l5-5 3 3 8-8M15 6h5v5" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
               </span>
-            </h1>
+              <span className="transition-opacity duration-200">{ctaLabels[ctaIndex]}</span>
+            </Link>
 
-            <p className="mx-auto max-w-[20rem] text-balance text-[1rem] font-medium leading-[1.66] text-[rgba(92,103,128,0.94)] sm:max-w-[30rem] sm:text-[1.08rem] md:max-w-[36rem] md:text-[1.2rem] md:leading-[1.62] lg:max-w-[44rem] lg:text-[1.24rem]">
-              {subheadline}
-            </p>
-
-            <div className="mt-4 flex justify-center md:mt-7">
-              <div className="w-full max-w-[18.5rem] sm:max-w-[22rem]">
-                <div className="flex flex-col items-center gap-3.5">
-                  <Link
-                    href="/simulate"
-                    className="btn-primary w-full justify-center gap-2.5 px-6 py-3.5 text-[1rem] font-extrabold sm:min-w-[16rem] sm:w-auto sm:px-7 md:text-[1.06rem]"
-                  >
-                    <span className="transition-opacity duration-200">{ctaLabels[ctaIndex]}</span>
-                    <span className="inline-flex h-6 w-6 items-center justify-center rounded-md bg-white/20">
-                      <svg viewBox="0 0 24 24" className="h-4 w-4 fill-none" aria-hidden="true">
-                        <path
-                          d="M4 16l5-5 3 3 8-8M15 6h5v5"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
-                    </span>
-                  </Link>
-                  <span className="text-[0.84rem] font-semibold tracking-[0.01em] text-[rgba(140,151,177,0.94)] md:text-[0.94rem]">{ctaMeta}</span>
-                  <Link href="#hero-preview" aria-label="Прокрутити до наступного блоку" className="hero-scroll-cue mt-1.5">
-                    <span className="hero-scroll-cue-shell" aria-hidden="true">
-                      <span className="hero-scroll-cue-dot" />
-                    </span>
-                    <span className="hero-scroll-cue-chevron" aria-hidden="true">
-                      <svg viewBox="0 0 24 24" className="h-4 w-4 fill-none">
-                        <path d="M7 10l5 5 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                    </span>
-                  </Link>
-                </div>
-              </div>
-            </div>
+            <span className="inline-flex items-center gap-2 text-[0.84rem] font-semibold text-[rgba(140,151,177,0.94)] md:text-[0.92rem]">
+              <svg viewBox="0 0 24 24" className="h-[1.125rem] w-[1.125rem] fill-none text-[var(--accent-strong)]" aria-hidden="true">
+                <path d="M12 3l7 3v5c0 4.4-2.8 7.7-7 9-4.2-1.3-7-4.6-7-9V6l7-3z" stroke="currentColor" strokeWidth="1.9" strokeLinejoin="round" />
+                <path d="M9 12l2 2 4-5" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              {ctaMeta}
+            </span>
           </div>
         </div>
 
-        <div id="hero-preview" className="relative min-h-[24rem] scroll-mt-24">
-          <div className="surface-panel relative overflow-hidden rounded-[2.25rem] p-5 md:p-6">
-            <div className="absolute inset-x-12 top-0 h-14 rounded-full bg-gradient-to-r from-[rgba(67,97,255,0.05)] via-[rgba(252,253,255,0.3)] to-[rgba(152,165,255,0.05)] blur-3xl" />
-            <div className="relative flex flex-wrap items-center justify-between gap-3 text-sm text-[var(--text-muted)]">
-              <div className="flex flex-wrap items-center gap-5">
-                <span className="inline-flex items-center gap-2">
-                  <span className="h-2.5 w-2.5 rounded-full bg-[var(--chart-stay)]" />
-                  {legendStay}
-                </span>
-                <span className="inline-flex items-center gap-2">
-                  <span className="h-2.5 w-2.5 rounded-full bg-[var(--chart-transition)]" />
-                  {legendNext}
-                </span>
-              </div>
-              <span className="inline-flex items-center rounded-full border border-[rgba(63,94,255,0.18)] bg-[rgba(238,242,255,0.9)] px-3 py-1 text-[0.73rem] font-semibold tracking-[0.01em] text-[var(--accent-strong)] md:text-[0.78rem]">
-                {growthBadge}
-              </span>
-            </div>
-
-            <div className="mt-6 grid grid-cols-[1fr_auto] gap-3 md:gap-4">
-              <div className="min-w-0">
-                <div className="relative h-[clamp(13.5rem,28vw,22rem)]">
-                  <div className="absolute inset-0 grid grid-rows-5">
-                    {Array.from({ length: 5 }).map((_, index) => (
-                      <div key={index} className="border-t border-dashed border-[rgba(23,24,28,0.08)]" />
-                    ))}
-                  </div>
-
-                  <svg
-                    viewBox={`0 0 ${chartWidth} ${chartHeight}`}
-                    className="absolute inset-0 h-full w-full"
-                    aria-hidden="true"
-                    preserveAspectRatio="none"
-                  >
-                    <defs>
-                      <linearGradient id="hero-forecast-area" x1="0%" y1="0%" x2="0%" y2="100%">
-                        <stop offset="0%" stopColor="var(--chart-transition)" stopOpacity="0.16" />
-                        <stop offset="100%" stopColor="var(--chart-transition)" stopOpacity="0.02" />
-                      </linearGradient>
-                    </defs>
-
-                    <path d={nextAreaPath} fill="url(#hero-forecast-area)" />
-                    <path d={stayPath} className="hero-line hero-line--baseline" />
-                    <path d={nextPath} className="hero-line hero-line--transition" />
-                  </svg>
-                </div>
-
-                <div className="mt-5 grid grid-cols-5 gap-2 border-t border-[var(--line-soft)] pt-4 text-center text-[11px] font-semibold text-[var(--text-soft)] md:text-xs">
-                  {chartData.map((item) => (
-                    <span key={item.year}>
-                      {item.year} {axisYearSuffix}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              <div className="flex h-[clamp(13.5rem,28vw,22rem)] flex-col justify-between pb-1 pt-1 text-right text-[10px] font-semibold text-[var(--text-soft)] md:text-[11px]">
-                {yAxisTicks.map((tick) => (
-                  <span key={tick} className="whitespace-nowrap">
-                    {tick} {axisMoneySuffix}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
+        <div className="relative z-10 mx-auto w-full max-w-[21.5rem] sm:max-w-[38rem] lg:max-w-none">
+          <HeroForecastCard />
         </div>
       </div>
     </section>
