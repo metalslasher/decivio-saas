@@ -191,21 +191,6 @@ const socialProof = {
   ratingValue: 4.5
 } as const;
 
-const supportedRoles = [
-  "PPC Specialist",
-  "DevOps Engineer",
-  "Product Designer",
-  "Data Analyst",
-  "Frontend Developer",
-  "Backend Developer",
-  "Project Manager",
-  "Customer Success Manager",
-  "HR Generalist",
-  "Business Analyst",
-  "Product Manager",
-  "SMM Specialist"
-] as const;
-
 const reviews = [
   {
     name: "Ірина Коваль",
@@ -746,63 +731,81 @@ export default function HomePage() {
         <div className="space-y-8 md:space-y-12">
           <HeroBeforeAfter />
 
-        <section className="py-6 md:py-9">
+        <section className="py-5 md:py-7">
           <Reveal>
-            <div className="grid grid-cols-2 gap-4 md:flex md:items-center md:gap-0">
+            <div className="surface-panel mx-auto grid max-w-[80rem] overflow-hidden rounded-[1.9rem] sm:grid-cols-3">
               <Link
                 href="#reviews"
-                className="block cursor-pointer space-y-1 transition-opacity hover:opacity-85 md:min-w-[18rem]"
+                className="group flex min-h-[8.2rem] flex-col justify-center gap-3 px-5 py-5 transition-opacity hover:opacity-85 md:min-h-[8.5rem] md:px-7"
               >
-                <p className="font-display text-[1.5rem] font-bold leading-none tracking-[-0.04em] text-[var(--text-strong)] md:text-[1.72rem]">
-                  {socialProof.reviews} відгуків
-                </p>
-                <div className="flex items-center gap-2.5">
-                  <div className="flex items-center gap-0.5" aria-label="Рейтинг 4.5 із 5">
+                <div className="flex flex-wrap items-center gap-3">
+                  <div className="flex items-center gap-1" aria-label="Рейтинг 4.5 із 5">
                     {Array.from({ length: 5 }).map((_, index) => {
                       const starNumber = index + 1;
                       const isFull = starNumber <= Math.floor(socialProof.ratingValue);
                       const isHalf = !isFull && starNumber - socialProof.ratingValue <= 0.5;
 
                       return (
-                        <svg key={index} viewBox="0 0 24 24" className="h-4 w-4" aria-hidden="true">
+                        <svg key={index} viewBox="0 0 24 24" className="h-5 w-5 md:h-6 md:w-6" aria-hidden="true">
                           <defs>
-                            <linearGradient id={`social-half-${index}`} x1="0%" y1="0%" x2="100%" y2="0%">
+                            <linearGradient id={`trust-half-${index}`} x1="0%" y1="0%" x2="100%" y2="0%">
                               <stop offset="50%" stopColor="var(--accent)" />
                               <stop offset="50%" stopColor="#eceef3" />
                             </linearGradient>
                           </defs>
                           <path
                             d="M12 2.5l2.9 5.88 6.49.94-4.7 4.58 1.11 6.47L12 17.3l-5.8 3.07 1.11-6.47-4.7-4.58 6.49-.94L12 2.5z"
-                            fill={isFull ? "var(--accent)" : isHalf ? `url(#social-half-${index})` : "#eceef3"}
+                            fill={isFull ? "var(--accent)" : isHalf ? `url(#trust-half-${index})` : "#eceef3"}
                           />
                         </svg>
                       );
                     })}
                   </div>
-                  <span className="text-[0.97rem] font-semibold text-[var(--text-muted)]">{socialProof.rating}</span>
+                  <span className="font-display text-[1.35rem] font-bold leading-none tracking-[-0.035em] text-[var(--text-strong)] md:text-[1.6rem]">
+                    {socialProof.rating}
+                  </span>
                 </div>
+                <p className="text-[1.03rem] font-semibold text-[var(--text-muted)] md:text-[1.15rem]">
+                  {socialProof.reviews} відгуків
+                </p>
               </Link>
 
-              <article className="space-y-1 md:min-w-[20rem]">
-                <p className="font-display text-[1.5rem] font-bold leading-none tracking-[-0.04em] text-[var(--text-strong)] md:text-[1.72rem]">
-                  {socialProof.users}
-                </p>
-                <p className="text-[0.97rem] font-medium text-[var(--text-muted)]">{socialProof.usersCaption}</p>
+              <article className="flex min-h-[8.2rem] items-center gap-4 border-t border-[rgba(22,29,43,0.08)] px-5 py-5 sm:border-l sm:border-t-0 md:min-h-[8.5rem] md:px-7">
+                <span className="surface-soft flex h-[3.25rem] w-[3.25rem] shrink-0 items-center justify-center rounded-full text-[var(--accent-strong)] md:h-[3.75rem] md:w-[3.75rem]">
+                  <svg viewBox="0 0 24 24" className="h-6 w-6 md:h-7 md:w-7" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M8 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z" />
+                    <path d="M16.5 10a3 3 0 1 0 0-6" />
+                    <path d="M3.5 20c0-3.2 2.5-5.8 5.8-5.8 2.2 0 4.1 1.1 5.1 2.8" />
+                    <path d="M14.8 20c.6-1.5 1.8-2.7 3.7-2.7 1.1 0 2 .3 2.7.9" />
+                  </svg>
+                </span>
+                <div className="min-w-0">
+                  <p className="font-display text-[1.65rem] font-bold leading-none tracking-[-0.04em] text-[var(--text-strong)] md:text-[1.9rem]">
+                    {socialProof.users}
+                  </p>
+                  <p className="mt-2 max-w-[13rem] text-[1.02rem] font-semibold leading-[1.25] text-[var(--text-muted)] md:text-[1.14rem]">
+                    {socialProof.usersCaption}
+                  </p>
+                </div>
               </article>
 
-              <div className="relative col-span-2 min-w-0 overflow-hidden py-1.5 md:col-auto md:flex-1 md:py-2">
-                <div className="roles-marquee-track flex w-max items-center gap-5 px-2 md:gap-6 md:px-3">
-                  {[...supportedRoles, ...supportedRoles].map((role, index) => (
-                    <span
-                      key={`${role}-${index}`}
-                      className="inline-flex items-center gap-2 whitespace-nowrap text-[0.86rem] font-semibold text-[var(--text-muted)] md:text-[0.94rem]"
-                    >
-                      <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent)]/55" />
-                      {role}
-                    </span>
-                  ))}
+              <article className="flex min-h-[8.2rem] items-center gap-4 border-t border-[rgba(22,29,43,0.08)] px-5 py-5 sm:border-l sm:border-t-0 md:min-h-[8.5rem] md:px-7">
+                <span className="surface-soft flex h-[3.25rem] w-[3.25rem] shrink-0 items-center justify-center rounded-full text-[var(--accent-strong)] md:h-[3.75rem] md:w-[3.75rem]">
+                  <svg viewBox="0 0 24 24" className="h-6 w-6 md:h-7 md:w-7" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M9 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z" />
+                    <path d="M3.8 20c0-3.2 2.5-5.8 5.8-5.8 1.7 0 3.1.6 4.2 1.6" />
+                    <path d="M15.5 17.5l2 2 3.7-4.2" />
+                  </svg>
+                </span>
+                <div className="min-w-0">
+                  <p className="font-display text-[1.65rem] font-bold leading-none tracking-[-0.04em] text-[var(--accent-strong)] md:text-[1.9rem]">
+                    100%
+                  </p>
+                  <p className="mt-2 max-w-[13rem] text-[1.02rem] font-semibold leading-[1.25] text-[var(--text-muted)] md:text-[1.14rem]">
+                    індивідуальний підхід
+                  </p>
                 </div>
-              </div>
+              </article>
             </div>
           </Reveal>
         </section>
