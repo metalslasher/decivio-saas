@@ -773,8 +773,8 @@ main {
   max-width: 100%;
   min-height: 3.75rem;
   align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
+  justify-content: center;
+  gap: 0.8rem;
   border-radius: 999px;
   background: linear-gradient(135deg, var(--accent), var(--accent-strong));
   padding: 0.62rem 0.62rem 0.62rem 1.55rem;
@@ -811,6 +811,11 @@ main {
   background: #ffffff;
   color: var(--accent-strong);
   box-shadow: 0 10px 24px -18px rgba(22, 29, 43, 0.26);
+}
+
+.hero-forecast-shell {
+  width: 100%;
+  max-width: calc(100vw - 36px);
 }
 
 .hero-forecast-card {
@@ -941,10 +946,22 @@ main {
   }
 }
 
+@media (min-width: 640px) {
+  .hero-forecast-shell {
+    max-width: 38rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .hero-forecast-shell {
+    max-width: none;
+  }
+}
+
 @media (max-width: 640px) {
   .hero-main-cta {
     min-height: 3.45rem;
-    gap: 0.65rem;
+    gap: 0.55rem;
     border-radius: 999px;
     padding: 0.55rem 0.55rem 0.55rem 1.05rem;
     font-size: 0.92rem;

@@ -322,7 +322,7 @@ export function HeroBeforeAfter() {
           </div>
         </div>
 
-        <div className="relative z-10 mx-auto w-full max-w-[18.75rem] sm:max-w-[38rem] lg:max-w-none">
+        <div className="hero-forecast-shell relative z-10 mx-auto">
           <HeroForecastCard key={activeScenario.role} scenario={activeScenario} />
         </div>
       </div>
