@@ -431,12 +431,7 @@ function InterviewPreview() {
         <div className="flex items-center justify-between">
           <div className="flex gap-2">
             <span className="h-2.5 w-2.5 rounded-full bg-[var(--accent)]" />
-            <span className="h-2.5 w-2.5 rounded-full bg-[var(--accent)]/45" />
-            <span className="h-2.5 w-2.5 rounded-full bg-[rgba(196,204,220,0.9)]" />
           </div>
-          <span className="rounded-full border border-[rgba(63,94,255,0.16)] bg-[rgba(238,242,255,0.9)] px-3 py-1 text-[0.72rem] font-semibold text-[var(--accent-strong)]">
-            3 раунди
-          </span>
         </div>
 
         <div className="mt-5 grid gap-2.5 rounded-[1.2rem] border border-[rgba(63,94,255,0.12)] bg-[rgba(238,242,255,0.42)] p-3">
@@ -531,11 +526,6 @@ function DayModelPreview() {
           <div className="feature-segment-block bg-[linear-gradient(90deg,var(--accent-strong),var(--accent))]" style={{ width: "42%" }} />
           <div className="feature-segment-block bg-[rgba(148,160,183,0.86)]" style={{ width: "28%" }} />
           <div className="feature-segment-block bg-[rgba(194,203,219,0.94)]" style={{ width: "30%" }} />
-        </div>
-        <div className="mt-3 flex justify-between">
-          {[0, 1, 2].map((index) => (
-            <span key={index} className={`h-2.5 w-2.5 rounded-full ${index === 0 ? "bg-[var(--accent)]" : index === 1 ? "bg-[rgba(148,160,183,0.86)]" : "bg-[rgba(196,205,223,0.94)]"}`} />
-          ))}
         </div>
       </div>
     </FeaturePreviewShell>
