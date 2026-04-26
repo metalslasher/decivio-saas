@@ -22,19 +22,19 @@ export function WordmarkLogo({ className = "", tone = "dark", showMark = true }:
       className={`font-display inline-flex items-center whitespace-nowrap py-[0.08em] text-[2rem] font-[900] leading-none tracking-normal [font-variation-settings:'wght'_860] ${baseTone} ${className}`}
       aria-hidden="true"
     >
-      {showMark ? <BrandMark tone={tone} className="h-[1.12em] w-[1.08em] shrink-0 translate-y-[0.035em]" /> : null}
+      {showMark ? <BrandMark tone={tone} className="h-[1.12em] w-[1.06em] shrink-0 -mr-[0.035em] translate-y-[0.035em]" /> : null}
 
-      <span className={`${showMark ? "ml-[0.04em]" : ""} inline-flex items-end leading-[0.86]`}>
+      <span className="inline-flex items-end leading-[0.86]">
         <span>ec</span>
 
-        <span className="relative inline-flex w-[0.31em] justify-center">
+        <span className="relative inline-flex w-[0.285em] justify-center">
           <span>ı</span>
           <AccentDot />
         </span>
 
         <span>v</span>
 
-        <span className="relative inline-flex w-[0.31em] justify-center">
+        <span className="relative inline-flex w-[0.285em] justify-center">
           <span>ı</span>
           <AccentDot />
         </span>
