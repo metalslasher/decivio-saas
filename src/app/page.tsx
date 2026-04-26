@@ -1,5 +1,6 @@
 ﻿import Link from "next/link";
 import type { ReactNode } from "react";
+import Image from "next/image";
 import { HeroBeforeAfter } from "@/components/hero-before-after";
 import { JsonLd } from "@/components/json-ld";
 import { Reveal } from "@/components/reveal";
@@ -187,97 +188,97 @@ const reviews = [
   {
     name: "Ірина Коваль",
     role: "Marketing → Product Design",
-    focus: "Порівняння сценаріїв",
+    avatar: "/reviews/iryna-koval.jpg",
     quote:
-      "Я довго вагалась, бо боялась просідання в доході. Після порівняння сценаріїв побачила, скільки місяців перехід буде ризиковим і коли новий напрям реально починає вигравати.",
+      "Я скептично ставилась до таких прогнозів. Але тут хоча б стало видно, що перші 5-6 місяців будуть просадкою, а не казкою про 'нове життя'. Після цього вже спокійніше вирішила йти в дизайн поступово.",
     rating: 5
   },
   {
     name: "Олексій Мельник",
     role: "Operations → Data Analytics",
-    focus: "Прогноз доходу",
+    avatar: "/reviews/oleksiy-melnyk.jpg",
     quote:
-      "Мені було важливо не почути загальне 'йди в аналітику', а побачити цифри. Прогноз показав не тільки стартову зарплату, а й те, як може змінюватися дохід у наступні роки.",
+      "Не все вийшло ідеально з першого разу: довелося кілька разів міняти рівень ринку, бо я завищив очікування. Але в результаті зрозумів, що мені краще цілитись не в junior, а в аналітичні roles ближче до operations.",
     rating: 4
   },
   {
     name: "Наталія Бондар",
     role: "HR → UX Research",
-    focus: "Оцінка готовності",
+    avatar: "/reviews/nataliya-bondar.jpg",
     quote:
-      "Сервіс добре підсвітив, що в моєму HR-досвіді вже можна використати для UX Research. Замість відчуття, що починаю з нуля, з'явився зрозумілий список прогалин.",
+      "До цього я чесно думала, що починаю з нуля. Після аналізу виписала 5 історій з HR, які нормально лягають у UX Research: інтерв'ю, патерни, болі людей. Це дуже зняло паніку.",
     rating: 5
   },
   {
     name: "Марина Стеценко",
     role: "Content Marketing → Product Marketing",
-    focus: "Резюме під роль",
+    avatar: "/reviews/maryna-stetsenko.jpg",
     quote:
-      "Після правок у резюме стало менше загальних формулювань і більше доказів під Product Marketing. Найкорисніше, що рекомендації були не абстрактні, а під конкретну цільову роль.",
+      "За два вечори переписала резюме: прибрала красиві, але порожні фрази й додала цифри по запусках. Мінус: хотілося б більше прикладів саме для B2B SaaS, але напрям правок був дуже точний.",
     rating: 4
   },
   {
     name: "Дмитро Литвин",
     role: "Sales → Customer Success",
-    focus: "Перевірка вакансій",
+    avatar: "/reviews/dmytro-lytvyn.jpg",
     quote:
-      "Я раніше відгукувався майже на все підряд. Перевірка вакансій швидко показала, де вимоги завищені для моєї точки, а де шанс на перехід у Customer Success виглядає реалістично.",
+      "Я раніше відгукувався майже на все підряд. Тут відсіяв 7 вакансій, залишив 4 нормальні під мій досвід у sales і з двох отримав перший дзвінок. Не магія, просто менше хаосу.",
     rating: 5
   },
   {
     name: "Анна Романюк",
     role: "Recruiting → People Operations",
-    focus: "План переходу",
+    avatar: "/reviews/anna-romanyuk.jpg",
     quote:
-      "Мені не вистачало не мотивації, а послідовності. План на 30-60-90 днів допоміг розкласти підготовку на маленькі кроки й перестати відкладати перехід.",
+      "Мені треба було не 'повір у себе', а список що робити в понеділок. План на 30-60-90 днів допоміг. Спочатку пунктів було забагато, я половину відклала, але маршрут нарешті став реальним.",
     rating: 4
   },
   {
     name: "Владислав Гнатюк",
     role: "Support → QA",
-    focus: "Перший крок",
+    avatar: "/reviews/vladyslav-hnatyuk.jpg",
     quote:
-      "Думав, що без комерційного досвіду в QA шансів майже немає. Аналіз показав, які задачі з підтримки вже релевантні, і що треба додати в портфоліо перед активними відгуками.",
+      "Я був майже впевнений, що без комерційного досвіду в QA мене ніхто не гляне. Аналіз витягнув задачі з support, які можна показати як релевантні, і дав список, що доробити в портфоліо.",
     rating: 5
   },
   {
     name: "Софія Левченко",
     role: "Finance → Project Management",
-    focus: "Ризики переходу",
+    avatar: "/reviews/sofiya-levchenko.jpg",
     quote:
-      "Сподобалось, що сервіс не продає перехід як легке рішення. Він чесно показав ризики, слабкі місця й варіант, за якого краще ще кілька місяців підготуватись.",
+      "Чесно, мені не дуже сподобався перший висновок: краще не поспішати. Але він був логічний. Побачила, що без нормального кейсу про координацію проєктів я просто піду на слабші вакансії.",
     rating: 4
   },
   {
     name: "Андрій Мороз",
     role: "Frontend → Product Management",
-    focus: "Аргументи для співбесіди",
+    avatar: "/reviews/andriy-moroz.jpg",
     quote:
-      "На співбесідах я губився, коли треба було пояснювати перехід із розробки в продукт. Підготовка допомогла сформулювати логіку переходу без виправдань і зайвої технічності.",
+      "Після трьох співбесід я зрозумів, що погано пояснюю, навіщо мені PM. Тут зібрав нормальну історію переходу: не 'втомився кодити', а що я вже робив продуктово в команді.",
     rating: 5
   },
   {
     name: "Катерина Шевчук",
     role: "Office Management → HR Generalist",
-    focus: "Ринок і зарплата",
+    avatar: "/reviews/kateryna-shevchuk.jpg",
     quote:
-      "Було корисно побачити не одну красиву цифру, а діапазон і контекст ринку. Я зрозуміла, на яку зарплату можна претендувати зараз і що підсилити для наступного рівня.",
+      "Я хотіла просити більше, ніж реально тягнула на старті. Прогноз трохи приземлив, але чесно: краще знати це до співбесіди. Зараз цілюсь у нижчий діапазон і паралельно закриваю payroll.",
     rating: 5
   },
   {
     name: "Роман Савчук",
     role: "Account Manager → Business Analyst",
-    focus: "Вибір напряму",
+    avatar: "/reviews/roman-savchuk.jpg",
     quote:
-      "Я обирав між Business Analyst і Product Owner. Порівняння допомогло не сперечатись із собою на відчуттях, а побачити різницю в бар'єрах входу, доході й підготовці.",
+      "Я завис між BA і Product Owner. Після порівняння вибрав BA, бо бар'єр входу для мене нижчий. Не всі вакансії легко класифікувати, це мінус, але рішення стало менш емоційним.",
     rating: 4
   },
   {
-    name: "Олена Ткаченко",
+    name: "Микита Ткаченко",
     role: "Graphic Design → UX/UI",
-    focus: "Портфоліо",
+    avatar: "/reviews/mykyta-tkachenko.jpg",
     quote:
-      "Здавалося, що портфоліо вже нормальне, але сервіс показав, чому воно слабко продає саме UX/UI. Після рекомендацій стало зрозуміло, які кейси допрацювати першими.",
+      "Думав, портфоліо вже ок, бо виглядає красиво. Після перевірки прибрав 3 слабкі екрани й переписав один кейс нормальною логікою. Хотілося б ще прикладів junior-портфоліо, але стало сильніше.",
     rating: 4
   }
 ];
@@ -919,41 +920,49 @@ export default function HomePage() {
                   <article
                     key={`${review.name}-${index}`}
                     aria-hidden={index >= reviews.length}
-                    className="surface-panel relative flex min-h-[365px] w-[22rem] flex-none flex-col overflow-hidden rounded-[2rem] px-6 py-6 md:w-[23rem]"
+                    className="surface-panel relative flex min-h-[345px] w-[22.5rem] flex-none flex-col overflow-hidden rounded-[2rem] px-6 py-6 md:w-[23.5rem]"
                   >
                     <span className="pointer-events-none absolute left-4 top-2 font-display text-[4.6rem] leading-none text-[rgba(74,108,255,0.08)]">
                       “
-                    </span>
-
-                    <span className="relative mb-4 inline-flex w-fit rounded-full border border-[rgba(63,94,255,0.14)] bg-[rgba(238,242,255,0.86)] px-3 py-1 text-[0.72rem] font-semibold text-[var(--accent-strong)]">
-                      {review.focus}
                     </span>
 
                     <p className="relative text-[0.97rem] leading-[1.72] text-[var(--text-strong)]">
                       {review.quote}
                     </p>
 
-                    <div className="mt-auto pt-7">
-                      <div className="flex items-center justify-center gap-1.5">
-                        {Array.from({ length: 5 }).map((_, starIndex) => {
-                          const filled = starIndex < review.rating;
+                    <div className="relative mt-auto flex items-center gap-4 pt-5">
+                      <Image
+                        src={review.avatar}
+                        alt=""
+                        aria-hidden="true"
+                        width={112}
+                        height={112}
+                        sizes="56px"
+                        className="h-14 w-14 shrink-0 rounded-full object-cover ring-4 ring-white shadow-[0_12px_28px_rgba(35,48,78,0.16)]"
+                      />
 
-                          return (
-                            <svg
-                              key={`${review.name}-${index}-${starIndex}`}
-                              viewBox="0 0 24 24"
-                              className={`h-6 w-6 ${filled ? "fill-[var(--accent)] text-[var(--accent)]" : "fill-[#eceef3] text-[#eceef3]"}`}
-                              aria-hidden="true"
-                            >
-                              <path d="M12 2.5l2.9 5.88 6.49.94-4.7 4.58 1.11 6.47L12 17.3l-5.8 3.07 1.11-6.47-4.7-4.58 6.49-.94L12 2.5z" />
-                            </svg>
-                          );
-                        })}
-                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-1">
+                          {Array.from({ length: 5 }).map((_, starIndex) => {
+                            const filled = starIndex < review.rating;
 
-                      <div className="mt-4 text-center">
-                        <p className="font-display text-[1.18rem] font-semibold text-[var(--text-strong)] md:text-[1.24rem]">{review.name}</p>
-                        <p className="mt-1 text-sm text-[var(--text-muted)]">{review.role}</p>
+                            return (
+                              <svg
+                                key={`${review.name}-${index}-${starIndex}`}
+                                viewBox="0 0 24 24"
+                                className={`h-5 w-5 ${filled ? "fill-[var(--accent)] text-[var(--accent)]" : "fill-[#eceef3] text-[#eceef3]"}`}
+                                aria-hidden="true"
+                              >
+                                <path d="M12 2.5l2.9 5.88 6.49.94-4.7 4.58 1.11 6.47L12 17.3l-5.8 3.07 1.11-6.47-4.7-4.58 6.49-.94L12 2.5z" />
+                              </svg>
+                            );
+                          })}
+                        </div>
+
+                        <div className="mt-2">
+                          <p className="truncate font-display text-[1.06rem] font-semibold text-[var(--text-strong)] md:text-[1.12rem]">{review.name}</p>
+                          <p className="mt-1 truncate text-sm text-[var(--text-muted)]">{review.role}</p>
+                        </div>
                       </div>
                     </div>
                   </article>
