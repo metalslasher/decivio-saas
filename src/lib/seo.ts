@@ -60,7 +60,13 @@ export const siteConfig = {
   url: normalizeSiteUrl(process.env.NEXT_PUBLIC_SITE_URL ?? process.env.VERCEL_PROJECT_PRODUCTION_URL ?? process.env.VERCEL_URL),
   locale: "uk_UA",
   language: "uk-UA",
-  socialLinks: ["https://t.me/decivio", "https://www.linkedin.com/company/decivio", "https://www.youtube.com/@decivio"]
+  socialLinks: [
+    "https://t.me/decivio",
+    "https://www.instagram.com/decivio",
+    "https://www.linkedin.com/company/decivio",
+    "https://www.facebook.com/decivio",
+    "https://www.youtube.com/@decivio"
+  ]
 } as const;
 
 const defaultKeywords = [

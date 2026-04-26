@@ -10,8 +10,6 @@ type SocialLink = {
   icon: JSX.Element;
 };
 
-const supportEmail = "oleg.burikov.adv@gmail.com";
-
 const legalLinks = [
   { href: "/terms", label: "Умови використання" },
   { href: "/privacy", label: "Політика конфіденційності" }
@@ -31,6 +29,20 @@ const socialLinks: SocialLink[] = [
     )
   },
   {
+    href: "https://www.instagram.com/decivio",
+    label: "Instagram",
+    icon: (
+      <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
+        <path
+          fill="currentColor"
+          fillRule="evenodd"
+          clipRule="evenodd"
+          d="M7.8 2h8.4A5.8 5.8 0 0 1 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8A5.8 5.8 0 0 1 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2Zm0 2A3.8 3.8 0 0 0 4 7.8v8.4A3.8 3.8 0 0 0 7.8 20h8.4a3.8 3.8 0 0 0 3.8-3.8V7.8A3.8 3.8 0 0 0 16.2 4H7.8ZM12 7.2A4.8 4.8 0 1 1 12 16.8 4.8 4.8 0 0 1 12 7.2Zm0 2A2.8 2.8 0 1 0 12 14.8 2.8 2.8 0 0 0 12 9.2Zm5.05-2.45a1.15 1.15 0 1 1-2.3 0 1.15 1.15 0 0 1 2.3 0Z"
+        />
+      </svg>
+    )
+  },
+  {
     href: "https://www.linkedin.com/company/decivio",
     label: "LinkedIn",
     icon: (
@@ -38,6 +50,18 @@ const socialLinks: SocialLink[] = [
         <path
           fill="currentColor"
           d="M6.5 8.8H3.2V21h3.3V8.8Zm-1.7-5A1.9 1.9 0 0 0 3 5.7a1.9 1.9 0 0 0 1.9 1.9 1.9 1.9 0 0 0 0-3.8ZM21 14.4c0-3.7-2-5.4-4.7-5.4-2.2 0-3.1 1.2-3.7 2V8.8H9.4V21h3.3v-6.8c0-1.8.3-3.5 2.6-3.5 2.2 0 2.3 2 2.3 3.6V21H21v-6.6Z"
+        />
+      </svg>
+    )
+  },
+  {
+    href: "https://www.facebook.com/decivio",
+    label: "Facebook",
+    icon: (
+      <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
+        <path
+          fill="currentColor"
+          d="M14.3 21v-7.6h2.6l.4-3h-3V8.5c0-.9.2-1.5 1.5-1.5h1.7V4.3c-.3 0-1.3-.1-2.5-.1-2.5 0-4.1 1.5-4.1 4.2v2H8.1v3h2.8V21h3.4Z"
         />
       </svg>
     )
@@ -71,22 +95,18 @@ export function SiteFooter() {
           <div className="space-y-5">
             <WordmarkLogo tone="light" className="text-[2.6rem] md:text-[3rem]" />
             <p className="max-w-2xl text-[1.15rem] font-medium leading-[1.5] text-white/92 md:text-[1.35rem]">
-              Decivio допомагає пройти зміну кар&apos;єри з ясністю: оцінити новий напрям у цифрах, підготуватися до відгуків і рухатися далі за зрозумілим планом.
+              Кар&apos;єрний перехід у цифрах, без хаосу й випадкових порад.
             </p>
           </div>
 
-          <div className="space-y-5 lg:justify-self-end lg:text-right">
-            <a href={`mailto:${supportEmail}`} className="inline-block text-[1.05rem] font-semibold text-white transition hover:text-white/80 md:text-[1.2rem]">
-              {supportEmail}
-            </a>
-
+          <div className="lg:justify-self-end">
             <div className="flex gap-3 lg:justify-end">
               {socialLinks.map((item) => (
                 <Link
                   key={item.label}
                   href={item.href}
                   target="_blank"
-                  rel="noreferrer"
+                  rel="noopener noreferrer"
                   aria-label={item.label}
                   className="inline-flex h-14 w-14 items-center justify-center rounded-[1.2rem] bg-white text-[#182845] transition hover:-translate-y-px hover:bg-white/92"
                 >
