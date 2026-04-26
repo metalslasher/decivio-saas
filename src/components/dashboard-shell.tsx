@@ -1584,13 +1584,8 @@ function DashboardGuest({
   return (
     <section className="dashboard-shell-screen dashboard-shell">
       <div className="mx-auto w-full px-4 py-6 md:px-6 xl:px-8">
-        <div className="flex items-center gap-3 py-2">
-          <BrandBadge />
-          <Link
-            href="/"
-            className="inline-flex items-center"
-            aria-label="Decivio"
-          >
+        <div className="flex items-center py-2">
+          <Link href="/" className="inline-flex items-center" aria-label="Decivio">
             <WordmarkLogo className="text-[2.05rem] md:text-[2.2rem]" />
           </Link>
         </div>
