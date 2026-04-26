@@ -155,11 +155,11 @@ const socialProof = {
 const painPoints = [
   {
     title: "Хочете змінити сферу, але не бачите безпечного маршруту",
-    description: "Замість випадкових порад ви отримуєте напрям, ризики та зрозумілу послідовність дій."
+    description: "Замість випадкових порад ви отримуєте напрям, оцінку ризиків та зрозумілу послідовність дій."
   },
   {
     title: "Не розумієте, чи окупиться перехід",
-    description: "Decivio показує прогноз доходу й допомагає оцінити рішення не лише по стартовій зарплаті."
+    description: "Наш сервіс показує прогноз доходу й допомагає оцінити рішення не лише по стартовій зарплаті."
   },
   {
     title: "Складно обрати між кількома ролями",
@@ -794,8 +794,7 @@ export default function HomePage() {
               <Reveal className="min-w-0">
                 <div className="surface-panel relative w-full min-w-0 overflow-hidden rounded-[2rem] px-5 py-6 text-center sm:text-left md:px-7 md:py-8 lg:px-8 lg:py-9">
                   <div className="pointer-events-none absolute -right-16 -top-20 h-44 w-44 rounded-full bg-[rgba(63,94,255,0.08)] blur-3xl" />
-                  <span className="eyebrow-pill">Для тих, хто хоче ясності</span>
-                  <h2 className="mt-5 max-w-full break-words font-display text-[1.18rem] font-bold leading-[1.2] tracking-[-0.03em] text-[var(--text-strong)] [overflow-wrap:anywhere] sm:text-[1.5rem] md:text-[2rem] lg:text-[2.25rem]">
+                  <h2 className="max-w-full break-words font-display text-[1.18rem] font-bold leading-[1.2] tracking-[-0.03em] text-[var(--text-strong)] [overflow-wrap:anywhere] sm:text-[1.5rem] md:text-[2rem] lg:text-[2.25rem]">
                     Ми поруч, щоб зробити ваш шлях до нової роботи{" "}
                     <span className="text-[var(--accent-strong)]">простішим і результативнішим</span>.
                   </h2>
