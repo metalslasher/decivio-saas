@@ -309,27 +309,6 @@ function FeaturePreviewShell({ children }: { children: ReactNode }) {
   );
 }
 
-function FeatureChip({ children }: { children: ReactNode }) {
-  return <span className="feature-mini-chip">{children}</span>;
-}
-
-function Waveform({ bars = 5 }: { bars?: number }) {
-  return (
-    <div className="feature-waveform" aria-hidden="true">
-      {Array.from({ length: bars }).map((_, index) => (
-        <span
-          key={index}
-          className="feature-wave-bar"
-          style={{
-            height: `${12 + (index % 3) * 5}px`,
-            animationDelay: `${index * 120}ms`
-          }}
-        />
-      ))}
-    </div>
-  );
-}
-
 function ScenarioPreview() {
   const statCards = [
     { value: "+12%", active: false },
@@ -358,7 +337,6 @@ function ScenarioPreview() {
               className="feature-chart-line feature-chart-line--accent feature-line-draw"
               style={{ animationDelay: "280ms" }}
             />
-            <circle cx="308" cy="20" r="5" className="feature-pulse-dot" />
           </svg>
         </div>
       </div>
@@ -380,11 +358,6 @@ function ScenarioPreview() {
             <p className={`mt-4 text-[1rem] font-semibold ${card.active ? "text-[var(--accent-strong)]" : "text-[var(--text-strong)]"}`}>{card.value}</p>
           </div>
         ))}
-      </div>
-
-      <div className="mt-3 flex flex-wrap gap-2">
-        <FeatureChip>22 міс.</FeatureChip>
-        <FeatureChip>6 міс.</FeatureChip>
       </div>
     </FeaturePreviewShell>
   );
@@ -461,20 +434,30 @@ function InterviewPreview() {
             <span className="h-2.5 w-2.5 rounded-full bg-[var(--accent)]/45" />
             <span className="h-2.5 w-2.5 rounded-full bg-[rgba(196,204,220,0.9)]" />
           </div>
-          <Waveform bars={6} />
+          <span className="rounded-full border border-[rgba(63,94,255,0.16)] bg-[rgba(238,242,255,0.9)] px-3 py-1 text-[0.72rem] font-semibold text-[var(--accent-strong)]">
+            3 раунди
+          </span>
         </div>
 
-        <div className="mt-5 flex items-end justify-between rounded-[1.2rem] border border-[rgba(63,94,255,0.12)] bg-[rgba(238,242,255,0.42)] px-4 py-4">
-          {[22, 34, 18, 38, 28, 44, 24].map((height, index) => (
-            <span
+        <div className="mt-5 grid gap-2.5 rounded-[1.2rem] border border-[rgba(63,94,255,0.12)] bg-[rgba(238,242,255,0.42)] p-3">
+          {[0, 1, 2].map((index) => (
+            <div
               key={index}
-              className="feature-wave-bar"
-              style={{
-                width: "0.42rem",
-                height: `${height}px`,
-                animationDelay: `${index * 90}ms`
-              }}
-            />
+              className={`flex items-center gap-3 rounded-[0.95rem] border px-3 py-2.5 ${
+                index === 1
+                  ? "border-[rgba(63,94,255,0.18)] bg-white text-[var(--accent-strong)]"
+                  : "border-[rgba(24,26,32,0.06)] bg-white/70 text-[var(--text-muted)]"
+              }`}
+            >
+              <span className={`h-2.5 w-2.5 rounded-full ${index === 1 ? "bg-[var(--accent)]" : "bg-[rgba(196,204,220,0.9)]"}`} />
+              <div className="min-w-0 flex-1 space-y-1.5">
+                <div className={`h-1.5 rounded-full ${index === 1 ? "w-[76%] bg-[var(--accent)]/70" : "w-[64%] bg-[rgba(190,200,218,0.74)]"}`} />
+                <div className={`h-1.5 rounded-full ${index === 1 ? "w-[52%] bg-[var(--accent)]/30" : "w-[44%] bg-[rgba(218,224,236,0.86)]"}`} />
+              </div>
+              <svg viewBox="0 0 24 24" className="h-5 w-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d={index === 1 ? "M6 12.5l4 4 8-9" : "M8 12h8"} />
+              </svg>
+            </div>
           ))}
         </div>
       </div>
@@ -526,7 +509,7 @@ function DayModelPreview() {
           }}
         >
           <div className="feature-score-ring-inner">
-            <span className="text-[0.9rem] font-semibold text-[var(--text-strong)]">42</span>
+            <span className="text-[0.9rem] font-semibold text-[var(--text-strong)]">42%</span>
           </div>
         </div>
 
@@ -614,7 +597,7 @@ function MatchPreview() {
           }}
         >
           <div className="feature-score-ring-inner">
-            <span className="text-[1.1rem] font-semibold text-[var(--accent-strong)]">70</span>
+            <span className="text-[1.1rem] font-semibold text-[var(--accent-strong)]">70%</span>
           </div>
         </div>
 
