@@ -1092,7 +1092,7 @@ main {
 }
 
 .reviews-marquee-track {
-  animation: reviews-marquee 88s linear infinite;
+  animation: reviews-marquee 140s linear infinite;
 }
 
 .reviews-marquee-track:hover {

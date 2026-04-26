@@ -187,7 +187,6 @@ const painPoints = [
 const reviews = [
   {
     name: "Ірина Коваль",
-    role: "Marketing → Product Design",
     avatar: "/reviews/iryna-koval.jpg",
     quote:
       "Я скептично ставилась до таких прогнозів. Але тут хоча б стало видно, що перші 5-6 місяців будуть просадкою, а не казкою про 'нове життя'. Після цього вже спокійніше вирішила йти в дизайн поступово.",
@@ -195,7 +194,6 @@ const reviews = [
   },
   {
     name: "Олексій Мельник",
-    role: "Operations → Data Analytics",
     avatar: "/reviews/oleksiy-melnyk.jpg",
     quote:
       "Не все вийшло ідеально з першого разу: довелося кілька разів міняти рівень ринку, бо я завищив очікування. Але в результаті зрозумів, що мені краще цілитись не в junior, а в аналітичні roles ближче до operations.",
@@ -203,7 +201,6 @@ const reviews = [
   },
   {
     name: "Наталія Бондар",
-    role: "HR → UX Research",
     avatar: "/reviews/nataliya-bondar.jpg",
     quote:
       "До цього я чесно думала, що починаю з нуля. Після аналізу виписала 5 історій з HR, які нормально лягають у UX Research: інтерв'ю, патерни, болі людей. Це дуже зняло паніку.",
@@ -211,7 +208,6 @@ const reviews = [
   },
   {
     name: "Марина Стеценко",
-    role: "Content Marketing → Product Marketing",
     avatar: "/reviews/maryna-stetsenko.jpg",
     quote:
       "За два вечори переписала резюме: прибрала красиві, але порожні фрази й додала цифри по запусках. Мінус: хотілося б більше прикладів саме для B2B SaaS, але напрям правок був дуже точний.",
@@ -219,7 +215,6 @@ const reviews = [
   },
   {
     name: "Дмитро Литвин",
-    role: "Sales → Customer Success",
     avatar: "/reviews/dmytro-lytvyn.jpg",
     quote:
       "Я раніше відгукувався майже на все підряд. Тут відсіяв 7 вакансій, залишив 4 нормальні під мій досвід у sales і з двох отримав перший дзвінок. Не магія, просто менше хаосу.",
@@ -227,7 +222,6 @@ const reviews = [
   },
   {
     name: "Анна Романюк",
-    role: "Recruiting → People Operations",
     avatar: "/reviews/anna-romanyuk.jpg",
     quote:
       "Мені треба було не 'повір у себе', а список що робити в понеділок. План на 30-60-90 днів допоміг. Спочатку пунктів було забагато, я половину відклала, але маршрут нарешті став реальним.",
@@ -235,7 +229,6 @@ const reviews = [
   },
   {
     name: "Владислав Гнатюк",
-    role: "Support → QA",
     avatar: "/reviews/vladyslav-hnatyuk.jpg",
     quote:
       "Я був майже впевнений, що без комерційного досвіду в QA мене ніхто не гляне. Аналіз витягнув задачі з support, які можна показати як релевантні, і дав список, що доробити в портфоліо.",
@@ -243,7 +236,6 @@ const reviews = [
   },
   {
     name: "Софія Левченко",
-    role: "Finance → Project Management",
     avatar: "/reviews/sofiya-levchenko.jpg",
     quote:
       "Чесно, мені не дуже сподобався перший висновок: краще не поспішати. Але він був логічний. Побачила, що без нормального кейсу про координацію проєктів я просто піду на слабші вакансії.",
@@ -251,7 +243,6 @@ const reviews = [
   },
   {
     name: "Андрій Мороз",
-    role: "Frontend → Product Management",
     avatar: "/reviews/andriy-moroz.jpg",
     quote:
       "Після трьох співбесід я зрозумів, що погано пояснюю, навіщо мені PM. Тут зібрав нормальну історію переходу: не 'втомився кодити', а що я вже робив продуктово в команді.",
@@ -259,7 +250,6 @@ const reviews = [
   },
   {
     name: "Катерина Шевчук",
-    role: "Office Management → HR Generalist",
     avatar: "/reviews/kateryna-shevchuk.jpg",
     quote:
       "Я хотіла просити більше, ніж реально тягнула на старті. Прогноз трохи приземлив, але чесно: краще знати це до співбесіди. Зараз цілюсь у нижчий діапазон і паралельно закриваю payroll.",
@@ -267,7 +257,6 @@ const reviews = [
   },
   {
     name: "Роман Савчук",
-    role: "Account Manager → Business Analyst",
     avatar: "/reviews/roman-savchuk.jpg",
     quote:
       "Я завис між BA і Product Owner. Після порівняння вибрав BA, бо бар'єр входу для мене нижчий. Не всі вакансії легко класифікувати, це мінус, але рішення стало менш емоційним.",
@@ -275,11 +264,66 @@ const reviews = [
   },
   {
     name: "Микита Ткаченко",
-    role: "Graphic Design → UX/UI",
     avatar: "/reviews/mykyta-tkachenko.jpg",
     quote:
       "Думав, портфоліо вже ок, бо виглядає красиво. Після перевірки прибрав 3 слабкі екрани й переписав один кейс нормальною логікою. Хотілося б ще прикладів junior-портфоліо, але стало сильніше.",
     rating: 4
+  },
+  {
+    name: "Ольга Данилюк",
+    avatar: "/reviews/olha-danyliuk.jpg",
+    quote:
+      "Я думала, що мені просто скажуть 'йди в продукт'. Насправді висновок був обережніший: спочатку підтягнути кейс по запуску фічі. Це не так приємно читати, зате чесно.",
+    rating: 5
+  },
+  {
+    name: "Павло Кравець",
+    avatar: "/reviews/pavlo-kravets.jpg",
+    quote:
+      "Після 8 років у логістиці важко було зрозуміти, що взагалі продавати в резюме. За тиждень зібрав 4 нормальні історії з цифрами. Хотів би ще більше прикладів для supply chain.",
+    rating: 4
+  },
+  {
+    name: "Юлія Мартинюк",
+    avatar: "/reviews/yuliya-martynyuk.jpg",
+    quote:
+      "Мене зупиняло питання віку і того, що я не з IT. Тут побачила, які навички з навчання людей можна перенести в L&D/EdTech. Не стало легко, але стало зрозуміло, з чого почати.",
+    rating: 5
+  },
+  {
+    name: "Артем Клименко",
+    avatar: "/reviews/artem-klymenko.jpg",
+    quote:
+      "Я прийшов перевірити одну вакансію, а в результаті зрозумів, що вона зарано для мене. Неприємно, але корисно: не витратив тиждень на тестове, яке майже точно не пройшов би.",
+    rating: 5
+  },
+  {
+    name: "Максим Романів",
+    avatar: "/reviews/maksym-romaniv.jpg",
+    quote:
+      "Спочатку було відчуття, що інформації забагато. Але коли пройшовся по плану вдруге, стало видно 3 конкретні кроки: портфоліо, 10 вакансій для калібрування і тренування відповідей.",
+    rating: 4
+  },
+  {
+    name: "Аліна Горбач",
+    avatar: "/reviews/alina-horbach.jpg",
+    quote:
+      "Я постійно міняла напрям: то UX, то PM, то аналітика. Порівняння сценаріїв нарешті показало, де я фантазую, а де в мене вже є база. Вибрала аналітику і перестала скакати.",
+    rating: 5
+  },
+  {
+    name: "Сергій Приходько",
+    avatar: "/reviews/serhiy-prykhodko.jpg",
+    quote:
+      "Мені зайшло, що сервіс не обіцяє швидкий офер. Він показав, що з моїм рівнем англійської міжнародний ринок поки ризиковий. Мінус бал за те, що хотів би більше підказок по англійській.",
+    rating: 4
+  },
+  {
+    name: "Ліза Марченко",
+    avatar: "/reviews/liza-marchenko.jpg",
+    quote:
+      "Перед цим я відправила 18 відгуків і отримала тишу. Після перевірки змінила резюме під конкретні вакансії і прибрала зайві junior-формулювання. Перші відповіді з'явились через кілька днів.",
+    rating: 5
   }
 ];
 
@@ -942,7 +986,8 @@ export default function HomePage() {
                       />
 
                       <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-1">
+                        <p className="truncate font-display text-[1.06rem] font-semibold text-[var(--text-strong)] md:text-[1.12rem]">{review.name}</p>
+                        <div className="mt-1.5 flex items-center gap-1">
                           {Array.from({ length: 5 }).map((_, starIndex) => {
                             const filled = starIndex < review.rating;
 
@@ -957,11 +1002,6 @@ export default function HomePage() {
                               </svg>
                             );
                           })}
-                        </div>
-
-                        <div className="mt-2">
-                          <p className="truncate font-display text-[1.06rem] font-semibold text-[var(--text-strong)] md:text-[1.12rem]">{review.name}</p>
-                          <p className="mt-1 truncate text-sm text-[var(--text-muted)]">{review.role}</p>
                         </div>
                       </div>
                     </div>
