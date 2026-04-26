@@ -187,37 +187,97 @@ const reviews = [
   {
     name: "Ірина Коваль",
     role: "Marketing → Product Design",
-    quote: "Після симуляції стало зрозуміло, де саме новий напрям починає обганяти мій поточний шлях. Це дало спокій і рамку для рішення.",
+    focus: "Порівняння сценаріїв",
+    quote:
+      "Я довго вагалась, бо боялась просідання в доході. Після порівняння сценаріїв побачила, скільки місяців перехід буде ризиковим і коли новий напрям реально починає вигравати.",
     rating: 5
   },
   {
     name: "Олексій Мельник",
     role: "Operations → Data Analytics",
-    quote: "Найцінніше тут не стартова цифра, а вся траєкторія на кілька років уперед. Саме цього мені бракувало для реального вибору.",
+    focus: "Прогноз доходу",
+    quote:
+      "Мені було важливо не почути загальне 'йди в аналітику', а побачити цифри. Прогноз показав не тільки стартову зарплату, а й те, як може змінюватися дохід у наступні роки.",
     rating: 4
   },
   {
     name: "Наталія Бондар",
     role: "HR → UX Research",
-    quote: "Результат читається швидко. Не треба вивчати таблиці, щоб зрозуміти, чи виглядає перехід здоровим фінансово.",
+    focus: "Оцінка готовності",
+    quote:
+      "Сервіс добре підсвітив, що в моєму HR-досвіді вже можна використати для UX Research. Замість відчуття, що починаю з нуля, з'явився зрозумілий список прогалин.",
     rating: 5
   },
   {
     name: "Марина Стеценко",
     role: "Content Marketing → Product Marketing",
-    quote: "Сподобалось, що сервіс не тисне висновком, а показує структуру: де ризик, де потенціал і чим один маршрут сильніший за інший.",
+    focus: "Резюме під роль",
+    quote:
+      "Після правок у резюме стало менше загальних формулювань і більше доказів під Product Marketing. Найкорисніше, що рекомендації були не абстрактні, а під конкретну цільову роль.",
     rating: 4
   },
   {
     name: "Дмитро Литвин",
     role: "Sales → Customer Success",
-    quote: "Добре працює саме контраст між сценаріями. Видно не лише нову роль, а й ціну того, щоб залишитись у поточній точці.",
+    focus: "Перевірка вакансій",
+    quote:
+      "Я раніше відгукувався майже на все підряд. Перевірка вакансій швидко показала, де вимоги завищені для моєї точки, а де шанс на перехід у Customer Success виглядає реалістично.",
     rating: 5
   },
   {
     name: "Анна Романюк",
     role: "Recruiting → People Operations",
-    quote: "Це короткий формат без зайвого шуму. Отримуєш потрібні цифри й одразу бачиш, чи варто заглиблюватись у перехід далі.",
+    focus: "План переходу",
+    quote:
+      "Мені не вистачало не мотивації, а послідовності. План на 30-60-90 днів допоміг розкласти підготовку на маленькі кроки й перестати відкладати перехід.",
+    rating: 4
+  },
+  {
+    name: "Владислав Гнатюк",
+    role: "Support → QA",
+    focus: "Перший крок",
+    quote:
+      "Думав, що без комерційного досвіду в QA шансів майже немає. Аналіз показав, які задачі з підтримки вже релевантні, і що треба додати в портфоліо перед активними відгуками.",
+    rating: 5
+  },
+  {
+    name: "Софія Левченко",
+    role: "Finance → Project Management",
+    focus: "Ризики переходу",
+    quote:
+      "Сподобалось, що сервіс не продає перехід як легке рішення. Він чесно показав ризики, слабкі місця й варіант, за якого краще ще кілька місяців підготуватись.",
+    rating: 4
+  },
+  {
+    name: "Андрій Мороз",
+    role: "Frontend → Product Management",
+    focus: "Аргументи для співбесіди",
+    quote:
+      "На співбесідах я губився, коли треба було пояснювати перехід із розробки в продукт. Підготовка допомогла сформулювати логіку переходу без виправдань і зайвої технічності.",
+    rating: 5
+  },
+  {
+    name: "Катерина Шевчук",
+    role: "Office Management → HR Generalist",
+    focus: "Ринок і зарплата",
+    quote:
+      "Було корисно побачити не одну красиву цифру, а діапазон і контекст ринку. Я зрозуміла, на яку зарплату можна претендувати зараз і що підсилити для наступного рівня.",
+    rating: 5
+  },
+  {
+    name: "Роман Савчук",
+    role: "Account Manager → Business Analyst",
+    focus: "Вибір напряму",
+    quote:
+      "Я обирав між Business Analyst і Product Owner. Порівняння допомогло не сперечатись із собою на відчуттях, а побачити різницю в бар'єрах входу, доході й підготовці.",
+    rating: 4
+  },
+  {
+    name: "Олена Ткаченко",
+    role: "Graphic Design → UX/UI",
+    focus: "Портфоліо",
+    quote:
+      "Здавалося, що портфоліо вже нормальне, але сервіс показав, чому воно слабко продає саме UX/UI. Після рекомендацій стало зрозуміло, які кейси допрацювати першими.",
     rating: 4
   }
 ];
@@ -428,13 +488,7 @@ function InterviewPreview() {
   return (
     <FeaturePreviewShell>
       <div className="rounded-[1.35rem] border border-[rgba(24,26,32,0.08)] bg-[rgba(255,255,255,0.74)] p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex gap-2">
-            <span className="h-2.5 w-2.5 rounded-full bg-[var(--accent)]" />
-          </div>
-        </div>
-
-        <div className="mt-5 grid gap-2.5 rounded-[1.2rem] border border-[rgba(63,94,255,0.12)] bg-[rgba(238,242,255,0.42)] p-3">
+        <div className="grid gap-2.5 rounded-[1.2rem] border border-[rgba(63,94,255,0.12)] bg-[rgba(238,242,255,0.42)] p-3">
           {[0, 1, 2].map((index) => (
             <div
               key={index}
@@ -865,17 +919,21 @@ export default function HomePage() {
                   <article
                     key={`${review.name}-${index}`}
                     aria-hidden={index >= reviews.length}
-                    className="surface-panel relative flex min-h-[315px] w-[20.5rem] flex-none flex-col overflow-hidden rounded-[2rem] px-6 py-6 md:w-[21.5rem]"
+                    className="surface-panel relative flex min-h-[365px] w-[22rem] flex-none flex-col overflow-hidden rounded-[2rem] px-6 py-6 md:w-[23rem]"
                   >
                     <span className="pointer-events-none absolute left-4 top-2 font-display text-[4.6rem] leading-none text-[rgba(74,108,255,0.08)]">
                       “
                     </span>
 
-                    <p className="relative max-w-[28ch] text-[1.01rem] leading-[1.8] text-[var(--text-strong)]">
+                    <span className="relative mb-4 inline-flex w-fit rounded-full border border-[rgba(63,94,255,0.14)] bg-[rgba(238,242,255,0.86)] px-3 py-1 text-[0.72rem] font-semibold text-[var(--accent-strong)]">
+                      {review.focus}
+                    </span>
+
+                    <p className="relative text-[0.97rem] leading-[1.72] text-[var(--text-strong)]">
                       {review.quote}
                     </p>
 
-                    <div className="mt-auto pt-8">
+                    <div className="mt-auto pt-7">
                       <div className="flex items-center justify-center gap-1.5">
                         {Array.from({ length: 5 }).map((_, starIndex) => {
                           const filled = starIndex < review.rating;
