@@ -972,10 +972,12 @@ export default function HomePage() {
                 <div className="career-target-board">
                   <div className="career-target-rings">
                     <span className="career-target-center" />
-                    <svg viewBox="0 0 120 120" className="career-target-dart" fill="none">
-                      <path d="M34 86L82 38" stroke="currentColor" strokeWidth="9" strokeLinecap="round" />
-                      <path d="M72 28h22v22" stroke="currentColor" strokeWidth="9" strokeLinecap="round" strokeLinejoin="round" />
-                      <path d="M82 38l24-24" stroke="currentColor" strokeWidth="7" strokeLinecap="round" />
+                    <svg viewBox="0 0 320 320" className="career-target-dart" fill="none">
+                      <path className="career-target-dart-shadow" d="M262 58L166 154" />
+                      <path className="career-target-dart-shaft" d="M258 62L163 157" />
+                      <path className="career-target-dart-head" d="M146 174l17-38 23 23-40 15z" />
+                      <path className="career-target-dart-tail" d="M258 62l2-42 38-3-4 35 35-4-3 38-42 2" />
+                      <path className="career-target-dart-tail-line" d="M258 62l26 26" />
                     </svg>
                   </div>
 
