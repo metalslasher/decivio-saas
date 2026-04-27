@@ -904,7 +904,7 @@ export default function HomePage() {
 
         <section id="career-pains" className="relative py-4 md:py-6">
           <div className="pointer-events-none absolute left-1/2 top-[38%] h-64 w-[88%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[rgba(63,94,255,0.055)] blur-3xl md:h-80" />
-          <div className="relative mx-0 grid w-full max-w-[22rem] min-w-0 gap-5 sm:mx-auto sm:max-w-[80rem] lg:grid-cols-[0.9fr_1.1fr] lg:items-start lg:gap-6 xl:gap-8">
+          <div className="relative mx-auto grid w-full max-w-[80rem] min-w-0 gap-5 lg:grid-cols-[0.9fr_1.1fr] lg:items-start lg:gap-6 xl:gap-8">
             <div className="min-w-0 lg:sticky lg:top-28 lg:self-start">
               <Reveal className="min-w-0">
                 <div className="surface-panel relative w-full min-w-0 overflow-hidden rounded-[2rem] px-5 py-6 text-center sm:text-left md:px-7 md:py-8 lg:px-8 lg:py-9">
@@ -954,20 +954,70 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="py-3 md:py-5" aria-labelledby="career-brands-title">
+        <section className="career-opportunity-section relative mx-auto max-w-[80rem] overflow-hidden py-7 md:py-10" aria-labelledby="career-brands-title">
           <Reveal>
-            <div className="surface-panel relative mx-auto max-w-[80rem] overflow-hidden rounded-[2rem] px-0 py-6 text-center md:py-8">
-              <div className="mx-auto max-w-[46rem] px-5 md:px-8">
-                <h2 id="career-brands-title" className="font-display text-[1.35rem] font-bold leading-[1.12] tracking-[-0.035em] text-[var(--text-strong)] md:text-[2.05rem]">
-                  Цільтеся в сильні продуктові команди, а не просто в першу доступну вакансію
+            <div className="grid min-w-0 items-center gap-8 lg:grid-cols-[0.98fr_1.02fr] lg:gap-10">
+              <div className="relative z-10 min-w-0 text-center lg:text-left">
+                <h2 id="career-brands-title" className="font-display text-[2rem] font-extrabold leading-[1.04] tracking-normal text-[var(--text-strong)] sm:text-[2.6rem] md:text-[3.15rem] lg:text-[3.45rem]">
+                  Цільтеся в сильні продуктові команди, а не просто в першу{" "}
+                  <span className="career-opportunity-accent">доступну вакансію</span>
                 </h2>
-                <p className="mx-auto mt-3 max-w-[39rem] text-[0.92rem] leading-[1.68] text-[var(--text-muted)] md:text-[1.02rem]">
-                  Decivio допомагає оцінити перехід, посилити резюме й підготовку так, щоб претендувати на ролі з кращим рівнем доходу,
+                <p className="mx-auto mt-5 max-w-[35rem] text-[0.98rem] leading-[1.72] text-[var(--text-muted)] md:text-[1.06rem] lg:mx-0">
+                  Наш сервіс допомагає тверезо оцінити перехід, посилити резюме й підготовку так, щоб претендувати на ролі з кращим рівнем доходу,
                   процесів і професійного росту.
                 </p>
               </div>
 
-              <div className="career-brand-marquee relative mt-6 overflow-hidden py-2 md:mt-7">
+              <div className="career-opportunity-visual" aria-hidden="true">
+                <div className="career-target-board">
+                  <div className="career-target-rings">
+                    <span className="career-target-center" />
+                    <svg viewBox="0 0 120 120" className="career-target-dart" fill="none">
+                      <path d="M34 86L82 38" stroke="currentColor" strokeWidth="9" strokeLinecap="round" />
+                      <path d="M72 28h22v22" stroke="currentColor" strokeWidth="9" strokeLinecap="round" strokeLinejoin="round" />
+                      <path d="M82 38l24-24" stroke="currentColor" strokeWidth="7" strokeLinecap="round" />
+                    </svg>
+                  </div>
+
+                  <div className="career-floating-bubble career-floating-bubble--growth">
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <path d="M4.5 15.5l5.2-5.2 3.4 3.4 6.4-7.2" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round" />
+                      <path d="M15.5 6.5h4v4" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </div>
+
+                  <div className="career-floating-bubble career-floating-bubble--star">
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <path d="M12 3.8l2.4 4.9 5.4.8-3.9 3.8.9 5.4-4.8-2.5-4.8 2.5.9-5.4-3.9-3.8 5.4-.8L12 3.8z" stroke="currentColor" strokeWidth="1.9" strokeLinejoin="round" />
+                    </svg>
+                  </div>
+
+                  <div className="career-floating-bubble career-floating-bubble--team">
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <path d="M8.6 11.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4zM3.6 18.8c.5-2.8 2.4-4.5 5-4.5s4.5 1.7 5 4.5" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" />
+                      <path d="M15.5 11.3a2.7 2.7 0 1 0 0-5.4M17.1 14.4c2 .5 3.3 2 3.7 4.4" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" />
+                    </svg>
+                  </div>
+
+                  <div className="career-opportunity-note">
+                    <span className="career-opportunity-note-icon">
+                      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <path d="M4.5 15.5l5.2-5.2 3.4 3.4 6.4-7.2" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round" />
+                        <path d="M15.5 6.5h4v4" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </span>
+                    <span className="career-opportunity-note-copy">
+                      <span>Кращі команди.</span>
+                      <span>Кращі процеси.</span>
+                      <span>Кращі можливості.</span>
+                    </span>
+                    <span className="career-opportunity-note-progress" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="career-brand-marquee relative mt-7 overflow-hidden py-2 md:mt-8">
                 <div className="career-brand-track flex w-max items-center">
                   {Array.from({ length: 3 }).map((_, groupIndex) => (
                     <div
@@ -983,14 +1033,13 @@ export default function HomePage() {
                     </div>
                   ))}
                 </div>
-              </div>
             </div>
           </Reveal>
         </section>
 
       </div>
 
-      <section id="features" className="mt-8 space-y-8 md:mt-10 md:space-y-10">
+      <section id="features" className="mx-auto mt-8 max-w-[80rem] space-y-8 md:mt-10 md:space-y-10">
         {featureShowcases.map((item, index) => {
           return (
             <Reveal key={item.title} delayMs={index * 40}>
@@ -1032,7 +1081,7 @@ export default function HomePage() {
         })}
       </section>
 
-      <section id="reviews" className="relative mt-10 md:mt-14">
+      <section id="reviews" className="relative mx-auto mt-10 max-w-[80rem] md:mt-14">
         <Reveal>
           <div className="relative">
             <div className="overflow-hidden px-1 pt-8 md:px-2 md:pt-10">
@@ -1090,7 +1139,7 @@ export default function HomePage() {
         </Reveal>
       </section>
 
-      <section id="faq" className="mt-16 md:mt-24">
+      <section id="faq" className="mx-auto mt-16 max-w-[80rem] md:mt-24">
         <div className="grid gap-4 md:grid-cols-2">
           {faqItems.map((item, index) => (
             <Reveal key={item.question} delayMs={index * 40}>
