@@ -1099,6 +1099,43 @@ main {
   animation-play-state: paused;
 }
 
+.career-brand-marquee {
+  mask-image: linear-gradient(90deg, transparent 0%, #000 12%, #000 88%, transparent 100%);
+}
+
+.career-brand-track {
+  animation: career-brand-marquee 72s linear infinite;
+}
+
+.career-brand-group {
+  padding-inline: 0.75rem;
+}
+
+.career-brand-marquee:hover .career-brand-track {
+  animation-play-state: paused;
+}
+
+.career-brand-name {
+  display: inline-flex;
+  min-width: max-content;
+  align-items: center;
+  justify-content: center;
+  color: rgba(102, 112, 133, 0.54);
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: clamp(1.28rem, 2.05vw, 2.05rem);
+  font-weight: 800;
+  letter-spacing: 0;
+  line-height: 1;
+  white-space: nowrap;
+  transition:
+    color 180ms ease,
+    opacity 180ms ease;
+}
+
+.career-brand-name:hover {
+  color: rgba(52, 83, 244, 0.66);
+}
+
 .feature-preview-shell {
   position: relative;
   border: 1px solid rgba(255, 255, 255, 0.72);
@@ -1368,6 +1405,15 @@ main {
   }
 }
 
+@keyframes career-brand-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-33.333%);
+  }
+}
+
 @keyframes hero-caret-blink {
   0%,
   47% {
@@ -1412,6 +1458,7 @@ main {
 
 @media (prefers-reduced-motion: reduce) {
   .reviews-marquee-track,
+  .career-brand-track,
   .hero-line,
   .hero-caret,
   .hero-forecast-line,

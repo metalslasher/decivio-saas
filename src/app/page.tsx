@@ -153,6 +153,29 @@ const socialProof = {
   ratingValue: 4.5
 } as const;
 
+const careerBrandNames = [
+  "Grammarly",
+  "Genesis",
+  "Ajax Systems",
+  "MacPaw",
+  "Readdle",
+  "Jooble",
+  "Preply",
+  "People.ai",
+  "airSlate",
+  "Restream",
+  "Competera",
+  "BetterMe",
+  "Reface",
+  "Petcube",
+  "Depositphotos",
+  "Promova",
+  "Headway",
+  "Uklon",
+  "monobank",
+  "Liki24"
+] as const;
+
 const painPoints = [
   {
     title: "Хочете змінити сферу, але не бачите безпечного маршруту",
@@ -929,6 +952,40 @@ export default function HomePage() {
               </div>
             </Reveal>
           </div>
+        </section>
+
+        <section className="py-3 md:py-5" aria-labelledby="career-brands-title">
+          <Reveal>
+            <div className="surface-panel relative mx-auto max-w-[80rem] overflow-hidden rounded-[2rem] px-0 py-6 text-center md:py-8">
+              <div className="mx-auto max-w-[46rem] px-5 md:px-8">
+                <h2 id="career-brands-title" className="font-display text-[1.35rem] font-bold leading-[1.12] tracking-[-0.035em] text-[var(--text-strong)] md:text-[2.05rem]">
+                  Цільтеся в сильні продуктові команди, а не просто в першу доступну вакансію
+                </h2>
+                <p className="mx-auto mt-3 max-w-[39rem] text-[0.92rem] leading-[1.68] text-[var(--text-muted)] md:text-[1.02rem]">
+                  Decivio допомагає оцінити перехід, посилити резюме й підготовку так, щоб претендувати на ролі з кращим рівнем доходу,
+                  процесів і професійного росту.
+                </p>
+              </div>
+
+              <div className="career-brand-marquee relative mt-6 overflow-hidden py-2 md:mt-7">
+                <div className="career-brand-track flex w-max items-center">
+                  {Array.from({ length: 3 }).map((_, groupIndex) => (
+                    <div
+                      key={groupIndex}
+                      className="career-brand-group flex items-center gap-6 md:gap-9"
+                      aria-hidden={groupIndex > 0}
+                    >
+                      {careerBrandNames.map((brand) => (
+                        <span key={`${brand}-${groupIndex}`} className="career-brand-name">
+                          {brand}
+                        </span>
+                      ))}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </Reveal>
         </section>
 
       </div>
