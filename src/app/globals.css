@@ -1120,230 +1120,43 @@ main {
 
 .career-target-board {
   position: relative;
-  width: min(100%, 34rem);
-  min-height: 21rem;
+  display: grid;
+  width: min(100%, 38rem);
+  min-height: 22rem;
+  place-items: center;
 }
 
 .career-target-board::before {
   content: "";
   position: absolute;
-  inset: -3rem -3rem -2rem -2rem;
+  inset: -1rem -1.5rem;
   z-index: -1;
   border-radius: 999px;
   background:
-    radial-gradient(circle at 68% 36%, rgba(67, 97, 255, 0.16), transparent 58%),
-    radial-gradient(circle at 34% 74%, rgba(152, 165, 255, 0.08), transparent 62%);
+    radial-gradient(circle at 64% 44%, rgba(67, 97, 255, 0.13), transparent 58%),
+    radial-gradient(circle at 32% 70%, rgba(142, 152, 255, 0.1), transparent 64%);
   filter: blur(18px);
   pointer-events: none;
 }
 
-.career-target-rings {
-  position: absolute;
-  right: 6%;
-  top: 0;
-  width: min(70%, 22rem);
-  aspect-ratio: 1;
-  border-radius: 999px;
-  background:
-    radial-gradient(circle at center, rgba(255, 255, 255, 0.98) 0 8.5%, rgba(67, 97, 255, 0.92) 8.7% 15.8%, rgba(238, 242, 255, 0.94) 16% 27%, rgba(67, 97, 255, 0.75) 27.2% 35.2%, rgba(238, 242, 255, 0.9) 35.4% 49.5%, rgba(67, 97, 255, 0.46) 49.7% 59.2%, rgba(255, 255, 255, 0.7) 59.4% 100%);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.95),
-    0 34px 80px -56px rgba(52, 83, 244, 0.55);
-}
-
-.career-target-rings::before {
-  content: "";
-  position: absolute;
-  inset: -10%;
-  border-radius: inherit;
-  background: radial-gradient(circle at center, rgba(67, 97, 255, 0.14), transparent 66%);
-  filter: blur(16px);
-}
-
-.career-target-center {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  height: 18%;
-  width: 18%;
-  border-radius: 999px;
-  background: #ffffff;
-  box-shadow:
-    0 0 0 0.45rem rgba(67, 97, 255, 0.76),
-    0 14px 32px -18px rgba(52, 83, 244, 0.7);
-  transform: translate(-50%, -50%);
-}
-
-.career-target-dart {
-  position: absolute;
-  inset: 2% 2% auto auto;
-  width: 84%;
-  height: 84%;
-  color: var(--accent);
-  filter: drop-shadow(0 15px 14px rgba(52, 83, 244, 0.18));
-  transform: rotate(0deg);
-  overflow: visible;
-}
-
-.career-target-dart-shadow {
-  stroke: rgba(52, 83, 244, 0.16);
-  stroke-width: 8;
-  stroke-linecap: round;
-}
-
-.career-target-dart-shaft {
-  stroke: currentColor;
-  stroke-width: 7;
-  stroke-linecap: round;
-}
-
-.career-target-dart-head {
-  fill: currentColor;
-  stroke: rgba(255, 255, 255, 0.72);
-  stroke-width: 2.1;
-  stroke-linejoin: round;
-}
-
-.career-target-dart-fin {
-  fill: rgba(88, 112, 255, 0.86);
-  stroke: currentColor;
-  stroke-width: 3.6;
-  stroke-linejoin: round;
-}
-
-.career-target-dart-fin--lower {
-  fill: rgba(72, 99, 255, 0.78);
-}
-
-.career-target-dart-fin-line {
-  stroke: rgba(255, 255, 255, 0.76);
-  stroke-width: 2.2;
-  stroke-linecap: round;
-}
-
-.career-floating-bubble {
-  position: absolute;
-  z-index: 3;
-  display: grid;
-  height: 4rem;
-  width: 4rem;
-  place-items: center;
-  border: 1px solid rgba(255, 255, 255, 0.78);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.72);
-  color: var(--accent);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.94),
-    0 24px 46px -34px rgba(52, 83, 244, 0.34);
-  backdrop-filter: blur(16px);
-}
-
-.career-floating-bubble svg {
-  height: 1.45rem;
-  width: 1.45rem;
-}
-
-.career-floating-bubble--growth {
-  left: 10%;
-  top: 3%;
-}
-
-.career-floating-bubble--star {
-  right: 0;
-  top: 33%;
-}
-
-.career-floating-bubble--team {
-  bottom: 6%;
-  right: 5%;
-}
-
-.career-opportunity-panel {
-  position: absolute;
-  z-index: 4;
-  bottom: 10%;
-  left: 13%;
-  width: min(66%, 17rem);
-  min-height: 7.6rem;
-  border: 1px solid rgba(255, 255, 255, 0.82);
-  border-radius: 1.45rem;
-  background:
-    linear-gradient(145deg, rgba(255, 255, 255, 0.82), rgba(244, 247, 255, 0.68)),
-    radial-gradient(12rem 8rem at 28% 18%, rgba(67, 97, 255, 0.08), transparent 62%);
-  padding: 1.05rem 1.1rem;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.96),
-    0 26px 60px -42px rgba(22, 29, 43, 0.2);
-  backdrop-filter: blur(18px);
-  transform: rotate(3deg);
-}
-
-.career-panel-orb,
-.career-panel-line,
-.career-panel-progress {
-  position: absolute;
+.career-target-asset {
+  position: relative;
+  z-index: 1;
   display: block;
-}
-
-.career-panel-orb {
-  border-radius: 999px;
-}
-
-.career-panel-orb--main {
-  left: 1.1rem;
-  top: 1.05rem;
-  height: 2.9rem;
-  width: 2.9rem;
-  background: linear-gradient(135deg, var(--accent), var(--accent-strong));
-  box-shadow: 0 14px 26px -18px rgba(52, 83, 244, 0.8);
-}
-
-.career-panel-orb--soft {
-  left: 1.9rem;
-  top: 1.85rem;
-  height: 1.3rem;
-  width: 1.3rem;
-  background: rgba(255, 255, 255, 0.5);
-}
-
-.career-panel-line {
-  left: 5rem;
-  height: 0.58rem;
-  border-radius: 999px;
-  background: rgba(134, 146, 174, 0.3);
-}
-
-.career-panel-line--wide {
-  top: 1.38rem;
-  width: 66%;
-}
-
-.career-panel-line--medium {
-  top: 2.72rem;
-  width: 52%;
-}
-
-.career-panel-line--short {
-  top: 4.06rem;
-  width: 38%;
-}
-
-.career-panel-progress {
-  left: 5rem;
-  right: 1.3rem;
-  bottom: 1.18rem;
-  height: 0.42rem;
-  overflow: hidden;
-  border-radius: 999px;
-  background: rgba(223, 229, 241, 0.9);
-}
-
-.career-panel-progress span {
-  display: block;
-  height: 100%;
-  width: 58%;
-  border-radius: inherit;
-  background: linear-gradient(90deg, var(--accent), var(--accent-coral));
+  width: min(100%, 38rem);
+  height: auto;
+  object-fit: contain;
+  object-position: center;
+  mix-blend-mode: multiply;
+  filter: saturate(1.03) contrast(1.01);
+  mask-image:
+    linear-gradient(90deg, transparent 0%, #000 18%, #000 86%, transparent 100%),
+    linear-gradient(180deg, transparent 0%, #000 9%, #000 88%, transparent 100%);
+  mask-composite: intersect;
+  -webkit-mask-image:
+    linear-gradient(90deg, transparent 0%, #000 18%, #000 86%, transparent 100%),
+    linear-gradient(180deg, transparent 0%, #000 9%, #000 88%, transparent 100%);
+  -webkit-mask-composite: source-in;
 }
 
 .career-brand-marquee {
@@ -1385,21 +1198,15 @@ main {
 
 @media (max-width: 1023px) {
   .career-opportunity-visual {
-    min-height: 18rem;
+    min-height: 19rem;
   }
 
   .career-target-board {
-    min-height: 18rem;
+    min-height: 19rem;
   }
 
-  .career-target-rings {
-    right: 8%;
-    width: min(68%, 18rem);
-  }
-
-  .career-opportunity-panel {
-    left: 8%;
-    width: min(76%, 17rem);
+  .career-target-asset {
+    width: min(100%, 33rem);
   }
 }
 
@@ -1410,99 +1217,20 @@ main {
   }
 
   .career-opportunity-visual {
-    min-height: 14rem;
+    min-height: 17rem;
   }
 
   .career-target-board {
-    min-height: 14rem;
+    min-height: 17rem;
   }
 
-  .career-target-rings {
-    right: 6%;
-    top: 0.35rem;
-    width: 12.2rem;
+  .career-target-board::before {
+    inset: -0.7rem -1rem;
   }
 
-  .career-floating-bubble {
-    height: 2.85rem;
-    width: 2.85rem;
-  }
-
-  .career-floating-bubble svg {
-    height: 1.05rem;
-    width: 1.05rem;
-  }
-
-  .career-floating-bubble--growth {
-    left: 6%;
-    top: 2%;
-  }
-
-  .career-floating-bubble--star {
-    right: 0;
-    top: 30%;
-  }
-
-  .career-floating-bubble--team {
-    bottom: 4%;
-    right: 6%;
-  }
-
-  .career-target-dart {
-    inset: 7% 3% auto auto;
-    width: 80%;
-    height: 80%;
-  }
-
-  .career-opportunity-panel {
-    bottom: 8%;
-    left: 1%;
-    width: 13rem;
-    min-height: 5.9rem;
-    border-radius: 1.15rem;
-    padding: 0.75rem 0.8rem;
-    transform: rotate(3deg);
-  }
-
-  .career-panel-orb--main {
-    left: 0.78rem;
-    top: 0.78rem;
-    height: 2.15rem;
-    width: 2.15rem;
-  }
-
-  .career-panel-orb--soft {
-    left: 1.36rem;
-    top: 1.36rem;
-    height: 0.95rem;
-    width: 0.95rem;
-  }
-
-  .career-panel-line {
-    left: 3.65rem;
-    height: 0.42rem;
-  }
-
-  .career-panel-line--wide {
-    top: 1rem;
-    width: 58%;
-  }
-
-  .career-panel-line--medium {
-    top: 2rem;
-    width: 46%;
-  }
-
-  .career-panel-line--short {
-    top: 3rem;
-    width: 34%;
-  }
-
-  .career-panel-progress {
-    left: 3.65rem;
-    right: 1rem;
-    bottom: 0.95rem;
-    height: 0.32rem;
+  .career-target-asset {
+    width: min(108%, 28rem);
+    max-width: none;
   }
 }
 

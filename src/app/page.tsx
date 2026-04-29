@@ -970,48 +970,14 @@ export default function HomePage() {
 
               <div className="career-opportunity-visual" aria-hidden="true">
                 <div className="career-target-board">
-                  <div className="career-target-rings">
-                    <span className="career-target-center" />
-                    <svg viewBox="0 0 300 300" className="career-target-dart" fill="none">
-                      <path className="career-target-dart-shadow" d="M244 56L154 146" />
-                      <path className="career-target-dart-shaft" d="M236 64L154 146" />
-                      <path className="career-target-dart-head" d="M140 160l13-34 22 22-35 12z" />
-                      <path className="career-target-dart-fin career-target-dart-fin--upper" d="M232 68l9-35 18-10-5 35z" />
-                      <path className="career-target-dart-fin career-target-dart-fin--lower" d="M232 68l35-9 10-18-35 5z" />
-                      <path className="career-target-dart-fin-line" d="M232 68l22-22" />
-                    </svg>
-                  </div>
-
-                  <div className="career-floating-bubble career-floating-bubble--growth">
-                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                      <path d="M4.5 15.5l5.2-5.2 3.4 3.4 6.4-7.2" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round" />
-                      <path d="M15.5 6.5h4v4" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  </div>
-
-                  <div className="career-floating-bubble career-floating-bubble--star">
-                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                      <path d="M12 3.8l2.4 4.9 5.4.8-3.9 3.8.9 5.4-4.8-2.5-4.8 2.5.9-5.4-3.9-3.8 5.4-.8L12 3.8z" stroke="currentColor" strokeWidth="1.9" strokeLinejoin="round" />
-                    </svg>
-                  </div>
-
-                  <div className="career-floating-bubble career-floating-bubble--team">
-                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                      <path d="M8.6 11.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4zM3.6 18.8c.5-2.8 2.4-4.5 5-4.5s4.5 1.7 5 4.5" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" />
-                      <path d="M15.5 11.3a2.7 2.7 0 1 0 0-5.4M17.1 14.4c2 .5 3.3 2 3.7 4.4" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" />
-                    </svg>
-                  </div>
-
-                  <div className="career-opportunity-panel">
-                    <span className="career-panel-orb career-panel-orb--main" />
-                    <span className="career-panel-orb career-panel-orb--soft" />
-                    <span className="career-panel-line career-panel-line--wide" />
-                    <span className="career-panel-line career-panel-line--medium" />
-                    <span className="career-panel-line career-panel-line--short" />
-                    <span className="career-panel-progress">
-                      <span />
-                    </span>
-                  </div>
+                  <Image
+                    src="/graphics/career-target-visual.webp"
+                    alt=""
+                    width={1400}
+                    height={933}
+                    sizes="(max-width: 640px) 100vw, (max-width: 1023px) 74vw, 44vw"
+                    className="career-target-asset"
+                  />
                 </div>
               </div>
             </div>
