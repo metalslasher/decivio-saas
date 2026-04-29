@@ -94,8 +94,8 @@ export function SiteFooter() {
         <div className="grid gap-10 border-b border-white/18 pb-10 md:pb-12 lg:grid-cols-[1.2fr_auto] lg:items-start">
           <div className="space-y-5">
             <WordmarkLogo tone="light" className="text-[2.6rem] md:text-[3rem]" />
-            <p className="max-w-2xl text-[1.15rem] font-medium leading-[1.5] text-white/92 md:text-[1.35rem]">
-              Кар&apos;єрний перехід у цифрах, без хаосу й випадкових порад.
+            <p className="max-w-xl text-[0.98rem] font-medium leading-[1.65] text-white/78 md:text-[1.08rem]">
+              Змінюйте карʼєру з планом: оцінюйте сценарії, дохід і ризики, посилюйте резюме та рухайтесь до кращої роботи.
             </p>
           </div>
 

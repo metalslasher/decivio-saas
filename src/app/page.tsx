@@ -834,11 +834,11 @@ export default function HomePage() {
     <>
       <JsonLd data={homeSoftwareSchema} />
       <JsonLd data={homeFaqSchema} />
-      <div className="pb-10">
-        <div className="space-y-8 md:space-y-12">
+      <div className="pb-12 md:pb-16">
+        <div className="space-y-10 md:space-y-16">
           <HeroBeforeAfter />
 
-        <section className="py-5 md:py-7">
+        <section className="py-6 md:py-8">
           <Reveal>
             <div className="surface-panel mx-auto grid max-w-[80rem] overflow-hidden rounded-[1.9rem] sm:grid-cols-3">
               <Link
@@ -902,7 +902,7 @@ export default function HomePage() {
           </Reveal>
         </section>
 
-        <section id="career-pains" className="relative py-4 md:py-6">
+        <section id="career-pains" className="relative py-6 md:py-8">
           <div className="pointer-events-none absolute left-1/2 top-[38%] h-64 w-[88%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[rgba(63,94,255,0.055)] blur-3xl md:h-80" />
           <div className="relative mx-auto grid w-full max-w-[80rem] min-w-0 gap-5 lg:grid-cols-[1.1fr_0.9fr] lg:items-start lg:gap-6 xl:gap-8">
             <div className="min-w-0 lg:order-2 lg:sticky lg:top-28 lg:self-start">
@@ -954,7 +954,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="career-opportunity-section relative mx-auto max-w-[80rem] py-7 md:py-10" aria-labelledby="career-brands-title">
+        <section className="career-opportunity-section relative mx-auto max-w-[80rem] py-9 md:py-14" aria-labelledby="career-brands-title">
           <Reveal>
             <div className="grid min-w-0 items-center gap-8 lg:grid-cols-[0.98fr_1.02fr] lg:gap-10">
               <div className="relative z-10 min-w-0 text-center lg:text-left">
@@ -1004,7 +1004,7 @@ export default function HomePage() {
 
       </div>
 
-      <section id="features" className="mx-auto mt-8 max-w-[80rem] space-y-8 md:mt-10 md:space-y-10">
+      <section id="features" className="mx-auto mt-12 max-w-[80rem] space-y-9 md:mt-16 md:space-y-12">
         {featureShowcases.map((item, index) => {
           return (
             <Reveal key={item.title} delayMs={index * 40}>
@@ -1046,7 +1046,7 @@ export default function HomePage() {
         })}
       </section>
 
-      <section id="reviews" className="relative mx-auto mt-10 max-w-[80rem] md:mt-14">
+      <section id="reviews" className="relative mx-auto mt-14 max-w-[80rem] md:mt-20">
         <Reveal>
           <div className="relative">
             <div className="overflow-hidden px-1 pt-8 md:px-2 md:pt-10">
