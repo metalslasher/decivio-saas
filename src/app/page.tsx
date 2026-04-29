@@ -954,7 +954,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="career-opportunity-section relative mx-auto max-w-[80rem] overflow-hidden py-7 md:py-10" aria-labelledby="career-brands-title">
+        <section className="career-opportunity-section relative mx-auto max-w-[80rem] py-7 md:py-10" aria-labelledby="career-brands-title">
           <Reveal>
             <div className="grid min-w-0 items-center gap-8 lg:grid-cols-[0.98fr_1.02fr] lg:gap-10">
               <div className="relative z-10 min-w-0 text-center lg:text-left">
@@ -972,12 +972,13 @@ export default function HomePage() {
                 <div className="career-target-board">
                   <div className="career-target-rings">
                     <span className="career-target-center" />
-                    <svg viewBox="0 0 320 320" className="career-target-dart" fill="none">
-                      <path className="career-target-dart-shadow" d="M262 58L166 154" />
-                      <path className="career-target-dart-shaft" d="M258 62L163 157" />
-                      <path className="career-target-dart-head" d="M146 174l17-38 23 23-40 15z" />
-                      <path className="career-target-dart-tail" d="M258 62l2-42 38-3-4 35 35-4-3 38-42 2" />
-                      <path className="career-target-dart-tail-line" d="M258 62l26 26" />
+                    <svg viewBox="0 0 300 300" className="career-target-dart" fill="none">
+                      <path className="career-target-dart-shadow" d="M244 56L154 146" />
+                      <path className="career-target-dart-shaft" d="M236 64L154 146" />
+                      <path className="career-target-dart-head" d="M140 160l13-34 22 22-35 12z" />
+                      <path className="career-target-dart-fin career-target-dart-fin--upper" d="M232 68l9-35 18-10-5 35z" />
+                      <path className="career-target-dart-fin career-target-dart-fin--lower" d="M232 68l35-9 10-18-35 5z" />
+                      <path className="career-target-dart-fin-line" d="M232 68l22-22" />
                     </svg>
                   </div>
 
@@ -1001,19 +1002,15 @@ export default function HomePage() {
                     </svg>
                   </div>
 
-                  <div className="career-opportunity-note">
-                    <span className="career-opportunity-note-icon">
-                      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                        <path d="M4.5 15.5l5.2-5.2 3.4 3.4 6.4-7.2" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round" />
-                        <path d="M15.5 6.5h4v4" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
+                  <div className="career-opportunity-panel">
+                    <span className="career-panel-orb career-panel-orb--main" />
+                    <span className="career-panel-orb career-panel-orb--soft" />
+                    <span className="career-panel-line career-panel-line--wide" />
+                    <span className="career-panel-line career-panel-line--medium" />
+                    <span className="career-panel-line career-panel-line--short" />
+                    <span className="career-panel-progress">
+                      <span />
                     </span>
-                    <span className="career-opportunity-note-copy">
-                      <span>Кращі команди.</span>
-                      <span>Кращі процеси.</span>
-                      <span>Кращі можливості.</span>
-                    </span>
-                    <span className="career-opportunity-note-progress" />
                   </div>
                 </div>
               </div>
