@@ -904,8 +904,8 @@ export default function HomePage() {
 
         <section id="career-pains" className="relative py-4 md:py-6">
           <div className="pointer-events-none absolute left-1/2 top-[38%] h-64 w-[88%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[rgba(63,94,255,0.055)] blur-3xl md:h-80" />
-          <div className="relative mx-auto grid w-full max-w-[80rem] min-w-0 gap-5 lg:grid-cols-[0.9fr_1.1fr] lg:items-start lg:gap-6 xl:gap-8">
-            <div className="min-w-0 lg:sticky lg:top-28 lg:self-start">
+          <div className="relative mx-auto grid w-full max-w-[80rem] min-w-0 gap-5 lg:grid-cols-[1.1fr_0.9fr] lg:items-start lg:gap-6 xl:gap-8">
+            <div className="min-w-0 lg:order-2 lg:sticky lg:top-28 lg:self-start">
               <Reveal className="min-w-0">
                 <div className="surface-panel relative w-full min-w-0 overflow-hidden rounded-[2rem] px-5 py-6 text-center sm:text-left md:px-7 md:py-8 lg:px-8 lg:py-9">
                   <div className="pointer-events-none absolute -right-16 -top-20 h-44 w-44 rounded-full bg-[rgba(63,94,255,0.08)] blur-3xl" />
@@ -926,7 +926,7 @@ export default function HomePage() {
               </Reveal>
             </div>
 
-            <Reveal className="min-w-0" delayMs={80}>
+            <Reveal className="min-w-0 lg:order-1" delayMs={80}>
               <div className="grid min-w-0 gap-3 md:grid-cols-2 lg:grid-cols-1">
                 {painPoints.map((item, index) => (
                   <article
@@ -958,7 +958,7 @@ export default function HomePage() {
           <Reveal>
             <div className="grid min-w-0 items-center gap-8 lg:grid-cols-[0.98fr_1.02fr] lg:gap-10">
               <div className="relative z-10 min-w-0 text-center lg:text-left">
-                <h2 id="career-brands-title" className="font-display text-[2rem] font-extrabold leading-[1.04] tracking-normal text-[var(--text-strong)] sm:text-[2.6rem] md:text-[3.15rem] lg:text-[3.45rem]">
+                <h2 id="career-brands-title" className="mx-auto max-w-[36rem] font-display text-[1.78rem] font-extrabold leading-[1.1] tracking-[-0.022em] text-[var(--text-strong)] sm:text-[2.06rem] md:text-[2.38rem] lg:mx-0 lg:text-[2.58rem] xl:text-[2.74rem]">
                   Цільтеся в сильні продуктові команди, а не просто в першу{" "}
                   <span className="career-opportunity-accent">доступну вакансію</span>
                 </h2>
