@@ -17,18 +17,6 @@ const legalLinks = [
 
 const socialLinks: SocialLink[] = [
   {
-    href: "https://t.me/decivio",
-    label: "Telegram",
-    icon: (
-      <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
-        <path
-          fill="currentColor"
-          d="M21.2 4.4c.3-.1.6.1.7.4.1.2.1.3.1.5l-3.1 14.3c-.1.5-.6.8-1 .7-.1 0-.2-.1-.3-.2l-4-3-2 2c-.2.3-.5.4-.8.4-.5 0-.9-.4-.9-.9l.5-4.5 8.3-7.5c.2-.2.2-.5 0-.7-.1-.1-.3-.1-.5 0l-10 6.3-4.1-1.3c-.5-.2-.7-.7-.5-1.1.1-.2.3-.4.5-.5l16.1-5.9Z"
-        />
-      </svg>
-    )
-  },
-  {
     href: "https://www.instagram.com/decivio",
     label: "Instagram",
     icon: (
@@ -95,7 +83,8 @@ export function SiteFooter() {
           <div className="space-y-5">
             <WordmarkLogo tone="light" className="text-[2.6rem] md:text-[3rem]" />
             <p className="max-w-xl text-[0.98rem] font-medium leading-[1.65] text-white/78 md:text-[1.08rem]">
-              Змінюйте карʼєру з планом: оцінюйте сценарії, дохід і ризики, посилюйте резюме та рухайтесь до кращої роботи.
+              Отримайте професійну підтримку для карʼєрного переходу: оцініть свій шлях, посильте резюме й рухайтесь до роботи,
+              яку справді хочете.
             </p>
           </div>
 

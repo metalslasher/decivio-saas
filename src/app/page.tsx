@@ -1,5 +1,5 @@
 ﻿import Link from "next/link";
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import Image from "next/image";
 import { HeroBeforeAfter } from "@/components/hero-before-after";
 import { JsonLd } from "@/components/json-ld";
@@ -829,6 +829,55 @@ function FeaturePreview({ item }: { item: FeatureShowcase }) {
   }
 }
 
+function FeatureStackCard({ item, index }: { item: FeatureShowcase; index: number }) {
+  const cardStyle = {
+    "--feature-card-top": `${6.25 + index * 0.62}rem`,
+    "--feature-card-z": index + 1
+  } as CSSProperties;
+
+  return (
+    <article className="feature-stack-card" style={cardStyle}>
+      <div className="feature-stack-card-grid">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2.5">
+            <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[rgba(63,94,255,0.1)] font-display text-[0.78rem] font-bold text-[var(--accent-strong)]">
+              {String(index + 1).padStart(2, "0")}
+            </span>
+            <span className="rounded-full border border-[rgba(63,94,255,0.16)] bg-[rgba(238,242,255,0.76)] px-3 py-1 text-[0.74rem] font-bold uppercase tracking-normal text-[var(--accent-strong)]">
+              {item.previewTitle}
+            </span>
+          </div>
+
+          <h3 className="mt-5 break-words font-display text-[1.52rem] font-bold leading-[1.08] tracking-normal text-[var(--text-strong)] [overflow-wrap:anywhere] md:text-[1.86rem]">
+            {item.title}
+          </h3>
+
+          <div className="mt-5 grid gap-2.5 sm:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-2">
+            {item.bullets.map((bullet) => (
+              <p key={bullet} className="feature-stack-bullet">
+                <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--accent)]" />
+                <span>{bullet}</span>
+              </p>
+            ))}
+          </div>
+
+          <div className="mt-5 flex flex-wrap gap-2">
+            {item.chips.map((chip) => (
+              <span key={chip} className="feature-stack-chip">
+                {chip}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        <div className="feature-stack-preview">
+          <FeaturePreview item={item} />
+        </div>
+      </div>
+    </article>
+  );
+}
+
 export default function HomePage() {
   return (
     <>
@@ -1004,46 +1053,57 @@ export default function HomePage() {
 
       </div>
 
-      <section id="features" className="mx-auto mt-12 max-w-[80rem] space-y-9 md:mt-16 md:space-y-12">
-        {featureShowcases.map((item, index) => {
-          return (
-            <Reveal key={item.title} delayMs={index * 40}>
-              <article className="surface-panel relative overflow-hidden rounded-[2.4rem] px-6 py-6 md:px-8 md:py-8">
-                <div className="pointer-events-none absolute -right-10 top-0 h-20 w-52 rounded-full bg-[rgba(67,97,255,0.05)] blur-3xl" />
-                <div className="pointer-events-none absolute -left-10 bottom-0 h-20 w-52 rounded-full bg-[rgba(152,165,255,0.05)] blur-3xl" />
+      <section id="features" className="feature-stack-section mx-auto mt-12 max-w-[80rem] md:mt-16" aria-labelledby="features-title">
+        <Reveal>
+          <div className="feature-stack-shell">
+            <div className="feature-stack-layout">
+              <aside className="feature-stack-copy">
+                <span className="eyebrow-pill">Модулі Decivio</span>
+                <h2 id="features-title" className="mt-5 break-words font-display text-[1.85rem] font-extrabold leading-[1.05] tracking-normal text-[var(--text-strong)] md:text-[2.5rem] lg:text-[2.85rem]">
+                  Усі інструменти переходу в одному компактному блоці
+                </h2>
+                <p className="mt-5 max-w-[35rem] text-[0.98rem] leading-[1.72] text-[var(--text-muted)] md:text-[1.05rem]">
+                  Сценарії, резюме, співбесіди, план переходу, вакансії та оцінка офера зібрані разом, щоб показати весь шлях без довгого списку
+                  розрізнених секцій.
+                </p>
 
-                <div className="relative grid gap-7 md:grid-cols-12 md:gap-8">
-                  <div className="flex h-full flex-col md:col-span-7">
-                    <div className="space-y-4 md:space-y-5">
-                      <h3 className="font-display text-[1.66rem] font-bold leading-[1.01] tracking-[-0.045em] text-[var(--text-strong)] md:text-[2.18rem]">
-                        {item.title}
-                      </h3>
-
-                      <div className="space-y-2.5">
-                        {item.bullets.map((bullet) => (
-                          <p key={bullet} className="flex items-start gap-2.5 text-[0.92rem] leading-[1.7] text-[var(--text-muted)] md:text-[0.97rem]">
-                            <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--accent)]" />
-                            <span>{bullet}</span>
-                          </p>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="mt-6 md:mt-8">
-                      <Link href={item.href} className="btn-primary">
-                        {item.cta}
-                      </Link>
-                    </div>
+                <div className="mt-7 grid grid-cols-2 gap-3">
+                  <div className="feature-stack-stat">
+                    <span className="text-[1.65rem] font-bold leading-none text-[var(--text-strong)]">{featureShowcases.length}</span>
+                    <span className="text-[0.82rem] font-semibold leading-tight text-[var(--text-muted)]">модулів в одному сценарії</span>
                   </div>
-
-                  <div className="md:col-span-5">
-                    <FeaturePreview item={item} />
+                  <div className="feature-stack-stat">
+                    <span className="text-[1.65rem] font-bold leading-none text-[var(--text-strong)]">1</span>
+                    <span className="text-[0.82rem] font-semibold leading-tight text-[var(--text-muted)]">місце для старту й доступу</span>
                   </div>
                 </div>
-              </article>
-            </Reveal>
-          );
-        })}
+
+                <div className="mt-7 flex flex-col gap-3 sm:flex-row lg:flex-col xl:flex-row">
+                  <Link href="/simulate" className="btn-primary text-center">
+                    Почати прогноз
+                  </Link>
+                  <Link href="/pricing" className="btn-secondary text-center">
+                    Переглянути доступ
+                  </Link>
+                </div>
+
+                <div className="feature-stack-index" aria-label="Список модулів">
+                  {featureShowcases.map((item, index) => (
+                    <span key={item.title}>
+                      {String(index + 1).padStart(2, "0")} · {item.title}
+                    </span>
+                  ))}
+                </div>
+              </aside>
+
+              <div className="feature-card-stack">
+                {featureShowcases.map((item, index) => (
+                  <FeatureStackCard key={item.title} item={item} index={index} />
+                ))}
+              </div>
+            </div>
+          </div>
+        </Reveal>
       </section>
 
       <section id="reviews" className="relative mx-auto mt-14 max-w-[80rem] md:mt-20">
