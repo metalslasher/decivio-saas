@@ -306,7 +306,7 @@ const faqItems = [
       "Звичайна оцінка зарплати показує лише можливу цифру на старті. Тут ви бачите сценарій у часі: просадку на початку, період окупності, потенціал нового напряму і різницю між кількома варіантами переходу."
   },
   {
-    question: "Чим Decivio відрізняється від ChatGPT або загальних порад?",
+    question: "Чим Decivio відрізняється від ChatGPT?",
     answer:
       "Decivio не просто генерує текст. Сервіс збирає вашу ситуацію в сценарій, рахує ризики, показує сильні й слабкі місця переходу та перетворює це на конкретні наступні кроки."
   },
@@ -321,19 +321,14 @@ const faqItems = [
       "Так. Ви можете побачити різницю між поточним шляхом і кількома варіантами переходу, щоб зрозуміти, який сценарій виглядає сильніше саме для вас."
   },
   {
-    question: "Що доступно безкоштовно, а що входить у платний доступ?",
-    answer:
-      "Безкоштовно ви можете швидко перевірити, чи є сенс рухатись глибше. Платний доступ відкриває детальні сценарії, резюме під цільову роль, підготовку до співбесід, перевірку вакансій і покроковий план переходу."
-  },
-  {
-    question: "Скільки часу займає симуляція?",
-    answer:
-      "Базову симуляцію можна пройти за 2–3 хвилини. Після цього ви одразу бачите висновок і можете вирішити, чи потрібна глибша підготовка."
-  },
-  {
     question: "Чи підійде сервіс, якщо в мене ще немає досвіду в новій ролі?",
     answer:
       "Так. Сервіс враховує, чи є у вас практичний або базовий досвід, і показує, наскільки реалістичним виглядає вхід саме з вашої поточної точки."
+  },
+  {
+    question: "Чи враховується досвід не з IT або не з цільової сфери?",
+    answer:
+      "Так. Висновок дивиться не лише на назву вашої поточної ролі, а й на переносимі навички: комунікацію, аналітику, операційний досвід, роботу з клієнтами, управління процесами або людьми."
   },
   {
     question: "Чи підходить сервіс для України та міжнародного ринку?",
@@ -351,14 +346,9 @@ const faqItems = [
       "Прогноз не є обіцянкою конкретної зарплати. Це сценарна оцінка на основі ваших даних, ринку й припущень. Її варто використовувати як орієнтир для рішення, а не як гарантований результат."
   },
   {
-    question: "Що відбувається з моїми даними?",
+    question: "Чи можна використати результат для резюме або співбесіди?",
     answer:
-      "Дані використовуються для формування вашого кар'єрного висновку та персоналізованих рекомендацій. Ви не вводите платіжні дані під час безкоштовної симуляції, а деталі обробки описані в політиці конфіденційності."
-  },
-  {
-    question: "Кому сервіс може не підійти?",
-    answer:
-      "Якщо вам потрібна гарантія працевлаштування, готова вакансія або рішення замість вас, сервіс цього не дає. Він корисний тоді, коли ви хочете краще оцінити варіанти і підготуватися до переходу."
+      "Так. Висновок допомагає зрозуміти, які сильні сторони варто підсвітити, які прогалини закрити першими і як пояснювати логіку переходу рекрутеру або hiring manager."
   }
 ] as const;
 
@@ -1059,19 +1049,8 @@ export default function HomePage() {
         </Reveal>
       </section>
 
-      <section id="faq" className="mx-auto mt-16 max-w-[80rem] md:mt-24">
-        <Reveal>
-          <div className="mx-auto max-w-[44rem] text-center">
-            <h2 className="font-display text-[1.9rem] font-extrabold leading-[1.08] tracking-normal text-[var(--text-strong)] md:text-[2.45rem]">
-              Питання перед стартом
-            </h2>
-            <p className="mt-4 text-[0.98rem] leading-[1.72] text-[var(--text-muted)] md:text-[1.06rem]">
-              Коротко про точність прогнозу, дані, платний доступ і межі сервісу, щоб рішення про перехід було без зайвих припущень.
-            </p>
-          </div>
-        </Reveal>
-
-        <div className="mt-7 grid gap-4 md:mt-9 md:grid-cols-2">
+      <section id="faq" className="mx-auto mt-16 max-w-[80rem] md:mt-24" aria-label="Часті питання">
+        <div className="grid gap-4 md:grid-cols-2">
           {faqItems.map((item, index) => (
             <Reveal key={item.question} delayMs={index * 35}>
               <details className="surface-panel group rounded-[1.8rem] px-5 py-4 md:px-6 md:py-5">
@@ -1091,7 +1070,6 @@ export default function HomePage() {
       <section className="final-cta-section mx-auto mt-16 max-w-[80rem] md:mt-24" aria-labelledby="final-cta-title">
         <Reveal>
           <div className="final-cta-panel">
-            <div className="final-cta-grid" aria-hidden="true" />
             <div className="relative z-10 mx-auto flex max-w-[48rem] flex-col items-center text-center">
               <div className="flex items-center gap-1.5" aria-label="Рейтинг 4.5 із 5">
                 {Array.from({ length: 5 }).map((_, index) => {
@@ -1104,26 +1082,26 @@ export default function HomePage() {
                       <defs>
                         <linearGradient id={`final-trust-half-${index}`} x1="0%" y1="0%" x2="100%" y2="0%">
                           <stop offset="50%" stopColor="currentColor" />
-                          <stop offset="50%" stopColor="rgba(255,255,255,0.32)" />
+                          <stop offset="50%" stopColor="rgba(102,112,133,0.24)" />
                         </linearGradient>
                       </defs>
                       <path
                         d="M12 2.5l2.9 5.88 6.49.94-4.7 4.58 1.11 6.47L12 17.3l-5.8 3.07 1.11-6.47-4.7-4.58 6.49-.94L12 2.5z"
-                        fill={isFull ? "currentColor" : isHalf ? `url(#final-trust-half-${index})` : "rgba(255,255,255,0.32)"}
+                        fill={isFull ? "currentColor" : isHalf ? `url(#final-trust-half-${index})` : "rgba(102,112,133,0.24)"}
                       />
                     </svg>
                   );
                 })}
-                <span className="ml-2 text-[0.94rem] font-semibold text-white/72">{socialProof.rating} за відгуками користувачів</span>
+                <span className="ml-2 text-[0.94rem] font-semibold text-[var(--text-muted)]">{socialProof.rating} за відгуками користувачів</span>
               </div>
 
-              <p className="mt-7 text-[0.82rem] font-extrabold uppercase tracking-normal text-[rgba(167,178,255,0.92)] md:text-[0.88rem]">
+              <p className="mt-7 text-[0.82rem] font-extrabold uppercase tracking-normal text-[var(--accent-strong)] md:text-[0.88rem]">
                 Перед тим як вкладати місяці у новий напрям
               </p>
-              <h2 id="final-cta-title" className="mt-4 max-w-[42rem] font-display text-[2.12rem] font-extrabold leading-[1.04] tracking-normal text-white sm:text-[2.65rem] md:text-[3.25rem]">
+              <h2 id="final-cta-title" className="mt-4 max-w-[42rem] font-display text-[2.12rem] font-extrabold leading-[1.04] tracking-normal text-[var(--text-strong)] sm:text-[2.65rem] md:text-[3.25rem]">
                 Перевірте, чи справді окупиться ваша зміна карʼєри
               </h2>
-              <p className="mt-6 max-w-[39rem] text-[1rem] font-medium leading-[1.72] text-white/74 md:text-[1.12rem]">
+              <p className="mt-6 max-w-[39rem] text-[1rem] font-medium leading-[1.72] text-[var(--text-muted)] md:text-[1.12rem]">
                 Decivio покаже ризик-період, потенціал доходу, сильні сторони та перші кроки, щоб ви рухались не навмання,
                 а з реалістичним планом.
               </p>
@@ -1135,15 +1113,7 @@ export default function HomePage() {
                     <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </Link>
-                <span className="text-[0.9rem] font-semibold text-white/62">Безкоштовно · 2–3 хвилини</span>
-              </div>
-
-              <div className="mt-8 grid w-full gap-3 sm:grid-cols-3">
-                {["Окупність переходу", "Ризики на старті", "План наступних кроків"].map((item) => (
-                  <div key={item} className="final-cta-proof">
-                    {item}
-                  </div>
-                ))}
+                <span className="text-[0.9rem] font-semibold text-[var(--text-muted)]">Безкоштовно · 2–3 хвилини</span>
               </div>
             </div>
           </div>
