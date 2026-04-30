@@ -17,14 +17,6 @@ const featureShowcases = [
       "Максимальна просадка та ризиковий період у перші місяці",
       "Альтернативні маршрути переходу з різним темпом входу"
     ],
-    cta: "Переглянути сценарії",
-    href: "/pricing",
-    previewTitle: "Панель сценаріїв",
-    previewRows: [
-      { label: "Залишитись", value: "+12% за 5 років", accent: false },
-      { label: "Перейти", value: "+68% за 5 років", accent: true },
-      { label: "Альтернатива", value: "+44% за 5 років", accent: false }
-    ],
     chips: ["Окупність: ~22 міс.", "Ризик-період: 6 міс."]
   },
   {
@@ -35,14 +27,6 @@ const featureShowcases = [
       "Формулювання досвіду через результати, цифри та досягнення",
       "Виділення релевантних навичок, проєктів і сильних сторін",
       "Фінальна перевірка перед відгуком та готовий експорт у PDF"
-    ],
-    cta: "Створити нове резюме",
-    href: "/pricing",
-    previewTitle: "Конструктор резюме",
-    previewRows: [
-      { label: "Заголовок і ціль", value: "Оновлено під вакансію", accent: true },
-      { label: "Досвід роботи", value: "4 релевантні приклади", accent: true },
-      { label: "Навички", value: "12 ключових акцентів", accent: false }
     ],
     chips: ["Зрозуміло для рекрутера", "Готово до відгуку", "Експорт у PDF"]
   },
@@ -55,14 +39,6 @@ const featureShowcases = [
       "Підказки, де відповідь звучить слабко або непереконливо",
       "План тренування, щоб поступово посилити відповіді"
     ],
-    cta: "Почати підготовку",
-    href: "/pricing",
-    previewTitle: "Режим співбесіди",
-    previewRows: [
-      { label: "Розмова з рекрутером", value: "12 питань + коментарі", accent: false },
-      { label: "Професійний етап", value: "18 питань + розбір", accent: true },
-      { label: "Практична частина", value: "5 задач + орієнтири", accent: false }
-    ],
     chips: ["Пробна співбесіда", "Коментарі до відповідей", "Приклади сильних відповідей"]
   },
   {
@@ -73,14 +49,6 @@ const featureShowcases = [
       "Скільки буде комунікації, самостійної роботи й відповідальності",
       "Типові задачі, інструменти та ритм нової ролі",
       "Що потрібно освоїти в перші тижні, щоб увійти в робочий темп"
-    ],
-    cta: "Переглянути модель дня",
-    href: "/pricing",
-    previewTitle: "Модель робочого дня",
-    previewRows: [
-      { label: "Фокус-робота", value: "42%", accent: true },
-      { label: "Комунікація і зустрічі", value: "28%", accent: false },
-      { label: "Операційні задачі", value: "30%", accent: false }
     ],
     chips: ["Реалістичний темп", "Окремо за рівнями", "Очікування від ролі"]
   },
@@ -93,14 +61,6 @@ const featureShowcases = [
       "Контрольні точки до першої співбесіди та пропозиції роботи",
       "Показники прогресу, щоб бачити де ви відстаєте"
     ],
-    cta: "Отримати план",
-    href: "/pricing",
-    previewTitle: "План 30/60/90",
-    previewRows: [
-      { label: "30 днів", value: "База + портфоліо", accent: true },
-      { label: "60 днів", value: "Практика + фідбек", accent: false },
-      { label: "90 днів", value: "Інтерв’ю + офер", accent: true }
-    ],
     chips: ["Відстеження прогресу", "Нагадування", "Точки перевірки"]
   },
   {
@@ -112,14 +72,6 @@ const featureShowcases = [
       "Пояснює, що вже достатньо сильне для відгуку просто зараз",
       "Дає пріоритетний список, що підтягнути спочатку"
     ],
-    cta: "Перевірити вакансію",
-    href: "/pricing",
-    previewTitle: "Карта відповідності",
-    previewRows: [
-      { label: "Сильні збіги", value: "7 із 10 вимог", accent: true },
-      { label: "Потрібно посилити", value: "3 навички", accent: false },
-      { label: "Готовність до відгуку", value: "Після 2 кроків", accent: true }
-    ],
     chips: ["Пріоритети підготовки", "Опора на текст вакансії", "Зрозумілий план дій"]
   },
   {
@@ -130,14 +82,6 @@ const featureShowcases = [
       "Оцінка, чи перекриває пропозиція ризик переходу на старті",
       "Розрахунок вигоди на горизонті кількох років, а не лише першої зарплати",
       "Пояснення, коли варто погоджуватись, торгуватись або почекати"
-    ],
-    cta: "Оцінити пропозицію",
-    href: "/pricing",
-    previewTitle: "Оцінка пропозиції",
-    previewRows: [
-      { label: "Стартовий дохід", value: "+18% до поточного", accent: false },
-      { label: "Горизонт 3 років", value: "+540 тис. грн", accent: true },
-      { label: "Фінансовий запас", value: "Покриває стартовий ризик", accent: true }
     ],
     chips: ["Порівняння з поточною роллю", "Оцінка ризику", "Аргументи для переговорів"]
   }
@@ -1045,12 +989,10 @@ export default function HomePage() {
       </div>
 
       <section id="features" className="feature-stack-section mx-auto mt-12 max-w-[80rem] md:mt-16">
-        <div className="feature-stack-shell">
-          <div className="feature-card-stack">
-            {featureShowcases.map((item, index) => (
-              <FeatureStackCard key={item.title} item={item} index={index} />
-            ))}
-          </div>
+        <div className="feature-card-stack">
+          {featureShowcases.map((item, index) => (
+            <FeatureStackCard key={item.title} item={item} index={index} />
+          ))}
         </div>
       </section>
 
