@@ -839,16 +839,7 @@ function FeatureStackCard({ item, index }: { item: FeatureShowcase; index: numbe
     <article className="feature-stack-card" style={cardStyle}>
       <div className="feature-stack-card-grid">
         <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-2.5">
-            <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[rgba(63,94,255,0.1)] font-display text-[0.78rem] font-bold text-[var(--accent-strong)]">
-              {String(index + 1).padStart(2, "0")}
-            </span>
-            <span className="rounded-full border border-[rgba(63,94,255,0.16)] bg-[rgba(238,242,255,0.76)] px-3 py-1 text-[0.74rem] font-bold uppercase tracking-normal text-[var(--accent-strong)]">
-              {item.previewTitle}
-            </span>
-          </div>
-
-          <h3 className="mt-5 break-words font-display text-[1.52rem] font-bold leading-[1.08] tracking-normal text-[var(--text-strong)] [overflow-wrap:anywhere] md:text-[1.86rem]">
+          <h3 className="break-words font-display text-[1.52rem] font-bold leading-[1.08] tracking-normal text-[var(--text-strong)] [overflow-wrap:anywhere] md:text-[1.86rem]">
             {item.title}
           </h3>
 
@@ -1053,54 +1044,13 @@ export default function HomePage() {
 
       </div>
 
-      <section id="features" className="feature-stack-section mx-auto mt-12 max-w-[80rem] md:mt-16" aria-labelledby="features-title">
+      <section id="features" className="feature-stack-section mx-auto mt-12 max-w-[80rem] md:mt-16">
         <Reveal>
           <div className="feature-stack-shell">
-            <div className="feature-stack-layout">
-              <aside className="feature-stack-copy">
-                <span className="eyebrow-pill">Модулі Decivio</span>
-                <h2 id="features-title" className="mt-5 break-words font-display text-[1.85rem] font-extrabold leading-[1.05] tracking-normal text-[var(--text-strong)] md:text-[2.5rem] lg:text-[2.85rem]">
-                  Усі інструменти переходу в одному компактному блоці
-                </h2>
-                <p className="mt-5 max-w-[35rem] text-[0.98rem] leading-[1.72] text-[var(--text-muted)] md:text-[1.05rem]">
-                  Сценарії, резюме, співбесіди, план переходу, вакансії та оцінка офера зібрані разом, щоб показати весь шлях без довгого списку
-                  розрізнених секцій.
-                </p>
-
-                <div className="mt-7 grid grid-cols-2 gap-3">
-                  <div className="feature-stack-stat">
-                    <span className="text-[1.65rem] font-bold leading-none text-[var(--text-strong)]">{featureShowcases.length}</span>
-                    <span className="text-[0.82rem] font-semibold leading-tight text-[var(--text-muted)]">модулів в одному сценарії</span>
-                  </div>
-                  <div className="feature-stack-stat">
-                    <span className="text-[1.65rem] font-bold leading-none text-[var(--text-strong)]">1</span>
-                    <span className="text-[0.82rem] font-semibold leading-tight text-[var(--text-muted)]">місце для старту й доступу</span>
-                  </div>
-                </div>
-
-                <div className="mt-7 flex flex-col gap-3 sm:flex-row lg:flex-col xl:flex-row">
-                  <Link href="/simulate" className="btn-primary text-center">
-                    Почати прогноз
-                  </Link>
-                  <Link href="/pricing" className="btn-secondary text-center">
-                    Переглянути доступ
-                  </Link>
-                </div>
-
-                <div className="feature-stack-index" aria-label="Список модулів">
-                  {featureShowcases.map((item, index) => (
-                    <span key={item.title}>
-                      {String(index + 1).padStart(2, "0")} · {item.title}
-                    </span>
-                  ))}
-                </div>
-              </aside>
-
-              <div className="feature-card-stack">
-                {featureShowcases.map((item, index) => (
-                  <FeatureStackCard key={item.title} item={item} index={index} />
-                ))}
-              </div>
+            <div className="feature-card-stack">
+              {featureShowcases.map((item, index) => (
+                <FeatureStackCard key={item.title} item={item} index={index} />
+              ))}
             </div>
           </div>
         </Reveal>
