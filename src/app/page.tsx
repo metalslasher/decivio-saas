@@ -306,6 +306,11 @@ const faqItems = [
       "Звичайна оцінка зарплати показує лише можливу цифру на старті. Тут ви бачите сценарій у часі: просадку на початку, період окупності, потенціал нового напряму і різницю між кількома варіантами переходу."
   },
   {
+    question: "Чим Decivio відрізняється від ChatGPT або загальних порад?",
+    answer:
+      "Decivio не просто генерує текст. Сервіс збирає вашу ситуацію в сценарій, рахує ризики, показує сильні й слабкі місця переходу та перетворює це на конкретні наступні кроки."
+  },
+  {
     question: "Які дані потрібні для кар'єрної симуляції?",
     answer:
       "Для базового прогнозу достатньо поточного доходу, поточної ролі, стажу, цільової ролі, релевантного досвіду, англійської та ринку, на який ви орієнтуєтесь."
@@ -318,7 +323,7 @@ const faqItems = [
   {
     question: "Що доступно безкоштовно, а що входить у платний доступ?",
     answer:
-      "Безкоштовно ви можете швидко перевірити, чи є сенс рухатись глибше. Платний доступ відкриває детальні сценарії, резюме під цільову роль, підготовку до співбесід, перевірку вакансій і покроковий план."
+      "Безкоштовно ви можете швидко перевірити, чи є сенс рухатись глибше. Платний доступ відкриває детальні сценарії, резюме під цільову роль, підготовку до співбесід, перевірку вакансій і покроковий план переходу."
   },
   {
     question: "Скільки часу займає симуляція?",
@@ -852,7 +857,7 @@ export default function HomePage() {
                       );
                     })}
                   </div>
-                  <span className="font-display text-[1.35rem] font-bold leading-none tracking-[-0.035em] text-[var(--text-strong)] md:text-[1.6rem]">
+                  <span className="font-display text-[1.35rem] font-bold leading-none tracking-normal text-[var(--text-strong)] md:text-[1.6rem]">
                     {socialProof.rating}
                   </span>
                 </div>
@@ -863,7 +868,7 @@ export default function HomePage() {
 
               <article className="flex min-h-[8.2rem] flex-col items-center justify-center border-t border-[rgba(22,29,43,0.08)] px-5 py-5 text-center sm:items-start sm:border-l sm:border-t-0 sm:text-left md:min-h-[8.5rem] md:px-7">
                 <div className="min-w-0">
-                  <p className="font-display text-[1.65rem] font-bold leading-none tracking-[-0.04em] text-[var(--text-strong)] md:text-[1.9rem]">
+                  <p className="font-display text-[1.65rem] font-bold leading-none tracking-normal text-[var(--text-strong)] md:text-[1.9rem]">
                     {socialProof.users}
                   </p>
                   <p className="mt-2 max-w-[13rem] text-[1.02rem] font-semibold leading-[1.25] text-[var(--text-muted)] md:text-[1.14rem]">
@@ -874,7 +879,7 @@ export default function HomePage() {
 
               <article className="flex min-h-[8.2rem] flex-col items-center justify-center border-t border-[rgba(22,29,43,0.08)] px-5 py-5 text-center sm:items-start sm:border-l sm:border-t-0 sm:text-left md:min-h-[8.5rem] md:px-7">
                 <div className="min-w-0">
-                  <p className="font-display text-[1.65rem] font-bold leading-none tracking-[-0.04em] text-[var(--text-strong)] md:text-[1.9rem]">
+                  <p className="font-display text-[1.65rem] font-bold leading-none tracking-normal text-[var(--text-strong)] md:text-[1.9rem]">
                     100%
                   </p>
                   <p className="mt-2 max-w-[13rem] text-[1.02rem] font-semibold leading-[1.25] text-[var(--text-muted)] md:text-[1.14rem]">
@@ -893,7 +898,7 @@ export default function HomePage() {
               <Reveal className="min-w-0">
                 <div className="surface-panel relative w-full min-w-0 overflow-hidden rounded-[2rem] px-5 py-6 text-center sm:text-left md:px-7 md:py-8 lg:px-8 lg:py-9">
                   <div className="pointer-events-none absolute -right-16 -top-20 h-44 w-44 rounded-full bg-[rgba(63,94,255,0.08)] blur-3xl" />
-                  <h2 className="max-w-full break-words font-display text-[1.18rem] font-bold leading-[1.2] tracking-[-0.03em] text-[var(--text-strong)] [overflow-wrap:anywhere] sm:text-[1.5rem] md:text-[2rem] lg:text-[2.25rem]">
+                  <h2 className="max-w-full break-words font-display text-[1.24rem] font-bold leading-[1.2] tracking-normal text-[var(--text-strong)] [overflow-wrap:anywhere] sm:text-[1.55rem] md:text-[2rem] lg:text-[2.25rem]">
                     Ми поруч, щоб зробити ваш шлях до нової роботи{" "}
                     <span className="text-[var(--accent-strong)]">простішим і результативнішим</span>.
                   </h2>
@@ -902,7 +907,7 @@ export default function HomePage() {
                     та рухаєтесь до карʼєри, яку справді хочете.
                   </p>
                   <div className="mt-6 flex justify-center sm:justify-start">
-                    <Link href="/simulate" className="btn-primary w-full max-w-[18rem] px-4 py-3 text-center text-[0.82rem] leading-tight sm:w-auto sm:max-w-full sm:px-7 md:px-8 md:text-[0.94rem]">
+                    <Link href="/simulate" className="btn-primary w-full max-w-[18rem] px-4 py-3 text-center text-[0.9rem] leading-tight sm:w-auto sm:max-w-full sm:px-7 md:px-8 md:text-[0.94rem]">
                       Отримати прогноз зміни кар’єри
                     </Link>
                   </div>
@@ -923,7 +928,7 @@ export default function HomePage() {
                         {String(index + 1).padStart(2, "0")}
                       </span>
                       <div className="min-w-0">
-                        <h3 className="break-words font-display text-[1.08rem] font-bold leading-[1.18] tracking-[-0.025em] text-[var(--text-strong)] [overflow-wrap:anywhere] md:text-[1.18rem]">
+                        <h3 className="break-words font-display text-[1.08rem] font-bold leading-[1.18] tracking-normal text-[var(--text-strong)] [overflow-wrap:anywhere] md:text-[1.18rem]">
                           {item.title}
                         </h3>
                         <p className="mt-2 break-words text-[0.9rem] leading-[1.62] text-[var(--text-muted)] [overflow-wrap:anywhere] md:text-[0.95rem]">
@@ -942,7 +947,7 @@ export default function HomePage() {
           <Reveal>
             <div className="grid min-w-0 items-center gap-8 lg:grid-cols-[0.98fr_1.02fr] lg:gap-10">
               <div className="relative z-10 min-w-0 text-center lg:text-left">
-                <h2 id="career-brands-title" className="mx-auto max-w-[36rem] font-display text-[1.78rem] font-extrabold leading-[1.1] tracking-[-0.022em] text-[var(--text-strong)] sm:text-[2.06rem] md:text-[2.38rem] lg:mx-0 lg:text-[2.58rem] xl:text-[2.74rem]">
+                <h2 id="career-brands-title" className="mx-auto max-w-[36rem] font-display text-[1.84rem] font-extrabold leading-[1.1] tracking-normal text-[var(--text-strong)] sm:text-[2.06rem] md:text-[2.38rem] lg:mx-0 lg:text-[2.58rem] xl:text-[2.74rem]">
                   Цільтеся в сильні продуктові команди, а не просто в першу{" "}
                   <span className="career-opportunity-accent">доступну вакансію</span>
                 </h2>
@@ -1055,21 +1060,94 @@ export default function HomePage() {
       </section>
 
       <section id="faq" className="mx-auto mt-16 max-w-[80rem] md:mt-24">
-        <div className="grid gap-4 md:grid-cols-2">
+        <Reveal>
+          <div className="mx-auto max-w-[44rem] text-center">
+            <h2 className="font-display text-[1.9rem] font-extrabold leading-[1.08] tracking-normal text-[var(--text-strong)] md:text-[2.45rem]">
+              Питання перед стартом
+            </h2>
+            <p className="mt-4 text-[0.98rem] leading-[1.72] text-[var(--text-muted)] md:text-[1.06rem]">
+              Коротко про точність прогнозу, дані, платний доступ і межі сервісу, щоб рішення про перехід було без зайвих припущень.
+            </p>
+          </div>
+        </Reveal>
+
+        <div className="mt-7 grid gap-4 md:mt-9 md:grid-cols-2">
           {faqItems.map((item, index) => (
-            <Reveal key={item.question} delayMs={index * 40}>
+            <Reveal key={item.question} delayMs={index * 35}>
               <details className="surface-panel group rounded-[1.8rem] px-5 py-4 md:px-6 md:py-5">
-                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-display text-[1.02rem] font-semibold leading-[1.24] tracking-[-0.02em] text-[var(--text-strong)] marker:hidden [&::-webkit-details-marker]:hidden md:text-[1.12rem]">
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-display text-[1.04rem] font-semibold leading-[1.28] tracking-normal text-[var(--text-strong)] marker:hidden [&::-webkit-details-marker]:hidden md:text-[1.12rem]">
                   <span>{item.question}</span>
                   <span className="text-[1.4rem] font-medium text-[var(--accent-strong)] transition-transform duration-200 group-open:rotate-45">
                     +
                   </span>
                 </summary>
-                <p className="mt-3 pr-8 text-[0.94rem] leading-[1.72] text-[var(--text-muted)] md:text-[0.98rem]">{item.answer}</p>
+                <p className="mt-3 pr-8 text-[0.96rem] leading-[1.72] text-[var(--text-muted)] md:text-[0.99rem]">{item.answer}</p>
               </details>
             </Reveal>
           ))}
         </div>
+      </section>
+
+      <section className="final-cta-section mx-auto mt-16 max-w-[80rem] md:mt-24" aria-labelledby="final-cta-title">
+        <Reveal>
+          <div className="final-cta-panel">
+            <div className="final-cta-grid" aria-hidden="true" />
+            <div className="relative z-10 mx-auto flex max-w-[48rem] flex-col items-center text-center">
+              <div className="flex items-center gap-1.5" aria-label="Рейтинг 4.5 із 5">
+                {Array.from({ length: 5 }).map((_, index) => {
+                  const starNumber = index + 1;
+                  const isFull = starNumber <= Math.floor(socialProof.ratingValue);
+                  const isHalf = !isFull && starNumber - socialProof.ratingValue <= 0.5;
+
+                  return (
+                    <svg key={index} viewBox="0 0 24 24" className="h-5 w-5 text-[var(--accent)]" aria-hidden="true">
+                      <defs>
+                        <linearGradient id={`final-trust-half-${index}`} x1="0%" y1="0%" x2="100%" y2="0%">
+                          <stop offset="50%" stopColor="currentColor" />
+                          <stop offset="50%" stopColor="rgba(255,255,255,0.32)" />
+                        </linearGradient>
+                      </defs>
+                      <path
+                        d="M12 2.5l2.9 5.88 6.49.94-4.7 4.58 1.11 6.47L12 17.3l-5.8 3.07 1.11-6.47-4.7-4.58 6.49-.94L12 2.5z"
+                        fill={isFull ? "currentColor" : isHalf ? `url(#final-trust-half-${index})` : "rgba(255,255,255,0.32)"}
+                      />
+                    </svg>
+                  );
+                })}
+                <span className="ml-2 text-[0.94rem] font-semibold text-white/72">{socialProof.rating} за відгуками користувачів</span>
+              </div>
+
+              <p className="mt-7 text-[0.82rem] font-extrabold uppercase tracking-normal text-[rgba(167,178,255,0.92)] md:text-[0.88rem]">
+                Перед тим як вкладати місяці у новий напрям
+              </p>
+              <h2 id="final-cta-title" className="mt-4 max-w-[42rem] font-display text-[2.12rem] font-extrabold leading-[1.04] tracking-normal text-white sm:text-[2.65rem] md:text-[3.25rem]">
+                Перевірте, чи справді окупиться ваша зміна карʼєри
+              </h2>
+              <p className="mt-6 max-w-[39rem] text-[1rem] font-medium leading-[1.72] text-white/74 md:text-[1.12rem]">
+                Decivio покаже ризик-період, потенціал доходу, сильні сторони та перші кроки, щоб ви рухались не навмання,
+                а з реалістичним планом.
+              </p>
+
+              <div className="mt-8 flex w-full flex-col items-center justify-center gap-3 sm:w-auto sm:flex-row">
+                <Link href="/simulate" className="final-cta-button">
+                  Почати аналіз карʼєри
+                  <svg viewBox="0 0 24 24" className="h-5 w-5 fill-none" aria-hidden="true">
+                    <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </Link>
+                <span className="text-[0.9rem] font-semibold text-white/62">Безкоштовно · 2–3 хвилини</span>
+              </div>
+
+              <div className="mt-8 grid w-full gap-3 sm:grid-cols-3">
+                {["Окупність переходу", "Ризики на старті", "План наступних кроків"].map((item) => (
+                  <div key={item} className="final-cta-proof">
+                    {item}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </Reveal>
       </section>
 
     </div>

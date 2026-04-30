@@ -185,14 +185,14 @@ function HeroForecastCard({ scenario }: { scenario: HeroScenario }) {
               </svg>
             </span>
             <span className="min-w-0">
-              <span className="block text-[0.68rem] font-semibold text-[rgba(102,112,133,0.78)]">Ваша наступна кар’єра</span>
-              <span className="block truncate text-[0.86rem] font-extrabold text-[var(--text-strong)]">{scenario.role}</span>
+              <span className="block text-[0.74rem] font-semibold text-[rgba(102,112,133,0.78)]">Ваша наступна кар’єра</span>
+              <span className="block truncate text-[0.9rem] font-extrabold text-[var(--text-strong)]">{scenario.role}</span>
             </span>
           </div>
 
           <div className="hero-growth-pill">
             <span className="block text-[1.8rem] font-extrabold leading-none text-[#28b86f]">+{growthPercent}%</span>
-            <span className="mt-1 block max-w-[5.5rem] text-[0.68rem] font-semibold leading-[1.16] text-[rgba(92,103,128,0.9)]">
+            <span className="mt-1 block max-w-[5.5rem] text-[0.74rem] font-semibold leading-[1.16] text-[rgba(92,103,128,0.9)]">
               до доходу
             </span>
           </div>
