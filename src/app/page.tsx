@@ -1045,15 +1045,13 @@ export default function HomePage() {
       </div>
 
       <section id="features" className="feature-stack-section mx-auto mt-12 max-w-[80rem] md:mt-16">
-        <Reveal>
-          <div className="feature-stack-shell">
-            <div className="feature-card-stack">
-              {featureShowcases.map((item, index) => (
-                <FeatureStackCard key={item.title} item={item} index={index} />
-              ))}
-            </div>
+        <div className="feature-stack-shell">
+          <div className="feature-card-stack">
+            {featureShowcases.map((item, index) => (
+              <FeatureStackCard key={item.title} item={item} index={index} />
+            ))}
           </div>
-        </Reveal>
+        </div>
       </section>
 
       <section id="reviews" className="relative mx-auto mt-14 max-w-[80rem] md:mt-20">
