@@ -16,8 +16,7 @@ const featureShowcases = [
       "Точка, де новий напрям починає випереджати поточний шлях",
       "Максимальна просадка та ризиковий період у перші місяці",
       "Альтернативні маршрути переходу з різним темпом входу"
-    ],
-    chips: ["Окупність: ~22 міс.", "Ризик-період: 6 міс."]
+    ]
   },
   {
     title: "Резюме під цільову роль",
@@ -27,8 +26,7 @@ const featureShowcases = [
       "Формулювання досвіду через результати, цифри та досягнення",
       "Виділення релевантних навичок, проєктів і сильних сторін",
       "Фінальна перевірка перед відгуком та готовий експорт у PDF"
-    ],
-    chips: ["Зрозуміло для рекрутера", "Готово до відгуку", "Експорт у PDF"]
+    ]
   },
   {
     title: "Підготовка до співбесід",
@@ -38,8 +36,7 @@ const featureShowcases = [
       "Окремі блоки для розмови з рекрутером, керівником і практичної частини",
       "Підказки, де відповідь звучить слабко або непереконливо",
       "План тренування, щоб поступово посилити відповіді"
-    ],
-    chips: ["Пробна співбесіда", "Коментарі до відповідей", "Приклади сильних відповідей"]
+    ]
   },
   {
     title: "Модель робочого дня в новій ролі",
@@ -49,8 +46,7 @@ const featureShowcases = [
       "Скільки буде комунікації, самостійної роботи й відповідальності",
       "Типові задачі, інструменти та ритм нової ролі",
       "Що потрібно освоїти в перші тижні, щоб увійти в робочий темп"
-    ],
-    chips: ["Реалістичний темп", "Окремо за рівнями", "Очікування від ролі"]
+    ]
   },
   {
     title: "План переходу",
@@ -60,8 +56,7 @@ const featureShowcases = [
       "Щотижневі кроки для навчання, портфоліо й відгуків",
       "Контрольні точки до першої співбесіди та пропозиції роботи",
       "Показники прогресу, щоб бачити де ви відстаєте"
-    ],
-    chips: ["Відстеження прогресу", "Нагадування", "Точки перевірки"]
+    ]
   },
   {
     title: "Перевірка відповідності вакансії",
@@ -71,8 +66,7 @@ const featureShowcases = [
       "Показує, яких навичок, інструментів або доказів вам ще бракує",
       "Пояснює, що вже достатньо сильне для відгуку просто зараз",
       "Дає пріоритетний список, що підтягнути спочатку"
-    ],
-    chips: ["Пріоритети підготовки", "Опора на текст вакансії", "Зрозумілий план дій"]
+    ]
   },
   {
     title: "Оцінка пропозиції роботи",
@@ -82,8 +76,7 @@ const featureShowcases = [
       "Оцінка, чи перекриває пропозиція ризик переходу на старті",
       "Розрахунок вигоди на горизонті кількох років, а не лише першої зарплати",
       "Пояснення, коли варто погоджуватись, торгуватись або почекати"
-    ],
-    chips: ["Порівняння з поточною роллю", "Оцінка ризику", "Аргументи для переговорів"]
+    ]
   }
 ] as const;
 
@@ -128,10 +121,10 @@ const painPoints = [
     title: "Не розумієте, чи окупиться перехід фінансово"
   },
   {
-    title: "Складно обрати між кількома ролями і не метатися"
+    title: "Складно обрати між кількома ролями"
   },
   {
-    title: "Є страх втратити темп або гроші в перші місяці"
+    title: "Боїтеся вкладати час у напрям, який не дасть результату"
   },
   {
     title: "Сумніваєтесь, чи ваш досвід взагалі релевантний"
@@ -317,16 +310,6 @@ const faqItems = [
       "Так. Ви можете побачити різницю між поточним шляхом і кількома варіантами переходу, щоб зрозуміти, який сценарій виглядає сильніше саме для вас."
   },
   {
-    question: "Чи підійде сервіс, якщо в мене ще немає досвіду в новій ролі?",
-    answer:
-      "Так. Сервіс враховує, чи є у вас практичний або базовий досвід, і показує, наскільки реалістичним виглядає вхід саме з вашої поточної точки."
-  },
-  {
-    question: "Чи враховується досвід не з IT або не з цільової сфери?",
-    answer:
-      "Так. Висновок дивиться не лише на назву вашої поточної ролі, а й на переносимі навички: комунікацію, аналітику, операційний досвід, роботу з клієнтами, управління процесами або людьми."
-  },
-  {
     question: "Чи підходить сервіс для України та міжнародного ринку?",
     answer:
       "Так. У симуляції можна орієнтуватися на Україну, віддалений формат, міжнародний ринок або локальну роботу за кордоном. Висновок залежить від обраного ринку, ролі, рівня досвіду та ваших вхідних даних."
@@ -340,11 +323,6 @@ const faqItems = [
     question: "Наскільки точним є прогноз доходу?",
     answer:
       "Прогноз не є обіцянкою конкретної зарплати. Це сценарна оцінка на основі ваших даних, ринку й припущень. Її варто використовувати як орієнтир для рішення, а не як гарантований результат."
-  },
-  {
-    question: "Чи можна використати результат для резюме або співбесіди?",
-    answer:
-      "Так. Висновок допомагає зрозуміти, які сильні сторони варто підсвітити, які прогалини закрити першими і як пояснювати логіку переходу рекрутеру або hiring manager."
   }
 ] as const;
 
@@ -787,13 +765,6 @@ function FeatureStackCard({ item, index }: { item: FeatureShowcase; index: numbe
             ))}
           </div>
 
-          <div className="mt-5 flex flex-wrap gap-2">
-            {item.chips.map((chip) => (
-              <span key={chip} className="feature-stack-chip">
-                {chip}
-              </span>
-            ))}
-          </div>
         </div>
 
         <div className="feature-stack-preview">
@@ -884,10 +855,9 @@ export default function HomePage() {
               <Reveal className="min-w-0">
                 <div className="surface-panel relative w-full min-w-0 overflow-hidden rounded-[2rem] px-5 py-6 text-center sm:text-left md:px-7 md:py-8 lg:px-8 lg:py-9">
                   <div className="pointer-events-none absolute -right-16 -top-20 h-44 w-44 rounded-full bg-[rgba(63,94,255,0.08)] blur-3xl" />
-                  <h2 className="career-support-title max-w-full break-words font-display text-[1.34rem] font-extrabold leading-[1.08] tracking-normal text-[var(--text-strong)] [overflow-wrap:anywhere] sm:text-[1.7rem] md:text-[2.12rem] lg:text-[2.35rem]">
-                    <span className="career-support-kicker">Ми поруч</span>
-                    <span className="career-support-copy">щоб зробити ваш шлях до нової роботи</span>
-                    <span className="career-support-highlight">простішим і результативнішим.</span>
+                  <h2 className="home-section-heading max-w-full break-words [overflow-wrap:anywhere]">
+                    Ми поруч, щоб зробити ваш шлях до нової роботи{" "}
+                    <span className="home-section-heading-accent">простішим і результативнішим</span>.
                   </h2>
                   <p className="mt-4 max-w-full break-words text-[0.9rem] leading-[1.72] text-[var(--text-muted)] [overflow-wrap:anywhere] md:text-[1.04rem]">
                     За допомогою наших інструментів і практичних підказок ви швидше виходите на співбесіди, краще виглядаєте на ринку
@@ -927,54 +897,6 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="career-opportunity-section relative mx-auto max-w-[80rem] py-9 md:py-14" aria-labelledby="career-brands-title">
-          <Reveal>
-            <div className="grid min-w-0 items-center gap-8 lg:grid-cols-[0.98fr_1.02fr] lg:gap-10">
-              <div className="relative z-10 min-w-0 text-center lg:text-left">
-                <h2 id="career-brands-title" className="mx-auto max-w-[36rem] font-display text-[1.84rem] font-extrabold leading-[1.1] tracking-normal text-[var(--text-strong)] sm:text-[2.06rem] md:text-[2.38rem] lg:mx-0 lg:text-[2.58rem] xl:text-[2.74rem]">
-                  Цільтеся в сильні продуктові команди, а не просто в першу{" "}
-                  <span className="career-opportunity-accent">доступну вакансію</span>
-                </h2>
-                <p className="mx-auto mt-5 max-w-[35rem] text-[0.98rem] leading-[1.72] text-[var(--text-muted)] md:text-[1.06rem] lg:mx-0">
-                  Наш сервіс допомагає тверезо оцінити перехід, посилити резюме й підготовку так, щоб претендувати на ролі з кращим рівнем доходу,
-                  процесів і професійного росту.
-                </p>
-              </div>
-
-              <div className="career-opportunity-visual" aria-hidden="true">
-                <div className="career-target-board">
-                  <Image
-                    src="/graphics/career-target-visual.webp"
-                    alt=""
-                    width={1400}
-                    height={933}
-                    sizes="(max-width: 640px) 100vw, (max-width: 1023px) 74vw, 44vw"
-                    className="career-target-asset"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="career-brand-marquee relative mt-7 overflow-hidden py-2 md:mt-8">
-                <div className="career-brand-track flex w-max items-center">
-                  {Array.from({ length: 3 }).map((_, groupIndex) => (
-                    <div
-                      key={groupIndex}
-                      className="career-brand-group flex items-center gap-6 md:gap-9"
-                      aria-hidden={groupIndex > 0}
-                    >
-                      {careerBrandNames.map((brand) => (
-                        <span key={`${brand}-${groupIndex}`} className="career-brand-name">
-                          {brand}
-                        </span>
-                      ))}
-                    </div>
-                  ))}
-                </div>
-            </div>
-          </Reveal>
-        </section>
-
       </div>
 
       <section id="features" className="feature-stack-section mx-auto mt-12 max-w-[80rem] md:mt-16">
@@ -983,6 +905,54 @@ export default function HomePage() {
             <FeatureStackCard key={item.title} item={item} index={index} />
           ))}
         </div>
+      </section>
+
+      <section className="career-opportunity-section relative mx-auto mt-10 max-w-[80rem] py-8 md:mt-12 md:py-10" aria-labelledby="career-brands-title">
+        <Reveal>
+          <div className="grid min-w-0 items-center gap-8 lg:grid-cols-[0.98fr_1.02fr] lg:gap-10">
+            <div className="relative z-10 min-w-0 text-center lg:text-left">
+              <h2 id="career-brands-title" className="home-section-heading mx-auto max-w-[36rem] lg:mx-0">
+                Цільтеся в сильні продуктові команди, а не просто в першу{" "}
+                <span className="home-section-heading-accent">доступну вакансію</span>
+              </h2>
+              <p className="mx-auto mt-5 max-w-[35rem] text-[0.98rem] leading-[1.72] text-[var(--text-muted)] md:text-[1.06rem] lg:mx-0">
+                Наш сервіс допомагає тверезо оцінити перехід, посилити резюме й підготовку так, щоб претендувати на ролі з кращим рівнем доходу,
+                процесів і професійного росту.
+              </p>
+            </div>
+
+            <div className="career-opportunity-visual" aria-hidden="true">
+              <div className="career-target-board">
+                <Image
+                  src="/graphics/career-target-visual.webp"
+                  alt=""
+                  width={1400}
+                  height={933}
+                  sizes="(max-width: 640px) 100vw, (max-width: 1023px) 74vw, 44vw"
+                  className="career-target-asset"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="career-brand-marquee relative mt-7 overflow-hidden py-2 md:mt-8">
+            <div className="career-brand-track flex w-max items-center">
+              {Array.from({ length: 3 }).map((_, groupIndex) => (
+                <div
+                  key={groupIndex}
+                  className="career-brand-group flex items-center gap-6 md:gap-9"
+                  aria-hidden={groupIndex > 0}
+                >
+                  {careerBrandNames.map((brand) => (
+                    <span key={`${brand}-${groupIndex}`} className="career-brand-name">
+                      {brand}
+                    </span>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
+        </Reveal>
       </section>
 
       <section id="reviews" className="relative mx-auto mt-10 max-w-[80rem] md:mt-12">

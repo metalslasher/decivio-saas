@@ -1099,79 +1099,23 @@ main {
   animation-play-state: paused;
 }
 
-.career-support-title {
+.home-section-heading {
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: clamp(1.72rem, 4.2vw, 2.34rem);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: 0;
+  color: var(--text-strong);
   text-wrap: balance;
 }
 
-.career-support-title > span {
-  display: block;
-}
-
-.career-support-kicker {
-  width: fit-content;
-  margin: 0 auto 0.72rem;
-  border: 1px solid rgba(67, 97, 255, 0.16);
-  border-radius: 9999px;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(238, 242, 255, 0.92)),
-    radial-gradient(9rem 3rem at 20% 0%, rgba(67, 97, 255, 0.14), transparent 62%);
-  padding: 0.38rem 0.82rem;
+.home-section-heading-accent {
   color: var(--accent-strong);
-  font-size: 0.46em;
-  font-weight: 800;
-  line-height: 1;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.9),
-    0 14px 28px -24px rgba(41, 73, 244, 0.44);
-  transform: rotate(-1deg);
-}
-
-.career-support-copy {
-  position: relative;
-  z-index: 1;
-}
-
-.career-support-highlight {
-  position: relative;
-  z-index: 1;
-  width: fit-content;
-  margin: 0.1rem auto 0;
-  background: linear-gradient(90deg, var(--accent-strong), #6f82ff 58%, #171b24 112%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-.career-support-highlight::after {
-  content: "";
-  position: absolute;
-  left: -0.12em;
-  right: -0.12em;
-  bottom: 0.02em;
-  z-index: -1;
-  height: 0.32em;
-  border-radius: 999px;
-  background: rgba(67, 97, 255, 0.12);
-  transform: skewX(-10deg) rotate(-1deg);
-}
-
-@media (min-width: 640px) {
-  .career-support-kicker,
-  .career-support-highlight {
-    margin-left: 0;
-    margin-right: 0;
-  }
 }
 
 .career-opportunity-section {
   isolation: isolate;
   overflow: visible;
-}
-
-.career-opportunity-accent {
-  position: relative;
-  display: inline-block;
-  color: var(--accent);
 }
 
 .career-opportunity-visual {
@@ -1350,21 +1294,6 @@ main {
   font-size: 0.9rem;
   line-height: 1.58;
   color: var(--text-muted);
-}
-
-.feature-stack-chip {
-  display: inline-flex;
-  min-width: 0;
-  align-items: center;
-  justify-content: center;
-  border-radius: 9999px;
-  border: 1px solid rgba(63, 94, 255, 0.16);
-  background: rgba(238, 242, 255, 0.8);
-  padding: 0.45rem 0.78rem;
-  font-size: 0.82rem;
-  font-weight: 700;
-  line-height: 1.2;
-  color: var(--accent-strong);
 }
 
 .feature-stack-preview {
