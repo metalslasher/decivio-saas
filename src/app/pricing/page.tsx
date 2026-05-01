@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { JsonLd } from "@/components/json-ld";
 import { formatUah, getCheckoutHref, paidFeatureSections, pricingPlans } from "@/lib/pricing";
-import { createBreadcrumbSchema, createFaqSchema, createMetadata, createSoftwareApplicationSchema } from "@/lib/seo";
+import { createBreadcrumbSchema, createMetadata, createSoftwareApplicationSchema } from "@/lib/seo";
 
 export const metadata = createMetadata({
   title: "Ціни",
@@ -11,39 +11,6 @@ export const metadata = createMetadata({
   path: "/pricing",
   keywords: ["тарифи decivio", "ціни decivio", "вартість доступу decivio", "річний доступ decivio"]
 });
-
-const pricingFaqItems = [
-  {
-    question: "Що входить у платний доступ?",
-    answer:
-      "Платний доступ відкриває весь набір інструментів Decivio: сценарії переходу, прогноз доходу й ризику, резюме під роль, підготовку до співбесід, план 30/60/90, перевірку вакансій і оцінку пропозиції роботи."
-  },
-  {
-    question: "Чим місячний доступ відрізняється від річного?",
-    answer:
-      "Функціонал однаковий. Місячний доступ списується щомісяця, а річний оформлюється одним платежем на 12 місяців і дає нижчу ціну в перерахунку на місяць."
-  },
-  {
-    question: "Коли краще обрати місячний доступ?",
-    answer:
-      "Місячний формат підходить, якщо хочете пройти один активний цикл: перевірити сценарій, посилити резюме, підготуватися до перших відгуків і не брати довший період одразу."
-  },
-  {
-    question: "Коли вигідніше брати річний доступ?",
-    answer:
-      "Річний доступ доречний, якщо ви плануєте системно працювати над переходом, порівнювати кілька ролей, повертатися до вакансій і поступово посилювати підготовку протягом року."
-  },
-  {
-    question: "Чи потрібно доплачувати за окремі модулі?",
-    answer:
-      "Ні. Резюме, співбесіди, сценарії, вакансії, план переходу й оцінка оферу входять в один доступ. Окремо купувати модулі не потрібно."
-  },
-  {
-    question: "У якій валюті проходить оплата і як списуються кошти?",
-    answer:
-      "Оплата проходить у гривні. Місячний доступ працює як щомісячна підписка, а річний доступ оплачується одним платежем за 12 місяців."
-  }
-] as const;
 
 const pricingReviews = [
   {
@@ -120,8 +87,7 @@ const pricingSchemas = [
       urlPath: "/pricing"
     })),
     isAccessibleForFree: false
-  }),
-  createFaqSchema([...pricingFaqItems])
+  })
 ];
 
 type PricingPlan = (typeof pricingPlans)[number];
@@ -161,7 +127,7 @@ function PlanCard({ plan }: { plan: PricingPlan }) {
 
         <div className="shrink-0 text-left sm:text-right">
           {plan.oldMonthlyEquivalentUah ? (
-            <p className="text-[0.92rem] font-semibold text-[var(--text-soft)] line-through">{formatUah(plan.oldMonthlyEquivalentUah)} (/ міс)</p>
+            <p className="text-[0.92rem] font-semibold text-[var(--text-soft)] line-through">{formatUah(plan.oldMonthlyEquivalentUah)}</p>
           ) : null}
           <p className="mt-1 font-display text-[2rem] font-extrabold leading-none tracking-normal text-[var(--accent-strong)] md:text-[2.25rem]">
             {formatUah(plan.monthlyEquivalentUah)}
@@ -301,21 +267,6 @@ export default function PricingPage() {
           </div>
         </section>
 
-        <section id="faq">
-          <div className="grid gap-4 md:grid-cols-2">
-            {pricingFaqItems.map((item) => (
-              <details key={item.question} className="surface-panel group rounded-[1.8rem] px-5 py-4 md:px-6 md:py-5">
-                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-display text-[1.02rem] font-semibold leading-[1.24] tracking-normal text-[var(--text-strong)] marker:hidden [&::-webkit-details-marker]:hidden md:text-[1.1rem]">
-                  <span>{item.question}</span>
-                  <span className="text-[1.4rem] font-medium text-[var(--accent-strong)] transition-transform duration-200 group-open:rotate-45">
-                    +
-                  </span>
-                </summary>
-                <p className="mt-3 pr-8 text-[0.94rem] leading-[1.72] text-[var(--text-muted)] md:text-[0.98rem]">{item.answer}</p>
-              </details>
-            ))}
-          </div>
-        </section>
       </div>
     </>
   );
