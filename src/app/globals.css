@@ -1318,7 +1318,7 @@ main {
     display: grid;
     gap: 1.1rem;
     overflow: visible;
-    padding: 0 0 8rem;
+    padding: 0 0 2rem;
     scroll-snap-type: none;
   }
 
@@ -1338,7 +1338,7 @@ main {
 
 @media (min-width: 1280px) {
   .feature-card-stack {
-    padding-bottom: 10rem;
+    padding-bottom: 2.5rem;
   }
 
   .feature-stack-card-grid {

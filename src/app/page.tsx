@@ -991,10 +991,10 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section id="reviews" className="relative mx-auto mt-14 max-w-[80rem] md:mt-20">
+      <section id="reviews" className="relative mx-auto mt-10 max-w-[80rem] md:mt-12">
         <Reveal>
           <div className="relative">
-            <div className="overflow-hidden px-1 pt-8 md:px-2 md:pt-10">
+            <div className="overflow-hidden px-1 pt-4 md:px-2 md:pt-5">
               <div className="reviews-marquee-track flex w-max gap-5">
                 {[...reviews, ...reviews].map((review, index) => (
                   <article
