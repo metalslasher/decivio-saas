@@ -857,7 +857,7 @@ export default function HomePage() {
                   <div className="pointer-events-none absolute -right-16 -top-20 h-44 w-44 rounded-full bg-[rgba(63,94,255,0.08)] blur-3xl" />
                   <h2 className="home-section-heading max-w-full break-words [overflow-wrap:anywhere]">
                     Ми поруч, щоб зробити ваш шлях до нової роботи{" "}
-                    <span className="home-section-heading-accent">простішим і результативнішим</span>.
+                    <span className="home-section-heading-accent">простішим і результативнішим</span>
                   </h2>
                   <p className="mt-4 max-w-full break-words text-[0.9rem] leading-[1.72] text-[var(--text-muted)] [overflow-wrap:anywhere] md:text-[1.04rem]">
                     За допомогою наших інструментів і практичних підказок ви швидше виходите на співбесіди, краще виглядаєте на ринку
