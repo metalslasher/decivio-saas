@@ -126,65 +126,42 @@ const pricingSchemas = [
 
 type PricingPlan = (typeof pricingPlans)[number];
 
-function getMonthlyDiscount(plan: PricingPlan) {
-  if (!plan.oldMonthlyEquivalentUah) {
-    return null;
-  }
-
-  return Math.round((1 - plan.monthlyEquivalentUah / plan.oldMonthlyEquivalentUah) * 100);
-}
-
 function PlanCard({ plan }: { plan: PricingPlan }) {
   const isFeatured = plan.featured;
-  const discount = getMonthlyDiscount(plan);
-  const totalLabel =
-    plan.id === "annual" ? `${formatUah(plan.billedNowUah)} одним платежем на 12 місяців` : `${formatUah(plan.billedNowUah)} щомісяця`;
+  const monthlyDiscount = plan.oldMonthlyEquivalentUah ? Math.round((1 - plan.monthlyEquivalentUah / plan.oldMonthlyEquivalentUah) * 100) : null;
   const ctaLabel = plan.id === "annual" ? "Обрати річний доступ" : "Обрати місячний доступ";
 
   return (
     <article
-      className={`surface-panel relative flex min-h-[15.5rem] flex-col overflow-visible rounded-[2rem] px-5 pb-5 pt-7 md:px-6 md:pb-6 md:pt-8 ${
-        isFeatured ? "ring-2 ring-[rgba(14,181,166,0.48)]" : ""
+      className={`surface-panel relative flex min-h-[14.5rem] flex-col overflow-visible rounded-[2rem] px-5 pb-5 pt-7 md:px-6 md:pb-6 md:pt-8 ${
+        isFeatured ? "ring-2 ring-[rgba(67,97,255,0.26)]" : ""
       }`}
     >
       <div className="absolute left-5 top-0 -translate-y-1/2">
-        <span className="inline-flex rounded-full bg-[#0bb5a5] px-4 py-2 text-[0.78rem] font-extrabold leading-none text-white shadow-[0_14px_28px_-20px_rgba(11,181,165,0.62)]">
-          {isFeatured && discount ? `Економія ${discount}%` : plan.badge}
+        <span className="inline-flex rounded-full bg-[linear-gradient(135deg,var(--accent),var(--accent-strong))] px-4 py-2 text-[0.78rem] font-extrabold leading-none text-white shadow-[0_14px_28px_-20px_rgba(41,73,244,0.52)]">
+          {isFeatured && monthlyDiscount ? `Економія ${monthlyDiscount}%` : plan.badge}
         </span>
       </div>
 
       {isFeatured ? (
         <div className="absolute right-5 top-0 hidden -translate-y-1/2 sm:block">
-          <span className="inline-flex rounded-full bg-[#ffd34d] px-5 py-3 text-[0.95rem] font-extrabold leading-none text-[#131722] shadow-[0_18px_34px_-22px_rgba(190,146,0,0.5)]">
+          <span className="inline-flex rounded-full border border-[rgba(67,97,255,0.16)] bg-[rgba(238,242,255,0.96)] px-5 py-3 text-[0.95rem] font-extrabold leading-none text-[var(--accent-strong)] shadow-[0_18px_34px_-24px_rgba(41,73,244,0.36)]">
             Найкраща ціна
           </span>
         </div>
       ) : null}
 
       <div className="flex flex-1 flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
-        <div className="flex min-w-0 gap-3.5">
-          <span
-            className={`mt-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 ${
-              isFeatured ? "border-[#0bb5a5] bg-[#0bb5a5] text-white" : "border-[var(--text-strong)] text-transparent"
-            }`}
-            aria-hidden="true"
-          >
-            <svg viewBox="0 0 24 24" className="h-4 w-4 fill-none">
-              <path d="M5 12.5l4.2 4.1L19 7" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </span>
-
-          <div className="min-w-0">
-            <h2 className="font-display text-[1.28rem] font-extrabold leading-[1.12] tracking-normal text-[var(--text-strong)] md:text-[1.42rem]">
-              {plan.name}
-            </h2>
-            <p className="mt-3 max-w-[29rem] text-[0.94rem] leading-[1.66] text-[var(--text-muted)]">{plan.description}</p>
-          </div>
+        <div className="min-w-0">
+          <h2 className="font-display text-[1.28rem] font-extrabold leading-[1.12] tracking-normal text-[var(--text-strong)] md:text-[1.42rem]">
+            {plan.name}
+          </h2>
+          <p className="mt-3 max-w-[31rem] text-[0.94rem] leading-[1.66] text-[var(--text-muted)]">{plan.description}</p>
         </div>
 
         <div className="shrink-0 text-left sm:text-right">
           {plan.oldMonthlyEquivalentUah ? (
-            <p className="text-[0.92rem] font-semibold text-[var(--text-soft)] line-through">{formatUah(plan.oldMonthlyEquivalentUah)} / міс</p>
+            <p className="text-[0.92rem] font-semibold text-[var(--text-soft)] line-through">{formatUah(plan.oldMonthlyEquivalentUah)} (/ міс)</p>
           ) : null}
           <p className="mt-1 font-display text-[2rem] font-extrabold leading-none tracking-normal text-[var(--accent-strong)] md:text-[2.25rem]">
             {formatUah(plan.monthlyEquivalentUah)}
@@ -193,9 +170,8 @@ function PlanCard({ plan }: { plan: PricingPlan }) {
         </div>
       </div>
 
-      <div className="mt-6 flex flex-col gap-3 border-t border-[rgba(22,29,43,0.08)] pt-5 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-[0.9rem] leading-[1.5] text-[var(--text-muted)]">{totalLabel}</p>
-        <Link href={getCheckoutHref(plan.id)} className={isFeatured ? "btn-primary justify-center" : "btn-secondary justify-center"}>
+      <div className="mt-6 border-t border-[rgba(22,29,43,0.08)] pt-5">
+        <Link href={getCheckoutHref(plan.id)} className={`w-full ${isFeatured ? "btn-primary justify-center" : "btn-secondary justify-center"}`}>
           {ctaLabel}
         </Link>
       </div>
@@ -269,13 +245,9 @@ export default function PricingPage() {
 
           <div className="relative">
             <header className="mx-auto max-w-3xl text-center">
-              <span className="eyebrow-pill">Повний доступ</span>
-              <h1 className="page-title mx-auto mt-4 max-w-[14ch]">
+              <h1 className="page-title mx-auto max-w-[14ch]">
                 Оберіть формат <span className="text-accent">доступу</span>
               </h1>
-              <p className="lead-copy mx-auto mt-5 max-w-2xl">
-                В обох тарифах відкритий весь набір Decivio. Відрізняється тільки формат списання і ціна в перерахунку на місяць.
-              </p>
             </header>
 
             <div className="mt-12 grid gap-5 md:mt-14 lg:grid-cols-2">
@@ -285,9 +257,11 @@ export default function PricingPage() {
           </div>
         </section>
 
-        <section className="space-y-6 md:space-y-7">
+        <section className="space-y-8 py-6 md:space-y-10 md:py-9">
           <div className="mx-auto max-w-3xl text-center">
-            <h2 className="section-title">Усі інструменти Decivio в одному доступі</h2>
+            <h2 className="page-title mx-auto max-w-[15ch]">
+              Усі інструменти <span className="text-accent">в одному місці</span>
+            </h2>
           </div>
 
           <div className="grid gap-4 lg:grid-cols-3">
@@ -318,7 +292,7 @@ export default function PricingPage() {
         </section>
 
         <section className="relative mx-auto max-w-[80rem]" aria-label="Відгуки користувачів">
-          <div className="overflow-hidden px-1 py-2 md:px-2">
+          <div className="overflow-hidden px-1 pb-12 pt-2 md:px-2 md:pb-14">
             <div className="reviews-marquee-track flex w-max gap-5">
               {[...pricingReviews, ...pricingReviews].map((review, index) => (
                 <PricingReviewCard key={`${review.name}-${index}`} review={review} index={index} />
