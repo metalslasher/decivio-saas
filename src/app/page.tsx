@@ -122,32 +122,28 @@ const careerBrandNames = [
 
 const painPoints = [
   {
-    title: "Хочете змінити сферу, але не бачите безпечного маршруту",
-    description: "Замість випадкових порад ви отримуєте напрям, оцінку ризиків та зрозумілу послідовність дій."
+    title: "Хочете змінити сферу, але не бачите безпечного маршруту"
   },
   {
-    title: "Не розумієте, чи окупиться перехід",
-    description: "Наш сервіс показує прогноз доходу й допомагає оцінити рішення не лише по стартовій зарплаті."
+    title: "Не розумієте, чи окупиться перехід фінансово"
   },
   {
-    title: "Складно обрати між кількома ролями",
-    description: "Порівнюєте сценарії й бачите, де більше потенціалу саме для вашого досвіду та цілей."
+    title: "Складно обрати між кількома ролями і не метатися"
   },
   {
-    title: "Є страх втратити темп або гроші на старті",
-    description: "Бачите ризиковий період і розумієте, який запас часу та ресурсів краще закласти."
+    title: "Є страх втратити темп або гроші в перші місяці"
   },
   {
-    title: "Втомилися від хаотичних порад",
-    description: "Отримуєте не мотиваційні фрази, а практичний план переходу з конкретними пріоритетами."
+    title: "Сумніваєтесь, чи ваш досвід взагалі релевантний"
   },
   {
-    title: "Не знаєте, як виглядати сильніше для рекрутера",
-    description: "Сервіс підказує, що посилити в резюме, підготовці та аргументах під цільову роль."
+    title: "Резюме не пояснює, чому вас мають взяти в нову роль"
   },
   {
-    title: "Сумніваєтесь, чи вистачить вашого досвіду",
-    description: "Розумієте, які сильні сторони вже можна використати, а які прогалини варто закрити першими."
+    title: "Відгукуєтесь на вакансії, але у відповідь тиша"
+  },
+  {
+    title: "Не знаєте, на який рівень і зарплату реально цілитися"
   }
 ] as const;
 
@@ -884,13 +880,14 @@ export default function HomePage() {
         <section id="career-pains" className="relative py-6 md:py-8">
           <div className="pointer-events-none absolute left-1/2 top-[38%] h-64 w-[88%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[rgba(63,94,255,0.055)] blur-3xl md:h-80" />
           <div className="relative mx-auto grid w-full max-w-[80rem] min-w-0 gap-5 lg:grid-cols-[1.1fr_0.9fr] lg:items-start lg:gap-6 xl:gap-8">
-            <div className="min-w-0 lg:order-2 lg:sticky lg:top-28 lg:self-start">
+            <div className="order-2 min-w-0 lg:order-2 lg:sticky lg:top-28 lg:self-start">
               <Reveal className="min-w-0">
                 <div className="surface-panel relative w-full min-w-0 overflow-hidden rounded-[2rem] px-5 py-6 text-center sm:text-left md:px-7 md:py-8 lg:px-8 lg:py-9">
                   <div className="pointer-events-none absolute -right-16 -top-20 h-44 w-44 rounded-full bg-[rgba(63,94,255,0.08)] blur-3xl" />
-                  <h2 className="max-w-full break-words font-display text-[1.24rem] font-bold leading-[1.2] tracking-normal text-[var(--text-strong)] [overflow-wrap:anywhere] sm:text-[1.55rem] md:text-[2rem] lg:text-[2.25rem]">
-                    Ми поруч, щоб зробити ваш шлях до нової роботи{" "}
-                    <span className="text-[var(--accent-strong)]">простішим і результативнішим</span>.
+                  <h2 className="career-support-title max-w-full break-words font-display text-[1.34rem] font-extrabold leading-[1.08] tracking-normal text-[var(--text-strong)] [overflow-wrap:anywhere] sm:text-[1.7rem] md:text-[2.12rem] lg:text-[2.35rem]">
+                    <span className="career-support-kicker">Ми поруч</span>
+                    <span className="career-support-copy">щоб зробити ваш шлях до нової роботи</span>
+                    <span className="career-support-highlight">простішим і результативнішим.</span>
                   </h2>
                   <p className="mt-4 max-w-full break-words text-[0.9rem] leading-[1.72] text-[var(--text-muted)] [overflow-wrap:anywhere] md:text-[1.04rem]">
                     За допомогою наших інструментів і практичних підказок ви швидше виходите на співбесіди, краще виглядаєте на ринку
@@ -905,15 +902,15 @@ export default function HomePage() {
               </Reveal>
             </div>
 
-            <Reveal className="min-w-0 lg:order-1" delayMs={80}>
+            <Reveal className="order-1 min-w-0 lg:order-1" delayMs={80}>
               <div className="grid min-w-0 gap-3 md:grid-cols-2 lg:grid-cols-1">
                 {painPoints.map((item, index) => (
                   <article
                     key={item.title}
-                    className="surface-panel group relative w-full min-w-0 overflow-hidden rounded-[1.55rem] px-4 py-4 md:px-5 md:py-5 lg:min-h-[116px]"
+                    className="surface-panel group relative w-full min-w-0 overflow-hidden rounded-[1.55rem] px-4 py-4 md:px-5 md:py-5 lg:min-h-[86px]"
                   >
                     <div className="pointer-events-none absolute -right-10 top-0 h-20 w-32 rounded-full bg-[rgba(63,94,255,0.045)] blur-2xl transition-opacity duration-200 group-hover:opacity-80" />
-                    <div className="relative flex gap-4">
+                    <div className="relative flex items-center gap-4">
                       <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[rgba(63,94,255,0.08)] font-display text-[0.78rem] font-bold text-[var(--accent-strong)]">
                         {String(index + 1).padStart(2, "0")}
                       </span>
@@ -921,9 +918,6 @@ export default function HomePage() {
                         <h3 className="break-words font-display text-[1.08rem] font-bold leading-[1.18] tracking-normal text-[var(--text-strong)] [overflow-wrap:anywhere] md:text-[1.18rem]">
                           {item.title}
                         </h3>
-                        <p className="mt-2 break-words text-[0.9rem] leading-[1.62] text-[var(--text-muted)] [overflow-wrap:anywhere] md:text-[0.95rem]">
-                          {item.description}
-                        </p>
                       </div>
                     </div>
                   </article>
