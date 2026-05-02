@@ -1,7 +1,8 @@
 import Image from "next/image";
-import Link from "next/link";
+import { Suspense } from "react";
 import { JsonLd } from "@/components/json-ld";
-import { formatUah, getCheckoutHref, paidFeatureSections, pricingPlans } from "@/lib/pricing";
+import { PricingPurchaseButton } from "@/components/pricing-purchase-button";
+import { formatUah, paidFeatureSections, pricingPlans } from "@/lib/pricing";
 import { createBreadcrumbSchema, createMetadata, createSoftwareApplicationSchema } from "@/lib/seo";
 
 export const metadata = createMetadata({
@@ -137,9 +138,19 @@ function PlanCard({ plan }: { plan: PricingPlan }) {
       </div>
 
       <div className="mt-6 border-t border-[rgba(22,29,43,0.08)] pt-5">
-        <Link href={getCheckoutHref(plan.id)} className={`w-full ${isFeatured ? "btn-primary justify-center" : "btn-secondary justify-center"}`}>
-          {ctaLabel}
-        </Link>
+        <Suspense
+          fallback={
+            <button type="button" disabled className={`w-full ${isFeatured ? "btn-primary justify-center" : "btn-secondary justify-center"} opacity-70`}>
+              {ctaLabel}
+            </button>
+          }
+        >
+          <PricingPurchaseButton
+            planId={plan.id}
+            label={ctaLabel}
+            className={`w-full ${isFeatured ? "btn-primary justify-center" : "btn-secondary justify-center"}`}
+          />
+        </Suspense>
       </div>
     </article>
   );

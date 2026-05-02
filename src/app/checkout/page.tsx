@@ -1,6 +1,5 @@
-import Link from "next/link";
-import { CheckoutGate } from "@/components/checkout-gate";
-import { getPricingPlan, pricingPlans } from "@/lib/pricing";
+import { redirect } from "next/navigation";
+import { getPricingPurchaseHref, getPricingPlan } from "@/lib/pricing";
 import { createMetadata } from "@/lib/seo";
 
 type CheckoutPageProps = {
@@ -12,47 +11,28 @@ type CheckoutPageProps = {
 
 export const metadata = createMetadata({
   title: "Оформлення доступу",
-  description: "Службова сторінка оформлення доступу до Decivio.",
+  description: "Службовий редірект оформлення доступу до Decivio.",
   path: "/checkout",
   noIndex: true
 });
 
 export default function CheckoutPage({ searchParams }: CheckoutPageProps) {
-  const plan = getPricingPlan(searchParams?.plan);
-  const initialCheckoutId = typeof searchParams?.checkout === "string" ? searchParams.checkout : null;
+  const requestedPlanId = typeof searchParams?.plan === "string" ? searchParams.plan : null;
+  const plan = getPricingPlan(requestedPlanId);
+  const checkoutId = typeof searchParams?.checkout === "string" ? searchParams.checkout : null;
 
-  return (
-    <section className="space-y-8 py-4 md:space-y-10 md:py-8">
-      <header className="max-w-4xl space-y-4 md:space-y-5">
-        <span className="eyebrow-pill">Оформлення</span>
-        <h1 className="page-title max-w-[12ch]">Підготуємо оплату й закріпимо доступ за вашим акаунтом.</h1>
-        <p className="lead-copy max-w-3xl">
-          Ви обрали <strong>{plan.name.toLowerCase()}</strong>. Сторінка сама створює mono checkout, повертає вас після оплати та
-          дотягує фактичний статус, щоб доступ відкрився саме у потрібному акаунті.
-        </p>
-      </header>
+  if (checkoutId) {
+    const params = new URLSearchParams({
+      plan: plan.id,
+      checkout: checkoutId
+    });
 
-      <div className="flex flex-wrap gap-3">
-        {pricingPlans.map((item) => {
-          const isActive = item.id === plan.id;
+    redirect(`/billing/return?${params.toString()}`);
+  }
 
-          return (
-            <Link
-              key={item.id}
-              href={`/checkout?plan=${item.id}`}
-              className={`inline-flex items-center rounded-full px-4 py-2.5 text-sm font-semibold transition ${
-                isActive
-                  ? "bg-[var(--accent-strong)] text-white shadow-[0_14px_30px_-22px_rgba(41,73,244,0.54)]"
-                  : "border border-[var(--line-soft)] bg-[rgba(255,255,255,0.76)] text-[var(--text-muted)] hover:text-[var(--text-strong)]"
-              }`}
-            >
-              {item.name}
-            </Link>
-          );
-        })}
-      </div>
+  if (requestedPlanId) {
+    redirect(getPricingPurchaseHref(plan.id));
+  }
 
-      <CheckoutGate plan={plan} initialCheckoutId={initialCheckoutId} />
-    </section>
-  );
+  redirect("/pricing");
 }

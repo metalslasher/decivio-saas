@@ -135,6 +135,6 @@ export function getPricingPlan(planId: string | null | undefined) {
   return pricingPlans.find((plan) => plan.id === planId) ?? pricingPlans[0];
 }
 
-export function getCheckoutHref(planId: PaidPlanId) {
-  return `/checkout?plan=${planId}`;
+export function getPricingPurchaseHref(planId: PaidPlanId) {
+  return `/pricing?checkoutPlan=${planId}`;
 }

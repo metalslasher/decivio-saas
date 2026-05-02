@@ -4,11 +4,12 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useAuthDialog } from "@/components/auth-dialog-provider";
 import { getSupabaseBrowserClient } from "@/lib/db/supabase-browser";
-import { formatUah, getCheckoutHref, pricingPlans } from "@/lib/pricing";
+import { formatUah, pricingPlans } from "@/lib/pricing";
 
 type CheckoutGateProps = {
   plan: (typeof pricingPlans)[number];
   initialCheckoutId: string | null;
+  authNextPath: string;
 };
 
 type SubscriptionSnapshot = {
@@ -125,7 +126,7 @@ function getCheckoutMessage(payload: CheckoutStatusPayload) {
   }
 }
 
-export function CheckoutGate({ plan, initialCheckoutId }: CheckoutGateProps) {
+export function CheckoutGate({ plan, initialCheckoutId, authNextPath }: CheckoutGateProps) {
   const supabase = useMemo(() => getSupabaseBrowserClient(), []);
   const { openAuthDialog } = useAuthDialog();
   const [authState, setAuthState] = useState<CheckoutState>({ status: "loading" });
@@ -254,7 +255,6 @@ export function CheckoutGate({ plan, initialCheckoutId }: CheckoutGateProps) {
     };
   }, [authState, initialCheckoutId]);
 
-  const nextPath = getCheckoutHref(plan.id);
   const subscription = authState.status === "user" ? authState.subscription : null;
   const activeUntilLabel = formatAccessDate(subscription?.currentPeriodEnd ?? null);
   const hasActiveProAccess =
@@ -342,10 +342,10 @@ export function CheckoutGate({ plan, initialCheckoutId }: CheckoutGateProps) {
         </div>
 
         <div className="mt-6 grid gap-3 md:grid-cols-2">
-          <button type="button" onClick={() => openAuthDialog("signup", { nextPath })} className="btn-primary text-center">
+          <button type="button" onClick={() => openAuthDialog("signup", { nextPath: authNextPath })} className="btn-primary text-center">
             Створити акаунт
           </button>
-          <button type="button" onClick={() => openAuthDialog("login", { nextPath })} className="btn-secondary text-center">
+          <button type="button" onClick={() => openAuthDialog("login", { nextPath: authNextPath })} className="btn-secondary text-center">
             У мене вже є акаунт
           </button>
         </div>

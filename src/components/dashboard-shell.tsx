@@ -40,7 +40,7 @@ import {
   type ProfileContext,
   type WorkPreference,
 } from "@/lib/profile-context";
-import { formatUah, pricingPlans } from "@/lib/pricing";
+import { formatUah, getPricingPurchaseHref, pricingPlans } from "@/lib/pricing";
 
 type DashboardView =
   | "overview"
@@ -3702,7 +3702,7 @@ function DashboardAccess({
             <Link href="/pricing" className="btn-secondary w-full">
               Переглянути тарифи
             </Link>
-            <Link href="/checkout?plan=monthly" className="btn-primary w-full">
+            <Link href={getPricingPurchaseHref("monthly")} className="btn-primary w-full">
               Відкрити оплату
             </Link>
             <button

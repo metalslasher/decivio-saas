@@ -81,7 +81,7 @@ export function buildAppUrl(pathname: string) {
 }
 
 export function buildMonoCheckoutReturnUrl(planId: PaidPlanId, checkoutId: string) {
-  return buildAppUrl(`/checkout?plan=${planId}&checkout=${checkoutId}`);
+  return buildAppUrl(`/billing/return?plan=${planId}&checkout=${checkoutId}`);
 }
 
 export function buildMonoInvoiceWebhookUrl() {
