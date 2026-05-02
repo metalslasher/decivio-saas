@@ -143,33 +143,27 @@ const painPoints = [
 const careerHelpStages = [
   {
     step: "01",
-    title: "Порівняти",
-    label: "сценарії",
-    caption: "роль / напрям / запасний план",
-    tags: ["дохід", "ризик", "темп"],
-    visual: "scenarios",
-    positionClass: "lg:left-[3%] lg:top-[12%]",
-    markerClass: "bg-[rgba(67,97,255,0.12)] text-[var(--accent-strong)]"
+    title: "Порівняти сценарії",
+    description: "Аналізуємо варіанти та показуємо, де більше можливостей для зростання.",
+    bullets: ["Поточна і нова роль", "Альтернативний напрям", "Дохід, ринок, перспективи"],
+    icon: "chart",
+    accentClass: "bg-[rgba(67,97,255,0.12)] text-[var(--accent-strong)]"
   },
   {
     step: "02",
-    title: "Підготувати",
-    label: "профіль",
-    caption: "резюме / досвід / вакансії",
-    tags: ["навички", "резюме", "ринок"],
-    visual: "profile",
-    positionClass: "lg:left-[35%] lg:top-[30%]",
-    markerClass: "bg-[rgba(20,184,166,0.12)] text-[#0f766e]"
+    title: "Підготувати профіль",
+    description: "Створюємо сильний профіль, який відкриває двері до бажаних ролей.",
+    bullets: ["Резюме під позицію", "Навички та релевантний досвід", "Підбір доречних вакансій"],
+    icon: "profile",
+    accentClass: "bg-[rgba(67,97,255,0.12)] text-[var(--accent-strong)]"
   },
   {
     step: "03",
-    title: "Дійти",
-    label: "до пропозиції",
-    caption: "співбесіди / план / рішення",
-    tags: ["розмова", "перехід", "оцінка"],
-    visual: "offer",
-    positionClass: "lg:right-[3%] lg:top-[8%]",
-    markerClass: "bg-[rgba(34,197,94,0.12)] text-[#15803d]"
+    title: "Дійти до пропозиції",
+    description: "Супроводжуємо на фінальному етапі, щоб ви отримали найкращу пропозицію.",
+    bullets: ["Підготовка до співбесід", "План переходу", "Оцінка пропозиції"],
+    icon: "send",
+    accentClass: "bg-[rgba(67,97,255,0.12)] text-[var(--accent-strong)]"
   }
 ] as const;
 
@@ -810,54 +804,69 @@ function FeatureStackCard({ item, index }: { item: FeatureShowcase; index: numbe
 
 type CareerHelpStage = (typeof careerHelpStages)[number];
 
-function CareerStageVisual({ visual }: { visual: CareerHelpStage["visual"] }) {
-  if (visual === "scenarios") {
+function CareerStageIcon({ icon }: { icon: CareerHelpStage["icon"] }) {
+  if (icon === "chart") {
     return (
-      <div className="relative h-24 overflow-hidden rounded-[1.25rem] border border-[rgba(67,97,255,0.1)] bg-[linear-gradient(135deg,rgba(67,97,255,0.08),rgba(255,255,255,0.76))] p-3">
-        <svg viewBox="0 0 220 72" className="absolute inset-0 h-full w-full" fill="none" aria-hidden="true">
-          <path d="M28 44C78 12 116 18 150 44C168 58 186 60 205 45" stroke="rgba(67,97,255,0.28)" strokeWidth="3" strokeLinecap="round" />
-          <path d="M28 44C76 34 110 42 148 26C170 17 190 19 205 31" stroke="rgba(20,184,166,0.34)" strokeWidth="3" strokeLinecap="round" />
-        </svg>
-        <div className="relative z-10 flex h-full items-end justify-between gap-2">
-          {["зараз", "ціль", "варіант"].map((item) => (
-            <span key={item} className="rounded-full bg-white/80 px-2.5 py-1 text-[0.72rem] font-bold text-[var(--text-strong)] shadow-[0_8px_18px_rgba(35,48,78,0.08)]">
-              {item}
-            </span>
-          ))}
-        </div>
-      </div>
+      <svg viewBox="0 0 42 42" className="h-9 w-9 fill-none" aria-hidden="true">
+        <path d="M8 31h27" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
+        <path d="M10 28l7-8 6 4 9-12" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+        <circle cx="17" cy="20" r="2.4" fill="currentColor" />
+        <circle cx="23" cy="24" r="2.4" fill="currentColor" />
+        <circle cx="32" cy="12" r="2.4" fill="currentColor" />
+      </svg>
     );
   }
 
-  if (visual === "profile") {
+  if (icon === "profile") {
     return (
-      <div className="flex h-24 items-center justify-center rounded-[1.25rem] border border-[rgba(20,184,166,0.12)] bg-[linear-gradient(135deg,rgba(240,253,250,0.95),rgba(255,255,255,0.78))]">
-        <div className="w-[7rem] rounded-[1rem] bg-white/90 p-3 shadow-[0_18px_38px_rgba(35,48,78,0.12)]">
-          <div className="h-2 w-12 rounded-full bg-[rgba(20,184,166,0.25)]" />
-          <div className="mt-3 space-y-2">
-            <div className="h-1.5 w-full rounded-full bg-[rgba(22,29,43,0.1)]" />
-            <div className="h-1.5 w-4/5 rounded-full bg-[rgba(67,97,255,0.22)]" />
-            <div className="h-1.5 w-3/5 rounded-full bg-[rgba(20,184,166,0.28)]" />
-          </div>
-          <div className="mt-3 flex gap-1.5">
-            <span className="h-5 flex-1 rounded-full bg-[rgba(67,97,255,0.1)]" />
-            <span className="h-5 flex-1 rounded-full bg-[rgba(20,184,166,0.12)]" />
-          </div>
-        </div>
-      </div>
+      <svg viewBox="0 0 42 42" className="h-9 w-9 fill-none" aria-hidden="true">
+        <circle cx="21" cy="16" r="6" stroke="currentColor" strokeWidth="2.4" />
+        <path d="M10 34c2.6-6.2 6.4-9.2 11-9.2s8.4 3 11 9.2" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
+      </svg>
     );
   }
 
   return (
-    <div className="relative flex h-24 items-center justify-center overflow-hidden rounded-[1.25rem] border border-[rgba(34,197,94,0.12)] bg-[linear-gradient(135deg,rgba(240,253,244,0.95),rgba(255,255,255,0.78))]">
-      <div className="relative w-[7.5rem] rotate-[-3deg] rounded-[1rem] bg-white/95 px-3 py-3 shadow-[0_18px_38px_rgba(35,48,78,0.12)]">
-        <div className="flex items-center justify-between gap-2">
-          <span className="h-2 w-12 rounded-full bg-[rgba(34,197,94,0.28)]" />
-          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[rgba(34,197,94,0.13)] text-[0.78rem] font-black text-[#15803d]">✓</span>
-        </div>
-        <div className="mt-4 h-1.5 w-full rounded-full bg-[rgba(22,29,43,0.1)]" />
-        <div className="mt-2 h-1.5 w-2/3 rounded-full bg-[rgba(34,197,94,0.24)]" />
-      </div>
+    <svg viewBox="0 0 42 42" className="h-9 w-9 fill-none" aria-hidden="true">
+      <path
+        d="M7 20.5 34 8.5 23.5 34l-4.8-10.7L7 20.5Z"
+        stroke="currentColor"
+        strokeWidth="2.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path d="m18.7 23.3 6.6-6.6" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function CareerTargetGraphic() {
+  return (
+    <div className="pointer-events-none absolute right-[2%] top-0 hidden h-52 w-52 lg:block" aria-hidden="true">
+      <svg viewBox="0 0 220 220" className="h-full w-full overflow-visible fill-none">
+        <defs>
+          <linearGradient id="career-target-gradient" x1="54" x2="160" y1="138" y2="38" gradientUnits="userSpaceOnUse">
+            <stop stopColor="#eef3ff" />
+            <stop offset="1" stopColor="#ffffff" />
+          </linearGradient>
+          <linearGradient id="career-target-accent" x1="68" x2="155" y1="123" y2="62" gradientUnits="userSpaceOnUse">
+            <stop stopColor="#4265ff" />
+            <stop offset="1" stopColor="#6f82ff" />
+          </linearGradient>
+          <filter id="career-target-shadow" x="0" y="0" width="220" height="220" colorInterpolationFilters="sRGB">
+            <feDropShadow dx="0" dy="22" stdDeviation="18" floodColor="#4361ff" floodOpacity="0.2" />
+          </filter>
+        </defs>
+        <ellipse cx="113" cy="145" rx="72" ry="28" fill="#dfe7ff" opacity="0.5" />
+        <g filter="url(#career-target-shadow)">
+          <ellipse cx="112" cy="116" rx="72" ry="41" fill="url(#career-target-gradient)" />
+          <ellipse cx="112" cy="116" rx="51" ry="29" stroke="url(#career-target-accent)" strokeWidth="8" />
+          <ellipse cx="112" cy="116" rx="28" ry="16" stroke="url(#career-target-accent)" strokeWidth="7" opacity="0.88" />
+          <ellipse cx="112" cy="116" rx="9" ry="5" fill="url(#career-target-accent)" />
+          <path d="M112 113V35" stroke="url(#career-target-accent)" strokeWidth="7" strokeLinecap="round" />
+          <path d="M116 39c17-6 25 1 41-7-7 13-13 21-36 27-2-7-3-13-5-20Z" fill="url(#career-target-accent)" />
+        </g>
+      </svg>
     </div>
   );
 }
@@ -866,99 +875,96 @@ function CareerHelpSection() {
   return (
     <section className="relative mx-auto mt-12 max-w-[80rem] md:mt-16" aria-labelledby="career-help-title">
       <Reveal>
-        <div className="grid min-w-0 gap-7 lg:grid-cols-[0.72fr_1.28fr] lg:items-center lg:gap-8 xl:gap-10">
-          <div className="min-w-0 text-center lg:text-left">
-            <p className="text-[0.82rem] font-extrabold uppercase tracking-normal text-[var(--accent-strong)] md:text-[0.88rem]">
-              Як Decivio допомагає
-            </p>
-            <h2 id="career-help-title" className="home-section-heading mx-auto mt-3 max-w-[31rem] lg:mx-0">
-              Один маршрут до <span className="home-section-heading-accent">сильнішої заявки</span>
+        <div className="relative min-w-0 overflow-hidden rounded-[2.2rem] bg-[linear-gradient(135deg,#fbfcff_0%,#f2f5ff_52%,#eef3ff_100%)] px-5 pb-7 pt-8 shadow-[0_28px_80px_rgba(35,48,78,0.1)] md:px-8 md:pb-9 md:pt-10 lg:min-h-[38rem] lg:px-11">
+          <div
+            className="pointer-events-none absolute inset-0 bg-[linear-gradient(115deg,rgba(255,255,255,0.86)_0%,rgba(255,255,255,0.35)_48%,rgba(67,97,255,0.08)_100%)]"
+            aria-hidden="true"
+          />
+
+          <div className="relative z-20 max-w-[33rem] text-center sm:text-left">
+            <h2 id="career-help-title" className="font-display text-[2.1rem] font-extrabold leading-[1.05] tracking-normal text-[var(--text-strong)] sm:text-[2.55rem] md:text-[3rem]">
+              Як Decivio <span className="text-[var(--accent-strong)]">допомагає</span>
             </h2>
-            <p className="mx-auto mt-5 max-w-[30rem] text-[0.98rem] leading-[1.7] text-[var(--text-muted)] md:text-[1.06rem] lg:mx-0">
-              Спершу обираєте реалістичний напрям, далі посилюєте профіль і виходите на співбесіди без хаосу.
+            <p className="mt-5 max-w-[29rem] text-[0.98rem] font-medium leading-[1.72] text-[var(--text-muted)] md:text-[1.06rem]">
+              Перетворюємо невизначеність на чіткий план переходу до сильнішої ролі та доходу.
             </p>
-            <div className="mt-6 flex flex-col items-center gap-3 sm:flex-row sm:justify-center lg:justify-start">
-              <Link href="/simulate" className="btn-primary w-full max-w-[18rem] px-5 py-3 text-center text-[0.92rem] sm:w-auto">
-                Побудувати свій маршрут
-              </Link>
-              <span className="text-[0.9rem] font-semibold text-[var(--text-muted)]">2-3 хвилини</span>
-            </div>
           </div>
 
-          <div className="relative min-w-0 overflow-hidden rounded-[2rem] border border-white/75 bg-[linear-gradient(135deg,rgba(248,250,255,0.98),rgba(239,244,255,0.94)_52%,rgba(240,253,250,0.92))] px-4 py-5 shadow-[0_28px_70px_rgba(35,48,78,0.11)] md:px-5 md:py-6 lg:min-h-[34rem]">
-            <div
-              className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(67,97,255,0.07)_1px,transparent_1px),linear-gradient(90deg,rgba(67,97,255,0.06)_1px,transparent_1px)] bg-[size:54px_54px] opacity-45"
-              aria-hidden="true"
+          <CareerTargetGraphic />
+
+          <svg
+            viewBox="0 0 1180 320"
+            className="pointer-events-none absolute left-[3%] top-[7.2rem] z-10 hidden h-[15rem] w-[94%] lg:block"
+            fill="none"
+            aria-hidden="true"
+          >
+            <defs>
+              <linearGradient id="career-help-road" x1="104" x2="1040" y1="236" y2="76" gradientUnits="userSpaceOnUse">
+                <stop stopColor="rgba(67,97,255,0.05)" />
+                <stop offset="0.35" stopColor="rgba(67,97,255,0.42)" />
+                <stop offset="0.7" stopColor="rgba(67,97,255,0.76)" />
+                <stop offset="1" stopColor="rgba(67,97,255,0.18)" />
+              </linearGradient>
+              <filter id="career-help-road-glow" x="0" y="0" width="1180" height="320" colorInterpolationFilters="sRGB">
+                <feDropShadow dx="0" dy="14" stdDeviation="14" floodColor="#4361ff" floodOpacity="0.2" />
+              </filter>
+            </defs>
+            <path
+              d="M100 236C248 212 362 215 458 192C566 166 535 103 635 100C742 96 720 184 810 170C914 154 894 68 1044 72"
+              stroke="rgba(255,255,255,0.94)"
+              strokeWidth="54"
+              strokeLinecap="round"
+              filter="url(#career-help-road-glow)"
             />
-            <svg
-              viewBox="0 0 760 430"
-              className="pointer-events-none absolute inset-0 hidden h-full w-full lg:block"
-              fill="none"
-              aria-hidden="true"
-            >
-              <defs>
-                <linearGradient id="career-help-path" x1="62" x2="698" y1="128" y2="124" gradientUnits="userSpaceOnUse">
-                  <stop stopColor="rgba(67, 97, 255, 0.72)" />
-                  <stop offset="0.52" stopColor="rgba(20, 184, 166, 0.62)" />
-                  <stop offset="1" stopColor="rgba(34, 197, 94, 0.72)" />
-                </linearGradient>
-              </defs>
-              <path
-                d="M70 146C175 34 286 344 392 246C490 154 530 68 690 132"
-                stroke="rgba(255,255,255,0.9)"
-                strokeWidth="16"
-                strokeLinecap="round"
-              />
-              <path
-                d="M70 146C175 34 286 344 392 246C490 154 530 68 690 132"
-                stroke="url(#career-help-path)"
-                strokeWidth="6"
-                strokeLinecap="round"
-                strokeDasharray="2 18"
-              />
-            </svg>
+            <path
+              d="M100 236C248 212 362 215 458 192C566 166 535 103 635 100C742 96 720 184 810 170C914 154 894 68 1044 72"
+              stroke="url(#career-help-road)"
+              strokeWidth="22"
+              strokeLinecap="round"
+            />
+            <path
+              d="M100 236C248 212 362 215 458 192C566 166 535 103 635 100C742 96 720 184 810 170C914 154 894 68 1044 72"
+              stroke="rgba(255,255,255,0.55)"
+              strokeWidth="5"
+              strokeLinecap="round"
+            />
+          </svg>
 
-            <div className="pointer-events-none absolute left-6 top-6 hidden rounded-full border border-white/70 bg-white/70 px-3 py-1 text-[0.72rem] font-extrabold uppercase tracking-normal text-[var(--text-muted)] shadow-[0_12px_28px_rgba(35,48,78,0.08)] lg:block" aria-hidden="true">
-              старт
-            </div>
-            <div className="pointer-events-none absolute bottom-6 right-6 hidden rounded-full border border-white/70 bg-white/70 px-3 py-1 text-[0.72rem] font-extrabold uppercase tracking-normal text-[#15803d] shadow-[0_12px_28px_rgba(35,48,78,0.08)] lg:block" aria-hidden="true">
-              рішення
-            </div>
+          <div className="pointer-events-none absolute right-[24%] top-12 hidden h-32 w-px bg-[linear-gradient(180deg,rgba(67,97,255,0),rgba(67,97,255,0.24),rgba(67,97,255,0))] lg:block" aria-hidden="true" />
+          <div className="pointer-events-none absolute right-[33%] top-5 hidden h-24 w-px bg-[linear-gradient(180deg,rgba(67,97,255,0),rgba(67,97,255,0.18),rgba(67,97,255,0))] lg:block" aria-hidden="true" />
 
-            <div className="relative z-10 grid min-w-0 gap-3 md:grid-cols-3 lg:block lg:min-h-[30rem]">
-              {careerHelpStages.map((stage) => (
-                <article
-                  key={stage.title}
-                  className={`relative min-w-0 overflow-hidden rounded-[1.45rem] border border-white/80 bg-white/80 p-4 shadow-[0_18px_42px_rgba(35,48,78,0.12)] backdrop-blur-sm transition-transform duration-200 hover:-translate-y-1 lg:absolute lg:w-[31%] ${stage.positionClass}`}
-                >
-                  <div className="flex items-center justify-between gap-3">
-                    <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full font-display text-[0.82rem] font-extrabold ${stage.markerClass}`}>
-                        {stage.step}
-                    </span>
-                    <span className="truncate rounded-full border border-[rgba(22,29,43,0.08)] bg-white/75 px-3 py-1 text-[0.72rem] font-extrabold uppercase tracking-normal text-[var(--text-muted)]">
-                      {stage.label}
-                    </span>
+          <div className="relative z-20 mt-20 grid min-w-0 gap-x-5 gap-y-16 md:grid-cols-3 md:gap-y-5 lg:mt-[13.8rem]">
+            {careerHelpStages.map((stage) => (
+              <article
+                key={stage.title}
+                className="relative min-w-0 rounded-[1.65rem] border border-white/78 bg-white/72 px-5 pb-6 pt-14 shadow-[0_22px_48px_rgba(35,48,78,0.1)] backdrop-blur-md md:min-h-[15rem] md:px-6"
+              >
+                <div className="absolute -top-[4.5rem] left-1/2 flex -translate-x-1/2 flex-col items-center" aria-hidden="true">
+                  <div className="relative z-10 flex h-16 w-16 items-center justify-center rounded-[1.05rem] border border-white/85 bg-white/82 text-[var(--accent-strong)] shadow-[0_18px_36px_rgba(67,97,255,0.18)] backdrop-blur-sm">
+                    <CareerStageIcon icon={stage.icon} />
                   </div>
+                  <div className="mt-[-0.45rem] h-5 w-[7.2rem] rounded-[50%] border border-[rgba(67,97,255,0.1)] bg-[rgba(67,97,255,0.12)] shadow-[0_12px_22px_rgba(67,97,255,0.12)]" />
+                </div>
 
-                  <div className="mt-4">
-                    <CareerStageVisual visual={stage.visual} />
-                  </div>
+                <span className={`absolute -left-2 -top-4 flex h-9 w-9 items-center justify-center rounded-full font-display text-[0.86rem] font-extrabold shadow-[0_12px_24px_rgba(67,97,255,0.2)] ${stage.accentClass}`}>
+                  {stage.step}
+                </span>
 
-                  <h3 className="mt-4 break-words font-display text-[1.18rem] font-bold leading-[1.08] tracking-normal text-[var(--text-strong)] [overflow-wrap:anywhere] md:text-[1.28rem]">
-                      {stage.title}
-                  </h3>
-                  <p className="mt-2 text-[0.86rem] font-semibold leading-[1.45] text-[var(--text-muted)]">{stage.caption}</p>
+                <h3 className="break-words font-display text-[1.22rem] font-bold leading-[1.14] tracking-normal text-[var(--text-strong)] [overflow-wrap:anywhere] md:text-[1.32rem]">
+                  {stage.title}
+                </h3>
+                <p className="mt-3 text-[0.9rem] leading-[1.58] text-[var(--text-muted)] md:text-[0.94rem]">{stage.description}</p>
 
-                  <div className="mt-4 flex flex-wrap gap-1.5">
-                    {stage.tags.map((tag) => (
-                      <span key={tag} className="rounded-full bg-[rgba(22,29,43,0.055)] px-2.5 py-1 text-[0.72rem] font-bold text-[var(--text-strong)]">
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                </article>
-              ))}
-            </div>
+                <div className="mt-5 grid gap-2.5">
+                  {stage.bullets.map((bullet) => (
+                    <p key={bullet} className="flex items-start gap-3 text-[0.82rem] font-semibold leading-[1.45] text-[var(--text-strong)]">
+                      <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--accent)]" />
+                      <span>{bullet}</span>
+                    </p>
+                  ))}
+                </div>
+              </article>
+            ))}
           </div>
         </div>
       </Reveal>
