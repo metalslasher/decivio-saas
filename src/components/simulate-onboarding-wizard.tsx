@@ -69,24 +69,6 @@ const initialValues: WizardForm = {
 const inputClassName = "field-surface mt-1";
 const radioCardClassName = "cursor-pointer rounded-[1.35rem] border px-4 py-3 text-sm transition";
 
-const simulationOutcomeItems = [
-  {
-    label: "1",
-    title: "Спершу висновок",
-    description: "Результат відкривається без реєстрації, щоб ви одразу побачили користь від симуляції."
-  },
-  {
-    label: "2",
-    title: "Потім практичний маршрут",
-    description: "Після висновку Decivio покаже, як перейти до резюме, плану підготовки, вакансій і співбесід."
-  },
-  {
-    label: "3",
-    title: "Оплата тоді, коли зрозуміло навіщо",
-    description: "Тарифи з'являються як наступний крок, а не як перешкода перед результатом."
-  }
-] as const;
-
 function parseNumber(value: string) {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : null;
@@ -129,41 +111,6 @@ function RadioCards<T extends string>({
         </label>
       ))}
     </div>
-  );
-}
-
-function SimulationOutcomePanel() {
-  return (
-    <aside className="surface-panel rounded-[2rem] p-5 md:p-6 lg:sticky lg:top-28">
-      <p className="label-muted">Після симуляції</p>
-      <h2 className="mt-3 text-[1.45rem] font-semibold leading-[1.06] tracking-[-0.04em] text-[var(--text-strong)] md:text-[1.72rem]">
-        Ви отримаєте не просто цифри, а основу для рішення.
-      </h2>
-      <p className="mt-4 text-[0.95rem] leading-[1.7] text-[var(--text-muted)]">
-        Форма збирає лише ті дані, які впливають на висновок: дохід, досвід, цільову роль, англійську, ринок і пріоритет переходу.
-      </p>
-
-      <div className="mt-6 space-y-4">
-        {simulationOutcomeItems.map((item) => (
-          <div key={item.title} className="flex gap-3">
-            <span className="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--accent-soft)] text-[0.78rem] font-bold text-[var(--accent-strong)]">
-              {item.label}
-            </span>
-            <span>
-              <span className="block text-[0.98rem] font-semibold leading-[1.35] text-[var(--text-strong)]">{item.title}</span>
-              <span className="mt-1 block text-[0.9rem] leading-[1.6] text-[var(--text-muted)]">{item.description}</span>
-            </span>
-          </div>
-        ))}
-      </div>
-
-      <div className="mt-6 border-t border-[var(--line-soft)] pt-5">
-        <p className="text-[0.82rem] font-semibold uppercase tracking-[0.14em] text-[var(--text-soft)]">На результаті</p>
-        <p className="mt-2 text-[1.02rem] font-semibold leading-[1.35] text-[var(--text-strong)]">
-          Decivio підкаже, що робити далі з вашим сценарієм.
-        </p>
-      </div>
-    </aside>
   );
 }
 
@@ -314,8 +261,7 @@ export function SimulateOnboardingWizard() {
         </p>
       </header>
 
-      <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,0.78fr),minmax(19rem,0.4fr)] xl:grid-cols-[minmax(0,0.74fr),minmax(21rem,0.38fr)]">
-        <div className="surface-panel relative rounded-[2rem] p-5 md:p-7" aria-busy={isSubmitting}>
+      <div className="surface-panel relative rounded-[2rem] p-5 md:p-7" aria-busy={isSubmitting}>
           {isSubmitting ? <div className="absolute inset-0 z-10 rounded-[2rem] bg-white/45 backdrop-blur-[1px]" aria-hidden="true" /> : null}
           <div className="space-y-2">
             <div className="flex items-center justify-between text-xs font-medium uppercase tracking-[0.14em] text-[var(--text-soft)]">
@@ -496,9 +442,6 @@ export function SimulateOnboardingWizard() {
               {isLastStep ? (isSubmitting ? "Формуємо висновок..." : "Отримати мій висновок") : "Далі"}
             </button>
           </div>
-        </div>
-
-        <SimulationOutcomePanel />
       </div>
     </section>
   );

@@ -153,41 +153,40 @@ function DecivioNextStepsPanel({
   isAuthenticated: boolean;
 }) {
   return (
-    <article className="surface-panel rounded-[2rem] p-5 md:p-7">
-      <div className="grid gap-7 lg:grid-cols-[minmax(0,0.95fr),minmax(18rem,0.58fr)] lg:items-start">
-        <div>
+    <article className="surface-panel rounded-[2rem] p-5 md:p-6">
+      <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
+        <div className="max-w-4xl">
           <p className="label-muted">Що Decivio зробить далі</p>
           <h2 className="mt-3 section-title">{cta.title}</h2>
-          <p className="body-copy mt-3 max-w-3xl">
+          <p className="body-copy mt-3">
             {isAuthenticated
               ? "Ваш сценарій уже збережено в кабінеті. Підписка відкриває практичну частину: підготовку матеріалів, план дій і підтримку на наступних етапах переходу."
               : "Висновок уже показав, що саме впливає на ваш перехід. На тарифах можна обрати доступ до практичної частини: резюме, плану підготовки, вакансій, співбесід і порівняння пропозицій."}
           </p>
-          <div className="mt-5 flex flex-wrap gap-3">
-            <Link href="/pricing" className="btn-primary">
-              Перейти до тарифів
-            </Link>
-            {isAuthenticated ? (
-              <Link href="/dashboard?view=scenario" className="btn-secondary">
-                Відкрити сценарії
-              </Link>
-            ) : null}
-          </div>
         </div>
 
-        <div className="space-y-4 lg:border-l lg:border-[var(--line-soft)] lg:pl-6">
-          {decivioNextSteps.map((item, index) => (
-            <div key={item.title} className="flex gap-3">
-              <span className="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--accent-soft)] text-[0.78rem] font-bold text-[var(--accent-strong)]">
-                {index + 1}
-              </span>
-              <span>
-                <span className="block text-[0.98rem] font-semibold leading-[1.35] text-[var(--text-strong)]">{item.title}</span>
-                <span className="mt-1 block text-[0.9rem] leading-[1.6] text-[var(--text-muted)]">{item.description}</span>
-              </span>
-            </div>
-          ))}
+        <div className="flex shrink-0 flex-wrap gap-3">
+          <Link href="/pricing" className="btn-primary">
+            Перейти до тарифів
+          </Link>
+          {isAuthenticated ? (
+            <Link href="/dashboard?view=scenario" className="btn-secondary">
+              Відкрити сценарії
+            </Link>
+          ) : null}
         </div>
+      </div>
+
+      <div className="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+        {decivioNextSteps.map((item, index) => (
+          <div key={item.title} className="rounded-[1.2rem] border border-[var(--line-soft)] bg-[rgba(255,255,255,0.58)] p-4">
+            <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[var(--accent-soft)] text-[0.78rem] font-bold text-[var(--accent-strong)]">
+              {index + 1}
+            </span>
+            <h3 className="mt-3 text-[0.98rem] font-semibold leading-[1.35] text-[var(--text-strong)]">{item.title}</h3>
+            <p className="mt-2 text-[0.88rem] leading-[1.58] text-[var(--text-muted)]">{item.description}</p>
+          </div>
+        ))}
       </div>
     </article>
   );
