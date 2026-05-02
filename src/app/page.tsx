@@ -143,30 +143,33 @@ const painPoints = [
 const careerHelpStages = [
   {
     step: "01",
-    kicker: "рішення",
-    title: "Зважити сценарії",
-    description:
-      "Показує, як виглядає поточна роль, цільовий напрям і запасний варіант за доходом, ризиком та темпом входу.",
-    points: ["поточна роль", "цільовий напрям", "запасний варіант"],
-    outcome: "видно, куди рухатися без зайвого ризику."
+    title: "Порівняти",
+    label: "сценарії",
+    caption: "роль / напрям / запасний план",
+    tags: ["дохід", "ризик", "темп"],
+    visual: "scenarios",
+    positionClass: "lg:left-[3%] lg:top-[12%]",
+    markerClass: "bg-[rgba(67,97,255,0.12)] text-[var(--accent-strong)]"
   },
   {
     step: "02",
-    kicker: "профіль",
-    title: "Підготувати себе під ринок",
-    description:
-      "Перекладає ваш досвід мовою вакансій: що винести в резюме, які навички підсвітити і де бракує доказів.",
-    points: ["резюме", "навички", "релевантний досвід"],
-    outcome: "профіль виглядає сильнішим для обраної ролі."
+    title: "Підготувати",
+    label: "профіль",
+    caption: "резюме / досвід / вакансії",
+    tags: ["навички", "резюме", "ринок"],
+    visual: "profile",
+    positionClass: "lg:left-[35%] lg:top-[30%]",
+    markerClass: "bg-[rgba(20,184,166,0.12)] text-[#0f766e]"
   },
   {
     step: "03",
-    kicker: "пропозиція",
-    title: "Дійти до пропозиції роботи",
-    description:
-      "Збирає план переходу, готує до співбесід і допомагає тверезо оцінити пропозицію, коли вона зʼявиться.",
-    points: ["співбесіди", "план переходу", "оцінка пропозиції"],
-    outcome: "зрозуміло, що приймати, де торгуватися і коли зачекати."
+    title: "Дійти",
+    label: "до пропозиції",
+    caption: "співбесіди / план / рішення",
+    tags: ["розмова", "перехід", "оцінка"],
+    visual: "offer",
+    positionClass: "lg:right-[3%] lg:top-[8%]",
+    markerClass: "bg-[rgba(34,197,94,0.12)] text-[#15803d]"
   }
 ] as const;
 
@@ -805,103 +808,155 @@ function FeatureStackCard({ item, index }: { item: FeatureShowcase; index: numbe
   );
 }
 
+type CareerHelpStage = (typeof careerHelpStages)[number];
+
+function CareerStageVisual({ visual }: { visual: CareerHelpStage["visual"] }) {
+  if (visual === "scenarios") {
+    return (
+      <div className="relative h-24 overflow-hidden rounded-[1.25rem] border border-[rgba(67,97,255,0.1)] bg-[linear-gradient(135deg,rgba(67,97,255,0.08),rgba(255,255,255,0.76))] p-3">
+        <svg viewBox="0 0 220 72" className="absolute inset-0 h-full w-full" fill="none" aria-hidden="true">
+          <path d="M28 44C78 12 116 18 150 44C168 58 186 60 205 45" stroke="rgba(67,97,255,0.28)" strokeWidth="3" strokeLinecap="round" />
+          <path d="M28 44C76 34 110 42 148 26C170 17 190 19 205 31" stroke="rgba(20,184,166,0.34)" strokeWidth="3" strokeLinecap="round" />
+        </svg>
+        <div className="relative z-10 flex h-full items-end justify-between gap-2">
+          {["зараз", "ціль", "варіант"].map((item) => (
+            <span key={item} className="rounded-full bg-white/80 px-2.5 py-1 text-[0.72rem] font-bold text-[var(--text-strong)] shadow-[0_8px_18px_rgba(35,48,78,0.08)]">
+              {item}
+            </span>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (visual === "profile") {
+    return (
+      <div className="flex h-24 items-center justify-center rounded-[1.25rem] border border-[rgba(20,184,166,0.12)] bg-[linear-gradient(135deg,rgba(240,253,250,0.95),rgba(255,255,255,0.78))]">
+        <div className="w-[7rem] rounded-[1rem] bg-white/90 p-3 shadow-[0_18px_38px_rgba(35,48,78,0.12)]">
+          <div className="h-2 w-12 rounded-full bg-[rgba(20,184,166,0.25)]" />
+          <div className="mt-3 space-y-2">
+            <div className="h-1.5 w-full rounded-full bg-[rgba(22,29,43,0.1)]" />
+            <div className="h-1.5 w-4/5 rounded-full bg-[rgba(67,97,255,0.22)]" />
+            <div className="h-1.5 w-3/5 rounded-full bg-[rgba(20,184,166,0.28)]" />
+          </div>
+          <div className="mt-3 flex gap-1.5">
+            <span className="h-5 flex-1 rounded-full bg-[rgba(67,97,255,0.1)]" />
+            <span className="h-5 flex-1 rounded-full bg-[rgba(20,184,166,0.12)]" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative flex h-24 items-center justify-center overflow-hidden rounded-[1.25rem] border border-[rgba(34,197,94,0.12)] bg-[linear-gradient(135deg,rgba(240,253,244,0.95),rgba(255,255,255,0.78))]">
+      <div className="relative w-[7.5rem] rotate-[-3deg] rounded-[1rem] bg-white/95 px-3 py-3 shadow-[0_18px_38px_rgba(35,48,78,0.12)]">
+        <div className="flex items-center justify-between gap-2">
+          <span className="h-2 w-12 rounded-full bg-[rgba(34,197,94,0.28)]" />
+          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[rgba(34,197,94,0.13)] text-[0.78rem] font-black text-[#15803d]">✓</span>
+        </div>
+        <div className="mt-4 h-1.5 w-full rounded-full bg-[rgba(22,29,43,0.1)]" />
+        <div className="mt-2 h-1.5 w-2/3 rounded-full bg-[rgba(34,197,94,0.24)]" />
+      </div>
+    </div>
+  );
+}
+
 function CareerHelpSection() {
   return (
     <section className="relative mx-auto mt-12 max-w-[80rem] md:mt-16" aria-labelledby="career-help-title">
       <Reveal>
-        <div className="grid min-w-0 gap-7 lg:grid-cols-[0.86fr_1.14fr] lg:items-center lg:gap-8 xl:gap-10">
+        <div className="grid min-w-0 gap-7 lg:grid-cols-[0.72fr_1.28fr] lg:items-center lg:gap-8 xl:gap-10">
           <div className="min-w-0 text-center lg:text-left">
             <p className="text-[0.82rem] font-extrabold uppercase tracking-normal text-[var(--accent-strong)] md:text-[0.88rem]">
               Як Decivio допомагає
             </p>
-            <h2 id="career-help-title" className="home-section-heading mx-auto mt-3 max-w-[36rem] lg:mx-0">
-              Від сумніву до <span className="home-section-heading-accent">пропозиції роботи</span>
+            <h2 id="career-help-title" className="home-section-heading mx-auto mt-3 max-w-[31rem] lg:mx-0">
+              Один маршрут до <span className="home-section-heading-accent">сильнішої заявки</span>
             </h2>
-            <p className="mx-auto mt-5 max-w-[35rem] text-[0.98rem] leading-[1.72] text-[var(--text-muted)] md:text-[1.06rem] lg:mx-0">
-              Decivio не залишає вас із набором окремих інструментів. Сервіс веде зрозумілим маршрутом: спочатку допомагає
-              обрати напрям, потім посилити профіль і далі підготуватися до реального рішення на ринку.
+            <p className="mx-auto mt-5 max-w-[30rem] text-[0.98rem] leading-[1.7] text-[var(--text-muted)] md:text-[1.06rem] lg:mx-0">
+              Спершу обираєте реалістичний напрям, далі посилюєте профіль і виходите на співбесіди без хаосу.
             </p>
             <div className="mt-6 flex flex-col items-center gap-3 sm:flex-row sm:justify-center lg:justify-start">
               <Link href="/simulate" className="btn-primary w-full max-w-[18rem] px-5 py-3 text-center text-[0.92rem] sm:w-auto">
                 Побудувати свій маршрут
               </Link>
-              <span className="text-[0.9rem] font-semibold text-[var(--text-muted)]">2-3 хвилини до першого висновку</span>
+              <span className="text-[0.9rem] font-semibold text-[var(--text-muted)]">2-3 хвилини</span>
             </div>
           </div>
 
-          <div className="relative min-w-0">
+          <div className="relative min-w-0 overflow-hidden rounded-[2rem] border border-white/75 bg-[linear-gradient(135deg,rgba(248,250,255,0.98),rgba(239,244,255,0.94)_52%,rgba(240,253,250,0.92))] px-4 py-5 shadow-[0_28px_70px_rgba(35,48,78,0.11)] md:px-5 md:py-6 lg:min-h-[34rem]">
+            <div
+              className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(67,97,255,0.07)_1px,transparent_1px),linear-gradient(90deg,rgba(67,97,255,0.06)_1px,transparent_1px)] bg-[size:54px_54px] opacity-45"
+              aria-hidden="true"
+            />
             <svg
-              viewBox="0 0 1000 120"
-              className="pointer-events-none absolute left-[7%] top-8 hidden h-24 w-[86%] lg:block"
+              viewBox="0 0 760 430"
+              className="pointer-events-none absolute inset-0 hidden h-full w-full lg:block"
               fill="none"
               aria-hidden="true"
             >
               <defs>
-                <linearGradient id="career-help-path" x1="0" x2="1000" y1="0" y2="0" gradientUnits="userSpaceOnUse">
-                  <stop stopColor="rgba(67, 97, 255, 0.08)" />
-                  <stop offset="0.5" stopColor="rgba(67, 97, 255, 0.42)" />
-                  <stop offset="1" stopColor="rgba(67, 97, 255, 0.08)" />
+                <linearGradient id="career-help-path" x1="62" x2="698" y1="128" y2="124" gradientUnits="userSpaceOnUse">
+                  <stop stopColor="rgba(67, 97, 255, 0.72)" />
+                  <stop offset="0.52" stopColor="rgba(20, 184, 166, 0.62)" />
+                  <stop offset="1" stopColor="rgba(34, 197, 94, 0.72)" />
                 </linearGradient>
               </defs>
               <path
-                d="M28 65C190 18 292 18 430 65C568 112 682 112 972 65"
-                stroke="url(#career-help-path)"
-                strokeWidth="4"
+                d="M70 146C175 34 286 344 392 246C490 154 530 68 690 132"
+                stroke="rgba(255,255,255,0.9)"
+                strokeWidth="16"
                 strokeLinecap="round"
-                strokeDasharray="10 12"
+              />
+              <path
+                d="M70 146C175 34 286 344 392 246C490 154 530 68 690 132"
+                stroke="url(#career-help-path)"
+                strokeWidth="6"
+                strokeLinecap="round"
+                strokeDasharray="2 18"
               />
             </svg>
 
-            <div className="grid min-w-0 gap-4 md:grid-cols-3">
+            <div className="pointer-events-none absolute left-6 top-6 hidden rounded-full border border-white/70 bg-white/70 px-3 py-1 text-[0.72rem] font-extrabold uppercase tracking-normal text-[var(--text-muted)] shadow-[0_12px_28px_rgba(35,48,78,0.08)] lg:block" aria-hidden="true">
+              старт
+            </div>
+            <div className="pointer-events-none absolute bottom-6 right-6 hidden rounded-full border border-white/70 bg-white/70 px-3 py-1 text-[0.72rem] font-extrabold uppercase tracking-normal text-[#15803d] shadow-[0_12px_28px_rgba(35,48,78,0.08)] lg:block" aria-hidden="true">
+              рішення
+            </div>
+
+            <div className="relative z-10 grid min-w-0 gap-3 md:grid-cols-3 lg:block lg:min-h-[30rem]">
               {careerHelpStages.map((stage) => (
                 <article
                   key={stage.title}
-                  className="surface-panel group relative min-w-0 overflow-hidden rounded-[1.7rem] px-4 py-5 md:px-5 md:py-6"
+                  className={`relative min-w-0 overflow-hidden rounded-[1.45rem] border border-white/80 bg-white/80 p-4 shadow-[0_18px_42px_rgba(35,48,78,0.12)] backdrop-blur-sm transition-transform duration-200 hover:-translate-y-1 lg:absolute lg:w-[31%] ${stage.positionClass}`}
                 >
-                  <div
-                    className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-[linear-gradient(90deg,rgba(67,97,255,0),rgba(67,97,255,0.62),rgba(67,97,255,0))] opacity-0 transition-opacity duration-200 group-hover:opacity-100 md:opacity-80"
-                    aria-hidden="true"
-                  />
-                  <div className="relative z-10 flex h-full min-w-0 flex-col">
-                    <div className="flex items-center justify-between gap-3">
-                      <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[rgba(67,97,255,0.1)] font-display text-[0.86rem] font-extrabold text-[var(--accent-strong)] ring-8 ring-[rgba(67,97,255,0.04)]">
+                  <div className="flex items-center justify-between gap-3">
+                    <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full font-display text-[0.82rem] font-extrabold ${stage.markerClass}`}>
                         {stage.step}
-                      </span>
-                      <span className="truncate rounded-full border border-[rgba(67,97,255,0.14)] bg-[rgba(67,97,255,0.055)] px-3 py-1 text-[0.72rem] font-extrabold uppercase tracking-normal text-[var(--accent-strong)]">
-                        {stage.kicker}
-                      </span>
-                    </div>
+                    </span>
+                    <span className="truncate rounded-full border border-[rgba(22,29,43,0.08)] bg-white/75 px-3 py-1 text-[0.72rem] font-extrabold uppercase tracking-normal text-[var(--text-muted)]">
+                      {stage.label}
+                    </span>
+                  </div>
 
-                    <h3 className="mt-5 break-words font-display text-[1.24rem] font-bold leading-[1.14] tracking-normal text-[var(--text-strong)] [overflow-wrap:anywhere] md:text-[1.34rem]">
+                  <div className="mt-4">
+                    <CareerStageVisual visual={stage.visual} />
+                  </div>
+
+                  <h3 className="mt-4 break-words font-display text-[1.18rem] font-bold leading-[1.08] tracking-normal text-[var(--text-strong)] [overflow-wrap:anywhere] md:text-[1.28rem]">
                       {stage.title}
-                    </h3>
-                    <p className="mt-3 text-[0.93rem] leading-[1.68] text-[var(--text-muted)] md:text-[0.96rem]">{stage.description}</p>
+                  </h3>
+                  <p className="mt-2 text-[0.86rem] font-semibold leading-[1.45] text-[var(--text-muted)]">{stage.caption}</p>
 
-                    <div className="mt-5 grid gap-2">
-                      {stage.points.map((point) => (
-                        <span
-                          key={point}
-                          className="min-w-0 rounded-full border border-[rgba(22,29,43,0.08)] bg-white/55 px-3 py-2 text-[0.82rem] font-semibold leading-tight text-[var(--text-strong)]"
-                        >
-                          {point}
-                        </span>
-                      ))}
-                    </div>
-
-                    <p className="mt-auto pt-5 text-[0.86rem] font-medium leading-[1.58] text-[var(--text-muted)]">
-                      <span className="font-bold text-[var(--text-strong)]">На виході:</span> {stage.outcome}
-                    </p>
+                  <div className="mt-4 flex flex-wrap gap-1.5">
+                    {stage.tags.map((tag) => (
+                      <span key={tag} className="rounded-full bg-[rgba(22,29,43,0.055)] px-2.5 py-1 text-[0.72rem] font-bold text-[var(--text-strong)]">
+                        {tag}
+                      </span>
+                    ))}
                   </div>
                 </article>
-              ))}
-            </div>
-
-            <div className="mt-4 grid grid-cols-3 gap-2 px-2" aria-hidden="true">
-              {careerHelpStages.map((stage, index) => (
-                <div key={`${stage.step}-marker`} className="flex items-center gap-2">
-                  <span className="h-2 w-2 shrink-0 rounded-full bg-[var(--accent)]" />
-                  <span className={`h-px flex-1 bg-[rgba(67,97,255,0.16)] ${index === careerHelpStages.length - 1 ? "opacity-0" : ""}`} />
-                </div>
               ))}
             </div>
           </div>
