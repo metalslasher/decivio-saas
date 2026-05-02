@@ -140,6 +140,36 @@ const painPoints = [
   }
 ] as const;
 
+const careerHelpStages = [
+  {
+    step: "01",
+    kicker: "рішення",
+    title: "Зважити сценарії",
+    description:
+      "Показує, як виглядає поточна роль, цільовий напрям і запасний варіант за доходом, ризиком та темпом входу.",
+    points: ["поточна роль", "цільовий напрям", "запасний варіант"],
+    outcome: "видно, куди рухатися без зайвого ризику."
+  },
+  {
+    step: "02",
+    kicker: "профіль",
+    title: "Підготувати себе під ринок",
+    description:
+      "Перекладає ваш досвід мовою вакансій: що винести в резюме, які навички підсвітити і де бракує доказів.",
+    points: ["резюме", "навички", "релевантний досвід"],
+    outcome: "профіль виглядає сильнішим для обраної ролі."
+  },
+  {
+    step: "03",
+    kicker: "пропозиція",
+    title: "Дійти до пропозиції роботи",
+    description:
+      "Збирає план переходу, готує до співбесід і допомагає тверезо оцінити пропозицію, коли вона зʼявиться.",
+    points: ["співбесіди", "план переходу", "оцінка пропозиції"],
+    outcome: "зрозуміло, що приймати, де торгуватися і коли зачекати."
+  }
+] as const;
+
 const reviews = [
   {
     name: "Ірина Коваль",
@@ -775,6 +805,112 @@ function FeatureStackCard({ item, index }: { item: FeatureShowcase; index: numbe
   );
 }
 
+function CareerHelpSection() {
+  return (
+    <section className="relative mx-auto mt-12 max-w-[80rem] md:mt-16" aria-labelledby="career-help-title">
+      <Reveal>
+        <div className="grid min-w-0 gap-7 lg:grid-cols-[0.86fr_1.14fr] lg:items-center lg:gap-8 xl:gap-10">
+          <div className="min-w-0 text-center lg:text-left">
+            <p className="text-[0.82rem] font-extrabold uppercase tracking-normal text-[var(--accent-strong)] md:text-[0.88rem]">
+              Як Decivio допомагає
+            </p>
+            <h2 id="career-help-title" className="home-section-heading mx-auto mt-3 max-w-[36rem] lg:mx-0">
+              Від сумніву до <span className="home-section-heading-accent">пропозиції роботи</span>
+            </h2>
+            <p className="mx-auto mt-5 max-w-[35rem] text-[0.98rem] leading-[1.72] text-[var(--text-muted)] md:text-[1.06rem] lg:mx-0">
+              Decivio не залишає вас із набором окремих інструментів. Сервіс веде зрозумілим маршрутом: спочатку допомагає
+              обрати напрям, потім посилити профіль і далі підготуватися до реального рішення на ринку.
+            </p>
+            <div className="mt-6 flex flex-col items-center gap-3 sm:flex-row sm:justify-center lg:justify-start">
+              <Link href="/simulate" className="btn-primary w-full max-w-[18rem] px-5 py-3 text-center text-[0.92rem] sm:w-auto">
+                Побудувати свій маршрут
+              </Link>
+              <span className="text-[0.9rem] font-semibold text-[var(--text-muted)]">2-3 хвилини до першого висновку</span>
+            </div>
+          </div>
+
+          <div className="relative min-w-0">
+            <svg
+              viewBox="0 0 1000 120"
+              className="pointer-events-none absolute left-[7%] top-8 hidden h-24 w-[86%] lg:block"
+              fill="none"
+              aria-hidden="true"
+            >
+              <defs>
+                <linearGradient id="career-help-path" x1="0" x2="1000" y1="0" y2="0" gradientUnits="userSpaceOnUse">
+                  <stop stopColor="rgba(67, 97, 255, 0.08)" />
+                  <stop offset="0.5" stopColor="rgba(67, 97, 255, 0.42)" />
+                  <stop offset="1" stopColor="rgba(67, 97, 255, 0.08)" />
+                </linearGradient>
+              </defs>
+              <path
+                d="M28 65C190 18 292 18 430 65C568 112 682 112 972 65"
+                stroke="url(#career-help-path)"
+                strokeWidth="4"
+                strokeLinecap="round"
+                strokeDasharray="10 12"
+              />
+            </svg>
+
+            <div className="grid min-w-0 gap-4 md:grid-cols-3">
+              {careerHelpStages.map((stage) => (
+                <article
+                  key={stage.title}
+                  className="surface-panel group relative min-w-0 overflow-hidden rounded-[1.7rem] px-4 py-5 md:px-5 md:py-6"
+                >
+                  <div
+                    className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-[linear-gradient(90deg,rgba(67,97,255,0),rgba(67,97,255,0.62),rgba(67,97,255,0))] opacity-0 transition-opacity duration-200 group-hover:opacity-100 md:opacity-80"
+                    aria-hidden="true"
+                  />
+                  <div className="relative z-10 flex h-full min-w-0 flex-col">
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[rgba(67,97,255,0.1)] font-display text-[0.86rem] font-extrabold text-[var(--accent-strong)] ring-8 ring-[rgba(67,97,255,0.04)]">
+                        {stage.step}
+                      </span>
+                      <span className="truncate rounded-full border border-[rgba(67,97,255,0.14)] bg-[rgba(67,97,255,0.055)] px-3 py-1 text-[0.72rem] font-extrabold uppercase tracking-normal text-[var(--accent-strong)]">
+                        {stage.kicker}
+                      </span>
+                    </div>
+
+                    <h3 className="mt-5 break-words font-display text-[1.24rem] font-bold leading-[1.14] tracking-normal text-[var(--text-strong)] [overflow-wrap:anywhere] md:text-[1.34rem]">
+                      {stage.title}
+                    </h3>
+                    <p className="mt-3 text-[0.93rem] leading-[1.68] text-[var(--text-muted)] md:text-[0.96rem]">{stage.description}</p>
+
+                    <div className="mt-5 grid gap-2">
+                      {stage.points.map((point) => (
+                        <span
+                          key={point}
+                          className="min-w-0 rounded-full border border-[rgba(22,29,43,0.08)] bg-white/55 px-3 py-2 text-[0.82rem] font-semibold leading-tight text-[var(--text-strong)]"
+                        >
+                          {point}
+                        </span>
+                      ))}
+                    </div>
+
+                    <p className="mt-auto pt-5 text-[0.86rem] font-medium leading-[1.58] text-[var(--text-muted)]">
+                      <span className="font-bold text-[var(--text-strong)]">На виході:</span> {stage.outcome}
+                    </p>
+                  </div>
+                </article>
+              ))}
+            </div>
+
+            <div className="mt-4 grid grid-cols-3 gap-2 px-2" aria-hidden="true">
+              {careerHelpStages.map((stage, index) => (
+                <div key={`${stage.step}-marker`} className="flex items-center gap-2">
+                  <span className="h-2 w-2 shrink-0 rounded-full bg-[var(--accent)]" />
+                  <span className={`h-px flex-1 bg-[rgba(67,97,255,0.16)] ${index === careerHelpStages.length - 1 ? "opacity-0" : ""}`} />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </Reveal>
+    </section>
+  );
+}
+
 export default function HomePage() {
   return (
     <>
@@ -954,6 +1090,8 @@ export default function HomePage() {
           </div>
         </Reveal>
       </section>
+
+      <CareerHelpSection />
 
       <section id="reviews" className="relative mx-auto mt-10 max-w-[80rem] md:mt-12">
         <Reveal>
