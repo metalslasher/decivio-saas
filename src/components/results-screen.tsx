@@ -16,6 +16,29 @@ type RequestState =
   | { status: "error"; title: string; description: string }
   | { status: "ready"; payload: SimulationResultsPayload; isAuthenticated: boolean };
 
+const decivioNextSteps = [
+  {
+    title: "Резюме під цільову роль",
+    description: "Перебудує подачу досвіду так, щоб вона відповідала напрямку, який ви обрали в симуляції."
+  },
+  {
+    title: "План переходу на 4-8 тижнів",
+    description: "Розкладе підготовку на зрозумілі кроки без зайвого хаосу та випадкових задач."
+  },
+  {
+    title: "Вакансії, які варто розглядати",
+    description: "Підкаже, де ваш профіль має більше шансів і які ролі не варто брати як першу ціль."
+  },
+  {
+    title: "Підготовка до співбесід",
+    description: "Допоможе закрити слабкі місця у відповідях і пояснити перехід у нову роль."
+  },
+  {
+    title: "Порівняння пропозицій",
+    description: "Допоможе оцінити не тільки суму, а й ризик, темп зростання та якість наступного кроку."
+  }
+] as const;
+
 function EmptyState({ title, description }: { title: string; description: string }) {
   return (
     <section className="mx-auto max-w-3xl py-12 md:py-16">
@@ -118,6 +141,54 @@ function MetricCard({
       <p className="label-muted">{label}</p>
       <p className={`mt-3 font-display text-[1.95rem] font-bold leading-[0.96] tracking-[-0.05em] md:text-[2.2rem] ${metricToneClass(tone)}`}>{value}</p>
       <p className="mt-2 text-[0.92rem] leading-[1.68] text-[var(--text-muted)]">{note}</p>
+    </article>
+  );
+}
+
+function DecivioNextStepsPanel({
+  cta,
+  isAuthenticated
+}: {
+  cta: SimulationResultsPayload["cta"];
+  isAuthenticated: boolean;
+}) {
+  return (
+    <article className="surface-panel rounded-[2rem] p-5 md:p-7">
+      <div className="grid gap-7 lg:grid-cols-[minmax(0,0.95fr),minmax(18rem,0.58fr)] lg:items-start">
+        <div>
+          <p className="label-muted">Що Decivio зробить далі</p>
+          <h2 className="mt-3 section-title">{cta.title}</h2>
+          <p className="body-copy mt-3 max-w-3xl">
+            {isAuthenticated
+              ? "Ваш сценарій уже збережено в кабінеті. Підписка відкриває практичну частину: підготовку матеріалів, план дій і підтримку на наступних етапах переходу."
+              : "Висновок уже показав, що саме впливає на ваш перехід. На тарифах можна обрати доступ до практичної частини: резюме, плану підготовки, вакансій, співбесід і порівняння пропозицій."}
+          </p>
+          <div className="mt-5 flex flex-wrap gap-3">
+            <Link href="/pricing" className="btn-primary">
+              Перейти до тарифів
+            </Link>
+            {isAuthenticated ? (
+              <Link href="/dashboard?view=scenario" className="btn-secondary">
+                Відкрити сценарії
+              </Link>
+            ) : null}
+          </div>
+        </div>
+
+        <div className="space-y-4 lg:border-l lg:border-[var(--line-soft)] lg:pl-6">
+          {decivioNextSteps.map((item, index) => (
+            <div key={item.title} className="flex gap-3">
+              <span className="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--accent-soft)] text-[0.78rem] font-bold text-[var(--accent-strong)]">
+                {index + 1}
+              </span>
+              <span>
+                <span className="block text-[0.98rem] font-semibold leading-[1.35] text-[var(--text-strong)]">{item.title}</span>
+                <span className="mt-1 block text-[0.9rem] leading-[1.6] text-[var(--text-muted)]">{item.description}</span>
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
     </article>
   );
 }
@@ -229,12 +300,6 @@ export function ResultsScreen({ simulationId }: ResultsScreenProps) {
   }
 
   const { payload, isAuthenticated } = state;
-  const primaryAction = isAuthenticated
-    ? { href: "/dashboard?view=scenario", label: "Відкрити сценарії" }
-    : { href: "/signup?next=%2Fdashboard", label: "Створити акаунт і зберегти в кабінеті" };
-  const secondaryAction = isAuthenticated
-    ? { href: "/dashboard", label: "Повернутися в кабінет" }
-    : { href: "/pricing", label: "Переглянути тарифи" };
 
   return (
     <section className="space-y-8 py-4 md:space-y-10 md:py-8">
@@ -272,23 +337,7 @@ export function ResultsScreen({ simulationId }: ResultsScreenProps) {
         <TextList eyebrow="Що персоналізувало відповідь" title="Як сервіс врахував саме вас" items={payload.personalizationNotes} />
       </div>
 
-      <article className="surface-panel rounded-[2rem] p-5 md:p-7">
-        <p className="label-muted">{isAuthenticated ? "Сценарій уже збережено в кабінеті" : "Що далі"}</p>
-        <h2 className="mt-3 section-title">{payload.cta.title}</h2>
-        <p className="body-copy mt-3 max-w-3xl">
-          {isAuthenticated
-            ? "Цей сценарій уже прив'язаний до вашого акаунта. Ви можете повернутися в кабінет, відкрити історію сценаріїв і рухатися далі по модулях."
-            : payload.cta.body}
-        </p>
-        <div className="mt-5 flex flex-wrap gap-3">
-          <Link href={primaryAction.href} className="btn-primary">
-            {primaryAction.label}
-          </Link>
-          <Link href={secondaryAction.href} className="btn-secondary">
-            {secondaryAction.label}
-          </Link>
-        </div>
-      </article>
+      <DecivioNextStepsPanel cta={payload.cta} isAuthenticated={isAuthenticated} />
     </section>
   );
 }

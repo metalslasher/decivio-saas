@@ -69,6 +69,24 @@ const initialValues: WizardForm = {
 const inputClassName = "field-surface mt-1";
 const radioCardClassName = "cursor-pointer rounded-[1.35rem] border px-4 py-3 text-sm transition";
 
+const simulationOutcomeItems = [
+  {
+    label: "1",
+    title: "Спершу висновок",
+    description: "Результат відкривається без реєстрації, щоб ви одразу побачили користь від симуляції."
+  },
+  {
+    label: "2",
+    title: "Потім практичний маршрут",
+    description: "Після висновку Decivio покаже, як перейти до резюме, плану підготовки, вакансій і співбесід."
+  },
+  {
+    label: "3",
+    title: "Оплата тоді, коли зрозуміло навіщо",
+    description: "Тарифи з'являються як наступний крок, а не як перешкода перед результатом."
+  }
+] as const;
+
 function parseNumber(value: string) {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : null;
@@ -111,6 +129,41 @@ function RadioCards<T extends string>({
         </label>
       ))}
     </div>
+  );
+}
+
+function SimulationOutcomePanel() {
+  return (
+    <aside className="surface-panel rounded-[2rem] p-5 md:p-6 lg:sticky lg:top-28">
+      <p className="label-muted">Після симуляції</p>
+      <h2 className="mt-3 text-[1.45rem] font-semibold leading-[1.06] tracking-[-0.04em] text-[var(--text-strong)] md:text-[1.72rem]">
+        Ви отримаєте не просто цифри, а основу для рішення.
+      </h2>
+      <p className="mt-4 text-[0.95rem] leading-[1.7] text-[var(--text-muted)]">
+        Форма збирає лише ті дані, які впливають на висновок: дохід, досвід, цільову роль, англійську, ринок і пріоритет переходу.
+      </p>
+
+      <div className="mt-6 space-y-4">
+        {simulationOutcomeItems.map((item) => (
+          <div key={item.title} className="flex gap-3">
+            <span className="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--accent-soft)] text-[0.78rem] font-bold text-[var(--accent-strong)]">
+              {item.label}
+            </span>
+            <span>
+              <span className="block text-[0.98rem] font-semibold leading-[1.35] text-[var(--text-strong)]">{item.title}</span>
+              <span className="mt-1 block text-[0.9rem] leading-[1.6] text-[var(--text-muted)]">{item.description}</span>
+            </span>
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-6 border-t border-[var(--line-soft)] pt-5">
+        <p className="text-[0.82rem] font-semibold uppercase tracking-[0.14em] text-[var(--text-soft)]">На результаті</p>
+        <p className="mt-2 text-[1.02rem] font-semibold leading-[1.35] text-[var(--text-strong)]">
+          Decivio підкаже, що робити далі з вашим сценарієм.
+        </p>
+      </div>
+    </aside>
   );
 }
 
@@ -261,187 +314,191 @@ export function SimulateOnboardingWizard() {
         </p>
       </header>
 
-      <div className="surface-panel relative rounded-[2rem] p-5 md:p-7" aria-busy={isSubmitting}>
-        {isSubmitting ? <div className="absolute inset-0 z-10 rounded-[2rem] bg-white/45 backdrop-blur-[1px]" aria-hidden="true" /> : null}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between text-xs font-medium uppercase tracking-[0.14em] text-[var(--text-soft)]">
-            <span>Крок {currentStep + 1} з {steps.length}</span>
-            <span>{Math.round(progress)}%</span>
-          </div>
-          <div className="h-2 overflow-hidden rounded-full bg-[var(--line-soft)]">
-            <div
-              className="h-full rounded-full bg-[linear-gradient(90deg,var(--accent-strong),var(--accent))] transition-all duration-300"
-              style={{ width: `${progress}%` }}
-            />
-          </div>
-        </div>
-
-        <fieldset disabled={isSubmitting} className="relative z-20 min-w-0 border-0 p-0 m-0">
-          <div key={currentStep} className="wizard-step-enter mt-6 space-y-5">
-            <div className="space-y-2">
-              <h2 className="section-title">{currentMeta.title}</h2>
-              <p className="body-copy">{currentMeta.helper}</p>
+      <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,0.78fr),minmax(19rem,0.4fr)] xl:grid-cols-[minmax(0,0.74fr),minmax(21rem,0.38fr)]">
+        <div className="surface-panel relative rounded-[2rem] p-5 md:p-7" aria-busy={isSubmitting}>
+          {isSubmitting ? <div className="absolute inset-0 z-10 rounded-[2rem] bg-white/45 backdrop-blur-[1px]" aria-hidden="true" /> : null}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-xs font-medium uppercase tracking-[0.14em] text-[var(--text-soft)]">
+              <span>Крок {currentStep + 1} з {steps.length}</span>
+              <span>{Math.round(progress)}%</span>
             </div>
+            <div className="h-2 overflow-hidden rounded-full bg-[var(--line-soft)]">
+              <div
+                className="h-full rounded-full bg-[linear-gradient(90deg,var(--accent-strong),var(--accent))] transition-all duration-300"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+          </div>
 
-            {currentStep === 0 ? (
-              <div className="grid gap-4">
-                <label className="text-sm font-medium leading-[1.6] text-[var(--text-muted)]">
-                  Поточний чистий дохід (грн/міс)
-                  <input
-                    type="number"
-                    min={0}
-                    inputMode="decimal"
-                    value={values.current_income}
-                    onChange={(event) => updateValue("current_income", event.target.value)}
-                    className={inputClassName}
-                    aria-invalid={Boolean(errors.current_income)}
-                    disabled={isSubmitting}
-                  />
-                  {errors.current_income ? <span className="mt-1 block text-xs text-rose-600">{errors.current_income}</span> : null}
-                </label>
+          <fieldset disabled={isSubmitting} className="relative z-20 min-w-0 border-0 p-0 m-0">
+            <div key={currentStep} className="wizard-step-enter mt-6 space-y-5">
+              <div className="space-y-2">
+                <h2 className="section-title">{currentMeta.title}</h2>
+                <p className="body-copy">{currentMeta.helper}</p>
               </div>
-            ) : null}
 
-            {currentStep === 1 ? (
-              <div className="space-y-4">
-                <label className="block text-sm font-medium leading-[1.6] text-[var(--text-muted)]" htmlFor="current-role">
-                  Поточна роль
-                  <input
-                    id="current-role"
-                    type="text"
-                    value={values.current_role}
-                    onChange={(event) => updateValue("current_role", event.target.value)}
-                    className={inputClassName}
-                    aria-invalid={Boolean(errors.current_role)}
-                    autoComplete="off"
-                    disabled={isSubmitting}
-                  />
-                </label>
-                {errors.current_role ? <span className="block text-xs text-rose-600">{errors.current_role}</span> : null}
-
-                <label className="block text-sm font-medium leading-[1.6] text-[var(--text-muted)]">
-                  Стаж у поточній сфері (років)
-                  <input
-                    type="number"
-                    min={0}
-                    max={60}
-                    step="0.5"
-                    inputMode="decimal"
-                    value={values.current_experience_years}
-                    onChange={(event) => updateValue("current_experience_years", event.target.value)}
-                    className={inputClassName}
-                    aria-invalid={Boolean(errors.current_experience_years)}
-                    disabled={isSubmitting}
-                  />
-                  {errors.current_experience_years ? (
-                    <span className="mt-1 block text-xs text-rose-600">{errors.current_experience_years}</span>
-                  ) : null}
-                </label>
-              </div>
-            ) : null}
-
-            {currentStep === 2 ? (
-              <div className="space-y-5">
-                <div>
-                  <label className="block text-sm font-medium leading-[1.6] text-[var(--text-muted)]" htmlFor="target-role">
-                    Цільова роль
+              {currentStep === 0 ? (
+                <div className="grid gap-4">
+                  <label className="text-sm font-medium leading-[1.6] text-[var(--text-muted)]">
+                    Поточний чистий дохід (грн/міс)
                     <input
-                      id="target-role"
-                      type="text"
-                      value={values.target_role}
-                      onChange={(event) => updateValue("target_role", event.target.value)}
+                      type="number"
+                      min={0}
+                      inputMode="decimal"
+                      value={values.current_income}
+                      onChange={(event) => updateValue("current_income", event.target.value)}
                       className={inputClassName}
-                      aria-invalid={Boolean(errors.target_role)}
+                      aria-invalid={Boolean(errors.current_income)}
+                      disabled={isSubmitting}
+                    />
+                    {errors.current_income ? <span className="mt-1 block text-xs text-rose-600">{errors.current_income}</span> : null}
+                  </label>
+                </div>
+              ) : null}
+
+              {currentStep === 1 ? (
+                <div className="space-y-4">
+                  <label className="block text-sm font-medium leading-[1.6] text-[var(--text-muted)]" htmlFor="current-role">
+                    Поточна роль
+                    <input
+                      id="current-role"
+                      type="text"
+                      value={values.current_role}
+                      onChange={(event) => updateValue("current_role", event.target.value)}
+                      className={inputClassName}
+                      aria-invalid={Boolean(errors.current_role)}
                       autoComplete="off"
                       disabled={isSubmitting}
                     />
                   </label>
-                  {errors.target_role ? <span className="block text-xs text-rose-600">{errors.target_role}</span> : null}
+                  {errors.current_role ? <span className="block text-xs text-rose-600">{errors.current_role}</span> : null}
+
+                  <label className="block text-sm font-medium leading-[1.6] text-[var(--text-muted)]">
+                    Стаж у поточній сфері (років)
+                    <input
+                      type="number"
+                      min={0}
+                      max={60}
+                      step="0.5"
+                      inputMode="decimal"
+                      value={values.current_experience_years}
+                      onChange={(event) => updateValue("current_experience_years", event.target.value)}
+                      className={inputClassName}
+                      aria-invalid={Boolean(errors.current_experience_years)}
+                      disabled={isSubmitting}
+                    />
+                    {errors.current_experience_years ? (
+                      <span className="mt-1 block text-xs text-rose-600">{errors.current_experience_years}</span>
+                    ) : null}
+                  </label>
                 </div>
+              ) : null}
 
-                <fieldset className="space-y-2">
-                  <legend className="text-sm font-medium leading-[1.6] text-[var(--text-muted)]">Релевантний досвід у цій ролі</legend>
-                  <RadioCards
-                    name="experience-level"
-                    value={values.experience_level}
-                    options={experienceLevelOptions}
-                    onChange={(nextValue) => updateValue("experience_level", nextValue)}
-                    disabled={isSubmitting}
-                  />
-                  {errors.experience_level ? <span className="block text-xs text-rose-600">{errors.experience_level}</span> : null}
-                </fieldset>
-              </div>
-            ) : null}
+              {currentStep === 2 ? (
+                <div className="space-y-5">
+                  <div>
+                    <label className="block text-sm font-medium leading-[1.6] text-[var(--text-muted)]" htmlFor="target-role">
+                      Цільова роль
+                      <input
+                        id="target-role"
+                        type="text"
+                        value={values.target_role}
+                        onChange={(event) => updateValue("target_role", event.target.value)}
+                        className={inputClassName}
+                        aria-invalid={Boolean(errors.target_role)}
+                        autoComplete="off"
+                        disabled={isSubmitting}
+                      />
+                    </label>
+                    {errors.target_role ? <span className="block text-xs text-rose-600">{errors.target_role}</span> : null}
+                  </div>
 
-            {currentStep === 3 ? (
-              <div className="space-y-5">
-                <fieldset className="space-y-2">
-                  <legend className="text-sm font-medium leading-[1.6] text-[var(--text-muted)]">Рівень англійської</legend>
-                  <RadioCards
-                    name="english-level"
-                    value={values.english_level}
-                    options={englishLevelOptions}
-                    onChange={(nextValue) => updateValue("english_level", nextValue)}
-                    disabled={isSubmitting}
-                  />
-                  {errors.english_level ? <span className="block text-xs text-rose-600">{errors.english_level}</span> : null}
-                </fieldset>
+                  <fieldset className="space-y-2">
+                    <legend className="text-sm font-medium leading-[1.6] text-[var(--text-muted)]">Релевантний досвід у цій ролі</legend>
+                    <RadioCards
+                      name="experience-level"
+                      value={values.experience_level}
+                      options={experienceLevelOptions}
+                      onChange={(nextValue) => updateValue("experience_level", nextValue)}
+                      disabled={isSubmitting}
+                    />
+                    {errors.experience_level ? <span className="block text-xs text-rose-600">{errors.experience_level}</span> : null}
+                  </fieldset>
+                </div>
+              ) : null}
 
-                <fieldset className="space-y-2">
-                  <legend className="text-sm font-medium leading-[1.6] text-[var(--text-muted)]">Куди орієнтуєтесь по ринку</legend>
-                  <RadioCards
-                    name="target-market"
-                    value={values.target_market}
-                    options={targetMarketOptions}
-                    onChange={(nextValue) => updateValue("target_market", nextValue)}
-                    disabled={isSubmitting}
-                  />
-                  {errors.target_market ? <span className="block text-xs text-rose-600">{errors.target_market}</span> : null}
-                </fieldset>
+              {currentStep === 3 ? (
+                <div className="space-y-5">
+                  <fieldset className="space-y-2">
+                    <legend className="text-sm font-medium leading-[1.6] text-[var(--text-muted)]">Рівень англійської</legend>
+                    <RadioCards
+                      name="english-level"
+                      value={values.english_level}
+                      options={englishLevelOptions}
+                      onChange={(nextValue) => updateValue("english_level", nextValue)}
+                      disabled={isSubmitting}
+                    />
+                    {errors.english_level ? <span className="block text-xs text-rose-600">{errors.english_level}</span> : null}
+                  </fieldset>
 
-                <fieldset className="space-y-2">
-                  <legend className="text-sm font-medium leading-[1.6] text-[var(--text-muted)]">Що важливіше зараз</legend>
-                  <RadioCards
-                    name="transition-priority"
-                    value={values.transition_priority}
-                    options={transitionPriorityOptions}
-                    onChange={(nextValue) => updateValue("transition_priority", nextValue)}
-                    disabled={isSubmitting}
-                  />
-                  {errors.transition_priority ? (
-                    <span className="block text-xs text-rose-600">{errors.transition_priority}</span>
-                  ) : null}
-                </fieldset>
-              </div>
-            ) : null}
+                  <fieldset className="space-y-2">
+                    <legend className="text-sm font-medium leading-[1.6] text-[var(--text-muted)]">Куди орієнтуєтесь по ринку</legend>
+                    <RadioCards
+                      name="target-market"
+                      value={values.target_market}
+                      options={targetMarketOptions}
+                      onChange={(nextValue) => updateValue("target_market", nextValue)}
+                      disabled={isSubmitting}
+                    />
+                    {errors.target_market ? <span className="block text-xs text-rose-600">{errors.target_market}</span> : null}
+                  </fieldset>
 
-            {requestError ? (
-              <p className="rounded-[1.3rem] border border-[rgba(201,155,134,0.5)] bg-[var(--danger-soft)] px-4 py-3 text-sm text-[var(--danger-strong)]">
-                {requestError}
-              </p>
-            ) : null}
+                  <fieldset className="space-y-2">
+                    <legend className="text-sm font-medium leading-[1.6] text-[var(--text-muted)]">Що важливіше зараз</legend>
+                    <RadioCards
+                      name="transition-priority"
+                      value={values.transition_priority}
+                      options={transitionPriorityOptions}
+                      onChange={(nextValue) => updateValue("transition_priority", nextValue)}
+                      disabled={isSubmitting}
+                    />
+                    {errors.transition_priority ? (
+                      <span className="block text-xs text-rose-600">{errors.transition_priority}</span>
+                    ) : null}
+                  </fieldset>
+                </div>
+              ) : null}
+
+              {requestError ? (
+                <p className="rounded-[1.3rem] border border-[rgba(201,155,134,0.5)] bg-[var(--danger-soft)] px-4 py-3 text-sm text-[var(--danger-strong)]">
+                  {requestError}
+                </p>
+              ) : null}
+            </div>
+          </fieldset>
+
+          <div className="relative z-20 mt-7 flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <button
+              type="button"
+              onClick={handleBack}
+              disabled={currentStep === 0 || isSubmitting}
+              className="btn-secondary disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Назад
+            </button>
+
+            <button
+              type="button"
+              onClick={isLastStep ? handleSubmit : handleNext}
+              disabled={isSubmitting}
+              className="btn-primary disabled:cursor-not-allowed disabled:opacity-70"
+            >
+              {isLastStep ? (isSubmitting ? "Формуємо висновок..." : "Отримати мій висновок") : "Далі"}
+            </button>
           </div>
-        </fieldset>
-
-        <div className="relative z-20 mt-7 flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <button
-            type="button"
-            onClick={handleBack}
-            disabled={currentStep === 0 || isSubmitting}
-            className="btn-secondary disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            Назад
-          </button>
-
-          <button
-            type="button"
-            onClick={isLastStep ? handleSubmit : handleNext}
-            disabled={isSubmitting}
-            className="btn-primary disabled:cursor-not-allowed disabled:opacity-70"
-          >
-            {isLastStep ? (isSubmitting ? "Формуємо висновок..." : "Отримати мій висновок") : "Далі"}
-          </button>
         </div>
+
+        <SimulationOutcomePanel />
       </div>
     </section>
   );
