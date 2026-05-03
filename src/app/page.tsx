@@ -980,6 +980,8 @@ export default function HomePage() {
           </div>
         </section>
 
+        <CareerHelpSection />
+
       </div>
 
       <section id="features" className="feature-stack-section mx-auto mt-12 max-w-[80rem] md:mt-16">
@@ -989,56 +991,6 @@ export default function HomePage() {
           ))}
         </div>
       </section>
-
-      <section className="career-opportunity-section relative mx-auto mt-10 max-w-[80rem] py-8 md:mt-12 md:py-10" aria-labelledby="career-brands-title">
-        <Reveal>
-          <div className="grid min-w-0 items-center gap-8 lg:grid-cols-[0.98fr_1.02fr] lg:gap-10">
-            <div className="relative z-10 min-w-0 text-center lg:text-left">
-              <h2 id="career-brands-title" className="home-section-heading mx-auto max-w-[36rem] lg:mx-0">
-                Цільтеся в сильні продуктові команди, а не просто в першу{" "}
-                <span className="home-section-heading-accent">доступну вакансію</span>
-              </h2>
-              <p className="mx-auto mt-5 max-w-[35rem] text-[0.98rem] leading-[1.72] text-[var(--text-muted)] md:text-[1.06rem] lg:mx-0">
-                Наш сервіс допомагає тверезо оцінити перехід, посилити резюме й підготовку так, щоб претендувати на ролі з кращим рівнем доходу,
-                процесів і професійного росту.
-              </p>
-            </div>
-
-            <div className="career-opportunity-visual" aria-hidden="true">
-              <div className="career-target-board">
-                <Image
-                  src="/graphics/career-target-visual.webp"
-                  alt=""
-                  width={1400}
-                  height={933}
-                  sizes="(max-width: 640px) 100vw, (max-width: 1023px) 74vw, 44vw"
-                  className="career-target-asset"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="career-brand-marquee relative mt-7 overflow-hidden py-2 md:mt-8">
-            <div className="career-brand-track flex w-max items-center">
-              {Array.from({ length: 3 }).map((_, groupIndex) => (
-                <div
-                  key={groupIndex}
-                  className="career-brand-group flex items-center gap-6 md:gap-9"
-                  aria-hidden={groupIndex > 0}
-                >
-                  {careerBrandNames.map((brand) => (
-                    <span key={`${brand}-${groupIndex}`} className="career-brand-name">
-                      {brand}
-                    </span>
-                  ))}
-                </div>
-              ))}
-            </div>
-          </div>
-        </Reveal>
-      </section>
-
-      <CareerHelpSection />
 
       <section id="reviews" className="relative mx-auto mt-10 max-w-[80rem] md:mt-12">
         <Reveal>
@@ -1093,6 +1045,54 @@ export default function HomePage() {
                   </article>
                 ))}
               </div>
+            </div>
+          </div>
+        </Reveal>
+      </section>
+
+      <section className="career-opportunity-section relative mx-auto mt-10 max-w-[80rem] py-8 md:mt-12 md:py-10" aria-labelledby="career-brands-title">
+        <Reveal>
+          <div className="grid min-w-0 items-center gap-8 lg:grid-cols-[0.98fr_1.02fr] lg:gap-10">
+            <div className="relative z-10 min-w-0 text-center lg:text-left">
+              <h2 id="career-brands-title" className="home-section-heading mx-auto max-w-[36rem] lg:mx-0">
+                Цільтеся в сильні продуктові команди, а не просто в першу{" "}
+                <span className="home-section-heading-accent">доступну вакансію</span>
+              </h2>
+              <p className="mx-auto mt-5 max-w-[35rem] text-[0.98rem] leading-[1.72] text-[var(--text-muted)] md:text-[1.06rem] lg:mx-0">
+                Наш сервіс допомагає тверезо оцінити перехід, посилити резюме й підготовку так, щоб претендувати на ролі з кращим рівнем доходу,
+                процесів і професійного росту.
+              </p>
+            </div>
+
+            <div className="career-opportunity-visual" aria-hidden="true">
+              <div className="career-target-board">
+                <Image
+                  src="/graphics/career-target-visual.webp"
+                  alt=""
+                  width={1400}
+                  height={933}
+                  sizes="(max-width: 640px) 100vw, (max-width: 1023px) 74vw, 44vw"
+                  className="career-target-asset"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="career-brand-marquee relative mt-7 overflow-hidden py-2 md:mt-8">
+            <div className="career-brand-track flex w-max items-center">
+              {Array.from({ length: 3 }).map((_, groupIndex) => (
+                <div
+                  key={groupIndex}
+                  className="career-brand-group flex items-center gap-6 md:gap-9"
+                  aria-hidden={groupIndex > 0}
+                >
+                  {careerBrandNames.map((brand) => (
+                    <span key={`${brand}-${groupIndex}`} className="career-brand-name">
+                      {brand}
+                    </span>
+                  ))}
+                </div>
+              ))}
             </div>
           </div>
         </Reveal>
