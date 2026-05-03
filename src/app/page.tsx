@@ -815,17 +815,22 @@ function CareerHelpSection() {
             </p>
           </div>
 
-          <div
-            className="pointer-events-none absolute right-[4%] top-[5.5rem] z-10 hidden h-[15.5rem] w-[74%] bg-contain bg-center bg-no-repeat lg:block"
-            style={{ backgroundImage: "url('/graphics/career-path-flag.svg')" }}
+          <Image
+            src="/graphics/career-path-flag.png"
+            alt=""
+            width={1774}
+            height={887}
+            sizes="(max-width: 1279px) 100vw, 74rem"
+            className="pointer-events-none absolute right-[-6rem] top-4 z-10 hidden w-[70rem] max-w-none select-none lg:block xl:right-[-4rem] xl:w-[74rem]"
             aria-hidden="true"
+            priority
           />
 
           <div className="relative z-20 mt-9 grid min-w-0 gap-4 md:mt-16 md:grid-cols-3 lg:mt-[17rem]">
             {careerHelpStages.map((stage) => (
               <article
                 key={stage.title}
-                className="relative min-w-0 rounded-[1.65rem] border border-white/78 bg-white/72 px-5 pb-6 pt-8 shadow-[0_22px_48px_rgba(35,48,78,0.1)] backdrop-blur-md md:min-h-[14rem] md:px-6 md:pt-9"
+                className="relative min-w-0 rounded-[1.65rem] border border-white/78 bg-white/90 px-5 pb-6 pt-8 shadow-[0_22px_48px_rgba(35,48,78,0.1)] backdrop-blur-md md:min-h-[14rem] md:px-6 md:pt-9"
               >
                 <span className="absolute -left-2 -top-4 flex h-9 w-9 items-center justify-center rounded-full bg-[rgba(67,97,255,0.12)] font-display text-[0.86rem] font-extrabold text-[var(--accent-strong)] shadow-[0_12px_24px_rgba(67,97,255,0.2)]">
                   {stage.step}
