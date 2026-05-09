@@ -5,183 +5,24 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { claimGuestSimulations } from "@/lib/auth-session-client";
 import { getSupabaseBrowserClient } from "@/lib/db/supabase-browser";
-import { PASSWORD_MIN_LENGTH, PASSWORD_POLICY_HINT, validateStrongPassword } from "@/lib/password-policy";
+import { PASSWORD_MIN_LENGTH, PASSWORD_POLICY_HINT } from "@/lib/password-policy";
+import { GoogleIcon } from "./auth-form-google-icon";
+import {
+  buildCallbackUrl,
+  getConfirmPasswordValidationError,
+  getEmailValidationError,
+  getFullNameValidationError,
+  getPasswordValidationError,
+  getViewCopy,
+  mapAuthErrorMessage,
+  normalizeNextPath,
+  type AuthFormProps,
+  type AuthView,
+  type FieldName,
+  type TouchedFields,
+} from "./auth-form-helpers";
 
-export type AuthView = "login" | "signup" | "reset";
-
-type AuthFormProps = {
-  initialView: AuthView;
-  nextPath?: string | null;
-  initialNotice?: string | null;
-  display?: "page" | "modal";
-  onClose?: () => void;
-  titleId?: string;
-};
-
-type FieldName = "fullName" | "email" | "password" | "confirmPassword";
-type TouchedFields = Record<FieldName, boolean>;
-
-function normalizeNextPath(value: string | null) {
-  if (!value || !value.startsWith("/") || value.startsWith("//")) {
-    return "/dashboard";
-  }
-
-  return value;
-}
-
-function buildCallbackUrl(nextPath: string) {
-  const url = new URL("/auth/callback", window.location.origin);
-  url.searchParams.set("next", nextPath);
-  return url.toString();
-}
-
-function mapAuthErrorMessage(message: string) {
-  const normalized = message.toLowerCase();
-
-  if (normalized.includes("failed to fetch") || normalized.includes("networkerror")) {
-    return "Не вдалося підключитися до сервісу авторизації. Якщо ви працюєте локально, перевірте, чи запущений Supabase.";
-  }
-
-  if (normalized.includes("invalid login credentials")) {
-    return "Неправильний email або пароль.";
-  }
-
-  if (normalized.includes("email not confirmed")) {
-    return "Пошта ще не підтверджена. Спершу відкрийте лист і підтвердьте акаунт.";
-  }
-
-  if (normalized.includes("user already registered")) {
-    return "Користувач із таким email уже існує.";
-  }
-
-  if (normalized.includes("same password")) {
-    return "Новий пароль має відрізнятися від попереднього.";
-  }
-
-  if (normalized.includes("password")) {
-    return "Пароль занадто слабкий або не відповідає вимогам.";
-  }
-
-  if (normalized.includes("rate limit")) {
-    return "Забагато спроб. Спробуйте ще раз трохи пізніше.";
-  }
-
-  return message;
-}
-
-function getViewCopy(view: AuthView) {
-  switch (view) {
-    case "signup":
-      return {
-        title: "Реєстрація",
-        description: null,
-        submitLabel: "Зареєструватися",
-        submitBusyLabel: "Створюємо акаунт..."
-      };
-    case "reset":
-      return {
-        title: "Відновлення пароля",
-        description: "Введіть email, і ми надішлемо посилання для зміни пароля.",
-        submitLabel: "Надіслати посилання",
-        submitBusyLabel: "Надсилаємо лист..."
-      };
-    default:
-      return {
-        title: "Вхід",
-        description: null,
-        submitLabel: "Увійти",
-        submitBusyLabel: "Входимо..."
-      };
-  }
-}
-
-function isEmailFormatValid(value: string) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
-}
-
-function getEmailValidationError(value: string) {
-  if (!value.trim()) {
-    return "Введіть email.";
-  }
-
-  if (!isEmailFormatValid(value)) {
-    return "Вкажіть коректний email.";
-  }
-
-  return null;
-}
-
-function getFullNameValidationError(value: string, view: AuthView) {
-  if (view !== "signup") {
-    return null;
-  }
-
-  const normalized = value.trim();
-  if (!normalized) {
-    return "Введіть ім'я.";
-  }
-
-  if (normalized.length > 80) {
-    return "Ім'я має бути коротшим за 80 символів.";
-  }
-
-  return null;
-}
-
-function getPasswordValidationError(value: string, view: AuthView) {
-  if (view === "reset") {
-    return null;
-  }
-
-  if (!value) {
-    return "Введіть пароль.";
-  }
-
-  if (view === "signup") {
-    return validateStrongPassword(value);
-  }
-
-  return null;
-}
-
-function getConfirmPasswordValidationError(password: string, confirmPassword: string, view: AuthView) {
-  if (view !== "signup") {
-    return null;
-  }
-
-  if (!confirmPassword) {
-    return "Підтвердіть пароль.";
-  }
-
-  if (password !== confirmPassword) {
-    return "Паролі не збігаються.";
-  }
-
-  return null;
-}
-
-function GoogleIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
-      <path
-        d="M21.805 12.23c0-.68-.061-1.334-.174-1.961H12v3.708h5.5a4.703 4.703 0 0 1-2.04 3.084v2.56h3.294c1.928-1.775 3.051-4.39 3.051-7.39Z"
-        fill="#4285F4"
-      />
-      <path
-        d="M12 22c2.76 0 5.075-.915 6.766-2.479l-3.294-2.56c-.915.613-2.083.975-3.472.975-2.67 0-4.93-1.803-5.737-4.226H2.858v2.644A10 10 0 0 0 12 22Z"
-        fill="#34A853"
-      />
-      <path
-        d="M6.263 13.71A5.996 5.996 0 0 1 5.942 12c0-.594.103-1.17.321-1.71V7.646H2.858A10 10 0 0 0 2 12c0 1.61.386 3.134 1.071 4.354l3.192-2.484Z"
-        fill="#FBBC05"
-      />
-      <path
-        d="M12 6.064c1.5 0 2.847.516 3.907 1.528l2.93-2.93C17.07 3.018 14.756 2 12 2A10 10 0 0 0 3.071 7.646L6.263 10.13C7.07 7.807 9.33 6.064 12 6.064Z"
-        fill="#EA4335"
-      />
-    </svg>
-  );
-}
+export type { AuthView } from "./auth-form-helpers";
 
 export function AuthForm({
   initialView,
