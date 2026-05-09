@@ -134,13 +134,24 @@ function MetricCard({
   label,
   value,
   note,
-  tone
+  tone,
+  details
 }: SimulationResultsPayload["metrics"][number]) {
   return (
     <article className="surface-panel rounded-[1.7rem] p-5 md:p-6">
       <p className="label-muted">{label}</p>
       <p className={`mt-3 font-display text-[1.95rem] font-bold leading-[0.98] tracking-normal md:text-[2.2rem] ${metricToneClass(tone)}`}>{value}</p>
       <p className="mt-2 text-[0.92rem] leading-[1.68] text-[var(--text-muted)]">{note}</p>
+      {details?.length ? (
+        <div className="mt-4 space-y-2 rounded-[1rem] border border-[var(--line-soft)] bg-[rgba(255,255,255,0.58)] p-3">
+          {details.map((item) => (
+            <div key={item.label} className="flex items-center justify-between gap-3 text-[0.78rem] leading-[1.35] text-[var(--text-muted)]">
+              <span>{item.label}</span>
+              <span className="shrink-0 font-semibold text-[var(--text-strong)]">{item.value}</span>
+            </div>
+          ))}
+        </div>
+      ) : null}
     </article>
   );
 }
