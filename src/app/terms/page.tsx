@@ -123,7 +123,7 @@ export default function TermsPage() {
           </p>
         </header>
 
-        <div className="mx-auto max-w-4xl space-y-5">
+        <div className="space-y-5">
           {sections.map((section) => (
             <article key={section.title} className="surface-panel rounded-[2rem] px-6 py-6 md:px-8 md:py-8">
               <h2 className="panel-title">{section.title}</h2>

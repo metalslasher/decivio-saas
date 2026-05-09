@@ -137,7 +137,7 @@ function PlanCard({ plan }: { plan: PricingPlan }) {
         </div>
       </div>
 
-      <div className="mt-6 border-t border-[rgba(22,29,43,0.08)] pt-5">
+      <div className="mt-6">
         <Suspense
           fallback={
             <button type="button" disabled className={`w-full ${isFeatured ? "btn-primary justify-center" : "btn-secondary justify-center"} opacity-70`}>
@@ -222,10 +222,6 @@ export default function PricingPage() {
               <h1 className="page-title mx-auto max-w-[14ch]">
                 Оберіть формат <span className="text-accent">доступу</span>
               </h1>
-              <p className="lead-copy mx-auto mt-5 max-w-3xl">
-                Повний доступ відкриває практичну частину Decivio після симуляції: план переходу, резюме, вакансії,
-                співбесіди та оцінку пропозицій.
-              </p>
             </header>
 
             <div className="mt-12 grid gap-5 md:mt-14 lg:grid-cols-2">
@@ -238,7 +234,7 @@ export default function PricingPage() {
         <section className="space-y-8 py-6 md:space-y-10 md:py-9">
           <div className="mx-auto max-w-3xl text-center">
             <h2 className="section-title mx-auto max-w-[15ch]">
-              Усі інструменти <span className="text-accent">в одному місці</span>
+              Усі інструменти в <span className="text-accent">одному місці</span>
             </h2>
           </div>
 

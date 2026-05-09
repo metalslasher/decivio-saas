@@ -3,10 +3,10 @@ import { SimulateOnboardingWizard } from "@/components/simulate-onboarding-wizar
 import { createBreadcrumbSchema, createMetadata, createSoftwareApplicationSchema } from "@/lib/seo";
 
 const analysisSignals = [
-  "поточний дохід і стартова фінансова точка",
+  "поточний чистий дохід як стартова фінансова точка",
   "поточна роль, досвід і реалістичний рівень на ринку",
   "цільова роль та близькість вашого досвіду до неї",
-  "англійська, цільовий ринок і пріоритет переходу"
+  "англійська, цільовий ринок і ваш головний пріоритет"
 ] as const;
 
 const outcomeCards = [
@@ -20,7 +20,7 @@ const outcomeCards = [
   },
   {
     title: "Що робити далі",
-    description: "Після висновку Decivio може допомогти з резюме, планом на 4-8 тижнів, вакансіями, співбесідами та порівнянням пропозицій."
+    description: "Після висновку ви бачите наступний крок, а Decivio може допомогти з резюме, планом, вакансіями й підготовкою до співбесід."
   }
 ] as const;
 
@@ -61,11 +61,11 @@ export default function SimulatePage() {
           <article className="surface-panel rounded-[2.2rem] px-6 py-6 md:px-8 md:py-8">
             <span className="eyebrow-pill">Що враховуємо</span>
             <h2 className="section-title mt-4 max-w-2xl">
-              Симулятор зміни карʼєри дивиться не лише на бажану зарплату.
+              Аналіз дивиться не лише на бажану зарплату.
             </h2>
             <p className="body-copy mt-4 max-w-2xl">
-              Щоб прогноз був корисним для реального рішення, Decivio враховує не одну цифру, а комбінацію факторів, які впливають на
-              швидкість входу, ризики, потенціал нового напряму та наступні кроки після результату.
+              Щоб висновок був корисним для реального рішення, Decivio враховує комбінацію факторів, які впливають на швидкість входу,
+              ризики, потенціал нового напряму та практичні кроки після результату.
             </p>
 
             <ul className="mt-5 space-y-3 text-[0.95rem] leading-[1.72] text-[var(--text-muted)]">

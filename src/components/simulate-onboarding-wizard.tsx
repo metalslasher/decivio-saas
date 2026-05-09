@@ -39,18 +39,18 @@ const steps: Array<{ title: string; helper: string; fields: WizardField[] }> = [
     fields: ["current_income"]
   },
   {
-    title: "Де ви зараз",
-    helper: "Опишіть поточну роль і скільки років ви вже в ній працюєте.",
+    title: "Поточна ситуація",
+    helper: "Додайте роль і досвід у сфері, з якої стартуєте перехід.",
     fields: ["current_role", "current_experience_years"]
   },
   {
-    title: "Куди хочете перейти",
-    helper: "Вкажіть цільову роль і наскільки ви вже дотичні до неї.",
+    title: "Ціль переходу",
+    helper: "Вкажіть нову роль і рівень досвіду, який уже можна використати в цьому напрямі.",
     fields: ["target_role", "experience_level"]
   },
   {
-    title: "Що ще врахувати",
-    helper: "Ці відповіді допомагають зробити висновок значно менш шаблонним і ближчим саме до вашої ситуації.",
+    title: "Умови переходу",
+    helper: "Оберіть мовний рівень, ринок і головний пріоритет, щоб прогноз точніше врахував ваші обмеження.",
     fields: ["english_level", "target_market", "transition_priority"]
   }
 ];
@@ -67,50 +67,74 @@ const initialValues: WizardForm = {
 };
 
 const inputClassName = "field-surface mt-1";
-const radioCardClassName = "cursor-pointer rounded-[1.2rem] border px-4 py-3 text-sm font-medium transition";
+const unitInputShellClassName =
+  "mt-1 flex w-full max-w-sm items-center overflow-hidden rounded-[1.2rem] border border-[var(--line-soft)] bg-[rgba(255,255,255,0.72)] px-4 py-3 transition focus-within:border-[rgba(41,73,244,0.24)] focus-within:bg-white focus-within:shadow-[0_0_0_5px_rgba(63,94,255,0.08)]";
+const unitInputClassName =
+  "min-w-0 flex-1 bg-transparent text-[1rem] font-semibold text-[var(--text-strong)] outline-none placeholder:text-[var(--text-soft)]";
+const unitLabelClassName = "ml-3 shrink-0 text-sm font-semibold text-[var(--text-soft)]";
 
 function parseNumber(value: string) {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : null;
 }
 
-function RadioCards<T extends string>({
-  name,
+function FieldError({ id, message }: { id: string; message?: string }) {
+  if (!message) {
+    return null;
+  }
+
+  return (
+    <span id={id} className="mt-1 block text-xs text-[var(--danger-strong)]">
+      {message}
+    </span>
+  );
+}
+
+function SelectField<T extends string>({
+  id,
+  label,
   value,
   options,
+  placeholder,
   onChange,
-  disabled = false
+  disabled,
+  error
 }: {
-  name: string;
+  id: string;
+  label: string;
   value: T | "";
+  placeholder: string;
   options: Array<{ value: T; label: string }>;
-  onChange: (nextValue: T) => void;
+  onChange: (nextValue: T | "") => void;
   disabled?: boolean;
+  error?: string;
 }) {
   return (
-    <div className="grid gap-2">
-      {options.map((item) => (
-        <label
-          key={item.value}
-          className={`${radioCardClassName} ${
-            value === item.value
-              ? "border-[rgba(63,94,255,0.22)] bg-[var(--accent-soft)] text-[var(--accent-strong)]"
-              : "border-[var(--line-soft)] bg-[rgba(255,255,255,0.74)] text-[var(--text-muted)] hover:border-[rgba(63,94,255,0.16)] hover:bg-white"
-          } ${disabled ? "pointer-events-none opacity-60" : ""}`}
+    <label className="block text-sm font-medium leading-[1.6] text-[var(--text-muted)]" htmlFor={id}>
+      {label}
+      <div className="relative mt-1">
+        <select
+          id={id}
+          value={value}
+          onChange={(event) => onChange(event.target.value as T | "")}
+          className="field-surface appearance-none pr-11"
+          aria-invalid={error ? true : undefined}
+          aria-describedby={error ? `${id}-error` : undefined}
+          disabled={disabled}
         >
-          <input
-            type="radio"
-            name={name}
-            value={item.value}
-            checked={value === item.value}
-            onChange={() => onChange(item.value)}
-            className="sr-only"
-            disabled={disabled}
-          />
-          {item.label}
-        </label>
-      ))}
-    </div>
+          <option value="">{placeholder}</option>
+          {options.map((item) => (
+            <option key={item.value} value={item.value}>
+              {item.label}
+            </option>
+          ))}
+        </select>
+        <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[0.72rem] text-[var(--text-soft)]">
+          ▼
+        </span>
+      </div>
+      <FieldError id={`${id}-error`} message={error} />
+    </label>
   );
 }
 
@@ -254,10 +278,12 @@ export function SimulateOnboardingWizard() {
 
   return (
     <section className="space-y-6 py-4 md:space-y-8 md:py-8">
-      <header className="mx-auto max-w-2xl space-y-3 text-center">
-        <h1 className="page-title mx-auto max-w-[9ch]">Симуляція</h1>
+      <header className="mx-auto max-w-3xl space-y-3 text-center">
+        <h1 className="page-title mx-auto max-w-[13ch]">
+          Оцініть <span className="text-accent">карʼєрний перехід</span>
+        </h1>
         <p className="lead-copy">
-          Заповніть кілька деталей, щоб оцінити свій сценарій переходу, ризики та наступний крок.
+          Дайте кілька фактів про поточну роль і ціль, а Decivio побудує прогноз доходу, ризику та першого практичного кроку.
         </p>
       </header>
 
@@ -283,45 +309,54 @@ export function SimulateOnboardingWizard() {
               <p className="body-copy">{currentMeta.helper}</p>
             </div>
 
-              {currentStep === 0 ? (
-                <div className="grid gap-4">
-                  <label className="text-sm font-medium leading-[1.6] text-[var(--text-muted)]">
-                    Поточний чистий дохід (грн/міс)
-                    <input
-                      type="number"
-                      min={0}
-                      inputMode="decimal"
-                      value={values.current_income}
-                      onChange={(event) => updateValue("current_income", event.target.value)}
-                      className={inputClassName}
-                      aria-invalid={Boolean(errors.current_income)}
-                      disabled={isSubmitting}
-                    />
-                    {errors.current_income ? <span className="mt-1 block text-xs text-[var(--danger-strong)]">{errors.current_income}</span> : null}
-                  </label>
+            {currentStep === 0 ? (
+              <div className="grid gap-2">
+                <label className="sr-only" htmlFor="current-income">
+                  Поточний чистий дохід
+                </label>
+                <div className={unitInputShellClassName}>
+                  <input
+                    id="current-income"
+                    type="number"
+                    min={0}
+                    inputMode="decimal"
+                    placeholder="Наприклад, 45000"
+                    value={values.current_income}
+                    onChange={(event) => updateValue("current_income", event.target.value)}
+                    className={unitInputClassName}
+                    aria-invalid={Boolean(errors.current_income)}
+                    aria-describedby={errors.current_income ? "current-income-error" : undefined}
+                    disabled={isSubmitting}
+                  />
+                  <span className={unitLabelClassName}>грн/міс</span>
                 </div>
-              ) : null}
+                <FieldError id="current-income-error" message={errors.current_income} />
+              </div>
+            ) : null}
 
-              {currentStep === 1 ? (
-                <div className="space-y-4">
-                  <label className="block text-sm font-medium leading-[1.6] text-[var(--text-muted)]" htmlFor="current-role">
-                    Поточна роль
-                    <input
-                      id="current-role"
-                      type="text"
-                      value={values.current_role}
-                      onChange={(event) => updateValue("current_role", event.target.value)}
-                      className={inputClassName}
-                      aria-invalid={Boolean(errors.current_role)}
-                      autoComplete="off"
-                      disabled={isSubmitting}
-                    />
-                  </label>
-                  {errors.current_role ? <span className="block text-xs text-[var(--danger-strong)]">{errors.current_role}</span> : null}
+            {currentStep === 1 ? (
+              <div className="grid gap-4 md:grid-cols-[minmax(0,1.15fr)_minmax(14rem,0.85fr)]">
+                <label className="block text-sm font-medium leading-[1.6] text-[var(--text-muted)]" htmlFor="current-role">
+                  Поточна роль
+                  <input
+                    id="current-role"
+                    type="text"
+                    value={values.current_role}
+                    onChange={(event) => updateValue("current_role", event.target.value)}
+                    className={inputClassName}
+                    aria-invalid={Boolean(errors.current_role)}
+                    aria-describedby={errors.current_role ? "current-role-error" : undefined}
+                    autoComplete="off"
+                    disabled={isSubmitting}
+                  />
+                  <FieldError id="current-role-error" message={errors.current_role} />
+                </label>
 
-                  <label className="block text-sm font-medium leading-[1.6] text-[var(--text-muted)]">
-                    Стаж у поточній сфері (років)
+                <label className="block text-sm font-medium leading-[1.6] text-[var(--text-muted)]" htmlFor="current-experience-years">
+                  Стаж у поточній сфері
+                  <div className={unitInputShellClassName}>
                     <input
+                      id="current-experience-years"
                       type="number"
                       min={0}
                       max={60}
@@ -329,119 +364,113 @@ export function SimulateOnboardingWizard() {
                       inputMode="decimal"
                       value={values.current_experience_years}
                       onChange={(event) => updateValue("current_experience_years", event.target.value)}
-                      className={inputClassName}
+                      className={unitInputClassName}
                       aria-invalid={Boolean(errors.current_experience_years)}
+                      aria-describedby={errors.current_experience_years ? "current-experience-years-error" : undefined}
                       disabled={isSubmitting}
                     />
-                    {errors.current_experience_years ? (
-                      <span className="mt-1 block text-xs text-[var(--danger-strong)]">{errors.current_experience_years}</span>
-                    ) : null}
-                  </label>
-                </div>
-              ) : null}
-
-              {currentStep === 2 ? (
-                <div className="space-y-5">
-                  <div>
-                    <label className="block text-sm font-medium leading-[1.6] text-[var(--text-muted)]" htmlFor="target-role">
-                      Цільова роль
-                      <input
-                        id="target-role"
-                        type="text"
-                        value={values.target_role}
-                        onChange={(event) => updateValue("target_role", event.target.value)}
-                        className={inputClassName}
-                        aria-invalid={Boolean(errors.target_role)}
-                        autoComplete="off"
-                        disabled={isSubmitting}
-                      />
-                    </label>
-                    {errors.target_role ? <span className="block text-xs text-[var(--danger-strong)]">{errors.target_role}</span> : null}
+                    <span className={unitLabelClassName}>років</span>
                   </div>
+                  <FieldError id="current-experience-years-error" message={errors.current_experience_years} />
+                </label>
+              </div>
+            ) : null}
 
-                  <fieldset className="space-y-2">
-                    <legend className="text-sm font-medium leading-[1.6] text-[var(--text-muted)]">Релевантний досвід у цій ролі</legend>
-                    <RadioCards
-                      name="experience-level"
-                      value={values.experience_level}
-                      options={experienceLevelOptions}
-                      onChange={(nextValue) => updateValue("experience_level", nextValue)}
-                      disabled={isSubmitting}
-                    />
-                    {errors.experience_level ? <span className="block text-xs text-[var(--danger-strong)]">{errors.experience_level}</span> : null}
-                  </fieldset>
-                </div>
-              ) : null}
+            {currentStep === 2 ? (
+              <div className="grid gap-4 md:grid-cols-[minmax(0,1.15fr)_minmax(14rem,0.85fr)]">
+                <label className="block text-sm font-medium leading-[1.6] text-[var(--text-muted)]" htmlFor="target-role">
+                  Цільова роль
+                  <input
+                    id="target-role"
+                    type="text"
+                    value={values.target_role}
+                    onChange={(event) => updateValue("target_role", event.target.value)}
+                    className={inputClassName}
+                    aria-invalid={Boolean(errors.target_role)}
+                    aria-describedby={errors.target_role ? "target-role-error" : undefined}
+                    autoComplete="off"
+                    disabled={isSubmitting}
+                  />
+                  <FieldError id="target-role-error" message={errors.target_role} />
+                </label>
 
-              {currentStep === 3 ? (
-                <div className="space-y-5">
-                  <fieldset className="space-y-2">
-                    <legend className="text-sm font-medium leading-[1.6] text-[var(--text-muted)]">Рівень англійської</legend>
-                    <RadioCards
-                      name="english-level"
-                      value={values.english_level}
-                      options={englishLevelOptions}
-                      onChange={(nextValue) => updateValue("english_level", nextValue)}
-                      disabled={isSubmitting}
-                    />
-                    {errors.english_level ? <span className="block text-xs text-[var(--danger-strong)]">{errors.english_level}</span> : null}
-                  </fieldset>
+                <SelectField
+                  id="experience-level"
+                  label="Релевантний досвід у цій ролі"
+                  value={values.experience_level}
+                  options={experienceLevelOptions}
+                  placeholder="Оберіть рівень"
+                  onChange={(nextValue) => updateValue("experience_level", nextValue)}
+                  disabled={isSubmitting}
+                  error={errors.experience_level}
+                />
+              </div>
+            ) : null}
 
-                  <fieldset className="space-y-2">
-                    <legend className="text-sm font-medium leading-[1.6] text-[var(--text-muted)]">Куди орієнтуєтесь по ринку</legend>
-                    <RadioCards
-                      name="target-market"
-                      value={values.target_market}
-                      options={targetMarketOptions}
-                      onChange={(nextValue) => updateValue("target_market", nextValue)}
-                      disabled={isSubmitting}
-                    />
-                    {errors.target_market ? <span className="block text-xs text-[var(--danger-strong)]">{errors.target_market}</span> : null}
-                  </fieldset>
+            {currentStep === 3 ? (
+              <div className="grid gap-4 lg:grid-cols-3">
+                <SelectField
+                  id="english-level"
+                  label="Рівень англійської"
+                  value={values.english_level}
+                  options={englishLevelOptions}
+                  placeholder="Оберіть рівень"
+                  onChange={(nextValue) => updateValue("english_level", nextValue)}
+                  disabled={isSubmitting}
+                  error={errors.english_level}
+                />
 
-                  <fieldset className="space-y-2">
-                    <legend className="text-sm font-medium leading-[1.6] text-[var(--text-muted)]">Що важливіше зараз</legend>
-                    <RadioCards
-                      name="transition-priority"
-                      value={values.transition_priority}
-                      options={transitionPriorityOptions}
-                      onChange={(nextValue) => updateValue("transition_priority", nextValue)}
-                      disabled={isSubmitting}
-                    />
-                    {errors.transition_priority ? (
-                      <span className="block text-xs text-[var(--danger-strong)]">{errors.transition_priority}</span>
-                    ) : null}
-                  </fieldset>
-                </div>
-              ) : null}
+                <SelectField
+                  id="target-market"
+                  label="Цільовий ринок"
+                  value={values.target_market}
+                  options={targetMarketOptions}
+                  placeholder="Оберіть ринок"
+                  onChange={(nextValue) => updateValue("target_market", nextValue)}
+                  disabled={isSubmitting}
+                  error={errors.target_market}
+                />
 
-              {requestError ? (
-                <p className="rounded-[1.3rem] border border-[rgba(201,155,134,0.5)] bg-[var(--danger-soft)] px-4 py-3 text-sm text-[var(--danger-strong)]">
-                  {requestError}
-                </p>
-              ) : null}
-            </div>
-          </fieldset>
+                <SelectField
+                  id="transition-priority"
+                  label="Головний пріоритет"
+                  value={values.transition_priority}
+                  options={transitionPriorityOptions}
+                  placeholder="Оберіть пріоритет"
+                  onChange={(nextValue) => updateValue("transition_priority", nextValue)}
+                  disabled={isSubmitting}
+                  error={errors.transition_priority}
+                />
+              </div>
+            ) : null}
 
-          <div className="relative z-20 mt-7 flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <button
-              type="button"
-              onClick={handleBack}
-              disabled={currentStep === 0 || isSubmitting}
-              className="btn-secondary disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              Назад
-            </button>
-
-            <button
-              type="button"
-              onClick={isLastStep ? handleSubmit : handleNext}
-              disabled={isSubmitting}
-              className="btn-primary disabled:cursor-not-allowed disabled:opacity-70"
-            >
-              {isLastStep ? (isSubmitting ? "Формуємо висновок..." : "Отримати мій висновок") : "Далі"}
-            </button>
+            {requestError ? (
+              <p className="rounded-[1.3rem] border border-[rgba(201,155,134,0.5)] bg-[var(--danger-soft)] px-4 py-3 text-sm text-[var(--danger-strong)]">
+                {requestError}
+              </p>
+            ) : null}
           </div>
+        </fieldset>
+
+        <div className="relative z-20 mt-7 flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <button
+            type="button"
+            onClick={handleBack}
+            disabled={currentStep === 0 || isSubmitting}
+            className="btn-secondary disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            Назад
+          </button>
+
+          <button
+            type="button"
+            onClick={isLastStep ? handleSubmit : handleNext}
+            disabled={isSubmitting}
+            className="btn-primary disabled:cursor-not-allowed disabled:opacity-70"
+          >
+            {isLastStep ? (isSubmitting ? "Формуємо висновок..." : "Отримати мій висновок") : "Далі"}
+          </button>
+        </div>
       </div>
     </section>
   );
