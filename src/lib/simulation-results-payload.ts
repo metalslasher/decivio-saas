@@ -202,7 +202,7 @@ function targetMarketLabel(market: TargetMarket) {
     case "ukraine":
       return "Україна";
     case "remote":
-      return "Віддалений формат / міжнародний ринок";
+      return "Міжнародний ринок";
     case "abroad":
       return "Локальна робота за кордоном";
     default:

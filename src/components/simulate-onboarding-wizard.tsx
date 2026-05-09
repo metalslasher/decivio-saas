@@ -66,9 +66,9 @@ const initialValues: WizardForm = {
   transition_priority: ""
 };
 
-const inputClassName = "field-surface mt-1";
+const inputClassName = "field-surface mt-1 h-[3.3rem]";
 const unitInputShellClassName =
-  "mt-1 flex w-full max-w-sm items-center overflow-hidden rounded-[1.2rem] border border-[var(--line-soft)] bg-[rgba(255,255,255,0.72)] px-4 py-3 transition focus-within:border-[rgba(41,73,244,0.24)] focus-within:bg-white focus-within:shadow-[0_0_0_5px_rgba(63,94,255,0.08)]";
+  "mt-1 flex h-[3.3rem] w-full items-center overflow-hidden rounded-[1.2rem] border border-[var(--line-soft)] bg-[rgba(255,255,255,0.72)] px-4 py-3 transition focus-within:border-[rgba(41,73,244,0.24)] focus-within:bg-white focus-within:shadow-[0_0_0_5px_rgba(63,94,255,0.08)]";
 const unitInputClassName =
   "min-w-0 flex-1 bg-transparent text-[1rem] font-semibold text-[var(--text-strong)] outline-none placeholder:text-[var(--text-soft)]";
 const unitLabelClassName = "ml-3 shrink-0 text-sm font-semibold text-[var(--text-soft)]";
@@ -117,7 +117,7 @@ function SelectField<T extends string>({
           id={id}
           value={value}
           onChange={(event) => onChange(event.target.value as T | "")}
-          className="field-surface appearance-none pr-11"
+          className="field-surface h-[3.3rem] appearance-none pr-11"
           aria-invalid={error ? true : undefined}
           aria-describedby={error ? `${id}-error` : undefined}
           disabled={disabled}
@@ -283,7 +283,7 @@ export function SimulateOnboardingWizard() {
           Оцініть <span className="text-accent">карʼєрний перехід</span>
         </h1>
         <p className="lead-copy">
-          Дайте кілька фактів про поточну роль і ціль, а Decivio побудує прогноз доходу, ризику та першого практичного кроку.
+          Надайте інформацію про поточну роль і ціль, а Decivio підготує прогноз доходу, ризику та першого практичного кроку.
         </p>
       </header>
 
@@ -320,7 +320,6 @@ export function SimulateOnboardingWizard() {
                     type="number"
                     min={0}
                     inputMode="decimal"
-                    placeholder="Наприклад, 45000"
                     value={values.current_income}
                     onChange={(event) => updateValue("current_income", event.target.value)}
                     className={unitInputClassName}
@@ -335,7 +334,7 @@ export function SimulateOnboardingWizard() {
             ) : null}
 
             {currentStep === 1 ? (
-              <div className="grid gap-4 md:grid-cols-[minmax(0,1.15fr)_minmax(14rem,0.85fr)]">
+              <div className="grid gap-4 md:grid-cols-2">
                 <label className="block text-sm font-medium leading-[1.6] text-[var(--text-muted)]" htmlFor="current-role">
                   Поточна роль
                   <input

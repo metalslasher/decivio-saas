@@ -132,15 +132,15 @@ export const experienceLevelOptions: Array<{ value: ExperienceLevel; label: stri
 ];
 
 export const englishLevelOptions: Array<{ value: EnglishLevel; label: string }> = [
-  { value: "basic", label: "A1-A2 / базовий рівень" },
-  { value: "intermediate", label: "B1 / можу спілкуватися" },
-  { value: "upper_intermediate", label: "B2 / можу проходити інтерв'ю" },
-  { value: "advanced", label: "C1+ / працюю впевнено" }
+  { value: "basic", label: "A1-A2 (базовий рівень)" },
+  { value: "intermediate", label: "B1 (можу спілкуватися)" },
+  { value: "upper_intermediate", label: "B2 (можу проходити інтерв'ю)" },
+  { value: "advanced", label: "C1+ (працюю впевнено)" }
 ];
 
 export const targetMarketOptions: Array<{ value: TargetMarket; label: string }> = [
   { value: "ukraine", label: "Україна" },
-  { value: "remote", label: "Віддалена робота / міжнародний ринок" },
+  { value: "remote", label: "Міжнародний ринок" },
   { value: "abroad", label: "Локальна робота за кордоном" }
 ];
 

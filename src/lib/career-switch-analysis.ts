@@ -126,7 +126,7 @@ const englishLevelDescriptions: Record<EnglishLevel, string> = {
 
 const targetMarketDescriptions: Record<TargetMarket, string> = {
   ukraine: "орієнтир на ринок України",
-  remote: "орієнтир на віддалену роботу або міжнародний ринок",
+  remote: "орієнтир на міжнародний ринок",
   abroad: "орієнтир на локальний ринок за кордоном"
 };
 
