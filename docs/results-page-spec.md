@@ -1,201 +1,120 @@
-ТЗ: Нова сторінка результатів симуляції (Decision + Upsell)
-0) Мета сторінки
+# Results Page Spec
 
-Сторінка результатів має:
+Status: current. This document describes the public result page after the four-step simulation.
 
-пояснити користувачу висновок простими словами (чи вигідно / умовно / ризиковано)
+## Source Of Truth
 
-показати ключові цифри й візуал (без “таблиці на 36 місяців”)
+- Page: `src/app/results/page.tsx`
+- UI: `src/components/results-screen.tsx`
+- Result endpoint: `src/app/api/simulations/[simulationId]/route.ts`
+- Payload mapping: `src/lib/simulation-results-payload.ts`
+- Analysis generation: `src/lib/ai/career-switch-analysis.ts`
 
-підштовхнути до Pro через очевидні “прогалини” безкоштовної версії
+## Route
 
-бути зрозумілою і “продажною”, але без агресії
+Canonical route:
 
-1) Де це реалізувати
+```text
+/results?simulationId=<uuid>
+```
 
-Замінити існуючу сторінку результатів: /results або /results/[id] (залежно від того, як зараз у проекті).
+The page requires a valid `simulationId`.
 
-Якщо зараз результат відкривається як localhost:3000/results?simulationId=... — зберегти цей шлях.
+Access rules:
 
-Якщо результат відкривається як .../results/<id> — зберегти.
+- Guest user can view only the result connected to the same guest session cookie.
+- Authenticated user can view only their own result.
+- If access is missing or the result cannot be loaded, show a clear error state with a path back to `/simulate`.
 
-Важливо: повністю прибрати поточний “демо-табличний” вивід, залишити тільки нову структуру.
+## Page Goal
 
-2) Дані, які використовуємо (MVP)
+The free result should give the user a useful first answer:
 
-Використати ті поля, які вже є у відповіді симуляції/БД, і прив’язати UI саме до них.
+- what the transition looks like,
+- how realistic it is,
+- where the main risk sits,
+- what the next paid product unlocks.
 
-Мінімально сторінка має працювати на:
+It should not expose the full paid dashboard plan before checkout.
 
-break_even_month (місяць окупності)
+## Visible Structure
 
-max_drawdown (максимальна просадка в грн)
+### Hero
 
-long_term_difference (різниця доходу на горизонті, наприклад 36 міс)
+Content:
 
-savings (фінансова подушка з онбордингу)
+- Generated headline.
+- Short summary.
+- Meta chips based on selected target role, market, English level, and priority.
 
-current_income (поточний дохід)
+### Metric Cards
 
-target_income (цільовий дохід або очікуваний дохід в новій ролі)
+Current cards:
 
-horizon_months (горизонт моделювання)
+- Current income.
+- Chance of first offer within 12 months.
+- Time to first offer.
+- Ceiling gap.
+- Transition risk.
 
-cashflow_series_stay (масив/серія для графіку “залишитись”)
+Important:
 
-cashflow_series_transition (масив/серія “перейти”)
+- The "Time to first offer" card shows one base value only.
+- Do not show optimistic/base/pessimistic rows unless the product decision changes again.
 
-Якщо серій немає — тимчасово побудувати їх на базі існуючої логіки (або згенерувати спрощено), але графік має бути.
+### Scenario Snapshot
 
-3) Логіка “Вердикту” (3 статуси)
+Shows current-role and target-role salary/market context in a compact comparison.
 
-На основі чисел зробити один з трьох статусів:
+### Comparison
 
-Статус A: “Вигідний перехід” (зелений)
+Shows the main side-by-side comparison between the current direction and target direction.
 
-Умови:
+### Explanation
 
-break_even_month <= 12
+Sections:
 
-savings >= abs(max_drawdown)
+- Why this result.
+- Personalization notes.
 
-long_term_difference > 0
+These sections should explain the reasoning in plain Ukrainian and avoid generic motivational text.
 
-Статус B: “Умовно вигідний” (жовтий)
+### CTA
 
-Умови:
+Primary path:
 
-break_even_month між 13–24 або
+- Go to `/pricing`.
 
-savings приблизно на межі покриття просадки (savings < abs(max_drawdown) але не критично)
+Authenticated paid users may also get a path into the dashboard scenario when access is active.
 
-Статус C: “Високий фінансовий ризик” (червоний)
+## Data Contract
 
-Умови:
+`simulation_results.summary_metrics` contains the numeric basis for the cards:
 
-savings < abs(max_drawdown) (подушка не покриває максимальну просадку)
-або
+```json
+{
+  "verdict_label": "stay|switch|depends",
+  "better_long_term_direction": "current_role|target_role|balanced",
+  "ceiling_gap_median": 0,
+  "probability_of_getting_job_within_12_months": 0.62,
+  "risk_level": "low|medium|high",
+  "current_best_case_median": 0,
+  "target_best_case_median": 0,
+  "current_confidence": 0.72,
+  "target_confidence": 0.7
+}
+```
 
-break_even_month > 24
+`simulation_results.ai_summary` contains the generated market profile, narrative, guidance, and metadata.
 
-4) Структура сторінки (блоки + вимоги)
-Блок 1. Header-резюме (Verdict)
+The UI should read through `buildSimulationResultsPayload()` instead of depending directly on raw AI JSON shape.
 
-Великий заголовок-вердикт:
-“Перехід у {цільова роль} має сенс” / “Перехід ризикований” тощо.
+## Error Handling
 
-Підзаголовок: 2–3 речення на базі чисел:
+User-facing errors should be specific enough to guide action:
 
-“Окупність: X міс.”
+- missing simulation id: ask the user to start a new analysis;
+- not found/no access: ask the user to reopen their own result or start again;
+- server failure: ask the user to retry.
 
-“Максимальна просадка: –Y грн”
-
-“Очікуваний ефект на горизонті: +Z грн”
-
-Візуально: статусний бейдж/іконка (зелений/жовтий/червоний), коротко, без паніки.
-
-Блок 2. Три ключові метрики (3 cards)
-
-Три картки крупними цифрами:
-
-Окупність: break_even_month міс
-
-Максимальна просадка: max_drawdown грн
-
-Різниця доходу за {horizon}: long_term_difference грн
-
-Вимоги:
-
-форматування гривні (розділення пробілами/комами)
-
-якщо значення від’ємне — показати “–” і підкреслити ризик
-
-Блок 3. Графік (Stay vs Transition)
-
-Один line-chart:
-
-Лінія “Залишитись”
-
-Лінія “Перехід”
-
-Вертикальна мітка break-even (місяць окупності) + підпис
-
-Важливо: без таблиць на 36 рядків.
-Під графіком короткий пояснювальний текст:
-“Точка перетину — момент, коли перехід починає приносити фінансовий плюс”.
-
-Блок 4. “Що це означає для вас” (пояснення простими словами)
-
-Автогенерований абзац (але без AI, чисто за шаблоном на цифрах), наприклад:
-
-Якщо break_even_month <= 12:
-“У перші {n} місяців дохід буде нижчим через перехід/навчання. Орієнтовно на {break_even_month}-му місяці ви компенсуєте просадку й почнете виходити в плюс. На горизонті {horizon} міс різниця складе {long_term_difference} грн.”
-
-Якщо ризик:
-“Зараз фінансова подушка не перекриває максимальну просадку. Це означає, що перехід може створити фінансовий тиск у перші місяці. Рекомендуємо або збільшити подушку, або обрати більш обережний сценарій.”
-
-Блок 5. “Ризик і подушка” (Risk Panel)
-
-Показати порівняння:
-
-“Ваша фінансова подушка: {savings} грн”
-
-“Орієнтовна максимальна просадка: {abs(max_drawdown)} грн”
-
-Статус:
-
-“Подушка достатня” або
-
-“Не вистачає приблизно: {abs(max_drawdown)-savings} грн”
-
-Візуально: прогрес-бар або простий індикатор.
-
-Блок 6. Pro Upsell (ключовий продажний блок)
-
-Заголовок: “Отримайте повний план переходу”
-Підзаголовок: “У безкоштовній версії ви бачите базову фінансову модель. Pro додає план дій і порівняння сценаріїв.”
-
-Список Pro-функцій (пункти):
-
-Порівняння 2–3 сценаріїв (різні ролі/траєкторії)
-
-Персональний план переходу на 6–12 місяців
-
-“Day-in-the-life” майбутньої ролі
-
-Генератор резюме під цільову позицію
-
-Рекомендації: що підсилити, щоб зменшити ризик
-
-CTA кнопка:
-
-“Розблокувати Pro і отримати план”
-Другий варіант (secondary):
-
-“Подивитися, що входить у Pro”
-
-Блок 7. Sticky CTA (опціонально, але бажано)
-
-На мобільному: приклеїти знизу кнопку “Отримати Pro” після скролу 30–40%.
-
-5) Важливі UX/копірайт вимоги
-
-Тексти українською.
-
-Не використовувати “страшилки”, а спокійно пояснювати ризик.
-
-Максимальна ясність: що означають цифри для життя користувача.
-
-Без “ціни” у цьому блоці, якщо ти не хочеш лякати. Ціну показувати після кліку або на pricing.
-
-6) Технічні вимоги
-
-Не ламати існуючий флоу онбордингу.
-
-Результати беруться з існуючої simulation/DB.
-
-Якщо деяких полів не вистачає — показати акуратні fallback стани (“недостатньо даних для графіку” і т.д.), але краще допиляти дані, щоб працювало.
-
-Додати базові loading/error states.
-
-Вирівняти адаптивку: desktop + mobile.
+Avoid raw technical errors in the UI.

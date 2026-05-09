@@ -1,306 +1,290 @@
-﻿Ð‘Ð°Ð·Ð° Ð´Ð°Ð½Ð¸Ñ… (MVP) â€” Decivio Simulator
-Ð¦Ñ–Ð»Ñ– Ð‘Ð”
+# Database Spec
 
-Ð—Ð±ÐµÑ€Ñ–Ð³Ð°Ñ‚Ð¸ Ð¿Ñ€Ð¾Ñ„Ñ–Ð»ÑŒ ÐºÐ¾Ñ€Ð¸ÑÑ‚ÑƒÐ²Ð°Ñ‡Ð° Ñ‚Ð° Ð¹Ð¾Ð³Ð¾ Ð½Ð°Ð»Ð°ÑˆÑ‚ÑƒÐ²Ð°Ð½Ð½Ñ
+Status: current as of the latest migrations in `supabase/migrations`.
 
-Ð—Ð±ÐµÑ€Ñ–Ð³Ð°Ñ‚Ð¸ ÑÐ¸Ð¼ÑƒÐ»ÑÑ†Ñ–Ñ— (Ð²Ñ…Ñ–Ð´Ð½Ñ– Ð¿Ð°Ñ€Ð°Ð¼ÐµÑ‚Ñ€Ð¸)
+This document mirrors the live schema and should not invent future tables. If the schema changes, add a migration first and update this file in the same commit.
 
-Ð—Ð±ÐµÑ€Ñ–Ð³Ð°Ñ‚Ð¸ Ñ€ÐµÐ·ÑƒÐ»ÑŒÑ‚Ð°Ñ‚Ð¸ Ñ€Ð¾Ð·Ñ€Ð°Ñ…ÑƒÐ½ÐºÑ–Ð² (Ð¼ÐµÑ‚Ñ€Ð¸ÐºÐ¸ + ÑÑ†ÐµÐ½Ð°Ñ€Ñ–Ñ—)
+## Source Of Truth
 
-Ð”Ð°Ñ‚Ð¸ Ð¼Ð¾Ð¶Ð»Ð¸Ð²Ñ–ÑÑ‚ÑŒ Ð¿Ð¾Ð²ÐµÑ€Ð½ÑƒÑ‚Ð¸ÑÑ, Ð¿Ð¾Ñ€Ñ–Ð²Ð½ÑÑ‚Ð¸, Ð²Ñ–Ð´Ñ€ÐµÐ´Ð°Ð³ÑƒÐ²Ð°Ñ‚Ð¸ Ñ– Ð¿ÐµÑ€ÐµÑ€Ð°Ñ…ÑƒÐ²Ð°Ñ‚Ð¸
+- Schema source: `supabase/migrations/*.sql`
+- Supabase server client: `src/lib/db/supabase.ts`
+- Browser client: `src/lib/db/supabase-browser.ts`
+- Guest transfer: `src/lib/guest-simulation-transfer.ts`
+- Billing persistence: `src/lib/billing-store.ts`
+- Result payload mapping: `src/lib/simulation-results-payload.ts`
 
-ÐŸÑ–Ð´Ð³Ð¾Ñ‚ÑƒÐ²Ð°Ñ‚Ð¸ Ð¾ÑÐ½Ð¾Ð²Ñƒ Ð¿Ñ–Ð´ Ð¼Ð¾Ð½ÐµÑ‚Ð¸Ð·Ð°Ñ†Ñ–ÑŽ (Ð¿Ð»Ð°Ð½, Ð»Ñ–Ð¼Ñ–Ñ‚Ð¸, one-time purchase / pro)
+## Core Tables
 
-ÐŸÑ–Ð´Ð³Ð¾Ñ‚ÑƒÐ²Ð°Ñ‚Ð¸ Ð¾ÑÐ½Ð¾Ð²Ñƒ Ð¿Ñ–Ð´ Ð¼Ð°Ð¹Ð±ÑƒÑ‚Ð½Ñ– ÑÐµÑ€Ð²Ñ–ÑÐ¸ (Ð°ÑƒÐ´Ð¸Ñ‚, Ñ€ÐµÐ·ÑŽÐ¼Ðµ, ÐºÐ¾Ð½ÑÐ°Ð»Ñ‚Ð¸Ð½Ð³) â€” ÑÐº â€œplaceholdersâ€ Ð±ÐµÐ· Ñ€ÐµÐ°Ð»Ñ–Ð·Ð°Ñ†Ñ–Ñ— Ð² MVP
+### `profiles`
 
-1) Ð¡ÑƒÑ‚Ð½Ð¾ÑÑ‚Ñ– (Ñ‚Ð°Ð±Ð»Ð¸Ñ†Ñ–)
-1.1 profiles
+Extends `auth.users`.
 
-ÐŸÑ€Ð¸Ð·Ð½Ð°Ñ‡ÐµÐ½Ð½Ñ: Ñ€Ð¾Ð·ÑˆÐ¸Ñ€ÐµÐ½Ð½Ñ Ð¿Ñ€Ð¾Ñ„Ñ–Ð»ÑŽ ÐºÐ¾Ñ€Ð¸ÑÑ‚ÑƒÐ²Ð°Ñ‡Ð° (Ð½Ð°Ð´ Auth).
+Important columns:
 
-ÐŸÐ¾Ð»Ñ:
+- `id uuid primary key` references `auth.users(id)`
+- `email text`
+- `full_name text`
+- `locale text default 'uk'`
+- `timezone text`
+- `avatar_url text`
+- `profile_context jsonb not null default '{}'`
+- `created_at timestamptz`
+- `updated_at timestamptz`
 
-id UUID (PK) â€” = auth user id
+Notes:
 
-email TEXT (optional, Ð¼Ð¾Ð¶Ð½Ð° Ñ‚ÑÐ³Ð½ÑƒÑ‚Ð¸ Ð· auth)
+- `handle_new_auth_user()` creates/updates a profile row when Supabase Auth creates a user.
+- The trigger also copies `full_name` or `name` from auth metadata.
+- `profile_context` stores dashboard/profile answers and can be seeded from the simulation form.
 
-full_name TEXT NULL
+### `subscriptions`
 
-locale TEXT DEFAULT 'uk'
+Stores access to paid dashboard features.
 
-timezone TEXT NULL
+Important columns:
 
-created_at TIMESTAMPTZ DEFAULT now()
+- `id uuid primary key`
+- `user_id uuid` references `profiles(id)`
+- `status text`: `free`, `trial`, `active`, `canceled`, `past_due`
+- `plan text`: `free`, `pro`
+- `current_period_end timestamptz`
+- `provider text`
+- `mono_invoice_id text`
+- `mono_subscription_id text`
+- `activated_at timestamptz`
+- legacy Stripe columns still exist: `stripe_customer_id`, `stripe_subscription_id`
 
-updated_at TIMESTAMPTZ DEFAULT now()
+Current product behavior:
 
-Ð†Ð½Ð´ÐµÐºÑÐ¸:
+- Dashboard access is granted when `plan = 'pro'` and status is `active`, `trial`, or still-valid `canceled`.
+- Annual access is activated from a successful mono invoice.
+- Monthly access is activated from an active mono subscription.
+- There is a unique index on `user_id`, so one user has one current subscription/access row.
 
-PK Ð¿Ð¾ id
+### `guest_sessions`
 
-RLS:
+Allows anonymous users to create a simulation before account creation.
+
+Important columns:
+
+- `id uuid primary key`
+- `created_at timestamptz`
+- `updated_at timestamptz`
+- `last_seen_at timestamptz`
+
+Current product behavior:
+
+- `/api/simulations` creates or refreshes a guest session when no authenticated user exists.
+- The guest session id is stored in an HTTP-only cookie.
+- After signup/login, `/api/auth/claim-guest-simulations` attaches guest simulations/results to the user.
+
+### `simulations`
+
+One career-transition simulation submission.
+
+Important columns:
+
+- `id uuid primary key`
+- `user_id uuid null` references `profiles(id)`
+- `guest_session_id uuid null` references `guest_sessions(id)`
+- `scenario_type text`: currently `career_switch`
+- `status text`: `pending`, `processing`, `completed`, `failed`
+- `inputs jsonb not null`
+- `assumptions jsonb null`
+- `version integer default 1`
+- `created_at timestamptz`
+- `updated_at timestamptz`
+
+Owner rule:
+
+- Exactly one of `user_id` or `guest_session_id` must be present.
+
+Current `inputs` contract:
+
+```json
+{
+  "current_income": 45000,
+  "current_role": "Маркетолог",
+  "current_experience_years": 5,
+  "target_role": "Product Manager",
+  "experience_level": "none|basic|practical",
+  "english_level": "basic|intermediate|upper_intermediate|advanced",
+  "target_market": "ukraine|remote|abroad",
+  "transition_priority": "speed|income",
+  "country": "UA"
+}
+```
+
+### `simulation_results`
+
+Stores generated analysis for one simulation.
+
+Important columns:
+
+- `id uuid primary key`
+- `simulation_id uuid` references `simulations(id)`
+- `user_id uuid null`
+- `guest_session_id uuid null`
+- `summary_metrics jsonb not null`
+- `series jsonb not null`
+- `ai_summary jsonb`
+- `created_at timestamptz`
+- `updated_at timestamptz`
+
+Owner rule:
+
+- Exactly one of `user_id` or `guest_session_id` must be present.
+
+Current `summary_metrics` contract:
+
+```json
+{
+  "verdict_label": "stay|switch|depends",
+  "better_long_term_direction": "current_role|target_role|balanced",
+  "ceiling_gap_median": 0,
+  "probability_of_getting_job_within_12_months": 0.62,
+  "risk_level": "low|medium|high",
+  "current_best_case_median": 0,
+  "target_best_case_median": 0,
+  "current_confidence": 0.72,
+  "target_confidence": 0.7
+}
+```
+
+Current `ai_summary` contract:
+
+```json
+{
+  "analysis": {
+    "market_profile": {
+      "current_role": {},
+      "target_role": {},
+      "comparison": {}
+    },
+    "narrative": {},
+    "guidance": {
+      "risk_assessment": {}
+    }
+  },
+  "meta": {
+    "model": "string",
+    "latency_ms": 0,
+    "web_search_used": true,
+    "request_id": "string|null",
+    "generated_at": "ISO date"
+  }
+}
+```
 
-user can select/update only own profile
+`series` currently exists for compatibility, but the active results page does not depend on monthly financial series.
 
-1.2 subscriptions
+## Billing Tables
 
-ÐŸÑ€Ð¸Ð·Ð½Ð°Ñ‡ÐµÐ½Ð½Ñ: ÑÑ‚Ð°Ñ‚ÑƒÑ Ð´Ð¾ÑÑ‚ÑƒÐ¿Ñƒ (free/pro) + Ñ‚ÐµÑ…Ð½Ñ–Ñ‡Ð½Ñ– Ð´Ð°Ð½Ñ– Ð¿Ñ–Ð´ Stripe.
+### `billing_checkouts`
 
-ÐŸÐ¾Ð»Ñ:
+Tracks a mono checkout attempt.
 
-id UUID PK
+Important columns:
 
-user_id UUID FK â†’ profiles.id
+- `id uuid primary key`
+- `user_id uuid` references `profiles(id)`
+- `provider text`: currently `mono`
+- `plan_id text`: `monthly`, `annual`
+- `billing_kind text`: `subscription`, `one_time`
+- `status text`: `pending`, `processing`, `paid`, `active`, `failed`, `canceled`, `expired`, `reversed`
+- `amount integer`
+- `ccy integer default 980`
+- `mono_invoice_id text`
+- `mono_subscription_id text`
+- `mono_page_url text`
+- `redirect_url text`
+- `last_event_at timestamptz`
+- `last_event_status text`
 
-status TEXT NOT NULL CHECK IN ('free','trial','active','canceled','past_due')
+Current behavior:
 
-plan TEXT NOT NULL CHECK IN ('free','pro')
+- Annual plan uses `billing_kind = 'one_time'` and mono invoice.
+- Monthly plan uses `billing_kind = 'subscription'` and mono subscription.
+- Only one mono target can be set: invoice or subscription, not both.
+- Access is granted when checkout status is `paid` or `active`.
 
-current_period_end TIMESTAMPTZ NULL
+### `billing_events`
 
-stripe_customer_id TEXT NULL
+Stores mono webhook/poll events with deduplication.
 
-stripe_subscription_id TEXT NULL
+Important columns:
 
-created_at TIMESTAMPTZ DEFAULT now()
+- `id uuid primary key`
+- `user_id uuid`
+- `checkout_id uuid null`
+- `provider text`: `mono`
+- `event_type text`
+- `external_id text`
+- `status text`
+- `event_time timestamptz`
+- `signature text`
+- `dedupe_key text unique`
+- `payload jsonb`
+- `created_at timestamptz`
 
-updated_at TIMESTAMPTZ DEFAULT now()
+## Supporting Tables
 
-Ð†Ð½Ð´ÐµÐºÑÐ¸:
+### `request_rate_limits`
 
-index on user_id
+Stores server-side rate-limit windows.
 
-unique on stripe_customer_id (optional)
+Used by:
 
-unique on stripe_subscription_id (optional)
+- `/api/simulations`
+- `/api/simulations/[simulationId]`
+- `/api/auth/claim-guest-simulations`
+- mono checkout/status endpoints
 
-RLS:
+Local E2E test mode bypasses rate limiting where needed.
 
-user can read only own subscription row
+### `simulation_projects`
 
-ÐŸÑ€Ð¸Ð¼Ñ–Ñ‚ÐºÐ°:
+Historical grouping table for simulations. It still exists in DB but is not part of the current public flow.
 
-Ð’ MVP Ð¼Ð¾Ð¶Ð½Ð° Ð¿Ð¾ÐºÐ¸ Ð·Ð±ÐµÑ€Ñ–Ð³Ð°Ñ‚Ð¸ Ñ‚Ñ–Ð»ÑŒÐºÐ¸ plan/status Ð±ÐµÐ· Stripe Ñ–Ð½Ñ‚ÐµÐ³Ñ€Ð°Ñ†Ñ–Ñ—.
+Do not build new product behavior on this table unless the dashboard simulation history is redesigned.
 
-1.3 simulation_projects
+### `lead_requests`
 
-ÐŸÑ€Ð¸Ð·Ð½Ð°Ñ‡ÐµÐ½Ð½Ñ: Ð³Ñ€ÑƒÐ¿ÑƒÐ²Ð°Ð½Ð½Ñ ÑÐ¸Ð¼ÑƒÐ»ÑÑ†Ñ–Ð¹ (Ð½Ð°Ð¿Ñ€Ð¸ÐºÐ»Ð°Ð´ â€œSwitch to Data Analyst 2026â€).
+Historical table for future service leads. It is not part of the current public flow.
 
-ÐŸÐ¾Ð»Ñ:
+Do not use it as an active product requirement unless a new lead-capture flow is explicitly designed.
 
-id UUID PK
+## Storage
 
-user_id UUID FK â†’ profiles.id
+### `avatars` bucket
 
-title TEXT NOT NULL
+Used by dashboard profile avatar uploads.
 
-description TEXT NULL
+Rules:
 
-is_archived BOOLEAN DEFAULT false
+- Public read.
+- Authenticated users can insert/update/delete only objects under their own user id folder.
+- Allowed MIME types: JPEG, PNG, WebP.
+- File size limit: 2 MB.
 
-created_at TIMESTAMPTZ DEFAULT now()
+## RLS
 
-updated_at TIMESTAMPTZ DEFAULT now()
+All user-owned tables have RLS enabled.
 
-Ð†Ð½Ð´ÐµÐºÑÐ¸:
+General rule:
 
-index on user_id
+- Client-side reads are limited to the current `auth.uid()`.
+- Guest simulation reads happen through server endpoints using the guest session cookie.
+- Writes that require elevated access use the service-role server client.
 
-index on is_archived
+## Local Test Mode
 
-RLS:
+`DECIVIO_TEST_MODE=1` is allowed only outside production.
 
-user can CRUD only own rows
+It currently does three things:
 
-1.4 simulations
+- `/api/simulations` does not require `OPENAI_API_KEY`.
+- `generateCareerSwitchAnalysis()` returns a deterministic mock analysis.
+- `/api/payments/mono/checkout` creates a local successful invoice/subscription record instead of calling mono.
 
-ÐŸÑ€Ð¸Ð·Ð½Ð°Ñ‡ÐµÐ½Ð½Ñ: Ð¾Ð´Ð¸Ð½ Ð·Ð°Ð¿ÑƒÑÐº ÑÐ¸Ð¼ÑƒÐ»ÑÑ†Ñ–Ñ— (Ð²Ñ…Ñ–Ð´Ð½Ñ– Ð¿Ð°Ñ€Ð°Ð¼ÐµÑ‚Ñ€Ð¸ + Ñ‚Ð¸Ð¿).
-
-ÐŸÐ¾Ð»Ñ:
-
-id UUID PK
-
-user_id UUID FK â†’ profiles.id
-
-project_id UUID FK â†’ simulation_projects.id NULL (MVP Ð¼Ð¾Ð¶Ðµ Ð±ÑƒÑ‚Ð¸ NULL)
-
-scenario_type TEXT NOT NULL CHECK IN ('career_switch') (MVP Ñ‚Ñ–Ð»ÑŒÐºÐ¸ Ñ†Ðµ)
-
-name TEXT NULL (Ð½Ð°Ð¿Ñ€Ð¸ÐºÐ»Ð°Ð´ â€œOptimistic planâ€ â€” Ð½ÐµÐ¾Ð±Ð¾Ð²â€™ÑÐ·ÐºÐ¾Ð²Ð¾)
-
-inputs JSONB NOT NULL (Ð²ÑÑ– Ð¿Ð°Ñ€Ð°Ð¼ÐµÑ‚Ñ€Ð¸ Ñ„Ð¾Ñ€Ð¼Ð¸)
-
-assumptions JSONB NULL (Ð´ÐµÑ„Ð¾Ð»Ñ‚Ð½Ñ– ÐºÐ¾ÐµÑ„Ñ–Ñ†Ñ–Ñ”Ð½Ñ‚Ð¸, ÑÐºÑ‰Ð¾ Ñ‚Ð¸ Ñ—Ñ… Ð·Ð°ÐºÐ»Ð°Ð´ÐµÑˆ)
-
-version INT DEFAULT 1 (Ð½Ð° Ð²Ð¸Ð¿Ð°Ð´Ð¾Ðº Ð·Ð¼Ñ–Ð½ Ð¼Ð¾Ð´ÐµÐ»Ñ–)
-
-created_at TIMESTAMPTZ DEFAULT now()
-
-updated_at TIMESTAMPTZ DEFAULT now()
-
-Ð†Ð½Ð´ÐµÐºÑÐ¸:
-
-index on user_id
-
-index on project_id
-
-index on scenario_type
-
-GIN index on inputs (optional Ð½Ð° Ð¼Ð°Ð¹Ð±ÑƒÑ‚Ð½Ñ”)
-
-RLS:
-
-user can CRUD only own rows
-
-Inputs JSONB (MVP Ñ€ÐµÐºÐ¾Ð¼ÐµÐ½Ð´Ð¾Ð²Ð°Ð½Ð¸Ð¹ ÐºÐ¾Ð½Ñ‚Ñ€Ð°ÐºÑ‚):
-
-current_income_monthly number
-
-current_expenses_monthly number
-
-current_savings number
-
-employment_type string ('employment'|'freelance'|'contract')
-
-target_role string (optional)
-
-expected_income_monthly number
-
-transition_months number
-
-education_cost_one_time number
-
-education_monthly_cost number (optional)
-
-study_hours_per_week number (optional)
-
-risk_profile string ('low'|'medium'|'high')
-
-horizon_months number (12|36|60)
-
-1.5 simulation_results
-
-ÐŸÑ€Ð¸Ð·Ð½Ð°Ñ‡ÐµÐ½Ð½Ñ: Ñ€ÐµÐ·ÑƒÐ»ÑŒÑ‚Ð°Ñ‚Ð¸ Ñ€Ð¾Ð·Ñ€Ð°Ñ…ÑƒÐ½ÐºÑƒ Ð´Ð»Ñ ÐºÐ¾Ð½ÐºÑ€ÐµÑ‚Ð½Ð¾Ñ— simulation_id.
-
-ÐŸÐ¾Ð»Ñ:
-
-id UUID PK
-
-simulation_id UUID UNIQUE FK â†’ simulations.id
-
-user_id UUID FK â†’ profiles.id (Ð´Ð»Ñ Ð¿Ñ€Ð¾ÑÑ‚Ð¸Ñ… Ð·Ð°Ð¿Ð¸Ñ‚Ñ–Ð² Ñ– RLS)
-
-summary_metrics JSONB NOT NULL
-
-series JSONB NOT NULL (Ð¼Ð°ÑÐ¸Ð²Ð¸ Ð¿Ð¾ Ð¼Ñ–ÑÑÑ†ÑÑ…)
-
-ai_summary JSONB NULL (Ð¾Ð¿Ñ†Ñ–Ð¹Ð½Ð¾: Ñ‚ÐµÐºÑÑ‚/Ð±ÑƒÐ»Ñ–Ñ‚Ð¸/Ð¿Ð¾Ð¿ÐµÑ€ÐµÐ´Ð¶ÐµÐ½Ð½Ñ)
-
-created_at TIMESTAMPTZ DEFAULT now()
-
-updated_at TIMESTAMPTZ DEFAULT now()
-
-Ð†Ð½Ð´ÐµÐºÑÐ¸:
-
-unique index on simulation_id
-
-index on user_id
-
-RLS:
-
-user can read only own results (Ñ‡ÐµÑ€ÐµÐ· user_id)
-
-Summary_metrics JSONB (Ð¼Ñ–Ð½Ñ–Ð¼ÑƒÐ¼):
-
-break_even_month number|null
-
-cashflow_gap_total number
-
-min_savings_balance number
-
-risk_window_months number
-
-roi_12m number
-
-roi_36m number
-
-roi_60m number
-
-Series JSONB (Ð¼Ñ–Ð½Ñ–Ð¼ÑƒÐ¼):
-
-baseline array of {month, income, expenses, net, savings_balance}
-
-realistic array ...
-
-optimistic array ...
-
-pessimistic array ...
-
-1.6 lead_requests (Ð¼Ð°Ð¹Ð±ÑƒÑ‚Ð½Ñ– paid-ÑÐµÑ€Ð²Ñ–ÑÐ¸)
-
-ÐŸÑ€Ð¸Ð·Ð½Ð°Ñ‡ÐµÐ½Ð½Ñ: Ð·Ð°ÑÐ²ÐºÐ¸ Ð½Ð° Ð°ÑƒÐ´Ð¸Ñ‚/Ñ€ÐµÐ·ÑŽÐ¼Ðµ/ÐºÐ¾Ð½ÑÐ°Ð»Ñ‚Ð¸Ð½Ð³ (Ð½Ðµ Ð¾Ð±Ð¾Ð²â€™ÑÐ·ÐºÐ¾Ð²Ð¾ Ð² MVP UI, Ð°Ð»Ðµ Ñ‚Ð°Ð±Ð»Ð¸Ñ†Ñ Ð¾Ðº).
-
-ÐŸÐ¾Ð»Ñ:
-
-id UUID PK
-
-user_id UUID FK â†’ profiles.id NULL (Ð´Ð¾Ð·Ð²Ð¾Ð»Ð¸Ñ‚Ð¸ Ð°Ð½Ð¾Ð½Ñ–Ð¼Ð½Ñ–)
-
-type TEXT NOT NULL CHECK IN ('career_audit','resume_audit','consulting')
-
-contact_email TEXT NOT NULL
-
-details JSONB NULL (ÐºÐ¾Ñ€Ð¾Ñ‚ÐºÐ¸Ð¹ Ð¾Ð¿Ð¸Ñ)
-
-status TEXT NOT NULL DEFAULT 'new' CHECK IN ('new','in_progress','done','canceled')
-
-created_at TIMESTAMPTZ DEFAULT now()
-
-updated_at TIMESTAMPTZ DEFAULT now()
-
-Ð†Ð½Ð´ÐµÐºÑÐ¸:
-
-index on type
-
-index on status
-
-index on user_id
-
-RLS:
-
-ÑÐºÑ‰Ð¾ user_id not null â€” ÑŽÐ·ÐµÑ€ Ð¼Ð¾Ð¶Ðµ Ñ‡Ð¸Ñ‚Ð°Ñ‚Ð¸ ÑÐ²Ð¾Ñ—
-
-Ð°Ð½Ð¾Ð½Ñ–Ð¼Ð½Ñ– Ð·Ð°Ð¿Ð¸ÑÐ¸ â€” Ñ‚Ñ–Ð»ÑŒÐºÐ¸ Ñ‡ÐµÑ€ÐµÐ· backend/service role (Ð½Ðµ Ñ‡ÐµÑ€ÐµÐ· ÐºÐ»Ñ–Ñ”Ð½Ñ‚)
-
-2) RLS (Row Level Security) â€” Ð²Ð¸Ð¼Ð¾Ð³Ð°
-
-Ð£ÑÑ– Ñ‚Ð°Ð±Ð»Ð¸Ñ†Ñ– Ð· user data Ð¼Ð°ÑŽÑ‚ÑŒ RLS. ÐŸÐ¾Ð»Ñ–Ñ‚Ð¸ÐºÐ¸:
-
-select/insert/update/delete Ñ‚Ñ–Ð»ÑŒÐºÐ¸ Ð´Ð»Ñ auth.uid() = user_id Ð°Ð±Ð¾ id (profiles)
-
-lead_requests â€” Ð¾Ð±ÐµÑ€ÐµÐ¶Ð½Ð¾: Ð°Ð½Ð¾Ð½Ñ–Ð¼Ð½Ñ– Ð²ÑÑ‚Ð°Ð²ÐºÐ¸ Ñ‚Ñ–Ð»ÑŒÐºÐ¸ Ñ‡ÐµÑ€ÐµÐ· server endpoint
-
-3) Ð¢Ñ€Ð¸Ð³ÐµÑ€Ð¸
-
-updated_at Ð¼Ð°Ñ” Ð¾Ð½Ð¾Ð²Ð»ÑŽÐ²Ð°Ñ‚Ð¸ÑÑŒ Ð°Ð²Ñ‚Ð¾Ð¼Ð°Ñ‚Ð¸Ñ‡Ð½Ð¾ Ð¿Ñ€Ð¸ UPDATE (trigger function)
-
-4) Seed / Ð´ÐµÑ„Ð¾Ð»Ñ‚Ð¸
-
-Ð¿Ñ€Ð¸ ÑÑ‚Ð²Ð¾Ñ€ÐµÐ½Ð½Ñ– ÑŽÐ·ÐµÑ€Ð° (auth) Ð°Ð²Ñ‚Ð¾Ð¼Ð°Ñ‚Ð¸Ñ‡Ð½Ð¾ ÑÑ‚Ð²Ð¾Ñ€ÑŽÐ²Ð°Ñ‚Ð¸ profiles row
-(Ð¼Ð¾Ð¶Ð½Ð° Ñ‡ÐµÑ€ÐµÐ· Supabase trigger Ð°Ð±Ð¾ Ñ‡ÐµÑ€ÐµÐ· app logic Ð¿Ñ€Ð¸ Ð¿ÐµÑ€ÑˆÐ¾Ð¼Ñƒ Ð»Ð¾Ð³Ñ–Ð½Ñ–)
-
-5) Ð’Ð¸Ð¼Ð¾Ð³Ð¸ Ð´Ð¾ Ñ€ÐµÐ°Ð»Ñ–Ð·Ð°Ñ†Ñ–Ñ— Ð² ÐºÐ¾Ð´Ñ–
-
-ORM: Prisma (ÑÐºÑ‰Ð¾ Ñ‚Ð¸ Ð½Ð° Next.js) Ð°Ð±Ð¾ Supabase SQL migrations
-
-API endpoints:
-
-POST /api/simulations â†’ create simulation + compute result + save result
-
-GET /api/simulations â†’ list
-
-GET /api/simulations/:id â†’ get + result
-
-PUT /api/simulations/:id â†’ update inputs + recompute result
-
-DELETE /api/simulations/:id â†’ delete
+This mode exists for automated E2E tests only. Do not expose it in production.

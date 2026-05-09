@@ -1,233 +1,114 @@
-📄 ТЗ ДЛЯ РЕАЛІЗАЦІЇ ОНБОРДИНГУ (MVP)
-1. Загальна задача
+# Simulate Onboarding Spec
 
-Реалізувати покроковий онбординг (multi-step wizard) для SaaS-платформи кар’єрного аналізу.
+Status: current. This document describes the public `/simulate` flow and replaces the old six-step onboarding spec.
 
-Ціль:
+## Source Of Truth
 
-зібрати стандартизовані дані користувача
+- Page: `src/app/simulate/page.tsx`
+- Wizard UI: `src/components/simulate-onboarding-wizard.tsx`
+- Form contract: `src/lib/career-switch-form.ts`
+- Submit endpoint: `src/app/api/simulations/route.ts`
+- AI/mock analysis: `src/lib/ai/career-switch-analysis.ts`
 
-зберегти їх у БД
+## Goal
 
-підготувати їх для подальшого фінансового розрахунку
+The onboarding should collect the smallest useful set of facts for a first career-transition estimate.
 
-Онбординг має:
+The user does not need an account before submitting the simulation. Registration/login happens later, when the user chooses a paid plan or explicitly clicks "Вхід" in the header.
 
-бути простим
+## Current Steps
 
-мати 6 кроків
+### Step 1: Income
 
-не містити відкритих текстових відповідей (крім числових полів)
+Purpose: understand the current financial baseline.
 
-працювати коректно на desktop і mobile
+Field:
 
-2. UX / Структура
-Тип реалізації:
+- `current_income`: required number, minimum `0`, shown as monthly net income in UAH.
 
-Multi-step form (wizard)
+UI notes:
 
-Поведінка:
+- The input is full width.
+- Do not show an example placeholder.
+- Show the unit as "грн/міс" near the field.
 
-Один екран = один крок
+### Step 2: Current Situation
 
-Кнопки: "Назад" / "Далі"
+Purpose: understand where the user is now.
 
-На останньому кроці кнопка: "Розрахувати мій сценарій"
+Fields:
 
-Progress bar зверху (6 кроків)
+- `current_role`: required text.
+- `current_experience_years`: required number, minimum `0`, maximum `60`, shown in years.
 
-3. Структура кроків
-КРОК 1 — Фінансова база
+UI notes:
 
-Заголовок:
-"Ваша поточна фінансова ситуація"
+- The two fields share the row on desktop and stack on mobile.
+- The experience field uses a visible "років" unit instead of putting "(років)" in the label.
 
-Поля:
+### Step 3: Target
 
-Поточний чистий дохід (грн/міс)
+Purpose: understand the role the user wants to move into.
 
-type: number
+Fields:
 
-required
+- `target_role`: required text.
+- `experience_level`: required select with values:
+  - `none`
+  - `basic`
+  - `practical`
 
-min: 0
+Validation:
 
-Середні щомісячні витрати (грн)
+- `target_role` should not be identical to `current_role` after trimming and lowercasing.
 
-type: number
+### Step 4: Transition Conditions
 
-required
+Purpose: tune the result to the user's constraints and main priority.
 
-min: 0
+Fields:
 
-Сума заощаджень (грн)
+- `english_level`: required select with values:
+  - `basic`
+  - `intermediate`
+  - `upper_intermediate`
+  - `advanced`
+- `target_market`: required select with values:
+  - `ukraine`
+  - `remote`
+  - `abroad`
+- `transition_priority`: required select with values:
+  - `speed`
+  - `income`
 
-type: number
+UI copy should explain the options in user language, for example:
 
-required
+- `basic`: "A1-A2 (базовий рівень)"
+- `intermediate`: "B1 (можу спілкуватися)"
+- `upper_intermediate`: "B2 (можу проходити інтерв'ю)"
+- `advanced`: "C1+ (вільна комунікація)"
+- `ukraine`: "Україна"
+- `remote`: "Міжнародний ринок"
+- `abroad`: "Локальна робота за кордоном"
 
-min: 0
+## Submit Behavior
 
-КРОК 2 — Поточна професія
+- Primary submit text before loading: "Отримати мій висновок".
+- Loading text: "Формуємо висновок...".
+- While loading, the full form content is visually blurred except the submit button.
+- On success, redirect to `/results?simulationId=<id>`.
+- On validation/API error, show a user-facing message and keep the entered data.
 
-Заголовок:
-"Ваша поточна сфера"
+## Ownership Behavior
 
-Поле:
+- Anonymous user: create or refresh a guest session cookie and store the simulation under `guest_session_id`.
+- Authenticated user: store the simulation under `user_id` and update `profiles.profile_context` from the submitted answers.
+- After later signup/login, guest simulations are attached through `/api/auth/claim-guest-simulations`.
 
-Поточна роль
+## Test Coverage
 
-type: select
+The critical public path is covered by `npm run test:flow` in local test mode:
 
-predefined list (поки захардкодити 10–15 ролей)
+`/simulate -> /results -> /pricing -> registration/login -> checkout -> /dashboard`.
 
-required
-
-КРОК 3 — Ціль переходу
-
-Заголовок:
-"Куди ви плануєте перейти?"
-
-Поля:
-
-Цільова сфера
-
-type: select
-
-той самий список ролей
-
-required
-
-Релевантний досвід у цій сфері
-
-type: radio
-
-варіанти:
-
-Немає досвіду
-
-Є базові знання
-
-Є практичний досвід
-
-required
-
-КРОК 4 — Ресурс часу
-
-Заголовок:
-"Ваш ресурс часу"
-
-Скільки годин на тиждень готові вкладати у підготовку?
-
-type: radio
-
-варіанти:
-
-5–10
-
-10–20
-
-20+
-
-required
-
-КРОК 5 — Цільовий дедлайн
-
-Заголовок:
-"Коли ви хочете здійснити перехід?"
-
-Цільовий термін переходу
-
-type: radio
-
-варіанти:
-
-До 6 місяців
-
-6–12 місяців
-
-Понад 12 місяців
-
-required
-
-КРОК 6 — Пріоритет
-
-Заголовок:
-"Ваш головний пріоритет"
-
-Що для вас важливіше?
-
-type: radio
-
-варіанти:
-
-Мінімізувати фінансовий ризик
-
-Максимізувати довгостроковий дохід
-
-Баланс між ризиком і доходом
-
-required
-
-4. Логіка збереження
-
-Після натискання "Розрахувати мій сценарій":
-
-Створюється новий запис у таблиці:
-simulations
-
-У поле inputs (JSON) записати:
-
-{
-  "current_income": number,
-  "monthly_expenses": number,
-  "savings": number,
-  "current_role": "string",
-  "target_role": "string",
-  "experience_level": "none|basic|practical",
-  "weekly_hours": "5-10|10-20|20+",
-  "target_deadline": "6m|6-12m|12m+",
-  "priority": "risk|income|max_balance"
-}
-
-Статус simulation = "pending"
-
-5. Валідація
-
-Всі поля required
-
-Дохід >= витрати (показати warning, але не блокувати)
-
-Заборонити target_role = current_role
-
-6. UI вимоги
-
-Лаконічний дизайн
-
-Без довгих описів
-
-Під кожним кроком — короткий пояснювальний текст (1 речення)
-
-Мобільна адаптивність
-
-Анімація переходу між кроками (fade або slide)
-
-7. Що НЕ потрібно робити зараз
-
-Жодних фінансових розрахунків
-
-Жодних AI-запитів
-
-Жодної логіки прогнозування
-
-Це тільки збір даних і збереження.
-
-8. Технічні вимоги
-
-Використовувати існуючу Supabase конфігурацію
-
-Використовувати current project structure
-
-Не змінювати БД структуру
-
-Не створювати нові таблиці
+The test uses deterministic mock AI and a local successful mono payment, so it should not spend OpenAI requests or create real payments.
