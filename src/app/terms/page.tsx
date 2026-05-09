@@ -4,7 +4,7 @@ import { createBreadcrumbSchema, createMetadata } from "@/lib/seo";
 export const metadata = createMetadata({
   title: "Умови використання",
   description:
-    "Умови використання сервісу Decivio: правила користування платформою, обмеження відповідальності, умови доступу до акаунта та порядок майбутнього підключення платних функцій.",
+    "Умови використання сервісу Decivio: правила користування платформою, обмеження відповідальності, умови доступу до акаунта та платного доступу.",
   path: "/terms",
   keywords: ["умови використання Decivio", "правила користування Decivio", "угода користувача Decivio"]
 });
@@ -69,8 +69,9 @@ const sections = [
   {
     title: "8. Платні функції та оплата",
     paragraphs: [
-      "На момент останнього оновлення цих умов повноцінна платна функціональність ще не підключена.",
-      "Після запуску платного доступу, підписок або окремих платних функцій ми можемо оновити ці умови, додавши правила оплати, строки доступу, умови скасування та інші пов'язані положення."
+      "Decivio може пропонувати платний доступ до окремих функцій, тарифів або підписок. Актуальна ціна, формат списання, склад доступу та строк дії показуються на сторінці тарифів або в процесі оформлення оплати.",
+      "Оплата обробляється через mono. Доступ відкривається для акаунта, з яким користувач проходить оформлення, після успішного підтвердження платежу або підписки платіжним провайдером.",
+      "Якщо платіж не підтверджено, скасовано, повернено або він має інший неуспішний статус, платний доступ може не відкриватися або бути обмежений до з'ясування статусу."
     ]
   },
   {
@@ -114,20 +115,18 @@ export default function TermsPage() {
     <>
       <JsonLd data={breadcrumbSchema} />
       <section className="space-y-8 py-4 md:space-y-10 md:py-8">
-        <header className="space-y-4 px-6 text-center md:px-8">
-          <h1 className="page-title mx-auto max-w-none">Умови використання</h1>
-          <p className="lead-copy mx-auto max-w-none">
-            Останнє оновлення: 12 квітня 2026 року. Ця сторінка визначає правила користування сервісом Decivio,
-            обмеження відповідальності, умови доступу до акаунта та загальні засади використання платформи.
+        <header className="mx-auto max-w-3xl space-y-4 text-center">
+          <h1 className="page-title mx-auto max-w-[12ch]">Умови використання</h1>
+          <p className="lead-copy mx-auto max-w-3xl">
+            Останнє оновлення: 9 травня 2026 року. Ця сторінка визначає правила користування сервісом Decivio,
+            обмеження відповідальності, умови доступу до акаунта, платних функцій та загальні засади використання платформи.
           </p>
         </header>
 
-        <div className="space-y-5">
+        <div className="mx-auto max-w-4xl space-y-5">
           {sections.map((section) => (
             <article key={section.title} className="surface-panel rounded-[2rem] px-6 py-6 md:px-8 md:py-8">
-              <h2 className="font-display text-[1.36rem] font-bold leading-[1.04] tracking-[-0.04em] text-[var(--text-strong)] md:text-[1.58rem]">
-                {section.title}
-              </h2>
+              <h2 className="panel-title">{section.title}</h2>
               <div className="mt-4 space-y-3">
                 {section.paragraphs.map((paragraph) => (
                   <p key={paragraph} className="text-[0.96rem] leading-[1.78] text-[var(--text-muted)] md:text-[1rem]">

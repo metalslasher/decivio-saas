@@ -42,7 +42,7 @@ const sections = [
     title: "4. Авторизація та акаунт",
     paragraphs: [
       "Для керування акаунтами та входом у сервіс ми використовуємо Supabase. Через цей сервіс можуть оброблятися електронна пошта, технічні ідентифікатори користувача та пов'язані з автентифікацією події.",
-      "Якщо в майбутньому на сайті буде підключено вхід через сторонніх провайдерів, таких як Google, частина даних для входу також може надходити від відповідного провайдера згідно з його власною політикою конфіденційності."
+      "Якщо ви обираєте вхід або реєстрацію через Google, частина даних для авторизації також може надходити від Google згідно з його власною політикою конфіденційності."
     ]
   },
   {
@@ -63,8 +63,8 @@ const sections = [
   {
     title: "7. Платежі",
     paragraphs: [
-      "Станом на дату останнього оновлення цієї політики конфіденційності повноцінна оплата на сайті ще не підключена.",
-      "Якщо в майбутньому буде підключено стороннього платіжного провайдера, платіжні дані оброблятимуться таким провайдером відповідно до його умов і політики конфіденційності. Ми оновимо цю сторінку після запуску платіжної функціональності."
+      "Оплата платного доступу в Decivio обробляється через mono. Платіжні реквізити вводяться на стороні платіжного провайдера, а Decivio не зберігає повні дані банківських карток.",
+      "Ми можемо отримувати від платіжного провайдера службові дані про статус платежу, ідентифікатор checkout, обраний тариф, суму, валюту та дату операції, щоб надати доступ, показати історію оплат і підтримати користувача."
     ]
   },
   {
@@ -114,20 +114,18 @@ export default function PrivacyPage() {
     <>
       <JsonLd data={breadcrumbSchema} />
       <section className="space-y-8 py-4 md:space-y-10 md:py-8">
-        <header className="space-y-4 px-6 text-center md:px-8">
-          <h1 className="page-title mx-auto max-w-none">Політика конфіденційності</h1>
-          <p className="lead-copy mx-auto max-w-none">
-            Останнє оновлення: 12 квітня 2026 року. Ця сторінка пояснює, які дані збирає Decivio, як вони
+        <header className="mx-auto max-w-3xl space-y-4 text-center">
+          <h1 className="page-title mx-auto max-w-[13ch]">Політика конфіденційності</h1>
+          <p className="lead-copy mx-auto max-w-3xl">
+            Останнє оновлення: 9 травня 2026 року. Ця сторінка пояснює, які дані збирає Decivio, як вони
             використовуються, які сторонні сервіси залучаються та як ви можете звернутися з питань конфіденційності.
           </p>
         </header>
 
-        <div className="space-y-5">
+        <div className="mx-auto max-w-4xl space-y-5">
           {sections.map((section) => (
             <article key={section.title} className="surface-panel rounded-[2rem] px-6 py-6 md:px-8 md:py-8">
-              <h2 className="font-display text-[1.36rem] font-bold leading-[1.04] tracking-[-0.04em] text-[var(--text-strong)] md:text-[1.58rem]">
-                {section.title}
-              </h2>
+              <h2 className="panel-title">{section.title}</h2>
               <div className="mt-4 space-y-3">
                 {section.paragraphs.map((paragraph) => (
                   <p key={paragraph} className="text-[0.96rem] leading-[1.78] text-[var(--text-muted)] md:text-[1rem]">

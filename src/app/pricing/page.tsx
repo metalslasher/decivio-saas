@@ -217,14 +217,15 @@ export default function PricingPage() {
 
       <div className="space-y-10 py-4 md:space-y-14 md:py-8">
         <section className="relative py-3 md:py-5">
-          <div className="pointer-events-none absolute -left-24 top-10 h-56 w-56 rounded-full bg-[rgba(67,97,255,0.10)] blur-3xl" />
-          <div className="pointer-events-none absolute -right-16 top-0 h-52 w-52 rounded-full bg-[rgba(152,165,255,0.12)] blur-3xl" />
-
           <div className="relative">
             <header className="mx-auto max-w-3xl text-center">
               <h1 className="page-title mx-auto max-w-[14ch]">
                 Оберіть формат <span className="text-accent">доступу</span>
               </h1>
+              <p className="lead-copy mx-auto mt-5 max-w-3xl">
+                Повний доступ відкриває практичну частину Decivio після симуляції: план переходу, резюме, вакансії,
+                співбесіди та оцінку пропозицій.
+              </p>
             </header>
 
             <div className="mt-12 grid gap-5 md:mt-14 lg:grid-cols-2">
@@ -236,7 +237,7 @@ export default function PricingPage() {
 
         <section className="space-y-8 py-6 md:space-y-10 md:py-9">
           <div className="mx-auto max-w-3xl text-center">
-            <h2 className="page-title mx-auto max-w-[15ch]">
+            <h2 className="section-title mx-auto max-w-[15ch]">
               Усі інструменти <span className="text-accent">в одному місці</span>
             </h2>
           </div>

@@ -67,7 +67,7 @@ const initialValues: WizardForm = {
 };
 
 const inputClassName = "field-surface mt-1";
-const radioCardClassName = "cursor-pointer rounded-[1.35rem] border px-4 py-3 text-sm transition";
+const radioCardClassName = "cursor-pointer rounded-[1.2rem] border px-4 py-3 text-sm font-medium transition";
 
 function parseNumber(value: string) {
   const parsed = Number(value);
@@ -95,7 +95,7 @@ function RadioCards<T extends string>({
           className={`${radioCardClassName} ${
             value === item.value
               ? "border-[rgba(63,94,255,0.22)] bg-[var(--accent-soft)] text-[var(--accent-strong)]"
-              : "border-[var(--line-soft)] bg-[rgba(255,255,255,0.8)] text-[var(--text-muted)] hover:border-[rgba(63,94,255,0.16)]"
+              : "border-[var(--line-soft)] bg-[rgba(255,255,255,0.74)] text-[var(--text-muted)] hover:border-[rgba(63,94,255,0.16)] hover:bg-white"
           } ${disabled ? "pointer-events-none opacity-60" : ""}`}
         >
           <input
@@ -262,26 +262,26 @@ export function SimulateOnboardingWizard() {
       </header>
 
       <div className="surface-panel relative rounded-[2rem] p-5 md:p-7" aria-busy={isSubmitting}>
-          {isSubmitting ? <div className="absolute inset-0 z-10 rounded-[2rem] bg-white/45 backdrop-blur-[1px]" aria-hidden="true" /> : null}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-xs font-medium uppercase tracking-[0.14em] text-[var(--text-soft)]">
-              <span>Крок {currentStep + 1} з {steps.length}</span>
-              <span>{Math.round(progress)}%</span>
-            </div>
-            <div className="h-2 overflow-hidden rounded-full bg-[var(--line-soft)]">
-              <div
-                className="h-full rounded-full bg-[linear-gradient(90deg,var(--accent-strong),var(--accent))] transition-all duration-300"
-                style={{ width: `${progress}%` }}
-              />
-            </div>
+        {isSubmitting ? <div className="absolute inset-0 z-10 rounded-[2rem] bg-white/45 backdrop-blur-[1px]" aria-hidden="true" /> : null}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between text-xs font-medium uppercase tracking-[0.14em] text-[var(--text-soft)]">
+            <span>Крок {currentStep + 1} з {steps.length}</span>
+            <span>{Math.round(progress)}%</span>
           </div>
+          <div className="h-2 overflow-hidden rounded-full bg-[var(--line-soft)]">
+            <div
+              className="h-full rounded-full bg-[linear-gradient(90deg,var(--accent-strong),var(--accent))] transition-all duration-300"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+        </div>
 
-          <fieldset disabled={isSubmitting} className="relative z-20 min-w-0 border-0 p-0 m-0">
-            <div key={currentStep} className="wizard-step-enter mt-6 space-y-5">
-              <div className="space-y-2">
-                <h2 className="section-title">{currentMeta.title}</h2>
-                <p className="body-copy">{currentMeta.helper}</p>
-              </div>
+        <fieldset disabled={isSubmitting} className="relative z-20 m-0 min-w-0 border-0 p-0">
+          <div key={currentStep} className="wizard-step-enter mt-6 space-y-5">
+            <div className="space-y-2">
+              <h2 className="section-title">{currentMeta.title}</h2>
+              <p className="body-copy">{currentMeta.helper}</p>
+            </div>
 
               {currentStep === 0 ? (
                 <div className="grid gap-4">
@@ -297,7 +297,7 @@ export function SimulateOnboardingWizard() {
                       aria-invalid={Boolean(errors.current_income)}
                       disabled={isSubmitting}
                     />
-                    {errors.current_income ? <span className="mt-1 block text-xs text-rose-600">{errors.current_income}</span> : null}
+                    {errors.current_income ? <span className="mt-1 block text-xs text-[var(--danger-strong)]">{errors.current_income}</span> : null}
                   </label>
                 </div>
               ) : null}
@@ -317,7 +317,7 @@ export function SimulateOnboardingWizard() {
                       disabled={isSubmitting}
                     />
                   </label>
-                  {errors.current_role ? <span className="block text-xs text-rose-600">{errors.current_role}</span> : null}
+                  {errors.current_role ? <span className="block text-xs text-[var(--danger-strong)]">{errors.current_role}</span> : null}
 
                   <label className="block text-sm font-medium leading-[1.6] text-[var(--text-muted)]">
                     Стаж у поточній сфері (років)
@@ -334,7 +334,7 @@ export function SimulateOnboardingWizard() {
                       disabled={isSubmitting}
                     />
                     {errors.current_experience_years ? (
-                      <span className="mt-1 block text-xs text-rose-600">{errors.current_experience_years}</span>
+                      <span className="mt-1 block text-xs text-[var(--danger-strong)]">{errors.current_experience_years}</span>
                     ) : null}
                   </label>
                 </div>
@@ -356,7 +356,7 @@ export function SimulateOnboardingWizard() {
                         disabled={isSubmitting}
                       />
                     </label>
-                    {errors.target_role ? <span className="block text-xs text-rose-600">{errors.target_role}</span> : null}
+                    {errors.target_role ? <span className="block text-xs text-[var(--danger-strong)]">{errors.target_role}</span> : null}
                   </div>
 
                   <fieldset className="space-y-2">
@@ -368,7 +368,7 @@ export function SimulateOnboardingWizard() {
                       onChange={(nextValue) => updateValue("experience_level", nextValue)}
                       disabled={isSubmitting}
                     />
-                    {errors.experience_level ? <span className="block text-xs text-rose-600">{errors.experience_level}</span> : null}
+                    {errors.experience_level ? <span className="block text-xs text-[var(--danger-strong)]">{errors.experience_level}</span> : null}
                   </fieldset>
                 </div>
               ) : null}
@@ -384,7 +384,7 @@ export function SimulateOnboardingWizard() {
                       onChange={(nextValue) => updateValue("english_level", nextValue)}
                       disabled={isSubmitting}
                     />
-                    {errors.english_level ? <span className="block text-xs text-rose-600">{errors.english_level}</span> : null}
+                    {errors.english_level ? <span className="block text-xs text-[var(--danger-strong)]">{errors.english_level}</span> : null}
                   </fieldset>
 
                   <fieldset className="space-y-2">
@@ -396,7 +396,7 @@ export function SimulateOnboardingWizard() {
                       onChange={(nextValue) => updateValue("target_market", nextValue)}
                       disabled={isSubmitting}
                     />
-                    {errors.target_market ? <span className="block text-xs text-rose-600">{errors.target_market}</span> : null}
+                    {errors.target_market ? <span className="block text-xs text-[var(--danger-strong)]">{errors.target_market}</span> : null}
                   </fieldset>
 
                   <fieldset className="space-y-2">
@@ -409,7 +409,7 @@ export function SimulateOnboardingWizard() {
                       disabled={isSubmitting}
                     />
                     {errors.transition_priority ? (
-                      <span className="block text-xs text-rose-600">{errors.transition_priority}</span>
+                      <span className="block text-xs text-[var(--danger-strong)]">{errors.transition_priority}</span>
                     ) : null}
                   </fieldset>
                 </div>

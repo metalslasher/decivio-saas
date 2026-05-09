@@ -120,11 +120,11 @@ function MetaChip({ children }: { children: ReactNode }) {
 function metricToneClass(tone: ResultsMetricTone) {
   switch (tone) {
     case "success":
-      return "text-emerald-700";
+      return "text-[var(--accent-strong)]";
     case "warning":
-      return "text-amber-600";
+      return "text-[var(--danger-strong)]";
     case "danger":
-      return "text-rose-600";
+      return "text-[var(--danger-strong)]";
     default:
       return "text-[var(--text-strong)]";
   }
@@ -139,7 +139,7 @@ function MetricCard({
   return (
     <article className="surface-panel rounded-[1.7rem] p-5 md:p-6">
       <p className="label-muted">{label}</p>
-      <p className={`mt-3 font-display text-[1.95rem] font-bold leading-[0.96] tracking-[-0.05em] md:text-[2.2rem] ${metricToneClass(tone)}`}>{value}</p>
+      <p className={`mt-3 font-display text-[1.95rem] font-bold leading-[0.98] tracking-normal md:text-[2.2rem] ${metricToneClass(tone)}`}>{value}</p>
       <p className="mt-2 text-[0.92rem] leading-[1.68] text-[var(--text-muted)]">{note}</p>
     </article>
   );

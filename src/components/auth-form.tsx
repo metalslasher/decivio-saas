@@ -462,7 +462,7 @@ export function AuthForm({
   const formClassName = "mt-6 space-y-4";
   const titleClassName =
     display === "modal"
-      ? "font-display text-[2rem] font-bold leading-[1.02] tracking-normal text-[var(--text-strong)] md:text-[2.25rem]"
+      ? "section-title max-w-[13ch]"
       : "page-title max-w-[13ch]";
 
   return (

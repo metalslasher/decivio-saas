@@ -331,11 +331,11 @@ export function CheckoutGate({ plan, initialCheckoutId, authNextPath }: Checkout
     return (
       <div className="surface-panel rounded-[2rem] p-6 md:p-7">
         <div className="space-y-3">
-          <p className="text-sm font-semibold uppercase tracking-[0.14em] text-[var(--accent-strong)]">Крок перед оплатою</p>
-          <h2 className="font-display text-[1.6rem] font-bold leading-[1.02] tracking-[-0.04em] text-[var(--text-strong)] md:text-[2rem]">
+          <span className="eyebrow-pill">Крок перед оплатою</span>
+          <h2 className="section-title max-w-xl">
             Спочатку закріпимо доступ за акаунтом.
           </h2>
-          <p className="text-[0.98rem] leading-[1.72] text-[var(--text-muted)]">
+          <p className="body-copy max-w-2xl">
             Після успішної mono-оплати саме цей профіль автоматично отримає платний доступ, історію оплат і подальше керування
             підпискою.
           </p>
@@ -362,7 +362,7 @@ export function CheckoutGate({ plan, initialCheckoutId, authNextPath }: Checkout
     <div className="grid gap-5 md:grid-cols-[1.15fr,0.85fr]">
       <article className="surface-dark rounded-[2rem] p-6 text-white md:p-7">
         <p className="text-sm font-semibold uppercase tracking-[0.14em] text-white/60">Обраний план</p>
-        <h2 className="mt-3 font-display text-[1.8rem] font-bold leading-[0.98] tracking-[-0.045em] md:text-[2.3rem]">{plan.name}</h2>
+        <h2 className="mt-3 font-display text-[1.8rem] font-bold leading-[1] tracking-normal md:text-[2.3rem]">{plan.name}</h2>
         <p className="mt-3 text-[1rem] leading-[1.72] text-white/72">{plan.description}</p>
 
         <div className="mt-6 grid gap-3 sm:grid-cols-2">

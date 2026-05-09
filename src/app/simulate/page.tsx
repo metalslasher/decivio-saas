@@ -60,10 +60,10 @@ export default function SimulatePage() {
         <section className="grid gap-5 pb-4 md:gap-6 md:pb-8 lg:grid-cols-[0.95fr,1.05fr]">
           <article className="surface-panel rounded-[2.2rem] px-6 py-6 md:px-8 md:py-8">
             <span className="eyebrow-pill">Що враховуємо</span>
-            <h2 className="mt-4 font-display text-[1.65rem] font-bold leading-[1.02] tracking-[-0.045em] text-[var(--text-strong)] md:text-[2.12rem]">
+            <h2 className="section-title mt-4 max-w-2xl">
               Симулятор зміни карʼєри дивиться не лише на бажану зарплату.
             </h2>
-            <p className="mt-4 text-[0.98rem] leading-[1.72] text-[var(--text-muted)]">
+            <p className="body-copy mt-4 max-w-2xl">
               Щоб прогноз був корисним для реального рішення, Decivio враховує не одну цифру, а комбінацію факторів, які впливають на
               швидкість входу, ризики, потенціал нового напряму та наступні кроки після результату.
             </p>
@@ -81,10 +81,8 @@ export default function SimulatePage() {
           <div className="grid gap-4">
             {outcomeCards.map((item) => (
               <article key={item.title} className="surface-panel rounded-[1.9rem] px-5 py-5 md:px-6 md:py-6">
-                <h2 className="font-display text-[1.28rem] font-semibold leading-[1.08] tracking-[-0.035em] text-[var(--text-strong)] md:text-[1.5rem]">
-                  {item.title}
-                </h2>
-                <p className="mt-3 text-[0.95rem] leading-[1.72] text-[var(--text-muted)] md:text-[0.98rem]">{item.description}</p>
+                <h2 className="panel-title">{item.title}</h2>
+                <p className="body-copy mt-3">{item.description}</p>
               </article>
             ))}
           </div>
