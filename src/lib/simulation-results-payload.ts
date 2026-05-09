@@ -30,7 +30,6 @@ export type SimulationResultsPayload = {
     value: string;
     note: string;
     tone: ResultsMetricTone;
-    details?: DetailRow[];
   }>;
   currentSnapshot: {
     eyebrow: string;
@@ -331,21 +330,7 @@ export function buildSimulationResultsPayload({
       {
         label: "Час до першого оферу",
         value: formatMonths(targetRole.time_to_first_offer_months.base),
-        note: "Базовий сценарій показано як головний орієнтир, а діапазон нижче допомагає оцінити запас часу.",
-        details: [
-          {
-            label: "Оптимістично",
-            value: formatMonths(targetRole.time_to_first_offer_months.optimistic)
-          },
-          {
-            label: "Базово",
-            value: formatMonths(targetRole.time_to_first_offer_months.base)
-          },
-          {
-            label: "Песимістично",
-            value: formatMonths(targetRole.time_to_first_offer_months.pessimistic)
-          }
-        ],
+        note: "Не гарантія, а орієнтир для поточного ринку й вашого профілю.",
         tone: "default"
       },
       {
