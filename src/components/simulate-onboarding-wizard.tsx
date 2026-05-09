@@ -275,6 +275,12 @@ export function SimulateOnboardingWizard() {
   };
 
   const currentMeta = steps[currentStep];
+  const dimmedFormClassName = isSubmitting
+    ? "pointer-events-none select-none blur-[3px] opacity-45 transition duration-200"
+    : "transition duration-200";
+  const dimmedBackButtonClassName = isSubmitting
+    ? "pointer-events-none select-none blur-[3px] opacity-45 transition duration-200"
+    : "transition duration-200";
 
   return (
     <section className="space-y-6 py-4 md:space-y-8 md:py-8">
@@ -287,30 +293,31 @@ export function SimulateOnboardingWizard() {
         </p>
       </header>
 
-      <div className="surface-panel relative rounded-[2rem] p-5 md:p-7" aria-busy={isSubmitting}>
-        {isSubmitting ? <div className="absolute inset-0 z-10 rounded-[2rem] bg-white/45 backdrop-blur-[1px]" aria-hidden="true" /> : null}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between text-xs font-medium uppercase tracking-[0.14em] text-[var(--text-soft)]">
-            <span>Крок {currentStep + 1} з {steps.length}</span>
-            <span>{Math.round(progress)}%</span>
-          </div>
-          <div className="h-2 overflow-hidden rounded-full bg-[var(--line-soft)]">
-            <div
-              className="h-full rounded-full bg-[linear-gradient(90deg,var(--accent-strong),var(--accent))] transition-all duration-300"
-              style={{ width: `${progress}%` }}
-            />
-          </div>
-        </div>
-
-        <fieldset disabled={isSubmitting} className="relative z-20 m-0 min-w-0 border-0 p-0">
-          <div key={currentStep} className="wizard-step-enter mt-6 space-y-5">
-            <div className="space-y-2">
-              <h2 className="section-title">{currentMeta.title}</h2>
-              <p className="body-copy">{currentMeta.helper}</p>
+      <div className="surface-panel relative overflow-hidden rounded-[2rem] p-5 md:p-7" aria-busy={isSubmitting}>
+        {isSubmitting ? <div className="absolute inset-0 z-10 rounded-[2rem] bg-white/40 backdrop-blur-[2px]" aria-hidden="true" /> : null}
+        <div className={dimmedFormClassName}>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-xs font-medium uppercase tracking-[0.14em] text-[var(--text-soft)]">
+              <span>Крок {currentStep + 1} з {steps.length}</span>
+              <span>{Math.round(progress)}%</span>
             </div>
+            <div className="h-2 overflow-hidden rounded-full bg-[var(--line-soft)]">
+              <div
+                className="h-full rounded-full bg-[linear-gradient(90deg,var(--accent-strong),var(--accent))] transition-all duration-300"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+          </div>
 
-            {currentStep === 0 ? (
-              <div className="grid gap-2">
+          <fieldset disabled={isSubmitting} className="m-0 min-w-0 border-0 p-0">
+            <div key={currentStep} className="wizard-step-enter mt-6 space-y-5">
+              <div className="space-y-2">
+                <h2 className="section-title">{currentMeta.title}</h2>
+                <p className="body-copy">{currentMeta.helper}</p>
+              </div>
+
+              {currentStep === 0 ? (
+                <div className="grid gap-2">
                 <label className="sr-only" htmlFor="current-income">
                   Поточний чистий дохід
                 </label>
@@ -331,7 +338,7 @@ export function SimulateOnboardingWizard() {
                 </div>
                 <FieldError id="current-income-error" message={errors.current_income} />
               </div>
-            ) : null}
+              ) : null}
 
             {currentStep === 1 ? (
               <div className="grid gap-4 md:grid-cols-2">
@@ -443,29 +450,32 @@ export function SimulateOnboardingWizard() {
               </div>
             ) : null}
 
-            {requestError ? (
-              <p className="rounded-[1.3rem] border border-[rgba(201,155,134,0.5)] bg-[var(--danger-soft)] px-4 py-3 text-sm text-[var(--danger-strong)]">
-                {requestError}
-              </p>
-            ) : null}
-          </div>
-        </fieldset>
+              {requestError ? (
+                <p className="rounded-[1.3rem] border border-[rgba(201,155,134,0.5)] bg-[var(--danger-soft)] px-4 py-3 text-sm text-[var(--danger-strong)]">
+                  {requestError}
+                </p>
+              ) : null}
+            </div>
+          </fieldset>
+        </div>
 
-        <div className="relative z-20 mt-7 flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <button
-            type="button"
-            onClick={handleBack}
-            disabled={currentStep === 0 || isSubmitting}
-            className="btn-secondary disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            Назад
-          </button>
+        <div className="relative mt-7 flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className={dimmedBackButtonClassName}>
+            <button
+              type="button"
+              onClick={handleBack}
+              disabled={currentStep === 0 || isSubmitting}
+              className="btn-secondary disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Назад
+            </button>
+          </div>
 
           <button
             type="button"
             onClick={isLastStep ? handleSubmit : handleNext}
             disabled={isSubmitting}
-            className="btn-primary disabled:cursor-not-allowed disabled:opacity-70"
+            className="btn-primary relative z-20 disabled:cursor-wait disabled:opacity-100"
           >
             {isLastStep ? (isSubmitting ? "Формуємо висновок..." : "Отримати мій висновок") : "Далі"}
           </button>
