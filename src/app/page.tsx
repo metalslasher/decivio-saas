@@ -1146,9 +1146,6 @@ export default function HomePage() {
               <div className="mt-8 flex w-full flex-col items-center justify-center gap-3 sm:w-auto sm:flex-row">
                 <Link href="/simulate" className="final-cta-button">
                   Почати аналіз карʼєри
-                  <svg viewBox="0 0 24 24" className="h-5 w-5 fill-none" aria-hidden="true">
-                    <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
                 </Link>
                 <span className="text-[0.9rem] font-semibold text-[var(--text-muted)]">Безкоштовно · 2–3 хвилини</span>
               </div>

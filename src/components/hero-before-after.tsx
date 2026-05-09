@@ -73,10 +73,7 @@ const heroScenarios = [
 const subheadline =
   "Усе для переходу в нову кар’єру з прогнозованим результатом і зрозумілим планом дій.";
 
-const ctaLabels = [
-  "Почати аналіз кар’єри",
-  "Почати зміну кар’єри"
-] as const;
+const ctaLabel = "Почати аналіз кар’єри";
 const ctaMeta = "\u0411\u0435\u0437\u043a\u043e\u0448\u0442\u043e\u0432\u043d\u043e \u2022 2\u20133 \u0445\u0432\u0438\u043b\u0438\u043d\u0438";
 const axisYearSuffix = "\u0440\u0456\u043a";
 
@@ -251,7 +248,6 @@ export function HeroBeforeAfter() {
   const [scenarioIndex, setScenarioIndex] = useState(0);
   const [typedText, setTypedText] = useState<string>(heroScenarios[0].fullText);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [ctaIndex, setCtaIndex] = useState(0);
   const activeScenario = heroScenarios[scenarioIndex];
   const typedHeadline = renderTypedHeadline(activeScenario.segments, typedText.length);
 
@@ -279,14 +275,6 @@ export function HeroBeforeAfter() {
     return () => clearTimeout(typingTimer);
   }, [activeScenario, isDeleting, typedText]);
 
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      setCtaIndex((prev) => (prev + 1) % ctaLabels.length);
-    }, 2800);
-
-    return () => clearInterval(intervalId);
-  }, []);
-
   return (
     <section className="relative pt-0 md:pt-1 lg:pt-0">
       <div className="mx-auto grid max-w-[80rem] items-center gap-8 py-7 pb-10 md:gap-8 md:py-8 md:pb-10 lg:min-h-[clamp(30rem,calc(100svh-34rem),34rem)] lg:grid-cols-[0.92fr_1.08fr] lg:gap-10 lg:py-3 xl:gap-12">
@@ -304,7 +292,7 @@ export function HeroBeforeAfter() {
 
           <div className="mt-7 flex w-full max-w-[18rem] flex-col items-center gap-3.5 sm:max-w-[22rem] lg:items-start">
             <Link href="/simulate" className="hero-main-cta">
-              <span className="hero-main-cta-label transition-opacity duration-200">{ctaLabels[ctaIndex]}</span>
+              <span className="hero-main-cta-label">{ctaLabel}</span>
               <span className="hero-main-cta-icon">
                 <svg viewBox="0 0 24 24" className="h-5 w-5 fill-none" aria-hidden="true">
                   <path d="M4 16l5-5 3 3 8-8M15 6h5v5" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round" />

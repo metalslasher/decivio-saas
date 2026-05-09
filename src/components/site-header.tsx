@@ -322,14 +322,9 @@ export function SiteHeader() {
                   </button>
                   <a
                     href={simulateCtaHref}
-                    className="hidden min-w-[11.2rem] items-center justify-start gap-3 rounded-full bg-[var(--accent-strong)] px-3 py-2.5 pr-4 text-[1.03rem] font-semibold text-white transition hover:-translate-y-px hover:bg-[var(--accent)] md:inline-flex"
+                    className="hidden min-w-[10rem] items-center justify-center rounded-full bg-[var(--accent-strong)] px-5 py-3 text-[1.03rem] font-semibold text-white transition hover:-translate-y-px hover:bg-[var(--accent)] md:inline-flex"
                   >
-                    <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white text-[var(--accent-strong)]">
-                      <svg viewBox="0 0 24 24" className="h-4 w-4 fill-none" aria-hidden="true">
-                        <path d="M6 12h11M12 7l5 5-5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                    </span>
-                    <span>Запустити аналіз</span>
+                    Оцінити перехід
                   </a>
                 </>
               )}
@@ -408,7 +403,7 @@ export function SiteHeader() {
                     onClick={() => setIsOpen(false)}
                     className="btn-primary"
                   >
-                    Запустити аналіз
+                    Оцінити перехід
                   </a>
                 </>
               )}

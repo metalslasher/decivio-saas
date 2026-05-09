@@ -18,7 +18,7 @@ type AuthFormProps = {
   titleId?: string;
 };
 
-type FieldName = "email" | "password" | "confirmPassword";
+type FieldName = "fullName" | "email" | "password" | "confirmPassword";
 type TouchedFields = Record<FieldName, boolean>;
 
 function normalizeNextPath(value: string | null) {
@@ -111,6 +111,23 @@ function getEmailValidationError(value: string) {
   return null;
 }
 
+function getFullNameValidationError(value: string, view: AuthView) {
+  if (view !== "signup") {
+    return null;
+  }
+
+  const normalized = value.trim();
+  if (!normalized) {
+    return "Введіть ім'я.";
+  }
+
+  if (normalized.length > 80) {
+    return "Ім'я має бути коротшим за 80 символів.";
+  }
+
+  return null;
+}
+
 function getPasswordValidationError(value: string, view: AuthView) {
   if (view === "reset") {
     return null;
@@ -179,6 +196,7 @@ export function AuthForm({
   const supabase = useMemo(() => getSupabaseBrowserClient(), []);
 
   const [view, setView] = useState<AuthView>(initialView);
+  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -189,6 +207,7 @@ export function AuthForm({
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(initialNotice);
   const [touchedFields, setTouchedFields] = useState<TouchedFields>({
+    fullName: false,
     email: false,
     password: false,
     confirmPassword: false
@@ -203,12 +222,14 @@ export function AuthForm({
   const shouldBlockForSessionCheck = display === "page" && isCheckingSession;
   const validationErrors = useMemo(
     () => ({
+      fullName: getFullNameValidationError(fullName, view),
       email: getEmailValidationError(email),
       password: getPasswordValidationError(password, view),
       confirmPassword: getConfirmPasswordValidationError(password, confirmPassword, view)
     }),
-    [confirmPassword, email, password, view]
+    [confirmPassword, email, fullName, password, view]
   );
+  const fullNameError = touchedFields.fullName ? validationErrors.fullName : null;
   const emailError = touchedFields.email ? validationErrors.email : null;
   const passwordError = touchedFields.password ? validationErrors.password : null;
   const confirmPasswordError = touchedFields.confirmPassword ? validationErrors.confirmPassword : null;
@@ -219,11 +240,13 @@ export function AuthForm({
     setView(initialView);
     setError(null);
     setNotice(initialNotice);
+    setFullName("");
     setPassword("");
     setConfirmPassword("");
     setIsPasswordVisible(false);
     setIsCheckingSession(initialView !== "reset" && display === "page");
     setTouchedFields({
+      fullName: false,
       email: false,
       password: false,
       confirmPassword: false
@@ -281,10 +304,12 @@ export function AuthForm({
     setView(nextView);
     setError(null);
     setNotice(nextNotice ?? null);
+    setFullName("");
     setPassword("");
     setConfirmPassword("");
     setIsPasswordVisible(false);
     setTouchedFields({
+      fullName: false,
       email: false,
       password: false,
       confirmPassword: false
@@ -297,6 +322,7 @@ export function AuthForm({
 
   const markActiveFieldsTouched = () => {
     setTouchedFields({
+      fullName: isSignup,
       email: true,
       password: !isReset,
       confirmPassword: isSignup
@@ -341,7 +367,10 @@ export function AuthForm({
     setNotice(null);
 
     const hasLocalValidationErrors =
-      Boolean(validationErrors.email) || (!isReset && Boolean(validationErrors.password)) || (isSignup && Boolean(validationErrors.confirmPassword));
+      Boolean(validationErrors.email) ||
+      (isSignup && Boolean(validationErrors.fullName)) ||
+      (!isReset && Boolean(validationErrors.password)) ||
+      (isSignup && Boolean(validationErrors.confirmPassword));
 
     if (hasLocalValidationErrors) {
       markActiveFieldsTouched();
@@ -366,11 +395,14 @@ export function AuthForm({
       }
 
       if (isSignup) {
+        const normalizedFullName = fullName.trim();
         const { data, error: signUpError } = await supabase.auth.signUp({
           email: email.trim(),
           password,
           options: {
             data: {
+              full_name: normalizedFullName,
+              name: normalizedFullName,
               source: display === "modal" ? "modal_signup" : "page_signup"
             },
             emailRedirectTo: buildCallbackUrl(redirectTo)
@@ -479,6 +511,32 @@ export function AuthForm({
                 <span className="h-px flex-1 bg-[var(--line-soft)]" />
               </div>
             </>
+          ) : null}
+
+          {isSignup ? (
+            <label className="block text-sm font-medium leading-[1.6] text-[var(--text-muted)]">
+              Ім&apos;я
+              <input
+                type="text"
+                value={fullName}
+                onChange={(event) => {
+                  setFullName(event.target.value);
+                  setError(null);
+                }}
+                onBlur={() => markFieldTouched("fullName")}
+                className="field-surface mt-1"
+                autoComplete="name"
+                maxLength={80}
+                aria-invalid={fullNameError ? true : undefined}
+                aria-describedby={fullNameError ? "auth-full-name-error" : undefined}
+                required
+              />
+              {fullNameError ? (
+                <p id="auth-full-name-error" className="mt-2 text-xs text-[var(--danger-strong)]">
+                  {fullNameError}
+                </p>
+              ) : null}
+            </label>
           ) : null}
 
           <label className="block text-sm font-medium leading-[1.6] text-[var(--text-muted)]">
