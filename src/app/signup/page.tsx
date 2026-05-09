@@ -1,11 +1,5 @@
-import { AuthForm } from "@/components/auth-form";
+import { redirect } from "next/navigation";
 import { createMetadata } from "@/lib/seo";
-
-type SignupPageProps = {
-  searchParams?: {
-    next?: string;
-  };
-};
 
 export const metadata = createMetadata({
   title: "Реєстрація",
@@ -14,6 +8,6 @@ export const metadata = createMetadata({
   noIndex: true
 });
 
-export default function SignupPage({ searchParams }: SignupPageProps) {
-  return <AuthForm initialView="signup" nextPath={searchParams?.next} />;
+export default function SignupPage() {
+  redirect("/pricing");
 }

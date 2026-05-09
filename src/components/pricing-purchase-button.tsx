@@ -37,7 +37,7 @@ export function PricingPurchaseButton({ planId, label, className }: PricingPurch
   const openSignup = useCallback(() => {
     openAuthDialog("signup", {
       nextPath,
-      notice: "Створіть акаунт або увійдіть, щоб закріпити оплату саме за вашим профілем."
+      notice: "Створіть акаунт, щоб закріпити оплату саме за вашим профілем."
     });
   }, [nextPath, openAuthDialog]);
 

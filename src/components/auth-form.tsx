@@ -143,11 +143,6 @@ function getConfirmPasswordValidationError(password: string, confirmPassword: st
   return null;
 }
 
-function getAuthViewHref(view: Extract<AuthView, "login" | "signup">, redirectTo: string) {
-  const path = view === "signup" ? "/signup" : "/login";
-  return `${path}?next=${encodeURIComponent(redirectTo)}`;
-}
-
 function GoogleIcon() {
   return (
     <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
@@ -203,7 +198,6 @@ export function AuthForm({
   const isSignup = view === "signup";
   const isReset = view === "reset";
   const showDescription = Boolean(copy.description);
-  const showVisualTitle = isReset;
   const showModalCloseButton = display === "modal" && Boolean(onClose);
   const isAnyAuthPending = isSubmitting || isGoogleSubmitting;
   const shouldBlockForSessionCheck = display === "page" && isCheckingSession;
@@ -433,91 +427,35 @@ export function AuthForm({
 
   const rootClassName = display === "modal" ? "" : "mx-auto max-w-xl py-6 md:py-10";
   const panelClassName = display === "modal" ? "surface-panel rounded-[2rem] p-6 md:p-8" : "surface-panel rounded-[2rem] p-6 md:p-8";
-  const loginHref = getAuthViewHref("login", redirectTo);
-  const signupHref = getAuthViewHref("signup", redirectTo);
-  const formClassName = showVisualTitle ? "mt-6 space-y-4" : "space-y-4";
+  const formClassName = "mt-6 space-y-4";
+  const titleClassName =
+    display === "modal"
+      ? "font-display text-[2rem] font-bold leading-[1.02] tracking-normal text-[var(--text-strong)] md:text-[2.25rem]"
+      : "page-title max-w-[13ch]";
 
   return (
     <section className={rootClassName}>
       <div className={panelClassName}>
-        {display === "modal" ? (
-          <div className={`mb-6 flex items-center ${isReset ? "justify-end" : "gap-3"}`}>
-            {!isReset ? (
-              <div className="grid flex-1 grid-cols-2 rounded-full border border-[var(--line-soft)] bg-white/72 p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.84)]">
-                <button
-                  type="button"
-                  onClick={() => switchView("login")}
-                  disabled={isAnyAuthPending || view === "login"}
-                  className={`rounded-full px-4 py-2.5 text-sm font-semibold transition ${
-                    view === "login"
-                      ? "bg-white text-[var(--text-strong)] shadow-[0_10px_24px_-18px_rgba(22,29,43,0.4)]"
-                      : "text-[var(--text-muted)] hover:text-[var(--text-strong)] disabled:cursor-default"
-                  }`}
-                  aria-pressed={view === "login"}
-                >
-                  Вхід
-                </button>
-                <button
-                  type="button"
-                  onClick={() => switchView("signup")}
-                  disabled={isAnyAuthPending || view === "signup"}
-                  className={`rounded-full px-4 py-2.5 text-sm font-semibold transition ${
-                    view === "signup"
-                      ? "bg-white text-[var(--text-strong)] shadow-[0_10px_24px_-18px_rgba(22,29,43,0.4)]"
-                      : "text-[var(--text-muted)] hover:text-[var(--text-strong)] disabled:cursor-default"
-                  }`}
-                  aria-pressed={view === "signup"}
-                >
-                  Реєстрація
-                </button>
-              </div>
-            ) : null}
-
-            {showModalCloseButton ? (
-              <button
-                type="button"
-                onClick={onClose}
-                className="inline-flex h-11 w-11 flex-none items-center justify-center rounded-full border border-white/60 bg-[rgba(252,253,255,0.84)] text-[var(--text-muted)] transition hover:bg-white hover:text-[var(--text-strong)]"
-                aria-label="Закрити"
-              >
-                <svg viewBox="0 0 24 24" className="h-5 w-5 fill-none" aria-hidden="true">
-                  <path d="M7 7l10 10M17 7 7 17" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-                </svg>
-              </button>
-            ) : null}
+        <div className={`flex items-start ${showModalCloseButton ? "justify-between gap-4" : ""}`}>
+          <div>
+            <h1 id={titleId} className={titleClassName}>
+              {copy.title}
+            </h1>
+            {showDescription ? <p className="mt-3 text-[0.98rem] leading-[1.72] text-[var(--text-muted)]">{copy.description}</p> : null}
           </div>
-        ) : !isReset ? (
-          <div className="mb-6 grid grid-cols-2 rounded-full border border-[var(--line-soft)] bg-white/72 p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.84)]">
-            <Link
-              href={loginHref}
-              className={`rounded-full px-4 py-2.5 text-center text-sm font-semibold transition ${
-                view === "login"
-                  ? "bg-white text-[var(--text-strong)] shadow-[0_10px_24px_-18px_rgba(22,29,43,0.4)]"
-                  : "text-[var(--text-muted)] hover:text-[var(--text-strong)]"
-              }`}
-              aria-current={view === "login" ? "page" : undefined}
-            >
-              Вхід
-            </Link>
-            <Link
-              href={signupHref}
-              className={`rounded-full px-4 py-2.5 text-center text-sm font-semibold transition ${
-                view === "signup"
-                  ? "bg-white text-[var(--text-strong)] shadow-[0_10px_24px_-18px_rgba(22,29,43,0.4)]"
-                  : "text-[var(--text-muted)] hover:text-[var(--text-strong)]"
-              }`}
-              aria-current={view === "signup" ? "page" : undefined}
-            >
-              Реєстрація
-            </Link>
-          </div>
-        ) : null}
 
-        <div>
-          <h1 id={titleId} className={showVisualTitle ? "page-title max-w-[13ch]" : "sr-only"}>
-            {copy.title}
-          </h1>
-          {showVisualTitle && showDescription ? <p className="mt-3 text-[0.98rem] leading-[1.72] text-[var(--text-muted)]">{copy.description}</p> : null}
+          {showModalCloseButton ? (
+            <button
+              type="button"
+              onClick={onClose}
+              className="inline-flex h-11 w-11 flex-none items-center justify-center rounded-full border border-white/60 bg-[rgba(252,253,255,0.84)] text-[var(--text-muted)] transition hover:bg-white hover:text-[var(--text-strong)]"
+              aria-label="Закрити"
+            >
+              <svg viewBox="0 0 24 24" className="h-5 w-5 fill-none" aria-hidden="true">
+                <path d="M7 7l10 10M17 7 7 17" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+              </svg>
+            </button>
+          ) : null}
         </div>
 
         <form onSubmit={handleSubmit} className={formClassName} aria-busy={isAnyAuthPending}>

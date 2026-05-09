@@ -16,6 +16,8 @@ const publicNavItems = [
   { href: "/pricing", label: "Ціни" }
 ];
 
+const simulateCtaHref = "https://www.decivio.net/simulate";
+
 type AuthState =
   | { status: "loading" }
   | { status: "guest" }
@@ -248,10 +250,6 @@ export function SiteHeader() {
     openAuthDialog("login", { nextPath: "/dashboard" });
   };
 
-  const openSignupDialog = () => {
-    openAuthDialog("signup", { nextPath: "/dashboard" });
-  };
-
   return (
     <header className="sticky top-0 z-50">
       <div className="w-full">
@@ -322,9 +320,8 @@ export function SiteHeader() {
                   >
                     Вхід
                   </button>
-                  <button
-                    type="button"
-                    onClick={openSignupDialog}
+                  <a
+                    href={simulateCtaHref}
                     className="hidden min-w-[11.2rem] items-center justify-start gap-3 rounded-full bg-[var(--accent-strong)] px-3 py-2.5 pr-4 text-[1.03rem] font-semibold text-white transition hover:-translate-y-px hover:bg-[var(--accent)] md:inline-flex"
                   >
                     <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white text-[var(--accent-strong)]">
@@ -332,8 +329,8 @@ export function SiteHeader() {
                         <path d="M6 12h11M12 7l5 5-5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                       </svg>
                     </span>
-                    <span>Реєстрація</span>
-                  </button>
+                    <span>Запустити аналіз</span>
+                  </a>
                 </>
               )}
 
@@ -406,16 +403,13 @@ export function SiteHeader() {
                   >
                     Вхід
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsOpen(false);
-                      openSignupDialog();
-                    }}
+                  <a
+                    href={simulateCtaHref}
+                    onClick={() => setIsOpen(false)}
                     className="btn-primary"
                   >
-                    Реєстрація
-                  </button>
+                    Запустити аналіз
+                  </a>
                 </>
               )}
             </div>
