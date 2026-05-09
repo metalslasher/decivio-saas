@@ -666,7 +666,12 @@ export function AuthForm({
             </p>
           ) : null}
 
-          <button type="submit" disabled={isAnyAuthPending} className="btn-primary w-full disabled:cursor-not-allowed disabled:opacity-70">
+          <button
+            type="submit"
+            disabled={isAnyAuthPending}
+            className="btn-primary w-full disabled:cursor-not-allowed disabled:opacity-70"
+            data-testid="auth-submit"
+          >
             {isSubmitting ? copy.submitBusyLabel : copy.submitLabel}
           </button>
         </form>

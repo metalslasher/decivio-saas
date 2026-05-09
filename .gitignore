@@ -15,3 +15,5 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 tmp-hero-check/
+playwright-report/
+test-results/

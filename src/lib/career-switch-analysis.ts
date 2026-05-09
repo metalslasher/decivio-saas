@@ -5,6 +5,7 @@ import type {
   TargetMarket,
   TransitionPriority
 } from "@/lib/career-switch-form";
+import { isLocalTestModeEnabled } from "@/lib/test-mode";
 export type SalaryLevel = "junior" | "middle" | "senior" | "lead";
 export type VerdictLabel = "stay" | "switch" | "depends";
 export type BetterLongTermDirection = "current_role" | "target_role" | "balanced";
@@ -715,6 +716,181 @@ function assertValidCareerSwitchRequest(input: CareerSwitchAnalysisRequest) {
   }
 }
 
+function clamp(value: number, min: number, max: number) {
+  return Math.min(max, Math.max(min, value));
+}
+
+function roundToHundreds(value: number) {
+  return Math.max(0, Math.round(value / 100) * 100);
+}
+
+function buildSalaryRange(median: number): SalaryRange {
+  const normalizedMedian = roundToHundreds(median);
+  return {
+    low: roundToHundreds(normalizedMedian * 0.82),
+    median: normalizedMedian,
+    high: roundToHundreds(normalizedMedian * 1.18),
+    currency: "UAH"
+  };
+}
+
+function getTargetEntryLevel(level: ExperienceLevel): SalaryLevel {
+  if (level === "practical") {
+    return "middle";
+  }
+
+  return "junior";
+}
+
+function getMarketScopeLabel(market: TargetMarket) {
+  switch (market) {
+    case "remote":
+      return "Міжнародний ринок";
+    case "abroad":
+      return "Локальна робота за кордоном";
+    case "ukraine":
+    default:
+      return "Україна";
+  }
+}
+
+function buildMockCareerSwitchAnalysis(input: CareerSwitchAnalysisRequest): CareerSwitchAnalysisResult {
+  const currentTitle = input.current_role_text.trim();
+  const targetTitle = input.target_role_text.trim();
+  const currentMedian = roundToHundreds(Math.max(input.current_income, 25000));
+  const marketMultiplier = input.target_market === "remote" ? 1.28 : input.target_market === "abroad" ? 1.18 : 1;
+  const experienceMultiplier =
+    input.target_experience_level === "practical" ? 1.05 : input.target_experience_level === "basic" ? 0.9 : 0.72;
+  const targetEntryMedian = roundToHundreds(Math.max(18000, currentMedian * experienceMultiplier * marketMultiplier));
+  const currentSeniorMedian = roundToHundreds(Math.max(currentMedian + 12000, currentMedian * 1.35));
+  const currentBestMedian = roundToHundreds(Math.max(currentSeniorMedian + 10000, currentMedian * 1.65));
+  const targetSeniorMedian = roundToHundreds(Math.max(targetEntryMedian + 18000, targetEntryMedian * 1.55));
+  const targetBestMedian = roundToHundreds(Math.max(targetSeniorMedian + 12000, targetEntryMedian * 1.9));
+  const ceilingGapMedian = targetBestMedian - currentBestMedian;
+  const betterLongTermDirection: BetterLongTermDirection =
+    targetBestMedian > currentBestMedian * 1.08
+      ? "target_role"
+      : currentBestMedian > targetBestMedian * 1.08
+        ? "current_role"
+        : "balanced";
+
+  const baseProbability =
+    input.target_experience_level === "practical" ? 0.72 : input.target_experience_level === "basic" ? 0.61 : 0.47;
+  const englishAdjustment =
+    input.english_level === "advanced"
+      ? 0.06
+      : input.english_level === "upper_intermediate"
+        ? 0.04
+        : input.english_level === "basic" && input.target_market !== "ukraine"
+          ? -0.08
+          : 0;
+  const probability = clamp(baseProbability + englishAdjustment, 0.34, 0.86);
+  const baseMonths =
+    (input.target_experience_level === "practical" ? 6 : input.target_experience_level === "basic" ? 9 : 12) +
+    (input.english_level === "basic" && input.target_market !== "ukraine" ? 2 : 0) -
+    (input.transition_priority === "speed" ? 1 : 0);
+  const offerBaseMonths = Math.max(3, baseMonths);
+  const targetEntryLevel = getTargetEntryLevel(input.target_experience_level);
+  const riskLevel: RiskLevel =
+    probability < 0.52 || (input.transition_priority === "income" && targetEntryMedian < currentMedian * 0.85)
+      ? "high"
+      : probability < 0.66
+        ? "medium"
+        : "low";
+  const verdictLabel: VerdictLabel = betterLongTermDirection === "target_role" ? "switch" : "depends";
+  const marketScopeLabel = getMarketScopeLabel(input.target_market);
+  const generatedAt = new Date().toISOString();
+
+  return {
+    analysis: {
+      market_profile: {
+        current_role: {
+          canonical_title: currentTitle,
+          market_scope_label: "Україна",
+          current_level_estimate: input.years_in_current_role >= 5 ? "senior" : input.years_in_current_role >= 2 ? "middle" : "junior",
+          current_market_salary_range: buildSalaryRange(currentMedian),
+          senior_salary_range: buildSalaryRange(currentSeniorMedian),
+          best_case_level: "lead",
+          best_case_salary_range: buildSalaryRange(currentBestMedian),
+          confidence: 0.72,
+          caveats: ["Локальний test mode використовує фіксований прогноз без зовнішнього AI-запиту."],
+          summary: `Поточна роль ${currentTitle} взята як стартова точка для перевірки всього сценарію.`
+        },
+        target_role: {
+          canonical_title: targetTitle,
+          market_scope_label: marketScopeLabel,
+          entry_level_for_switcher: targetEntryLevel,
+          entry_salary_range: buildSalaryRange(targetEntryMedian),
+          senior_salary_range: buildSalaryRange(targetSeniorMedian),
+          best_case_level: "lead",
+          best_case_salary_range: buildSalaryRange(targetBestMedian),
+          time_to_first_offer_months: {
+            optimistic: Math.max(2, offerBaseMonths - 3),
+            base: offerBaseMonths,
+            pessimistic: offerBaseMonths + 4
+          },
+          probability_of_getting_job_within_12_months: probability,
+          confidence: 0.7,
+          caveats: ["Прогноз призначений для локальної автоматичної перевірки flow, а не для реальної консультації."],
+          summary: `Цільова роль ${targetTitle} оцінена для ринку: ${marketScopeLabel}.`
+        },
+        comparison: {
+          better_long_term_direction: betterLongTermDirection,
+          better_long_term_label:
+            betterLongTermDirection === "target_role"
+              ? targetTitle
+              : betterLongTermDirection === "current_role"
+                ? currentTitle
+                : "Баланс між поточною та цільовою роллю",
+          ceiling_gap_median: ceilingGapMedian,
+          interpretation:
+            ceilingGapMedian >= 0
+              ? "Цільовий напрям має вищу довгострокову стелю, але потребує поетапної підготовки."
+              : "Поточний напрям виглядає фінансово сильнішим, тому перехід варто робити тільки з чітким планом."
+        }
+      },
+      narrative: {
+        verdict_label: verdictLabel,
+        headline: `${targetTitle}: тестовий прогноз переходу готовий`,
+        summary:
+          "Decivio сформував контрольний результат без витрати OpenAI-запиту. Цей висновок потрібен, щоб автоматично перевірити шлях від симуляції до оплати й кабінету.",
+        why_this_result: [
+          `Поточний дохід ${currentMedian} грн/міс використано як базу для порівняння.`,
+          `Цільовий ринок: ${marketScopeLabel}.`,
+          `Ймовірність отримати перший офер за 12 місяців оцінена на ${Math.round(probability * 100)}%.`
+        ],
+        personalization_notes: [
+          `Поточна роль: ${currentTitle}.`,
+          `Цільова роль: ${targetTitle}.`,
+          input.transition_priority === "income"
+            ? "У прогнозі підсилено фокус на доході."
+            : "У прогнозі підсилено фокус на швидкості переходу."
+        ],
+        cta_title: "Відкрити практичний план переходу",
+        cta_body: "Після оплати Decivio має прив'язати цей сценарій до акаунта і відкрити кабінет."
+      },
+      guidance: {
+        risk_assessment: {
+          level: riskLevel,
+          summary:
+            riskLevel === "high"
+              ? "Ризик підвищений: потрібен запас часу, портфоліо і реалістичний план входу."
+              : riskLevel === "medium"
+                ? "Ризик помірний: перехід виглядає можливим, якщо рухатись поетапно."
+                : "Ризик контрольований: стартові умови достатньо сильні для переходу."
+        }
+      }
+    },
+    meta: {
+      model: "decivio-local-test-mock",
+      latency_ms: 0,
+      web_search_used: false,
+      request_id: `test-${Date.now()}`,
+      generated_at: generatedAt
+    }
+  };
+}
+
 export function buildStoredSummaryMetrics(analysis: CareerSwitchAnalysis) {
   return {
     verdict_label: analysis.narrative.verdict_label,
@@ -752,6 +928,10 @@ export async function generateCareerSwitchAnalysis(
   input: CareerSwitchAnalysisRequest
 ): Promise<CareerSwitchAnalysisResult> {
   assertValidCareerSwitchRequest(input);
+
+  if (isLocalTestModeEnabled()) {
+    return buildMockCareerSwitchAnalysis(input);
+  }
 
   const missingOpenAiEnv = getMissingOpenAiEnv();
   if (missingOpenAiEnv.length > 0) {

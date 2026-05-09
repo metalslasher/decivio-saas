@@ -399,7 +399,7 @@ export function CheckoutGate({ plan, initialCheckoutId, authNextPath }: Checkout
             <p className="rounded-[1.3rem] bg-[rgba(255,255,255,0.72)] px-4 py-3 text-[0.96rem] leading-[1.68] text-[var(--text-strong)]">
               Для цього акаунта Pro вже активний{activeUntilLabel ? ` до ${activeUntilLabel}` : ""}. Повторно запускати оплату не потрібно.
             </p>
-            <Link href="/dashboard?view=access" className="btn-primary w-full text-center">
+            <Link href="/dashboard?view=access" className="btn-primary w-full text-center" data-testid="billing-dashboard-link">
               Перейти в кабінет
             </Link>
           </div>
@@ -464,7 +464,7 @@ export function CheckoutGate({ plan, initialCheckoutId, authNextPath }: Checkout
               ) : null}
 
               {resolvedPayload?.accessGranted ? (
-                <Link href="/dashboard?view=access" className="btn-secondary w-full text-center">
+                <Link href="/dashboard?view=access" className="btn-secondary w-full text-center" data-testid="billing-dashboard-link">
                   Перейти в кабінет
                 </Link>
               ) : null}

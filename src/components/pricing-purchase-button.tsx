@@ -139,7 +139,13 @@ export function PricingPurchaseButton({ planId, label, className }: PricingPurch
 
   return (
     <div className="space-y-3">
-      <button type="button" onClick={startPurchase} disabled={isBusy} className={`${className} disabled:cursor-not-allowed disabled:opacity-70`}>
+      <button
+        type="button"
+        onClick={startPurchase}
+        disabled={isBusy}
+        className={`${className} disabled:cursor-not-allowed disabled:opacity-70`}
+        data-testid={`pricing-purchase-${planId}`}
+      >
         {purchaseState.status === "checking"
           ? "Перевіряємо акаунт..."
           : purchaseState.status === "creating"

@@ -10,6 +10,7 @@ import { resolveGuestSessionIdentity } from "@/lib/guest-session-server";
 import { buildOnboardingProfileContext, mergeProfileContext, parseProfileContext } from "@/lib/profile-context";
 import { getAuthenticatedUserIdFromRequest } from "@/lib/request-auth";
 import { consumeRateLimit } from "@/lib/request-rate-limit";
+import { isLocalTestModeEnabled } from "@/lib/test-mode";
 
 const SIMULATION_RATE_LIMIT = {
   limit: 5,
@@ -58,7 +59,9 @@ function supabaseUnavailableErrorMessage(error: unknown, fallback: string) {
 }
 
 function getMissingServerEnv() {
-  const required = ["NEXT_PUBLIC_SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY", "OPENAI_API_KEY"] as const;
+  const required = isLocalTestModeEnabled()
+    ? (["NEXT_PUBLIC_SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY"] as const)
+    : (["NEXT_PUBLIC_SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY", "OPENAI_API_KEY"] as const);
   return required.filter((name) => {
     const value = process.env[name];
     return typeof value !== "string" || value.trim() === "";
@@ -122,6 +125,14 @@ async function applySimulationRateLimit(
   request: Request,
   subjectHint: string
 ) {
+  if (isLocalTestModeEnabled()) {
+    return {
+      allowed: true,
+      remaining: SIMULATION_RATE_LIMIT.limit,
+      retryAfterSeconds: 0
+    };
+  }
+
   try {
     return await consumeRateLimit(supabase, {
       route: "/api/simulations",

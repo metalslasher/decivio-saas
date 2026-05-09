@@ -3,7 +3,9 @@ import {
   assertUserDoesNotAlreadyHavePaidAccess,
   attachMonoTargetToCheckout,
   createCheckoutDraft,
-  findReusablePendingCheckout
+  findReusablePendingCheckout,
+  syncCheckoutFromMonoInvoiceStatus,
+  syncCheckoutFromMonoSubscriptionStatus
 } from "@/lib/billing-store";
 import { getBillingPlanConfig, isPaidPlanId } from "@/lib/billing";
 import { getSupabaseServiceRoleClient } from "@/lib/db/supabase";
@@ -14,6 +16,7 @@ import {
 } from "@/lib/mono-acquiring";
 import { getAuthenticatedUserFromRequest } from "@/lib/request-auth";
 import { consumeRateLimit } from "@/lib/request-rate-limit";
+import { isLocalTestModeEnabled } from "@/lib/test-mode";
 
 const CHECKOUT_RATE_LIMIT = {
   limit: 10,
@@ -22,6 +25,83 @@ const CHECKOUT_RATE_LIMIT = {
 
 function buildRateLimitSubjectHint(userId: string) {
   return `user:${userId}`;
+}
+
+async function activateLocalTestCheckout(
+  supabase: ReturnType<typeof getSupabaseServiceRoleClient>,
+  input: {
+    draft: Awaited<ReturnType<typeof createCheckoutDraft>>;
+    returnUrl: string;
+  }
+) {
+  const now = new Date().toISOString();
+
+  if (input.draft.billing_kind === "subscription") {
+    const subscriptionId = `test_subscription_${input.draft.id}`;
+    const nextChargeDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+
+    const attachedCheckout = await attachMonoTargetToCheckout(supabase, input.draft.id, {
+      pageUrl: input.returnUrl,
+      subscriptionId,
+      redirectUrl: input.returnUrl
+    });
+
+    const syncedCheckout = await syncCheckoutFromMonoSubscriptionStatus(
+      supabase,
+      {
+        subscriptionId,
+        status: "active",
+        startDate: now,
+        amount: attachedCheckout.amount,
+        ccy: attachedCheckout.ccy,
+        interval: "1m",
+        nextChargeDate
+      },
+      {
+        source: "poll",
+        payload: {
+          testMode: true,
+          checkoutId: attachedCheckout.id,
+          planId: attachedCheckout.plan_id
+        }
+      }
+    );
+
+    return syncedCheckout ?? attachedCheckout;
+  }
+
+  const invoiceId = `test_invoice_${input.draft.id}`;
+
+  const attachedCheckout = await attachMonoTargetToCheckout(supabase, input.draft.id, {
+    pageUrl: input.returnUrl,
+    invoiceId,
+    redirectUrl: input.returnUrl
+  });
+
+  const syncedCheckout = await syncCheckoutFromMonoInvoiceStatus(
+    supabase,
+    {
+      invoiceId,
+      status: "success",
+      amount: attachedCheckout.amount,
+      ccy: attachedCheckout.ccy,
+      finalAmount: attachedCheckout.amount,
+      createdDate: now,
+      modifiedDate: now,
+      reference: attachedCheckout.id,
+      destination: "Decivio local test checkout"
+    },
+    {
+      source: "poll",
+      payload: {
+        testMode: true,
+        checkoutId: attachedCheckout.id,
+        planId: attachedCheckout.plan_id
+      }
+    }
+  );
+
+  return syncedCheckout ?? attachedCheckout;
 }
 
 export async function POST(request: Request) {
@@ -59,15 +139,20 @@ export async function POST(request: Request) {
     );
   }
 
-  let rateLimit;
+  let rateLimit = {
+    allowed: true,
+    retryAfterSeconds: 0
+  };
   try {
-    rateLimit = await consumeRateLimit(supabase, {
-      route: "/api/payments/mono/checkout",
-      subjectHint: buildRateLimitSubjectHint(authenticatedUser.userId),
-      headers: request.headers,
-      limit: CHECKOUT_RATE_LIMIT.limit,
-      windowSeconds: CHECKOUT_RATE_LIMIT.windowSeconds
-    });
+    if (!isLocalTestModeEnabled()) {
+      rateLimit = await consumeRateLimit(supabase, {
+        route: "/api/payments/mono/checkout",
+        subjectHint: buildRateLimitSubjectHint(authenticatedUser.userId),
+        headers: request.headers,
+        limit: CHECKOUT_RATE_LIMIT.limit,
+        windowSeconds: CHECKOUT_RATE_LIMIT.windowSeconds
+      });
+    }
   } catch (error) {
     return NextResponse.json(
       {
@@ -135,15 +220,18 @@ export async function POST(request: Request) {
   }
 
   try {
+    const isTestMode = isLocalTestModeEnabled();
     const reusableCheckout = await findReusablePendingCheckout(supabase, authenticatedUser.userId, payload.planId);
     if (reusableCheckout?.mono_page_url) {
-      return NextResponse.json(
-        {
-          checkoutId: reusableCheckout.id,
-          redirectUrl: reusableCheckout.mono_page_url
-        },
-        { status: 200 }
-      );
+      if (!isTestMode) {
+        return NextResponse.json(
+          {
+            checkoutId: reusableCheckout.id,
+            redirectUrl: reusableCheckout.mono_page_url
+          },
+          { status: 200 }
+        );
+      }
     }
 
     const draft = await createCheckoutDraft(supabase, {
@@ -152,6 +240,23 @@ export async function POST(request: Request) {
       redirectUrl: buildMonoCheckoutReturnUrl(payload.planId, "pending")
     });
     const returnUrl = buildMonoCheckoutReturnUrl(payload.planId, draft.id);
+
+    if (isTestMode) {
+      const checkout = await activateLocalTestCheckout(supabase, {
+        draft,
+        returnUrl
+      });
+
+      return NextResponse.json(
+        {
+          checkoutId: checkout.id,
+          redirectUrl: returnUrl,
+          testMode: true
+        },
+        { status: 201 }
+      );
+    }
+
     const planConfig = getBillingPlanConfig(payload.planId);
 
     let monoResponse;
