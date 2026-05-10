@@ -93,7 +93,7 @@ main {
   --mirror-blur: 26px;
   isolation: isolate;
   backdrop-filter: blur(var(--mirror-blur));
-  border-bottom: 1px solid rgba(69, 88, 137, calc(0.18 * var(--mirror-progress)));
+  border-bottom: 1px solid rgba(69, 88, 137, calc(0.12 + 0.06 * var(--mirror-progress)));
   background:
     linear-gradient(180deg, rgba(255, 255, 255, calc(0.82 * var(--mirror-progress))), rgba(244, 247, 255, calc(0.76 * var(--mirror-progress)))),
     linear-gradient(120deg, rgba(67, 97, 255, calc(0.075 * var(--mirror-progress))), rgba(152, 165, 255, calc(0.065 * var(--mirror-progress))));
@@ -127,7 +127,7 @@ main {
   height: 1px;
   background: linear-gradient(90deg, rgba(67, 97, 255, 0), rgba(67, 97, 255, 0.26), rgba(18, 27, 51, 0.14), rgba(152, 165, 255, 0.22), rgba(67, 97, 255, 0));
   box-shadow: 0 1px 0 rgba(255, 255, 255, 0.72);
-  opacity: calc(0.72 * var(--mirror-progress));
+  opacity: calc(0.42 + 0.3 * var(--mirror-progress));
   pointer-events: none;
 }
 
