@@ -320,15 +320,15 @@ export function SiteHeader() {
                   <button
                     type="button"
                     onClick={openLoginDialog}
-                    className="hidden items-center justify-center px-2 text-[1.03rem] font-semibold text-[var(--accent-strong)] transition hover:text-[var(--accent)] md:inline-flex"
+                    className="header-login-button hidden items-center justify-center md:inline-flex"
                   >
                     Вхід
                   </button>
                   <a
                     href={simulateCtaHref}
-                    className="hidden min-w-[10rem] items-center justify-center rounded-full bg-[var(--accent-strong)] px-5 py-3 text-[1.03rem] font-semibold text-white transition hover:-translate-y-px hover:bg-[var(--accent)] md:inline-flex"
+                    className="header-cta-button hidden min-w-[11.25rem] items-center justify-center md:inline-flex"
                   >
-                    Оцінити перехід
+                    Змінити кар’єру
                   </a>
                 </>
               )}
@@ -398,7 +398,7 @@ export function SiteHeader() {
                       setIsOpen(false);
                       openLoginDialog();
                     }}
-                    className="btn-secondary mt-1"
+                    className="header-login-button mt-1 flex w-full items-center justify-center"
                   >
                     Вхід
                   </button>
@@ -407,7 +407,7 @@ export function SiteHeader() {
                     onClick={() => setIsOpen(false)}
                     className="btn-primary"
                   >
-                    Оцінити перехід
+                    Змінити кар’єру
                   </a>
                 </>
               )}
