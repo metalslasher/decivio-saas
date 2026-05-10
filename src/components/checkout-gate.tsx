@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuthDialog } from "@/components/auth-dialog-provider";
 import { getSupabaseBrowserClient } from "@/lib/db/supabase-browser";
 import { formatUah, pricingPlans } from "@/lib/pricing";
@@ -29,6 +29,11 @@ type CheckoutStatusPayload = {
   warning?: string | null;
 };
 
+type CheckoutStatusResponse = Partial<CheckoutStatusPayload> & {
+  error?: string;
+  warning?: string | null;
+};
+
 type CheckoutState =
   | { status: "loading" }
   | { status: "guest" }
@@ -51,6 +56,37 @@ const dateFormatter = new Intl.DateTimeFormat("uk-UA", {
   month: "long",
   year: "numeric"
 });
+
+const checkoutPollIntervalMs = 3000;
+const checkoutPollLimit = 10;
+
+function isWaitingCheckoutStatus(status: CheckoutStatusPayload["status"]) {
+  return status === "pending" || status === "processing";
+}
+
+function isRetryableCheckoutStatus(status: CheckoutStatusPayload["status"]) {
+  return status === "failed" || status === "expired" || status === "canceled" || status === "reversed";
+}
+
+function canReopenMonoPayment(payload: CheckoutStatusPayload | null) {
+  return Boolean(payload?.redirectUrl && isWaitingCheckoutStatus(payload.status));
+}
+
+function hasCurrentProAccess(subscription: SubscriptionSnapshot | null) {
+  if (!subscription || subscription.plan !== "pro") {
+    return false;
+  }
+
+  if (subscription.status !== "active" && subscription.status !== "trial" && subscription.status !== "canceled") {
+    return false;
+  }
+
+  if (!subscription.currentPeriodEnd) {
+    return subscription.status === "active" || subscription.status === "trial";
+  }
+
+  return new Date(subscription.currentPeriodEnd).getTime() > Date.now();
+}
 
 function formatAccessDate(value: string | null) {
   if (!value) {
@@ -113,13 +149,13 @@ function getCheckoutMessage(payload: CheckoutStatusPayload) {
     case "processing":
       return "Платіж уже в процесі. Зазвичай статус змінюється автоматично за кілька секунд.";
     case "failed":
-      return "mono повернув неуспішний статус. Можна спробувати ще раз або відкрити оплату повторно.";
+      return "mono повернув неуспішний статус. Доступ не відкрито, можна створити нову оплату.";
     case "expired":
       return "Час життя цього рахунку завершився. Потрібно створити новий checkout.";
     case "reversed":
       return "mono повернув статус повернення. Доступ не буде відкрито, поки не з’явиться нова успішна оплата.";
     case "canceled":
-      return "mono повідомив, що підписку скасовано. Якщо треба, можна створити нову.";
+      return "mono повідомив, що підписку скасовано. Доступ не активний, можна створити нову оплату.";
     case "pending":
     default:
       return "Чекаємо підтвердження від mono. Якщо ви вже повернулися після оплати, сторінка сама дотягне актуальний статус.";
@@ -185,6 +221,47 @@ export function CheckoutGate({ plan, initialCheckoutId, authNextPath }: Checkout
     };
   }, [supabase]);
 
+  const applyCheckoutSubscription = useCallback((payload: CheckoutStatusPayload) => {
+    if (!payload.subscription) {
+      return;
+    }
+
+    const nextSubscription = normalizeSubscriptionSnapshot(payload.subscription);
+    setAuthState((current) =>
+      current.status === "user"
+        ? {
+            ...current,
+            subscription: nextSubscription
+          }
+        : current
+    );
+  }, []);
+
+  const fetchCheckoutStatus = useCallback(
+    async (checkoutId: string) => {
+      if (authState.status !== "user") {
+        throw new Error("Потрібно увійти в акаунт, щоб перевірити статус оплати.");
+      }
+
+      const response = await fetch(`/api/payments/mono/checkout/${checkoutId}`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${authState.accessToken}`
+        },
+        cache: "no-store"
+      });
+
+      const payload = (await response.json()) as CheckoutStatusResponse;
+
+      if (!response.ok) {
+        throw new Error(payload.error || "Не вдалося перевірити статус оплати.");
+      }
+
+      return payload as CheckoutStatusPayload;
+    },
+    [authState]
+  );
+
   useEffect(() => {
     if (authState.status !== "user" || !initialCheckoutId) {
       return;
@@ -192,8 +269,11 @@ export function CheckoutGate({ plan, initialCheckoutId, authNextPath }: Checkout
 
     let cancelled = false;
     let timeoutId: ReturnType<typeof setTimeout> | null = null;
+    let pollAttempt = 0;
 
     const pollCheckoutStatus = async () => {
+      pollAttempt += 1;
+
       try {
         setFlowState((current) => ({
           status: "checking",
@@ -201,27 +281,12 @@ export function CheckoutGate({ plan, initialCheckoutId, authNextPath }: Checkout
           checkoutId: initialCheckoutId
         }));
 
-        const response = await fetch(`/api/payments/mono/checkout/${initialCheckoutId}`, {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${authState.accessToken}`
-          },
-          cache: "no-store"
-        });
-
-        const payload = (await response.json()) as CheckoutStatusPayload & { error?: string; warning?: string | null };
+        const payload = await fetchCheckoutStatus(initialCheckoutId);
         if (cancelled) {
           return;
         }
 
-        if (!response.ok) {
-          setFlowState({
-            status: "error",
-            error: payload.error || "Не вдалося перевірити статус checkout.",
-            checkoutId: initialCheckoutId
-          });
-          return;
-        }
+        applyCheckoutSubscription(payload);
 
         setFlowState({
           status: "resolved",
@@ -229,8 +294,17 @@ export function CheckoutGate({ plan, initialCheckoutId, authNextPath }: Checkout
           payload
         });
 
-        if (payload.status === "pending" || payload.status === "processing") {
-          timeoutId = setTimeout(pollCheckoutStatus, 3000);
+        if (isWaitingCheckoutStatus(payload.status)) {
+          if (pollAttempt < checkoutPollLimit) {
+            timeoutId = setTimeout(pollCheckoutStatus, checkoutPollIntervalMs);
+            return;
+          }
+
+          setFlowState({
+            status: "resolved",
+            error: "Статус ще очікує підтвердження від mono. Ви можете перевірити ще раз або повернутися до цієї сторінки пізніше.",
+            payload
+          });
         }
       } catch (error) {
         if (cancelled) {
@@ -239,7 +313,7 @@ export function CheckoutGate({ plan, initialCheckoutId, authNextPath }: Checkout
 
         setFlowState({
           status: "error",
-          error: error instanceof Error ? error.message : "Не вдалося перевірити статус checkout.",
+          error: error instanceof Error ? error.message : "Не вдалося перевірити статус оплати.",
           checkoutId: initialCheckoutId
         });
       }
@@ -253,13 +327,41 @@ export function CheckoutGate({ plan, initialCheckoutId, authNextPath }: Checkout
         clearTimeout(timeoutId);
       }
     };
-  }, [authState, initialCheckoutId]);
+  }, [applyCheckoutSubscription, authState.status, fetchCheckoutStatus, initialCheckoutId]);
 
-  const subscription = authState.status === "user" ? authState.subscription : null;
+  const resolvedPayload = flowState.status === "resolved" ? flowState.payload : null;
+  const subscription =
+    resolvedPayload?.subscription
+      ? normalizeSubscriptionSnapshot(resolvedPayload.subscription)
+      : authState.status === "user"
+        ? authState.subscription
+        : null;
   const activeUntilLabel = formatAccessDate(subscription?.currentPeriodEnd ?? null);
-  const hasActiveProAccess =
-    subscription?.plan === "pro" &&
-    (subscription.status === "active" || subscription.status === "trial" || subscription.status === "canceled");
+  const hasActiveProAccess = hasCurrentProAccess(subscription);
+
+  const handleCheckCheckoutStatus = async (checkoutId: string) => {
+    if (authState.status !== "user") {
+      return;
+    }
+
+    setFlowState({ status: "checking", error: null, checkoutId });
+
+    try {
+      const payload = await fetchCheckoutStatus(checkoutId);
+      applyCheckoutSubscription(payload);
+      setFlowState({
+        status: "resolved",
+        error: payload.warning ?? null,
+        payload
+      });
+    } catch (error) {
+      setFlowState({
+        status: "error",
+        error: error instanceof Error ? error.message : "Не вдалося перевірити статус оплати.",
+        checkoutId
+      });
+    }
+  };
 
   const handleCreateCheckout = async () => {
     if (authState.status !== "user") {
@@ -281,6 +383,7 @@ export function CheckoutGate({ plan, initialCheckoutId, authNextPath }: Checkout
       const payload = (await response.json()) as {
         checkoutId?: string;
         redirectUrl?: string;
+        status?: CheckoutStatusPayload["status"];
         error?: string;
         code?: string;
         redirectTo?: string;
@@ -294,7 +397,7 @@ export function CheckoutGate({ plan, initialCheckoutId, authNextPath }: Checkout
 
         setFlowState({
           status: "error",
-          error: payload.error || "Не вдалося створити mono checkout.",
+          error: payload.error || "Не вдалося створити оплату mono.",
           checkoutId: payload.checkoutId ?? null
         });
         return;
@@ -303,7 +406,7 @@ export function CheckoutGate({ plan, initialCheckoutId, authNextPath }: Checkout
       if (!payload.redirectUrl) {
         setFlowState({
           status: "error",
-          error: "mono checkout створено без платіжного посилання.",
+          error: "Оплату створено без платіжного посилання. Спробуйте ще раз.",
           checkoutId: payload.checkoutId ?? null
         });
         return;
@@ -313,10 +416,19 @@ export function CheckoutGate({ plan, initialCheckoutId, authNextPath }: Checkout
     } catch (error) {
       setFlowState({
         status: "error",
-        error: error instanceof Error ? error.message : "Не вдалося створити mono checkout.",
+        error: error instanceof Error ? error.message : "Не вдалося створити оплату mono.",
         checkoutId: null
       });
     }
+  };
+
+  const handlePrimaryCheckoutAction = () => {
+    if (resolvedPayload && isWaitingCheckoutStatus(resolvedPayload.status)) {
+      void handleCheckCheckoutStatus(resolvedPayload.checkoutId);
+      return;
+    }
+
+    void handleCreateCheckout();
   };
 
   if (authState.status === "loading") {
@@ -353,10 +465,19 @@ export function CheckoutGate({ plan, initialCheckoutId, authNextPath }: Checkout
     );
   }
 
-  const resolvedPayload = flowState.status === "resolved" ? flowState.payload : null;
   const checkoutStatusLabel = resolvedPayload ? mapCheckoutStatusLabel(resolvedPayload.status) : null;
   const checkoutMessage = resolvedPayload ? getCheckoutMessage(resolvedPayload) : null;
   const checkoutActiveUntil = formatAccessDate(resolvedPayload?.subscription?.currentPeriodEnd ?? null);
+  const primaryCheckoutButtonLabel =
+    flowState.status === "creating"
+      ? "Створюємо оплату mono..."
+      : flowState.status === "checking"
+        ? "Перевіряємо статус..."
+        : resolvedPayload && isWaitingCheckoutStatus(resolvedPayload.status)
+          ? "Перевірити статус ще раз"
+          : resolvedPayload && isRetryableCheckoutStatus(resolvedPayload.status)
+            ? "Створити нову оплату"
+            : "Перейти до оплати mono";
 
   return (
     <div className="grid gap-5 md:grid-cols-[1.15fr,0.85fr]">
@@ -397,7 +518,10 @@ export function CheckoutGate({ plan, initialCheckoutId, authNextPath }: Checkout
         {hasActiveProAccess ? (
           <div className="mt-4 space-y-4">
             <p className="rounded-[1.3rem] bg-[rgba(255,255,255,0.72)] px-4 py-3 text-[0.96rem] leading-[1.68] text-[var(--text-strong)]">
-              Для цього акаунта Pro вже активний{activeUntilLabel ? ` до ${activeUntilLabel}` : ""}. Повторно запускати оплату не потрібно.
+              {resolvedPayload?.accessGranted
+                ? "Оплату підтверджено, Pro-доступ відкритий для цього акаунта"
+                : "Для цього акаунта Pro вже активний"}
+              {activeUntilLabel ? ` до ${activeUntilLabel}` : ""}. Повторно запускати оплату не потрібно.
             </p>
             <Link href="/dashboard?view=access" className="btn-primary w-full text-center" data-testid="billing-dashboard-link">
               Перейти в кабінет
@@ -441,18 +565,14 @@ export function CheckoutGate({ plan, initialCheckoutId, authNextPath }: Checkout
             <div className="mt-6 grid gap-3">
               <button
                 type="button"
-                onClick={handleCreateCheckout}
+                onClick={handlePrimaryCheckoutAction}
                 disabled={flowState.status === "creating" || flowState.status === "checking"}
                 className="btn-primary w-full disabled:cursor-not-allowed disabled:opacity-70"
               >
-                {flowState.status === "creating"
-                  ? "Створюємо mono checkout..."
-                  : flowState.status === "checking"
-                    ? "Перевіряємо статус..."
-                    : "Перейти до оплати mono"}
+                {primaryCheckoutButtonLabel}
               </button>
 
-              {resolvedPayload?.redirectUrl && !resolvedPayload.accessGranted ? (
+              {resolvedPayload?.redirectUrl && canReopenMonoPayment(resolvedPayload) ? (
                 <a
                   href={resolvedPayload.redirectUrl}
                   className="btn-secondary w-full text-center"

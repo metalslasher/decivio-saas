@@ -505,7 +505,7 @@ export function formatCheckoutStatusForClient(checkout: BillingCheckoutRow | nul
     planId: checkout.plan_id,
     billingKind: checkout.billing_kind,
     status: checkout.status,
-    accessGranted: isAccessGrantedForCheckoutStatus(checkout.status),
+    accessGranted: isAccessGrantedForCheckoutStatus(checkout.status) && hasActiveAccess(subscription),
     redirectUrl: checkout.mono_page_url,
     subscription: subscription
       ? {

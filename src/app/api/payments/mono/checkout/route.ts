@@ -2,12 +2,14 @@ import { NextResponse } from "next/server";
 import {
   assertUserDoesNotAlreadyHavePaidAccess,
   attachMonoTargetToCheckout,
+  type BillingCheckoutRow,
   createCheckoutDraft,
   findReusablePendingCheckout,
   syncCheckoutFromMonoInvoiceStatus,
   syncCheckoutFromMonoSubscriptionStatus
 } from "@/lib/billing-store";
-import { getBillingPlanConfig, isPaidPlanId } from "@/lib/billing";
+import { type BillingCheckoutStatus, getBillingPlanConfig, isPaidPlanId } from "@/lib/billing";
+import { getBillingErrorMessage } from "@/lib/billing-errors";
 import { getSupabaseServiceRoleClient } from "@/lib/db/supabase";
 import {
   buildMonoCheckoutReturnUrl,
@@ -32,9 +34,29 @@ async function activateLocalTestCheckout(
   input: {
     draft: Awaited<ReturnType<typeof createCheckoutDraft>>;
     returnUrl: string;
+    status: BillingCheckoutStatus;
   }
 ) {
   const now = new Date().toISOString();
+
+  async function setLocalCheckoutStatus(status: BillingCheckoutStatus) {
+    const { data, error } = await supabase
+      .from("billing_checkouts")
+      .update({
+        status,
+        last_event_at: now,
+        last_event_status: `local_test_${status}`
+      })
+      .eq("id", input.draft.id)
+      .select("*")
+      .single<BillingCheckoutRow>();
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return data;
+  }
 
   if (input.draft.billing_kind === "subscription") {
     const subscriptionId = `test_subscription_${input.draft.id}`;
@@ -45,6 +67,45 @@ async function activateLocalTestCheckout(
       subscriptionId,
       redirectUrl: input.returnUrl
     });
+
+    if (input.status === "pending") {
+      return attachedCheckout;
+    }
+
+    if (input.status === "processing") {
+      return setLocalCheckoutStatus("processing");
+    }
+
+    if (input.status === "canceled") {
+      const syncedCheckout = await syncCheckoutFromMonoSubscriptionStatus(
+        supabase,
+        {
+          subscriptionId,
+          status: "cancelled",
+          startDate: now,
+          endDate: now,
+          amount: attachedCheckout.amount,
+          ccy: attachedCheckout.ccy,
+          interval: "1m",
+          cancellationDesc: "Decivio local test checkout"
+        },
+        {
+          source: "poll",
+          payload: {
+            testMode: true,
+            checkoutId: attachedCheckout.id,
+            planId: attachedCheckout.plan_id,
+            requestedStatus: input.status
+          }
+        }
+      );
+
+      return syncedCheckout ?? attachedCheckout;
+    }
+
+    if (input.status !== "active") {
+      return setLocalCheckoutStatus(input.status);
+    }
 
     const syncedCheckout = await syncCheckoutFromMonoSubscriptionStatus(
       supabase,
@@ -62,7 +123,8 @@ async function activateLocalTestCheckout(
         payload: {
           testMode: true,
           checkoutId: attachedCheckout.id,
-          planId: attachedCheckout.plan_id
+          planId: attachedCheckout.plan_id,
+          requestedStatus: input.status
         }
       }
     );
@@ -77,6 +139,49 @@ async function activateLocalTestCheckout(
     invoiceId,
     redirectUrl: input.returnUrl
   });
+
+  if (input.status === "pending") {
+    return attachedCheckout;
+  }
+
+  if (input.status === "processing") {
+    return setLocalCheckoutStatus("processing");
+  }
+
+  if (input.status === "failed" || input.status === "expired" || input.status === "reversed") {
+    const monoStatus =
+      input.status === "failed"
+        ? "failure"
+        : input.status === "expired"
+          ? "expired"
+          : "reversed";
+
+    const syncedCheckout = await syncCheckoutFromMonoInvoiceStatus(
+      supabase,
+      {
+        invoiceId,
+        status: monoStatus,
+        amount: attachedCheckout.amount,
+        ccy: attachedCheckout.ccy,
+        finalAmount: 0,
+        createdDate: now,
+        modifiedDate: now,
+        reference: attachedCheckout.id,
+        destination: "Decivio local test checkout"
+      },
+      {
+        source: "poll",
+        payload: {
+          testMode: true,
+          checkoutId: attachedCheckout.id,
+          planId: attachedCheckout.plan_id,
+          requestedStatus: input.status
+        }
+      }
+    );
+
+    return syncedCheckout ?? attachedCheckout;
+  }
 
   const syncedCheckout = await syncCheckoutFromMonoInvoiceStatus(
     supabase,
@@ -96,12 +201,36 @@ async function activateLocalTestCheckout(
       payload: {
         testMode: true,
         checkoutId: attachedCheckout.id,
-        planId: attachedCheckout.plan_id
+        planId: attachedCheckout.plan_id,
+        requestedStatus: input.status
       }
     }
   );
 
   return syncedCheckout ?? attachedCheckout;
+}
+
+function getLocalTestCheckoutStatus(
+  value: unknown,
+  billingKind: "subscription" | "one_time"
+): BillingCheckoutStatus {
+  if (!isLocalTestModeEnabled()) {
+    return billingKind === "subscription" ? "active" : "paid";
+  }
+
+  if (billingKind === "subscription") {
+    if (value === "pending" || value === "processing" || value === "active" || value === "canceled" || value === "failed") {
+      return value;
+    }
+
+    return "active";
+  }
+
+  if (value === "pending" || value === "processing" || value === "paid" || value === "failed" || value === "expired" || value === "reversed") {
+    return value;
+  }
+
+  return "paid";
 }
 
 export async function POST(request: Request) {
@@ -112,7 +241,7 @@ export async function POST(request: Request) {
   } catch (error) {
     return NextResponse.json(
       {
-        error: error instanceof Error ? error.message : "Supabase server is not configured."
+        error: getBillingErrorMessage(error, "Оплата тимчасово недоступна: не вдалося підготувати сервер.")
       },
       { status: 500 }
     );
@@ -124,7 +253,7 @@ export async function POST(request: Request) {
   } catch (error) {
     return NextResponse.json(
       {
-        error: error instanceof Error ? error.message : "Failed to verify authorization."
+        error: getBillingErrorMessage(error, "Сесію не вдалося підтвердити. Увійдіть ще раз і повторіть оплату.")
       },
       { status: 401 }
     );
@@ -133,7 +262,7 @@ export async function POST(request: Request) {
   if (!authenticatedUser) {
     return NextResponse.json(
       {
-        error: "Active authorization is required before payment."
+        error: "Перед оплатою потрібно увійти або створити акаунт."
       },
       { status: 401 }
     );
@@ -156,7 +285,7 @@ export async function POST(request: Request) {
   } catch (error) {
     return NextResponse.json(
       {
-        error: error instanceof Error ? error.message : "Failed to apply request rate limiting."
+        error: getBillingErrorMessage(error, "Не вдалося перевірити ліміт платіжних запитів. Спробуйте ще раз.")
       },
       { status: 500 }
     );
@@ -165,7 +294,7 @@ export async function POST(request: Request) {
   if (!rateLimit.allowed) {
     return NextResponse.json(
       {
-        error: "Too many payment attempts in a short period. Please wait a few minutes and try again."
+        error: "Забагато спроб оплати за короткий час. Зачекайте кілька хвилин і спробуйте ще раз."
       },
       {
         status: 429,
@@ -176,13 +305,13 @@ export async function POST(request: Request) {
     );
   }
 
-  let payload: { planId?: unknown };
+  let payload: { planId?: unknown; testCheckoutStatus?: unknown };
   try {
     payload = (await request.json()) as { planId?: unknown };
   } catch {
     return NextResponse.json(
       {
-        error: "Invalid request payload."
+        error: "Некоректний запит на оплату."
       },
       { status: 400 }
     );
@@ -191,7 +320,7 @@ export async function POST(request: Request) {
   if (!isPaidPlanId(payload.planId)) {
     return NextResponse.json(
       {
-        error: "Unknown plan for checkout."
+        error: "Невідомий тариф для оплати."
       },
       { status: 400 }
     );
@@ -203,7 +332,7 @@ export async function POST(request: Request) {
     if (error instanceof Error && error.message === "SUBSCRIPTION_ALREADY_ACTIVE") {
       return NextResponse.json(
         {
-          error: "Pro access is already active for this account.",
+          error: "Pro-доступ уже активний для цього акаунта.",
           code: "subscription_already_active",
           redirectTo: "/dashboard?view=access"
         },
@@ -213,7 +342,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(
       {
-        error: error instanceof Error ? error.message : "Failed to validate current access."
+        error: getBillingErrorMessage(error, "Не вдалося перевірити поточний доступ. Спробуйте ще раз.")
       },
       { status: 500 }
     );
@@ -221,6 +350,8 @@ export async function POST(request: Request) {
 
   try {
     const isTestMode = isLocalTestModeEnabled();
+    const planConfig = getBillingPlanConfig(payload.planId);
+    const localTestCheckoutStatus = getLocalTestCheckoutStatus(payload.testCheckoutStatus, planConfig.billingKind);
     const reusableCheckout = await findReusablePendingCheckout(supabase, authenticatedUser.userId, payload.planId);
     if (reusableCheckout?.mono_page_url) {
       if (!isTestMode) {
@@ -244,20 +375,20 @@ export async function POST(request: Request) {
     if (isTestMode) {
       const checkout = await activateLocalTestCheckout(supabase, {
         draft,
-        returnUrl
+        returnUrl,
+        status: localTestCheckoutStatus
       });
 
       return NextResponse.json(
         {
           checkoutId: checkout.id,
           redirectUrl: returnUrl,
+          status: checkout.status,
           testMode: true
         },
         { status: 201 }
       );
     }
-
-    const planConfig = getBillingPlanConfig(payload.planId);
 
     let monoResponse;
     try {
@@ -304,7 +435,7 @@ export async function POST(request: Request) {
   } catch (error) {
     return NextResponse.json(
       {
-        error: error instanceof Error ? error.message : "Failed to create mono checkout."
+        error: getBillingErrorMessage(error, "Не вдалося створити оплату mono. Спробуйте ще раз трохи пізніше.")
       },
       { status: 502 }
     );

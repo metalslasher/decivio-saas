@@ -74,11 +74,11 @@ export function PricingPurchaseButton({ planId, label, className }: PricingPurch
             return;
           }
 
-          throw new Error(payload.error || "Не вдалося створити mono checkout.");
+          throw new Error(payload.error || "Не вдалося створити оплату mono.");
         }
 
         if (!payload.redirectUrl) {
-          throw new Error("mono checkout створено без платіжного посилання.");
+          throw new Error("Оплату створено без платіжного посилання. Спробуйте ще раз.");
         }
 
         window.location.assign(payload.redirectUrl);

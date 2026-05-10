@@ -52,8 +52,9 @@ Flow covered:
 Notes:
 
 - The test expects the local app and local Supabase configuration to be usable.
-- `DECIVIO_TEST_MODE=1` enables deterministic mock AI and a local successful mono checkout.
+- `DECIVIO_TEST_MODE=1` enables deterministic mock AI and local mono checkout simulation.
 - The flow test should not call OpenAI or create a real mono payment.
+- Billing edge states can be simulated with `testCheckoutStatus`; see `docs/billing-flow.md`.
 
 ## Notes
 

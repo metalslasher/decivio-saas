@@ -28,6 +28,7 @@ Status: current public product flow. The dashboard internals are intentionally o
 - Annual plan: mono one-time invoice.
 - Access is active when the checkout/subscription state is paid or active.
 - Local E2E tests use a successful mock checkout; production must use real mono callbacks/status.
+- Failed, expired, canceled, reversed, pending, and processing payment states should keep the user on a clear recovery path instead of opening the paid dashboard.
 
 ## What The Free Result Should Do
 

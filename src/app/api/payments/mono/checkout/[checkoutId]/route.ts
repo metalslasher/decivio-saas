@@ -7,9 +7,11 @@ import {
   syncCheckoutFromMonoSubscriptionStatus
 } from "@/lib/billing-store";
 import { getMonoInvoiceStatus, getMonoSubscriptionStatus } from "@/lib/mono-acquiring";
+import { getBillingErrorMessage } from "@/lib/billing-errors";
 import { getSupabaseServiceRoleClient } from "@/lib/db/supabase";
 import { getAuthenticatedUserFromRequest } from "@/lib/request-auth";
 import { consumeRateLimit } from "@/lib/request-rate-limit";
+import { isLocalTestModeEnabled } from "@/lib/test-mode";
 
 const CHECKOUT_STATUS_RATE_LIMIT = {
   limit: 60,
@@ -34,7 +36,7 @@ export async function GET(request: Request, { params }: RouteContext) {
   } catch (error) {
     return NextResponse.json(
       {
-        error: error instanceof Error ? error.message : "Supabase server is not configured."
+        error: getBillingErrorMessage(error, "Оплата тимчасово недоступна: не вдалося підготувати сервер.")
       },
       { status: 500 }
     );
@@ -46,7 +48,7 @@ export async function GET(request: Request, { params }: RouteContext) {
   } catch (error) {
     return NextResponse.json(
       {
-        error: error instanceof Error ? error.message : "Failed to verify authorization."
+        error: getBillingErrorMessage(error, "Сесію не вдалося підтвердити. Увійдіть ще раз і повторіть дію.")
       },
       { status: 401 }
     );
@@ -55,7 +57,7 @@ export async function GET(request: Request, { params }: RouteContext) {
   if (!authenticatedUser) {
     return NextResponse.json(
       {
-        error: "Active authorization is required."
+        error: "Потрібно увійти в акаунт, щоб перевірити статус оплати."
       },
       { status: 401 }
     );
@@ -73,7 +75,7 @@ export async function GET(request: Request, { params }: RouteContext) {
   } catch (error) {
     return NextResponse.json(
       {
-        error: error instanceof Error ? error.message : "Failed to apply request rate limiting."
+        error: getBillingErrorMessage(error, "Не вдалося перевірити ліміт запитів. Спробуйте ще раз.")
       },
       { status: 500 }
     );
@@ -82,7 +84,7 @@ export async function GET(request: Request, { params }: RouteContext) {
   if (!rateLimit.allowed) {
     return NextResponse.json(
       {
-        error: "Too many checkout status requests in a short period. Please wait a bit and try again."
+        error: "Забагато перевірок статусу за короткий час. Зачекайте трохи і спробуйте ще раз."
       },
       {
         status: 429,
@@ -99,7 +101,7 @@ export async function GET(request: Request, { params }: RouteContext) {
   } catch (error) {
     return NextResponse.json(
       {
-        error: error instanceof Error ? error.message : "Failed to load checkout."
+        error: getBillingErrorMessage(error, "Не вдалося завантажити оплату. Спробуйте ще раз.")
       },
       { status: 500 }
     );
@@ -108,7 +110,7 @@ export async function GET(request: Request, { params }: RouteContext) {
   if (!checkout) {
     return NextResponse.json(
       {
-        error: "Checkout was not found."
+        error: "Оплату не знайдено для цього акаунта."
       },
       { status: 404 }
     );
@@ -116,7 +118,7 @@ export async function GET(request: Request, { params }: RouteContext) {
 
   let syncWarning: string | null = null;
 
-  if (checkout.status === "pending" || checkout.status === "processing") {
+  if (!isLocalTestModeEnabled() && (checkout.status === "pending" || checkout.status === "processing")) {
     try {
       if (checkout.mono_invoice_id) {
         const invoiceStatus = await getMonoInvoiceStatus(checkout.mono_invoice_id);
@@ -130,7 +132,7 @@ export async function GET(request: Request, { params }: RouteContext) {
         })) ?? checkout;
       }
     } catch (error) {
-      syncWarning = error instanceof Error ? error.message : "Failed to sync checkout with mono.";
+      syncWarning = getBillingErrorMessage(error, "Не вдалося оновити статус mono. Спробуйте перевірити ще раз трохи пізніше.");
     }
   }
 
@@ -138,7 +140,7 @@ export async function GET(request: Request, { params }: RouteContext) {
   try {
     subscription = await getUserSubscriptionAccess(supabase, authenticatedUser.userId);
   } catch (error) {
-    syncWarning = error instanceof Error ? error.message : syncWarning;
+    syncWarning = getBillingErrorMessage(error, syncWarning ?? "Не вдалося повторно перевірити доступ. Спробуйте оновити сторінку.");
   }
 
   return NextResponse.json(

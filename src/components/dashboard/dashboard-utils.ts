@@ -418,12 +418,19 @@ export function mapAccessLabel(
 }
 
 export function hasPaidDashboardAccess(subscription: DashboardAccessState) {
-  return (
-    subscription.plan === "pro" &&
-    (subscription.status === "active" ||
-      subscription.status === "trial" ||
-      subscription.status === "canceled")
-  );
+  if (subscription.plan !== "pro") {
+    return false;
+  }
+
+  if (subscription.status !== "active" && subscription.status !== "trial" && subscription.status !== "canceled") {
+    return false;
+  }
+
+  if (!subscription.currentPeriodEnd) {
+    return subscription.status === "active" || subscription.status === "trial";
+  }
+
+  return new Date(subscription.currentPeriodEnd).getTime() > Date.now();
 }
 
 export function accessTone(
