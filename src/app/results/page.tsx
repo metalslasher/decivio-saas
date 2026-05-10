@@ -15,13 +15,15 @@ type SearchParams = {
 };
 
 type ResultsPageProps = {
-  searchParams?: SearchParams;
+  searchParams?: Promise<SearchParams>;
 };
 
 function getSingleParam(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : value;
 }
 
-export default function ResultsPage({ searchParams }: ResultsPageProps) {
-  return <ResultsScreen simulationId={getSingleParam(searchParams?.simulationId) ?? null} />;
+export default async function ResultsPage({ searchParams }: ResultsPageProps) {
+  const resolvedSearchParams = await searchParams;
+
+  return <ResultsScreen simulationId={getSingleParam(resolvedSearchParams?.simulationId) ?? null} />;
 }

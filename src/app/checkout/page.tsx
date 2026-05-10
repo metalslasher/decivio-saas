@@ -3,10 +3,10 @@ import { getPricingPurchaseHref, getPricingPlan } from "@/lib/pricing";
 import { createMetadata } from "@/lib/seo";
 
 type CheckoutPageProps = {
-  searchParams?: {
+  searchParams?: Promise<{
     plan?: string;
     checkout?: string;
-  };
+  }>;
 };
 
 export const metadata = createMetadata({
@@ -16,10 +16,11 @@ export const metadata = createMetadata({
   noIndex: true
 });
 
-export default function CheckoutPage({ searchParams }: CheckoutPageProps) {
-  const requestedPlanId = typeof searchParams?.plan === "string" ? searchParams.plan : null;
+export default async function CheckoutPage({ searchParams }: CheckoutPageProps) {
+  const resolvedSearchParams = await searchParams;
+  const requestedPlanId = typeof resolvedSearchParams?.plan === "string" ? resolvedSearchParams.plan : null;
   const plan = getPricingPlan(requestedPlanId);
-  const checkoutId = typeof searchParams?.checkout === "string" ? searchParams.checkout : null;
+  const checkoutId = typeof resolvedSearchParams?.checkout === "string" ? resolvedSearchParams.checkout : null;
 
   if (checkoutId) {
     const params = new URLSearchParams({

@@ -14,6 +14,11 @@ import {
   resolveAnnualAccessEndsAt,
   resolveMonthlyAccessEndsAt
 } from "@/lib/billing";
+import {
+  BillingSecurityError,
+  getInvoiceCheckoutMismatch,
+  getSubscriptionCheckoutMismatch
+} from "@/lib/billing-security";
 import type { MonoInvoiceStatus, MonoSubscriptionStatus } from "@/lib/mono-acquiring";
 import type { PaidPlanId } from "@/lib/pricing";
 
@@ -85,6 +90,22 @@ function shouldApplyIncomingEvent(existingEventAt: string | null | undefined, in
   }
 
   return new Date(incomingEventAt).getTime() >= new Date(existingEventAt).getTime();
+}
+
+function isValidEventTime(value: string | null | undefined) {
+  return typeof value === "string" && value.trim().length > 0 && !Number.isNaN(new Date(value).getTime());
+}
+
+function resolveIncomingEventTime(...values: Array<string | null | undefined>) {
+  const eventTime = values.find(isValidEventTime);
+  return eventTime ?? new Date().toISOString();
+}
+
+function withBillingSecurityRejection(payload: unknown, reason: string) {
+  return {
+    rejectionReason: reason,
+    payload: normalizePayload(payload)
+  };
 }
 
 function hasActiveAccess(subscription: Pick<SubscriptionAccessRow, "plan" | "status" | "current_period_end"> | null) {
@@ -286,7 +307,7 @@ async function upsertSubscriptionAccess(
 }
 
 function buildSubscriptionAccessFromInvoice(checkout: BillingCheckoutRow, status: MonoInvoiceStatus): SubscriptionAccessRow {
-  const eventTime = status.modifiedDate ?? status.createdDate ?? new Date().toISOString();
+  const eventTime = resolveIncomingEventTime(status.modifiedDate, status.createdDate);
 
   if (status.status === "success") {
     return {
@@ -377,19 +398,26 @@ export async function syncCheckoutFromMonoInvoiceStatus(
     return null;
   }
 
-  const eventTime = invoiceStatus.modifiedDate ?? invoiceStatus.createdDate ?? new Date().toISOString();
+  const eventTime = resolveIncomingEventTime(invoiceStatus.modifiedDate, invoiceStatus.createdDate);
   const nextStatus = mapMonoInvoiceStatusToCheckoutStatus(invoiceStatus.status);
+  const mismatch = getInvoiceCheckoutMismatch(checkout, invoiceStatus);
 
   await recordBillingEvent(supabase, {
     userId: checkout.user_id,
     checkoutId: checkout.id,
-    eventType: `mono_invoice_${options.source}`,
+    eventType: mismatch ? `mono_invoice_${options.source}_rejected` : `mono_invoice_${options.source}`,
     externalId: invoiceStatus.invoiceId,
     status: invoiceStatus.status,
     eventTime,
     signature: options.signature ?? null,
-    payload: options.payload ?? invoiceStatus
+    payload: mismatch
+      ? withBillingSecurityRejection(options.payload ?? invoiceStatus, mismatch)
+      : options.payload ?? invoiceStatus
   });
+
+  if (mismatch) {
+    throw new BillingSecurityError(mismatch);
+  }
 
   if (shouldApplyIncomingEvent(checkout.last_event_at, eventTime)) {
     const { error: checkoutUpdateError } = await supabase
@@ -434,24 +462,31 @@ export async function syncCheckoutFromMonoSubscriptionStatus(
     return null;
   }
 
-  const recordedEventTime =
-    subscriptionStatus.nextChargeDate ??
-    subscriptionStatus.endDate ??
-    subscriptionStatus.startDate ??
-    null;
+  const recordedEventTime = resolveIncomingEventTime(
+    subscriptionStatus.nextChargeDate,
+    subscriptionStatus.endDate,
+    subscriptionStatus.startDate
+  );
   const appliedAt = new Date().toISOString();
   const nextStatus = mapMonoSubscriptionStatusToCheckoutStatus(subscriptionStatus.status);
+  const mismatch = getSubscriptionCheckoutMismatch(checkout, subscriptionStatus);
 
   await recordBillingEvent(supabase, {
     userId: checkout.user_id,
     checkoutId: checkout.id,
-    eventType: `mono_subscription_${options.source}`,
+    eventType: mismatch ? `mono_subscription_${options.source}_rejected` : `mono_subscription_${options.source}`,
     externalId: subscriptionStatus.subscriptionId,
     status: subscriptionStatus.status,
     eventTime: recordedEventTime,
     signature: options.signature ?? null,
-    payload: options.payload ?? subscriptionStatus
+    payload: mismatch
+      ? withBillingSecurityRejection(options.payload ?? subscriptionStatus, mismatch)
+      : options.payload ?? subscriptionStatus
   });
+
+  if (mismatch) {
+    throw new BillingSecurityError(mismatch);
+  }
 
   if (shouldApplyIncomingEvent(checkout.last_event_at, appliedAt)) {
     const { error: checkoutUpdateError } = await supabase

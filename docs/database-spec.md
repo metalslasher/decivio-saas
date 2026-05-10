@@ -207,6 +207,7 @@ Current behavior:
 - Monthly plan uses `billing_kind = 'subscription'` and mono subscription.
 - Only one mono target can be set: invoice or subscription, not both.
 - Access is granted when checkout status is `paid` or `active`.
+- Browser clients should not read or write this table directly; checkout reads/writes go through server payment APIs.
 
 ### `billing_events`
 
@@ -226,6 +227,12 @@ Important columns:
 - `dedupe_key text unique`
 - `payload jsonb`
 - `created_at timestamptz`
+
+Current behavior:
+
+- This is an internal audit table for server-side billing processing.
+- Browser clients should not read or write this table directly.
+- Rejected mono events can be stored with a `_rejected` event type and a `rejectionReason` inside the payload wrapper.
 
 ## Supporting Tables
 
@@ -274,6 +281,7 @@ All user-owned tables have RLS enabled.
 General rule:
 
 - Client-side reads are limited to the current `auth.uid()`.
+- Billing checkout and billing event internals are server-only even for the owning user.
 - Guest simulation reads happen through server endpoints using the guest session cookie.
 - Writes that require elevated access use the service-role server client.
 

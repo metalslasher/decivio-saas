@@ -193,7 +193,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   const existingGuestId = cookieStore.get(GUEST_USER_COOKIE_NAME)?.value ?? null;
 
   let authenticatedUserId: string | null = null;

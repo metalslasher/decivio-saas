@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { syncCheckoutFromMonoSubscriptionStatus } from "@/lib/billing-store";
+import { BillingSecurityError } from "@/lib/billing-security";
 import { getSupabaseServiceRoleClient } from "@/lib/db/supabase";
 import {
   extractMonoSubscriptionId,
@@ -7,23 +8,37 @@ import {
   verifyMonoWebhookSignature
 } from "@/lib/mono-acquiring";
 
+const genericWebhookError = { ok: false };
+
+function webhookError(status: number) {
+  return NextResponse.json(genericWebhookError, { status });
+}
+
 export async function POST(request: Request) {
   const signature = request.headers.get("x-sign")?.trim();
   if (!signature) {
-    return NextResponse.json({ error: "Missing x-sign header." }, { status: 400 });
+    return webhookError(400);
   }
 
   const rawBody = Buffer.from(await request.arrayBuffer());
-  const isValidSignature = await verifyMonoWebhookSignature(rawBody, signature);
+  let isValidSignature;
+  try {
+    isValidSignature = await verifyMonoWebhookSignature(rawBody, signature);
+  } catch (error) {
+    console.error("Mono subscription charge webhook signature verification failed.", error);
+    return webhookError(500);
+  }
+
   if (!isValidSignature) {
-    return NextResponse.json({ error: "Invalid webhook signature." }, { status: 401 });
+    console.warn("Rejected mono subscription charge webhook with invalid signature.");
+    return webhookError(401);
   }
 
   let payload: unknown;
   try {
     payload = JSON.parse(rawBody.toString("utf8")) as unknown;
   } catch {
-    return NextResponse.json({ error: "Invalid webhook payload." }, { status: 400 });
+    return webhookError(400);
   }
 
   const subscriptionId = extractMonoSubscriptionId(payload);
@@ -31,13 +46,31 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true, ignored: true }, { status: 200 });
   }
 
-  const supabase = getSupabaseServiceRoleClient();
-  const subscriptionStatus = await getMonoSubscriptionStatus(subscriptionId);
-  await syncCheckoutFromMonoSubscriptionStatus(supabase, subscriptionStatus, {
-    source: "webhook_charge",
-    signature,
-    payload
-  });
+  try {
+    const supabase = getSupabaseServiceRoleClient();
+    const subscriptionStatus = await getMonoSubscriptionStatus(subscriptionId);
+    const checkout = await syncCheckoutFromMonoSubscriptionStatus(supabase, subscriptionStatus, {
+      source: "webhook_charge",
+      signature,
+      payload
+    });
+
+    if (!checkout) {
+      console.warn("Ignored mono subscription charge webhook for unknown checkout.", { subscriptionId });
+      return NextResponse.json({ ok: true, ignored: true }, { status: 200 });
+    }
+  } catch (error) {
+    if (error instanceof BillingSecurityError) {
+      console.warn("Rejected mono subscription charge webhook because payment details did not match checkout.", {
+        reason: error.message,
+        subscriptionId
+      });
+      return NextResponse.json({ ok: true, ignored: true }, { status: 200 });
+    }
+
+    console.error("Mono subscription charge webhook processing failed.", error);
+    return webhookError(500);
+  }
 
   return NextResponse.json({ ok: true }, { status: 200 });
 }

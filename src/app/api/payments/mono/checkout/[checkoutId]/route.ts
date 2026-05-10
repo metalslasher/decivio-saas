@@ -23,12 +23,13 @@ function buildRateLimitSubjectHint(userId: string) {
 }
 
 type RouteContext = {
-  params: {
+  params: Promise<{
     checkoutId: string;
-  };
+  }>;
 };
 
 export async function GET(request: Request, { params }: RouteContext) {
+  const { checkoutId } = await params;
   let supabase;
 
   try {
@@ -97,7 +98,7 @@ export async function GET(request: Request, { params }: RouteContext) {
 
   let checkout;
   try {
-    checkout = await getUserCheckoutById(supabase, authenticatedUser.userId, params.checkoutId);
+    checkout = await getUserCheckoutById(supabase, authenticatedUser.userId, checkoutId);
   } catch (error) {
     return NextResponse.json(
       {

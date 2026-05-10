@@ -50,7 +50,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const guestSessionId = cookies().get(GUEST_USER_COOKIE_NAME)?.value ?? null;
+  const guestSessionId = (await cookies()).get(GUEST_USER_COOKIE_NAME)?.value ?? null;
 
   let rateLimit;
   try {

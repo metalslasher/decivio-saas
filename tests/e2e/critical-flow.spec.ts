@@ -1,6 +1,98 @@
 import { expect, test } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
 import { readFileSync } from "node:fs";
+import {
+  getInvoiceCheckoutMismatch,
+  getSubscriptionCheckoutMismatch
+} from "../../src/lib/billing-security";
+
+test("billing security helpers reject mismatched provider payment details", () => {
+  const annualCheckout = {
+    id: "checkout_annual",
+    plan_id: "annual" as const,
+    billing_kind: "one_time" as const,
+    amount: 478800,
+    ccy: 980,
+    mono_invoice_id: "invoice_1",
+    mono_subscription_id: null
+  };
+
+  expect(
+    getInvoiceCheckoutMismatch(annualCheckout, {
+      invoiceId: "invoice_1",
+      status: "success",
+      amount: 478800,
+      ccy: 980,
+      finalAmount: 478800,
+      reference: "checkout_annual"
+    })
+  ).toBeNull();
+
+  expect(
+    getInvoiceCheckoutMismatch(annualCheckout, {
+      invoiceId: "invoice_1",
+      status: "success",
+      amount: 100,
+      ccy: 980,
+      finalAmount: 100,
+      reference: "checkout_annual"
+    })
+  ).toBe("invoice_amount_mismatch");
+
+  expect(
+    getInvoiceCheckoutMismatch(annualCheckout, {
+      invoiceId: "invoice_1",
+      status: "success",
+      amount: 478800,
+      ccy: 980,
+      finalAmount: 478800,
+      reference: "other_checkout"
+    })
+  ).toBe("invoice_reference_mismatch");
+
+  const monthlyCheckout = {
+    id: "checkout_monthly",
+    plan_id: "monthly" as const,
+    billing_kind: "subscription" as const,
+    amount: 79900,
+    ccy: 980,
+    mono_invoice_id: null,
+    mono_subscription_id: "subscription_1"
+  };
+
+  expect(
+    getSubscriptionCheckoutMismatch(monthlyCheckout, {
+      subscriptionId: "subscription_1",
+      status: "active",
+      startDate: "2026-05-10T09:00:00.000Z",
+      amount: 79900,
+      ccy: 980,
+      interval: "1m"
+    })
+  ).toBeNull();
+
+  expect(
+    getSubscriptionCheckoutMismatch(monthlyCheckout, {
+      subscriptionId: "subscription_1",
+      status: "active",
+      startDate: "2026-05-10T09:00:00.000Z",
+      amount: 79900,
+      ccy: 840,
+      interval: "1m"
+    })
+  ).toBe("subscription_currency_mismatch");
+
+  expect(
+    getSubscriptionCheckoutMismatch(monthlyCheckout, {
+      subscriptionId: "subscription_1",
+      status: "active",
+      startDate: "2026-05-10T09:00:00.000Z",
+      amount: 79900,
+      ccy: 980,
+      interval: "1y"
+    })
+  ).toBe("subscription_interval_mismatch");
+});
 
 function readLocalEnvValue(key: string) {
   if (process.env[key]) {
@@ -165,4 +257,21 @@ test("local test mode keeps unresolved or failed billing states from granting ac
     expect(statusPayload.status).toBe(scenario.expectedStatus);
     expect(statusPayload.accessGranted).toBe(false);
   }
+});
+
+test("checkout creation rejects hostile browser origins", async ({ request }) => {
+  const accessToken = await createLocalTestAccessToken();
+  const response = await request.post("/api/payments/mono/checkout", {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      Origin: "https://evil.example"
+    },
+    data: {
+      planId: "annual"
+    }
+  });
+
+  expect(response.status()).toBe(403);
+  const payload = (await response.json()) as { error?: string };
+  expect(payload.error).toContain("Decivio");
 });

@@ -2,9 +2,9 @@ import { DashboardShell } from "@/components/dashboard-shell";
 import { createMetadata } from "@/lib/seo";
 
 type DashboardPageProps = {
-  searchParams?: {
+  searchParams?: Promise<{
     view?: string;
-  };
+  }>;
 };
 
 export const metadata = createMetadata({
@@ -14,6 +14,8 @@ export const metadata = createMetadata({
   noIndex: true,
 });
 
-export default function DashboardPage({ searchParams }: DashboardPageProps) {
-  return <DashboardShell requestedView={searchParams?.view} />;
+export default async function DashboardPage({ searchParams }: DashboardPageProps) {
+  const resolvedSearchParams = await searchParams;
+
+  return <DashboardShell requestedView={resolvedSearchParams?.view} />;
 }

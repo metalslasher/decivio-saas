@@ -8,6 +8,7 @@ import { useAuthDialog } from "@/components/auth-dialog-provider";
 import { WordmarkLogo } from "@/components/wordmark-logo";
 import { getSupabaseBrowserClient } from "@/lib/db/supabase-browser";
 import { PROFILE_UPDATED_EVENT, isBroadcastProfilePayload } from "@/lib/profile-broadcast";
+import { CANONICAL_SITE_URL } from "@/lib/site-url";
 
 const publicNavItems = [
   { href: "/#features", label: "Можливості" },
@@ -16,7 +17,7 @@ const publicNavItems = [
   { href: "/pricing", label: "Ціни" }
 ];
 
-const simulateCtaHref = "https://www.decivio.net/simulate";
+const simulateCtaHref = `${CANONICAL_SITE_URL}/simulate`;
 
 type AuthState =
   | { status: "loading" }

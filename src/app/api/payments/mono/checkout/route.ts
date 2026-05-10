@@ -16,6 +16,7 @@ import {
   createMonoInvoice,
   createMonoSubscription
 } from "@/lib/mono-acquiring";
+import { isAllowedSameSiteRequest } from "@/lib/request-origin";
 import { getAuthenticatedUserFromRequest } from "@/lib/request-auth";
 import { consumeRateLimit } from "@/lib/request-rate-limit";
 import { isLocalTestModeEnabled } from "@/lib/test-mode";
@@ -234,6 +235,15 @@ function getLocalTestCheckoutStatus(
 }
 
 export async function POST(request: Request) {
+  if (!isAllowedSameSiteRequest(request)) {
+    return NextResponse.json(
+      {
+        error: "Запит на оплату має бути створений із сайту Decivio."
+      },
+      { status: 403 }
+    );
+  }
+
   let supabase;
 
   try {

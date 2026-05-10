@@ -65,6 +65,10 @@ The default local test status remains successful: `paid` for annual and `active`
 
 ## Production Notes
 
+- The canonical production domain is `https://www.decivio.net`.
 - Production should use real mono checkout URLs and real mono webhooks/status polling.
+- Checkout creation is accepted only from the configured Decivio origin; cross-site browser origins are rejected.
+- Before opening access, mono status data must match the local checkout amount, currency, provider target, and plan interval/reference where available.
+- Mono webhook responses do not expose internal errors to callers; mismatched signed payment details are logged and ignored without granting access.
 - pRRO/fiscalization is a separate setup topic and should be confirmed before real payment launch.
 - Do not rely on registration alone for dashboard access; access must come from active subscription state.

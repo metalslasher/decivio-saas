@@ -2,10 +2,10 @@ import { AuthForm } from "@/components/auth-form";
 import { createMetadata } from "@/lib/seo";
 
 type LoginPageProps = {
-  searchParams?: {
+  searchParams?: Promise<{
     next?: string;
     created?: string;
-  };
+  }>;
 };
 
 export const metadata = createMetadata({
@@ -15,12 +15,14 @@ export const metadata = createMetadata({
   noIndex: true
 });
 
-export default function LoginPage({ searchParams }: LoginPageProps) {
+export default async function LoginPage({ searchParams }: LoginPageProps) {
+  const resolvedSearchParams = await searchParams;
+
   return (
     <AuthForm
       initialView="login"
-      nextPath={searchParams?.next}
-      initialNotice={searchParams?.created === "1" ? "Акаунт створено. Підтвердьте email у листі, а потім увійдіть у свій профіль." : null}
+      nextPath={resolvedSearchParams?.next}
+      initialNotice={resolvedSearchParams?.created === "1" ? "Акаунт створено. Підтвердьте email у листі, а потім увійдіть у свій профіль." : null}
     />
   );
 }

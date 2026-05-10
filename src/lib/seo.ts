@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getPublicSiteUrl } from "@/lib/site-url";
 
 type MetadataOptions = {
   title: string;
@@ -36,28 +37,13 @@ type SoftwareApplicationSchemaOptions = {
   isAccessibleForFree?: boolean;
 };
 
-function normalizeSiteUrl(value?: string | null) {
-  const fallbackUrl = "https://www.decivio.net";
-  if (!value) {
-    return fallbackUrl;
-  }
-
-  const trimmedValue = value.trim();
-  if (!trimmedValue) {
-    return fallbackUrl;
-  }
-
-  const withProtocol = /^https?:\/\//i.test(trimmedValue) ? trimmedValue : `https://${trimmedValue}`;
-  return withProtocol.replace(/\/+$/, "");
-}
-
 const googleSiteVerification = process.env.GOOGLE_SITE_VERIFICATION?.trim();
 
 export const siteConfig = {
   name: "Decivio",
   description:
     "Decivio допомагає спланувати зміну карʼєри: оцінити сценарії, дохід і ризики, підготувати резюме та рухатися до нової ролі впевнено.",
-  url: normalizeSiteUrl(process.env.NEXT_PUBLIC_SITE_URL ?? process.env.VERCEL_PROJECT_PRODUCTION_URL ?? process.env.VERCEL_URL),
+  url: getPublicSiteUrl(),
   locale: "uk_UA",
   language: "uk-UA",
   socialLinks: [

@@ -2,8 +2,11 @@ import "server-only";
 
 import { createPublicKey, createVerify, KeyObject } from "node:crypto";
 import type { PaidPlanId } from "@/lib/pricing";
+import { getPublicSiteUrl } from "@/lib/site-url";
 
 const DEFAULT_MONO_API_BASE_URL = "https://api.monobank.ua";
+const MONO_INVOICE_STATUSES = new Set(["created", "processing", "hold", "success", "failure", "reversed", "expired"]);
+const MONO_SUBSCRIPTION_STATUSES = new Set(["active", "cancelled"]);
 
 export type MonoInvoiceCreateResponse = {
   invoiceId: string;
@@ -45,6 +48,8 @@ export type MonoSubscriptionStatus = {
   };
 };
 
+export type MonoSubscriptionStatusWebhookPayload = Pick<MonoSubscriptionStatus, "subscriptionId" | "status">;
+
 type MonoRequestOptions = {
   method?: "GET" | "POST";
   body?: unknown;
@@ -67,13 +72,7 @@ function getMonoApiBaseUrl() {
 }
 
 export function getSiteUrl() {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim();
-
-  if (!siteUrl) {
-    throw new Error("Missing env var: NEXT_PUBLIC_SITE_URL.");
-  }
-
-  return siteUrl.replace(/\/+$/, "");
+  return getPublicSiteUrl();
 }
 
 export function buildAppUrl(pathname: string) {
@@ -208,6 +207,14 @@ function verifyMonoSignatureWithKey(body: Buffer, signatureBase64: string, key: 
   return verifier.verify(key, signature);
 }
 
+function safelyVerifyMonoSignatureWithKey(body: Buffer, signatureBase64: string, key: KeyObject) {
+  try {
+    return verifyMonoSignatureWithKey(body, signatureBase64, key);
+  } catch {
+    return false;
+  }
+}
+
 export async function verifyMonoWebhookSignature(body: Buffer, signatureBase64: string) {
   const signature = signatureBase64.trim();
   if (!signature) {
@@ -215,12 +222,12 @@ export async function verifyMonoWebhookSignature(body: Buffer, signatureBase64: 
   }
 
   const cachedKey = await getMonoWebhookPublicKey(false);
-  if (verifyMonoSignatureWithKey(body, signature, cachedKey)) {
+  if (safelyVerifyMonoSignatureWithKey(body, signature, cachedKey)) {
     return true;
   }
 
   const refreshedKey = await getMonoWebhookPublicKey(true);
-  return verifyMonoSignatureWithKey(body, signature, refreshedKey);
+  return safelyVerifyMonoSignatureWithKey(body, signature, refreshedKey);
 }
 
 export function isMonoInvoiceStatusPayload(payload: unknown): payload is MonoInvoiceStatus {
@@ -229,7 +236,16 @@ export function isMonoInvoiceStatusPayload(payload: unknown): payload is MonoInv
   }
 
   const maybePayload = payload as Record<string, unknown>;
-  return typeof maybePayload.invoiceId === "string" && typeof maybePayload.status === "string";
+  return (
+    typeof maybePayload.invoiceId === "string" &&
+    maybePayload.invoiceId.trim().length > 0 &&
+    typeof maybePayload.status === "string" &&
+    MONO_INVOICE_STATUSES.has(maybePayload.status) &&
+    typeof maybePayload.amount === "number" &&
+    Number.isFinite(maybePayload.amount) &&
+    typeof maybePayload.ccy === "number" &&
+    Number.isFinite(maybePayload.ccy)
+  );
 }
 
 export function isMonoSubscriptionStatusPayload(payload: unknown): payload is MonoSubscriptionStatus {
@@ -240,7 +256,29 @@ export function isMonoSubscriptionStatusPayload(payload: unknown): payload is Mo
   const maybePayload = payload as Record<string, unknown>;
   return (
     typeof maybePayload.subscriptionId === "string" &&
-    (maybePayload.status === "active" || maybePayload.status === "cancelled")
+    maybePayload.subscriptionId.trim().length > 0 &&
+    typeof maybePayload.status === "string" &&
+    MONO_SUBSCRIPTION_STATUSES.has(maybePayload.status) &&
+    typeof maybePayload.amount === "number" &&
+    Number.isFinite(maybePayload.amount) &&
+    typeof maybePayload.ccy === "number" &&
+    Number.isFinite(maybePayload.ccy) &&
+    typeof maybePayload.interval === "string" &&
+    maybePayload.interval.trim().length > 0
+  );
+}
+
+export function isMonoSubscriptionStatusWebhookPayload(payload: unknown): payload is MonoSubscriptionStatusWebhookPayload {
+  if (!payload || typeof payload !== "object") {
+    return false;
+  }
+
+  const maybePayload = payload as Record<string, unknown>;
+  return (
+    typeof maybePayload.subscriptionId === "string" &&
+    maybePayload.subscriptionId.trim().length > 0 &&
+    typeof maybePayload.status === "string" &&
+    MONO_SUBSCRIPTION_STATUSES.has(maybePayload.status)
   );
 }
 
@@ -250,5 +288,7 @@ export function extractMonoSubscriptionId(payload: unknown) {
   }
 
   const maybePayload = payload as Record<string, unknown>;
-  return typeof maybePayload.subscriptionId === "string" ? maybePayload.subscriptionId : null;
+  return typeof maybePayload.subscriptionId === "string" && maybePayload.subscriptionId.trim().length > 0
+    ? maybePayload.subscriptionId
+    : null;
 }

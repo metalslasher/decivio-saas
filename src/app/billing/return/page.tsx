@@ -3,10 +3,10 @@ import { getPricingPlan } from "@/lib/pricing";
 import { createMetadata } from "@/lib/seo";
 
 type BillingReturnPageProps = {
-  searchParams?: {
+  searchParams?: Promise<{
     plan?: string;
     checkout?: string;
-  };
+  }>;
 };
 
 export const metadata = createMetadata({
@@ -26,9 +26,10 @@ function buildBillingReturnPath(planId: string, checkoutId: string | null) {
   return `/billing/return?${params.toString()}`;
 }
 
-export default function BillingReturnPage({ searchParams }: BillingReturnPageProps) {
-  const plan = getPricingPlan(searchParams?.plan);
-  const initialCheckoutId = typeof searchParams?.checkout === "string" ? searchParams.checkout : null;
+export default async function BillingReturnPage({ searchParams }: BillingReturnPageProps) {
+  const resolvedSearchParams = await searchParams;
+  const plan = getPricingPlan(resolvedSearchParams?.plan);
+  const initialCheckoutId = typeof resolvedSearchParams?.checkout === "string" ? resolvedSearchParams.checkout : null;
   const authNextPath = buildBillingReturnPath(plan.id, initialCheckoutId);
 
   return (

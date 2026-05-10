@@ -51,9 +51,11 @@ function buildRateLimitSubjectHint(
 
 export async function GET(
   request: Request,
-  { params }: { params: { simulationId: string } },
+  { params }: { params: Promise<{ simulationId: string }> },
 ) {
-  if (!isUuid(params.simulationId)) {
+  const { simulationId } = await params;
+
+  if (!isUuid(simulationId)) {
     return errorResponse(
       400,
       "Некоректний simulationId",
@@ -92,7 +94,7 @@ export async function GET(
     );
   }
 
-  const guestSessionId = cookies().get(GUEST_USER_COOKIE_NAME)?.value ?? null;
+  const guestSessionId = (await cookies()).get(GUEST_USER_COOKIE_NAME)?.value ?? null;
 
   let rateLimit;
   try {
@@ -147,7 +149,7 @@ export async function GET(
     const { data: simulation, error: simulationError } = await userSupabase
       .from("simulations")
       .select("id, inputs, created_at")
-      .eq("id", params.simulationId)
+      .eq("id", simulationId)
       .maybeSingle();
 
     if (simulationError || !simulation) {
@@ -161,7 +163,7 @@ export async function GET(
     const { data: result, error: resultError } = await userSupabase
       .from("simulation_results")
       .select("ai_summary, created_at")
-      .eq("simulation_id", params.simulationId)
+      .eq("simulation_id", simulationId)
       .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle();
@@ -203,7 +205,7 @@ export async function GET(
   const { data: simulation, error: simulationError } = await serviceSupabase
     .from("simulations")
     .select("id, inputs, created_at")
-    .eq("id", params.simulationId)
+    .eq("id", simulationId)
     .eq("guest_session_id", guestSessionId)
     .maybeSingle();
 
@@ -218,7 +220,7 @@ export async function GET(
   const { data: result, error: resultError } = await serviceSupabase
     .from("simulation_results")
     .select("ai_summary, created_at")
-    .eq("simulation_id", params.simulationId)
+    .eq("simulation_id", simulationId)
     .eq("guest_session_id", guestSessionId)
     .order("created_at", { ascending: false })
     .limit(1)
