@@ -235,7 +235,10 @@ export function SiteHeader() {
   }
 
   const effectiveHeaderProgress = Math.max(headerProgress, isOpen ? 1 : 0);
-  const headerStyle = { "--mirror-progress": effectiveHeaderProgress } as CSSProperties;
+  const headerStyle = {
+    "--mirror-progress": effectiveHeaderProgress,
+    "--mirror-blur": `${Math.round(effectiveHeaderProgress * 26)}px`
+  } as CSSProperties;
   const profileLabel = authState.status === "user" ? getShortProfileLabel(authState.displayName, authState.email) : null;
 
   const handleSignOut = async () => {

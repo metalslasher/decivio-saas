@@ -90,15 +90,16 @@ main {
 
 .mirror-header {
   --mirror-progress: 1;
+  --mirror-blur: 26px;
   isolation: isolate;
-  backdrop-filter: blur(30px);
-  border-bottom: 1px solid rgba(69, 88, 137, calc(0.16 + 0.08 * var(--mirror-progress)));
+  backdrop-filter: blur(var(--mirror-blur));
+  border-bottom: 1px solid rgba(69, 88, 137, calc(0.18 * var(--mirror-progress)));
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, calc(0.9 + 0.04 * var(--mirror-progress))), rgba(244, 247, 255, calc(0.84 + 0.07 * var(--mirror-progress)))),
-    linear-gradient(120deg, rgba(67, 97, 255, calc(0.07 + 0.02 * var(--mirror-progress))), rgba(152, 165, 255, calc(0.06 + 0.025 * var(--mirror-progress))));
+    linear-gradient(180deg, rgba(255, 255, 255, calc(0.82 * var(--mirror-progress))), rgba(244, 247, 255, calc(0.76 * var(--mirror-progress)))),
+    linear-gradient(120deg, rgba(67, 97, 255, calc(0.075 * var(--mirror-progress))), rgba(152, 165, 255, calc(0.065 * var(--mirror-progress))));
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, calc(0.92 + 0.04 * var(--mirror-progress))),
-    0 16px 42px -30px rgba(22, 29, 43, calc(0.14 + 0.1 * var(--mirror-progress)));
+    inset 0 1px 0 rgba(255, 255, 255, calc(0.78 * var(--mirror-progress))),
+    0 16px 42px -30px rgba(22, 29, 43, calc(0.18 * var(--mirror-progress)));
   transition:
     border-color 220ms ease,
     background 220ms ease,
@@ -111,9 +112,9 @@ main {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, calc(0.34 + 0.1 * var(--mirror-progress))), rgba(248, 250, 255, calc(0.2 + 0.08 * var(--mirror-progress))) 34%, rgba(248, 250, 255, 0.02) 72%),
-    radial-gradient(40rem 10rem at 12% -16%, rgba(67, 97, 255, calc(0.08 + 0.03 * var(--mirror-progress))), transparent 60%),
-    radial-gradient(36rem 10rem at 88% -18%, rgba(152, 165, 255, calc(0.07 + 0.03 * var(--mirror-progress))), transparent 58%);
+    linear-gradient(180deg, rgba(255, 255, 255, calc(0.36 * var(--mirror-progress))), rgba(248, 250, 255, calc(0.22 * var(--mirror-progress))) 34%, transparent 72%),
+    radial-gradient(40rem 10rem at 12% -16%, rgba(67, 97, 255, calc(0.08 * var(--mirror-progress))), transparent 60%),
+    radial-gradient(36rem 10rem at 88% -18%, rgba(152, 165, 255, calc(0.075 * var(--mirror-progress))), transparent 58%);
   pointer-events: none;
 }
 
@@ -126,7 +127,7 @@ main {
   height: 1px;
   background: linear-gradient(90deg, rgba(67, 97, 255, 0), rgba(67, 97, 255, 0.26), rgba(18, 27, 51, 0.14), rgba(152, 165, 255, 0.22), rgba(67, 97, 255, 0));
   box-shadow: 0 1px 0 rgba(255, 255, 255, 0.72);
-  opacity: calc(0.7 + 0.18 * var(--mirror-progress));
+  opacity: calc(0.72 * var(--mirror-progress));
   pointer-events: none;
 }
 
