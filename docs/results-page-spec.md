@@ -8,7 +8,7 @@ Status: current. This document describes the public result page after the four-s
 - UI: `src/components/results-screen.tsx`
 - Result endpoint: `src/app/api/simulations/[simulationId]/route.ts`
 - Payload mapping: `src/lib/simulation-results-payload.ts`
-- Analysis generation: `src/lib/ai/career-switch-analysis.ts`
+- Analysis generation: `src/lib/career-switch-analysis/index.ts`
 
 ## Route
 

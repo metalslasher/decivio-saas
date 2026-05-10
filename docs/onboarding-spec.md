@@ -1,6 +1,6 @@
 # Simulate Onboarding Spec
 
-Status: current. This document describes the public `/simulate` flow and replaces the old six-step onboarding spec.
+Status: current. This document describes the public `/simulate` flow.
 
 ## Source Of Truth
 
@@ -8,7 +8,7 @@ Status: current. This document describes the public `/simulate` flow and replace
 - Wizard UI: `src/components/simulate-onboarding-wizard.tsx`
 - Form contract: `src/lib/career-switch-form.ts`
 - Submit endpoint: `src/app/api/simulations/route.ts`
-- AI/mock analysis: `src/lib/ai/career-switch-analysis.ts`
+- AI/mock analysis: `src/lib/career-switch-analysis/index.ts`
 
 ## Goal
 

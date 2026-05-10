@@ -4,6 +4,9 @@ These docs describe the current product, not historical prompts or early design 
 
 ## Active Documents
 
+- `codebase-map.md`: where the main product areas live in the repository.
+- `engineering-guide.md`: conventions for adding and refactoring code.
+- `documentation-workflow.md`: how and when docs should be updated.
 - `database-setup.md`: how to apply Supabase migrations and run the critical flow test.
 - `database-spec.md`: current database schema and table behavior.
 - `product-flow.md`: current public user path from simulation to paid dashboard.
@@ -23,7 +26,7 @@ These docs describe the current product, not historical prompts or early design 
 
 Before a product-facing release:
 
-1. Run `rg -n "6 крок|weekly_hours|target_deadline|market-profile|36 місяц|Ð|Ñ" docs --glob "!README.md"`.
+1. Run `npm run docs:check`.
 2. Check whether `/simulate`, `/results`, `/pricing`, auth, checkout, or dashboard access changed.
 3. Update the matching doc only where behavior actually changed.
 4. Run `npm run test:flow` when the critical user path is affected.

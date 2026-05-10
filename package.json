@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "docs:check": "node scripts/check-docs.mjs",
     "test:flow": "playwright test --config=playwright.flow.config.ts"
   },
   "dependencies": {

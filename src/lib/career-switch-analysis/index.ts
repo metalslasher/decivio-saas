@@ -6,111 +6,42 @@ import type {
   TransitionPriority
 } from "@/lib/career-switch-form";
 import { isLocalTestModeEnabled } from "@/lib/test-mode";
-export type SalaryLevel = "junior" | "middle" | "senior" | "lead";
-export type VerdictLabel = "stay" | "switch" | "depends";
-export type BetterLongTermDirection = "current_role" | "target_role" | "balanced";
-export type BestCaseLevel = "senior" | "lead";
-export type RiskLevel = "low" | "medium" | "high";
-
-export type CareerSwitchAnalysisRequest = {
-  country: "UA";
-  current_income: number;
-  current_role_text: string;
-  years_in_current_role: number;
-  target_role_text: string;
-  target_experience_level: ExperienceLevel;
-  english_level: EnglishLevel;
-  target_market: TargetMarket;
-  transition_priority: TransitionPriority;
-};
-
-export type SalaryRange = {
-  low: number;
-  median: number;
-  high: number;
-  currency: "UAH";
-};
-
-export type CurrentRoleSnapshot = {
-  canonical_title: string;
-  market_scope_label: string;
-  current_level_estimate: SalaryLevel;
-  current_market_salary_range: SalaryRange;
-  senior_salary_range: SalaryRange;
-  best_case_level: BestCaseLevel;
-  best_case_salary_range: SalaryRange;
-  confidence: number;
-  caveats: string[];
-  summary: string;
-};
-
-export type TargetRoleSnapshot = {
-  canonical_title: string;
-  market_scope_label: string;
-  entry_level_for_switcher: SalaryLevel;
-  entry_salary_range: SalaryRange;
-  senior_salary_range: SalaryRange;
-  best_case_level: BestCaseLevel;
-  best_case_salary_range: SalaryRange;
-  time_to_first_offer_months: {
-    optimistic: number;
-    base: number;
-    pessimistic: number;
-  };
-  probability_of_getting_job_within_12_months: number;
-  confidence: number;
-  caveats: string[];
-  summary: string;
-};
-
-export type CeilingComparison = {
-  better_long_term_direction: BetterLongTermDirection;
-  better_long_term_label: string;
-  ceiling_gap_median: number;
-  interpretation: string;
-};
-
-export type AnalysisNarrative = {
-  verdict_label: VerdictLabel;
-  headline: string;
-  summary: string;
-  why_this_result: string[];
-  personalization_notes: string[];
-  cta_title: string;
-  cta_body: string;
-};
-
-export type RiskAssessment = {
-  level: RiskLevel;
-  summary: string;
-};
-
-export type CareerSwitchAnalysis = {
-  market_profile: {
-    current_role: CurrentRoleSnapshot;
-    target_role: TargetRoleSnapshot;
-    comparison: CeilingComparison;
-  };
-  narrative: AnalysisNarrative;
-  guidance: {
-    risk_assessment: RiskAssessment;
-  };
-};
-
-export type CareerSwitchAnalysisResult = {
-  analysis: CareerSwitchAnalysis;
-  meta: {
-    model: string;
-    latency_ms: number;
-    web_search_used: boolean;
-    request_id: string | null;
-    generated_at: string;
-  };
-};
+import { ANALYSIS_SCHEMA_NAME, careerSwitchAnalysisSchema } from "./schema";
+import type {
+  AnalysisNarrative,
+  BestCaseLevel,
+  BetterLongTermDirection,
+  CareerSwitchAnalysis,
+  CareerSwitchAnalysisRequest,
+  CareerSwitchAnalysisResult,
+  CeilingComparison,
+  CurrentRoleSnapshot,
+  RiskAssessment,
+  RiskLevel,
+  SalaryLevel,
+  SalaryRange,
+  TargetRoleSnapshot,
+  VerdictLabel
+} from "./types";
+export type {
+  AnalysisNarrative,
+  BestCaseLevel,
+  BetterLongTermDirection,
+  CareerSwitchAnalysis,
+  CareerSwitchAnalysisRequest,
+  CareerSwitchAnalysisResult,
+  CeilingComparison,
+  CurrentRoleSnapshot,
+  RiskAssessment,
+  RiskLevel,
+  SalaryLevel,
+  SalaryRange,
+  TargetRoleSnapshot,
+  VerdictLabel
+} from "./types";
 
 const DEFAULT_MODEL = "gpt-5.4-mini";
 const FALLBACK_MODEL = "gpt-4.1";
-const ANALYSIS_SCHEMA_NAME = "career_switch_result";
 
 const experienceLevelDescriptions: Record<ExperienceLevel, string> = {
   none: "немає практичного або комерційного досвіду в цільовій ролі",
@@ -135,151 +66,6 @@ const transitionPriorityDescriptions: Record<TransitionPriority, string> = {
   speed: "людині важливіше швидше перейти в нову роль",
   income: "людині важливіше максимізувати дохід і стелю ролі"
 };
-
-const salaryRangeSchema = {
-  type: "object",
-  additionalProperties: false,
-  required: ["low", "median", "high", "currency"],
-  properties: {
-    low: { type: "number" },
-    median: { type: "number" },
-    high: { type: "number" },
-    currency: { type: "string", enum: ["UAH"] }
-  }
-} as const;
-
-const careerSwitchAnalysisSchema = {
-  type: "object",
-  additionalProperties: false,
-  required: ["market_profile", "narrative", "guidance"],
-  properties: {
-    market_profile: {
-      type: "object",
-      additionalProperties: false,
-      required: ["current_role", "target_role", "comparison"],
-      properties: {
-        current_role: {
-          type: "object",
-          additionalProperties: false,
-          required: [
-            "canonical_title",
-            "market_scope_label",
-            "current_level_estimate",
-            "current_market_salary_range",
-            "senior_salary_range",
-            "best_case_level",
-            "best_case_salary_range",
-            "confidence",
-            "caveats",
-            "summary"
-          ],
-          properties: {
-            canonical_title: { type: "string" },
-            market_scope_label: { type: "string" },
-            current_level_estimate: { type: "string", enum: ["junior", "middle", "senior", "lead"] },
-            current_market_salary_range: salaryRangeSchema,
-            senior_salary_range: salaryRangeSchema,
-            best_case_level: { type: "string", enum: ["senior", "lead"] },
-            best_case_salary_range: salaryRangeSchema,
-            confidence: { type: "number" },
-            caveats: { type: "array", items: { type: "string" } },
-            summary: { type: "string" }
-          }
-        },
-        target_role: {
-          type: "object",
-          additionalProperties: false,
-          required: [
-            "canonical_title",
-            "market_scope_label",
-            "entry_level_for_switcher",
-            "entry_salary_range",
-            "senior_salary_range",
-            "best_case_level",
-            "best_case_salary_range",
-            "time_to_first_offer_months",
-            "probability_of_getting_job_within_12_months",
-            "confidence",
-            "caveats",
-            "summary"
-          ],
-          properties: {
-            canonical_title: { type: "string" },
-            market_scope_label: { type: "string" },
-            entry_level_for_switcher: { type: "string", enum: ["junior", "middle", "senior", "lead"] },
-            entry_salary_range: salaryRangeSchema,
-            senior_salary_range: salaryRangeSchema,
-            best_case_level: { type: "string", enum: ["senior", "lead"] },
-            best_case_salary_range: salaryRangeSchema,
-            time_to_first_offer_months: {
-              type: "object",
-              additionalProperties: false,
-              required: ["optimistic", "base", "pessimistic"],
-              properties: {
-                optimistic: { type: "number" },
-                base: { type: "number" },
-                pessimistic: { type: "number" }
-              }
-            },
-            probability_of_getting_job_within_12_months: { type: "number" },
-            confidence: { type: "number" },
-            caveats: { type: "array", items: { type: "string" } },
-            summary: { type: "string" }
-          }
-        },
-        comparison: {
-          type: "object",
-          additionalProperties: false,
-          required: ["better_long_term_direction", "better_long_term_label", "ceiling_gap_median", "interpretation"],
-          properties: {
-            better_long_term_direction: { type: "string", enum: ["current_role", "target_role", "balanced"] },
-            better_long_term_label: { type: "string" },
-            ceiling_gap_median: { type: "number" },
-            interpretation: { type: "string" }
-          }
-        }
-      }
-    },
-    narrative: {
-      type: "object",
-      additionalProperties: false,
-      required: [
-        "verdict_label",
-        "headline",
-        "summary",
-        "why_this_result",
-        "personalization_notes",
-        "cta_title",
-        "cta_body"
-      ],
-      properties: {
-        verdict_label: { type: "string", enum: ["stay", "switch", "depends"] },
-        headline: { type: "string" },
-        summary: { type: "string" },
-        why_this_result: { type: "array", items: { type: "string" } },
-        personalization_notes: { type: "array", items: { type: "string" } },
-        cta_title: { type: "string" },
-        cta_body: { type: "string" }
-      }
-    },
-    guidance: {
-      type: "object",
-      additionalProperties: false,
-      required: ["risk_assessment"],
-      properties: {
-        risk_assessment: {
-          type: "object",
-          additionalProperties: false,
-          required: ["level", "summary"],
-          properties: {
-            level: { type: "string", enum: ["low", "medium", "high"] },
-            summary: { type: "string" }
-          }
-        }
-      }
-    }
-  }
-} as const;
 
 function toObject(value: unknown, fieldName: string) {
   if (typeof value !== "object" || value === null || Array.isArray(value)) {
