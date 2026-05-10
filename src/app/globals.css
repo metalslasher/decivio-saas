@@ -161,12 +161,12 @@ main {
 }
 
 .header-login-button {
-  min-height: 3.9rem;
-  border-radius: 1.05rem;
+  min-height: 3.25rem;
+  border-radius: 9999px;
   border: 1px solid rgba(52, 83, 244, 0.72);
   background: rgba(255, 255, 255, calc(0.68 + 0.14 * var(--mirror-progress)));
-  padding: 0.95rem 1.65rem;
-  font-size: 1.02rem;
+  padding: 0.78rem 1.45rem;
+  font-size: 0.98rem;
   font-weight: 800;
   color: var(--accent-strong);
   box-shadow:
@@ -192,12 +192,12 @@ main {
 }
 
 .header-cta-button {
-  min-height: 3.9rem;
-  border-radius: 1.05rem;
+  min-height: 3.25rem;
+  border-radius: 9999px;
   border: 1px solid rgba(52, 83, 244, 0.86);
   background: linear-gradient(135deg, var(--accent-strong), var(--accent));
-  padding: 0.95rem 1.65rem;
-  font-size: 1.02rem;
+  padding: 0.78rem 1.45rem;
+  font-size: 0.98rem;
   font-weight: 800;
   color: #ffffff;
   box-shadow:
