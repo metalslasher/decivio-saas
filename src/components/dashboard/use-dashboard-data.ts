@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { useCallback, useEffect, useState } from "react";
 import { GUEST_USER_COOKIE_NAME } from "@/lib/guest-session";
+import { applyManualFullAccess } from "@/lib/manual-full-access";
 import { emitProfileUpdated } from "@/lib/profile-broadcast";
 import { mergeProfileContext, parseProfileContext } from "@/lib/profile-context";
 import type {
@@ -163,6 +164,11 @@ export function useDashboardData(supabase: SupabaseClient) {
         subscriptionRow?.status === "past_due"
           ? subscriptionRow.status
           : "free";
+      const subscription = applyManualFullAccess(email, {
+        plan: derivedPlan,
+        status: derivedStatus,
+        currentPeriodEnd: subscriptionRow?.current_period_end ?? null,
+      });
 
       setState({
         status: "ready",
@@ -178,11 +184,7 @@ export function useDashboardData(supabase: SupabaseClient) {
           context: profileContext,
           completion: profileCompletion,
         },
-        subscription: {
-          plan: derivedPlan,
-          status: derivedStatus,
-          currentPeriodEnd: subscriptionRow?.current_period_end ?? null,
-        },
+        subscription,
         totalSimulations: countResponse.count ?? simulations.length,
         recentSimulations,
       });

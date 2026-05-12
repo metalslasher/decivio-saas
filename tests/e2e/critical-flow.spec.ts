@@ -5,6 +5,27 @@ import {
   getInvoiceCheckoutMismatch,
   getSubscriptionCheckoutMismatch
 } from "../../src/lib/billing-security";
+import {
+  applyManualFullAccess,
+  hasManualFullAccess
+} from "../../src/lib/manual-full-access";
+
+test("manual full-access email resolves to active Pro access", () => {
+  expect(hasManualFullAccess(" T0MMY.V4SK1S@GMAIL.COM ")).toBe(true);
+  expect(hasManualFullAccess("other@example.com")).toBe(false);
+
+  expect(
+    applyManualFullAccess("t0mmy.v4sk1s@gmail.com", {
+      plan: "free",
+      status: "free",
+      currentPeriodEnd: null
+    })
+  ).toEqual({
+    plan: "pro",
+    status: "active",
+    currentPeriodEnd: null
+  });
+});
 
 test("billing security helpers reject mismatched provider payment details", () => {
   const annualCheckout = {

@@ -3,6 +3,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 export type AuthenticatedRequestUser = {
   accessToken: string;
   userId: string;
+  email: string | null;
 };
 
 export function getBearerTokenFromRequest(request: Request) {
@@ -41,7 +42,8 @@ export async function getAuthenticatedUserFromRequest(
 
   return {
     accessToken,
-    userId: user.id
+    userId: user.id,
+    email: user.email?.trim() || null
   };
 }
 

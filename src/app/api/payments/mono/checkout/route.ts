@@ -11,6 +11,7 @@ import {
 import { type BillingCheckoutStatus, getBillingPlanConfig, isPaidPlanId } from "@/lib/billing";
 import { getBillingErrorMessage } from "@/lib/billing-errors";
 import { getSupabaseServiceRoleClient } from "@/lib/db/supabase";
+import { hasManualFullAccess } from "@/lib/manual-full-access";
 import {
   buildMonoCheckoutReturnUrl,
   createMonoInvoice,
@@ -337,6 +338,10 @@ export async function POST(request: Request) {
   }
 
   try {
+    if (hasManualFullAccess(authenticatedUser.email)) {
+      throw new Error("SUBSCRIPTION_ALREADY_ACTIVE");
+    }
+
     await assertUserDoesNotAlreadyHavePaidAccess(supabase, authenticatedUser.userId);
   } catch (error) {
     if (error instanceof Error && error.message === "SUBSCRIPTION_ALREADY_ACTIVE") {

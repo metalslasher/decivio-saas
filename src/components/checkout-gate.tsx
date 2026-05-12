@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuthDialog } from "@/components/auth-dialog-provider";
 import { getSupabaseBrowserClient } from "@/lib/db/supabase-browser";
+import { applyManualFullAccess } from "@/lib/manual-full-access";
 import { formatUah, pricingPlans } from "@/lib/pricing";
 
 type CheckoutGateProps = {
@@ -199,11 +200,14 @@ export function CheckoutGate({ plan, initialCheckoutId, authNextPath }: Checkout
         status: "user",
         email: session.user.email?.trim() || "Активна сесія",
         accessToken: session.access_token,
-        subscription: normalizeSubscriptionSnapshot({
-          plan: subscriptionRow?.plan,
-          status: subscriptionRow?.status,
-          currentPeriodEnd: subscriptionRow?.current_period_end
-        })
+        subscription: applyManualFullAccess(
+          session.user.email,
+          normalizeSubscriptionSnapshot({
+            plan: subscriptionRow?.plan,
+            status: subscriptionRow?.status,
+            currentPeriodEnd: subscriptionRow?.current_period_end
+          })
+        )
       });
     }
 

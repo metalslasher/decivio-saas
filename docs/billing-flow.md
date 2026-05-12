@@ -71,4 +71,15 @@ The default local test status remains successful: `paid` for annual and `active`
 - Before opening access, mono status data must match the local checkout amount, currency, provider target, and plan interval/reference where available.
 - Mono webhook responses do not expose internal errors to callers; mismatched signed payment details are logged and ignored without granting access.
 - pRRO/fiscalization is a separate setup topic and should be confirmed before real payment launch.
-- Do not rely on registration alone for dashboard access; access must come from active subscription state.
+- Do not rely on registration alone for dashboard access; access must come from active subscription state or an explicit manual full-access override.
+
+## Manual Full Access
+
+The account `t0mmy.v4sk1s@gmail.com` has an explicit full-access override for the dashboard.
+This is handled in `src/lib/manual-full-access.ts` and should stay isolated there.
+
+Behavior:
+
+- dashboard access resolves to `pro` / `active` even without a paid subscription row;
+- checkout creation returns `subscription_already_active` and redirects to `/dashboard?view=access`;
+- payment/webhook logic for all other users remains unchanged.
