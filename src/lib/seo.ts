@@ -42,7 +42,7 @@ const googleSiteVerification = process.env.GOOGLE_SITE_VERIFICATION?.trim();
 export const siteConfig = {
   name: "Decivio",
   description:
-    "Decivio допомагає спланувати зміну карʼєри: оцінити сценарії, дохід і ризики, підготувати резюме та рухатися до нової ролі впевнено.",
+    "Decivio допомагає оцінити ваш дохід, ринок і кар'єрний потенціал, посилити резюме та підготуватися до сильнішого оферу.",
   url: getPublicSiteUrl(),
   locale: "uk_UA",
   language: "uk-UA",
@@ -56,11 +56,12 @@ export const siteConfig = {
 } as const;
 
 const defaultKeywords = [
-  "зміна кар'єри",
-  "кар'єрний перехід",
+  "оцінка зарплати",
+  "аналіз доходу",
   "прогноз доходу",
-  "симулятор кар'єри",
-  "калькулятор зміни кар'єри",
+  "ринкова зарплата",
+  "підготовка до співбесіди",
+  "покращення резюме",
   "аналіз зарплати",
   "кар'єрне планування"
 ];
@@ -264,7 +265,7 @@ export function createSoftwareApplicationSchema({
       description: offer.description,
       price: offer.price,
       priceCurrency: "UAH",
-      category: offer.category ?? "Career transition software",
+      category: offer.category ?? "Career development software",
       url: buildAbsoluteUrl(offer.urlPath ?? path)
     }))
   };

@@ -40,16 +40,16 @@ const steps: Array<{ title: string; helper: string; fields: WizardField[] }> = [
   },
   {
     title: "Поточна ситуація",
-    helper: "Додайте роль і досвід у сфері, з якої стартуєте перехід.",
+    helper: "Додайте роль і досвід, щоб оцінка спиралась на вашу реальну базу.",
     fields: ["current_role", "current_experience_years"]
   },
   {
-    title: "Ціль переходу",
-    helper: "Вкажіть нову роль і рівень досвіду, який уже можна використати в цьому напрямі.",
+    title: "Цільова можливість",
+    helper: "Вкажіть роль або рівень можливостей, на який хочете цілитись далі.",
     fields: ["target_role", "experience_level"]
   },
   {
-    title: "Умови переходу",
+    title: "Умови ринку",
     helper: "Оберіть мовний рівень, ринок і головний пріоритет, щоб прогноз точніше врахував ваші обмеження.",
     fields: ["english_level", "target_market", "transition_priority"]
   }
@@ -286,10 +286,10 @@ export function SimulateOnboardingWizard() {
     <section className="space-y-6 py-4 md:space-y-8 md:py-8">
       <header className="mx-auto max-w-3xl space-y-3 text-center">
         <h1 className="page-title mx-auto max-w-[13ch]">
-          Оцініть <span className="text-accent">карʼєрний перехід</span>
+          Оцініть <span className="text-accent">дохід і ринок</span>
         </h1>
         <p className="lead-copy">
-          Надайте інформацію про поточну роль і ціль, а Decivio підготує прогноз доходу, ризику та першого практичного кроку.
+          Надайте інформацію про поточну роль і ціль, а Decivio підготує прогноз доходу, ринку та першого практичного кроку.
         </p>
       </header>
 

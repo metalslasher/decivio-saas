@@ -83,8 +83,8 @@ export function SiteFooter() {
           <div className="space-y-5">
             <WordmarkLogo tone="light" className="text-[2.6rem] md:text-[3rem]" />
             <p className="max-w-xl text-[0.98rem] font-medium leading-[1.65] text-white/78 md:text-[1.08rem]">
-              Отримайте професійну підтримку для карʼєрного переходу: оцініть свій шлях, посильте резюме й рухайтесь до роботи,
-              яку справді хочете.
+              Оцініть свій дохід і ринок, посильте резюме й підготуйтеся до вакансій, співбесід та оферів,
+              які краще відповідають вашому досвіду.
             </p>
           </div>
 

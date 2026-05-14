@@ -98,7 +98,7 @@ export function parseCareerSwitchFormPayload(payload: Record<string, unknown>): 
   }
 
   if (!isKnownValue(payload.transition_priority, TRANSITION_PRIORITY_VALUES)) {
-    return { ok: false, error: "Пріоритет переходу: оберіть один із варіантів." };
+    return { ok: false, error: "Головний пріоритет: оберіть один із варіантів." };
   }
 
   return {

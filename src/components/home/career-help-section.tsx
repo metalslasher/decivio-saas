@@ -14,10 +14,10 @@ export function CareerHelpSection() {
 
           <div className="relative z-20 max-w-[33rem] text-center sm:text-left">
             <h2 id="career-help-title" className="home-section-heading max-w-full break-words [overflow-wrap:anywhere]">
-              Від ідеї змінити кар’єру <span className="home-section-heading-accent">до пропозиції</span>
+              Від поточного доходу <span className="home-section-heading-accent">до сильнішого оферу</span>
             </h2>
             <p className="mt-5 max-w-[29rem] text-[0.98rem] font-medium leading-[1.72] text-[var(--text-muted)] md:text-[1.06rem]">
-              Перетворюємо невизначеність на чіткий план переходу до сильнішої ролі та доходу.
+              Перетворюємо вашу реальну ситуацію на зрозумілий план: який ринок обрати, що посилити і як аргументувати свою цінність.
             </p>
           </div>
 

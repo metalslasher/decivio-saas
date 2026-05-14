@@ -280,7 +280,7 @@ export function buildSimulationResultsPayload({
 
   const targetDetails: DetailRow[] = [
     {
-      label: `Стартовий рівень для переходу (${levelLabel(targetRole.entry_level_for_switcher)})`,
+      label: `Реалістичний стартовий рівень (${levelLabel(targetRole.entry_level_for_switcher)})`,
       value: formatCurrency(targetRole.entry_salary_range.median)
     },
     {
@@ -322,9 +322,9 @@ export function buildSimulationResultsPayload({
         tone: "default"
       },
       {
-        label: "Шанс увійти за 12 міс.",
+        label: "Шанс оферу за 12 міс.",
         value: formatProbability(targetRole.probability_of_getting_job_within_12_months),
-        note: "Оцінка реалістичності входу в цільову роль за вашим профілем.",
+        note: "Оцінка реалістичності отримати офер за вашим профілем.",
         tone: "default"
       },
       {
@@ -340,7 +340,7 @@ export function buildSimulationResultsPayload({
         tone: "default"
       },
       {
-        label: "Ризик переходу",
+        label: "Ризик сценарію",
         value: riskLevelLabel(riskAssessment.level),
         note: riskAssessment.summary,
         tone: riskLevelTone(riskAssessment.level)

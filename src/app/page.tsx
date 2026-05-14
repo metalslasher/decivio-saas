@@ -17,28 +17,29 @@ import { pricingPlans } from "@/lib/pricing";
 import { createFaqSchema, createMetadata, createSoftwareApplicationSchema } from "@/lib/seo";
 
 export const metadata = createMetadata({
-  title: "Змінюйте карʼєру з планом, а не навмання",
+  title: "Зрозумійте, де ваш досвід коштує більше",
   description:
-    "Decivio допомагає спланувати зміну карʼєри: оцінити сценарії переходу, дохід і ризики, підготувати резюме, перевірити вакансії та краще пройти співбесіди.",
+    "Decivio аналізує ваш поточний дохід, роль і ринок, показує де можна заробляти більше та допомагає підготувати резюме, вакансії, співбесіди й офер.",
   path: "/",
   keywords: [
-    "аналіз зміни кар'єри",
-    "прогноз доходу після зміни кар'єри",
-    "кар'єрний симулятор",
-    "порівняння кар'єрних сценаріїв"
+    "аналіз зарплати",
+    "оцінка доходу",
+    "ринкова зарплата",
+    "підготовка до співбесіди",
+    "покращення резюме"
   ]
 });
 
 const homeSoftwareSchema = createSoftwareApplicationSchema({
   path: "/",
   description:
-    "Decivio допомагає спланувати зміну карʼєри: оцінити сценарії переходу, дохід і ризики, підготувати резюме, перевірити вакансії та краще пройти співбесіди.",
+    "Decivio аналізує ваш поточний дохід, роль і ринок, показує де можна заробляти більше та допомагає підготувати резюме, вакансії, співбесіди й офер.",
   featureList: featureShowcases.map((item) => item.title),
   offers: [
     {
       name: "Безкоштовний висновок",
       price: 0,
-      description: "Перший персоналізований аналіз кар'єрного переходу без оплати.",
+      description: "Перший персоналізований аналіз доходу, ринку і наступного кар'єрного кроку без оплати.",
       urlPath: "/simulate"
     },
     ...pricingPlans.map((plan) => ({
@@ -133,16 +134,16 @@ export default function HomePage() {
                 <div className="surface-panel relative w-full min-w-0 overflow-hidden rounded-[2rem] px-5 py-6 text-center sm:text-left md:px-7 md:py-8 lg:px-8 lg:py-9">
                   <div className="pointer-events-none absolute -right-16 -top-20 h-44 w-44 rounded-full bg-[rgba(63,94,255,0.08)] blur-3xl" />
                   <h2 className="home-section-heading max-w-full break-words [overflow-wrap:anywhere]">
-                    Ми поруч, щоб зробити ваш шлях до нової роботи{" "}
-                    <span className="home-section-heading-accent">простішим і результативнішим</span>
+                    Ми поруч, щоб перетворити ваш досвід на{" "}
+                    <span className="home-section-heading-accent">сильнішу позицію на ринку</span>
                   </h2>
                   <p className="mt-4 max-w-full break-words text-[0.9rem] leading-[1.72] text-[var(--text-muted)] [overflow-wrap:anywhere] md:text-[1.04rem]">
-                    За допомогою наших інструментів і практичних підказок ви швидше виходите на співбесіди, краще виглядаєте на ринку
-                    та рухаєтесь до карʼєри, яку справді хочете.
+                    Decivio показує, чи відповідає ваш дохід ринку, де є реалістичний потенціал росту та що варто посилити,
+                    щоб претендувати на кращі вакансії й офери.
                   </p>
                   <div className="mt-6 flex justify-center sm:justify-start">
                     <Link href="/simulate" className="btn-primary w-full max-w-[18rem] px-4 py-3 text-center text-[0.9rem] leading-tight sm:w-auto sm:max-w-full sm:px-7 md:px-8 md:text-[0.94rem]">
-                      Отримати прогноз зміни кар’єри
+                      Оцінити дохід і ринок
                     </Link>
                   </div>
                 </div>
@@ -249,12 +250,12 @@ export default function HomePage() {
           <div className="grid min-w-0 items-center gap-8 lg:grid-cols-[0.98fr_1.02fr] lg:gap-10">
             <div className="relative z-10 min-w-0 text-center lg:text-left">
               <h2 id="career-brands-title" className="home-section-heading mx-auto max-w-[36rem] lg:mx-0">
-                Цільтеся в кращі можливості, а не просто в першу{" "}
-                <span className="home-section-heading-accent">доступну вакансію</span>
+                Цільтеся в можливості, де ваш досвід{" "}
+                <span className="home-section-heading-accent">оцінюють вище</span>
               </h2>
               <p className="mx-auto mt-5 max-w-[35rem] text-[0.98rem] leading-[1.72] text-[var(--text-muted)] md:text-[1.06rem] lg:mx-0">
-                Наш сервіс допомагає тверезо оцінити перехід, посилити резюме й підготовку так, щоб претендувати на ролі з кращим рівнем доходу,
-                процесів і професійного росту.
+                Наш сервіс допомагає порівняти поточну ситуацію з українським та міжнародним ринком, посилити резюме й підготовку
+                так, щоб претендувати не на випадкові вакансії, а на сильніші пропозиції.
               </p>
             </div>
 
@@ -339,14 +340,14 @@ export default function HomePage() {
               </div>
 
               <p className="mt-7 text-[0.82rem] font-extrabold uppercase tracking-normal text-[var(--accent-strong)] md:text-[0.88rem]">
-                Перед тим як вкладати місяці у новий напрям
+                Перед тим як погоджуватись на менше
               </p>
               <h2 id="final-cta-title" className="mt-4 max-w-[42rem] font-display text-[2.12rem] font-extrabold leading-[1.04] tracking-normal text-[var(--text-strong)] sm:text-[2.65rem] md:text-[3.25rem]">
-                Перевірте, чи справді окупиться ваша зміна карʼєри
+                Перевірте, де ваш досвід може коштувати більше
               </h2>
               <p className="mt-6 max-w-[39rem] text-[1rem] font-medium leading-[1.72] text-[var(--text-muted)] md:text-[1.12rem]">
-                Decivio покаже ризик-період, потенціал доходу, сильні сторони та перші кроки, щоб ви рухались не навмання,
-                а з реалістичним планом.
+                Decivio покаже ринковий потенціал, сильні сторони, прогалини та перші кроки, щоб ви йшли до кращого оферу
+                з реалістичною аргументацією.
               </p>
 
               <div className="mt-8 flex w-full flex-col items-center justify-center gap-3 sm:w-auto sm:flex-row">

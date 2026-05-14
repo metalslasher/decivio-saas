@@ -1,7 +1,6 @@
 ﻿"use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
 
 const chartWidth = 560;
 const chartHeight = 250;
@@ -31,47 +30,45 @@ const chartData = [
 
 const heroScenarios = [
   {
-    fullText: "Отримайте покроковий план зміни професії",
+    fullText: "Дізнайтесь, де ваш досвід коштує більше",
     segments: [
-      { text: "Отримайте " },
-      { text: "покроковий план", accent: true },
-      { text: " зміни професії" }
+      { text: "Дізнайтесь, де ваш " },
+      { text: "досвід коштує більше", accent: true }
     ],
-    role: "DevOps Engineer",
+    role: "Сильніший ринок",
     nextValues: [28, 45, 61, 78, 93]
   },
   {
-    fullText: "Оцініть свій дохід у новій кар’єрі ще до старту",
+    fullText: "Перевірте, чи відповідає зарплата ринку",
     segments: [
-      { text: "Оцініть свій " },
-      { text: "дохід", accent: true },
-      { text: " у новій кар’єрі ще до старту" }
+      { text: "Перевірте, чи відповідає " },
+      { text: "зарплата ринку", accent: true }
     ],
-    role: "Data Analyst",
+    role: "Ринкова вилка",
     nextValues: [31, 47, 60, 73, 86]
   },
   {
-    fullText: "Порівняйте напрямки та оберіть найвигідніший",
+    fullText: "Підготуйте резюме під сильніші вакансії",
     segments: [
-      { text: "Порівняйте напрямки та оберіть " },
-      { text: "найвигідніший", accent: true }
+      { text: "Підготуйте резюме під " },
+      { text: "сильніші вакансії", accent: true }
     ],
-    role: "Product Manager",
+    role: "Кращі вакансії",
     nextValues: [30, 43, 56, 68, 81]
   },
   {
-    fullText: "Знайдіть роботу, яка дійсно вам підходить",
+    fullText: "Йдіть на співбесіди з кращими аргументами",
     segments: [
-      { text: "Знайдіть роботу, яка " },
-      { text: "дійсно вам підходить", accent: true }
+      { text: "Йдіть на співбесіди з " },
+      { text: "кращими аргументами", accent: true }
     ],
-    role: "UX/UI Designer",
+    role: "Сильніший офер",
     nextValues: [29, 42, 54, 66, 79]
   }
 ] as const satisfies readonly HeroScenario[];
 
 const subheadline =
-  "Усе для переходу в нову кар’єру з прогнозованим результатом і зрозумілим планом дій.";
+  "Decivio оцінює ваш поточний дохід, роль і ринок, показує реалістичний потенціал та план до сильнішого оферу.";
 
 const ctaLabel = "Почати аналіз кар’єри";
 const ctaMeta = "\u0411\u0435\u0437\u043a\u043e\u0448\u0442\u043e\u0432\u043d\u043e \u2022 2\u20133 \u0445\u0432\u0438\u043b\u0438\u043d\u0438";
@@ -182,7 +179,7 @@ function HeroForecastCard({ scenario }: { scenario: HeroScenario }) {
               </svg>
             </span>
             <span className="min-w-0">
-              <span className="block text-[0.74rem] font-semibold text-[rgba(102,112,133,0.78)]">Ваша наступна кар’єра</span>
+              <span className="block text-[0.74rem] font-semibold text-[rgba(102,112,133,0.78)]">Ваша наступна ціль</span>
               <span className="block truncate text-[0.9rem] font-extrabold text-[var(--text-strong)]">{scenario.role}</span>
             </span>
           </div>
@@ -245,35 +242,8 @@ function HeroForecastCard({ scenario }: { scenario: HeroScenario }) {
 }
 
 export function HeroBeforeAfter() {
-  const [scenarioIndex, setScenarioIndex] = useState(0);
-  const [typedText, setTypedText] = useState<string>(heroScenarios[0].fullText);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const activeScenario = heroScenarios[scenarioIndex];
-  const typedHeadline = renderTypedHeadline(activeScenario.segments, typedText.length);
-
-  useEffect(() => {
-    if (!isDeleting && typedText === activeScenario.fullText) {
-      const pauseTimer = setTimeout(() => setIsDeleting(true), 1500);
-      return () => clearTimeout(pauseTimer);
-    }
-
-    if (isDeleting && typedText.length === 0) {
-      setIsDeleting(false);
-      setScenarioIndex((prev) => (prev + 1) % heroScenarios.length);
-      return;
-    }
-
-    const speed = isDeleting ? 26 : 44;
-    const typingTimer = setTimeout(() => {
-      setTypedText((prev) =>
-        isDeleting
-          ? activeScenario.fullText.slice(0, Math.max(0, prev.length - 1))
-          : activeScenario.fullText.slice(0, prev.length + 1)
-      );
-    }, speed);
-
-    return () => clearTimeout(typingTimer);
-  }, [activeScenario, isDeleting, typedText]);
+  const activeScenario = heroScenarios[0];
+  const typedHeadline = renderTypedHeadline(activeScenario.segments, activeScenario.fullText.length);
 
   return (
     <section className="relative pt-0 md:pt-1 lg:pt-0">
@@ -281,9 +251,6 @@ export function HeroBeforeAfter() {
         <div className="relative z-10 flex flex-col items-center text-center lg:items-start lg:text-left">
           <h1 className="min-h-[8.9rem] max-w-[12.5ch] font-display text-[2.28rem] font-extrabold leading-[0.96] tracking-normal text-[var(--text-strong)] sm:min-h-[8.4rem] sm:max-w-[13.5ch] sm:text-[2.85rem] md:min-h-[9.2rem] md:text-[3.15rem] lg:min-h-[8.4rem] lg:max-w-[36rem] lg:text-[2.85rem] xl:min-h-[8.8rem] xl:max-w-[39rem] xl:text-[3.05rem]">
             {typedHeadline}
-            <span className="hero-caret ml-1 text-[var(--accent-strong)]" aria-hidden="true">
-              |
-            </span>
           </h1>
 
           <p className="mt-6 max-w-[21rem] text-balance text-[1rem] font-medium leading-[1.66] text-[rgba(92,103,128,0.94)] sm:max-w-[30rem] sm:text-[1.08rem] md:max-w-[34rem] md:text-[1.16rem] md:leading-[1.62]">
@@ -311,7 +278,7 @@ export function HeroBeforeAfter() {
         </div>
 
         <div className="hero-forecast-shell relative z-10 mx-auto">
-          <HeroForecastCard key={activeScenario.role} scenario={activeScenario} />
+          <HeroForecastCard scenario={activeScenario} />
         </div>
       </div>
     </section>
