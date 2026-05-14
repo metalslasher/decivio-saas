@@ -12,7 +12,7 @@ Status: current. This document describes the public `/simulate` flow.
 
 ## Goal
 
-The onboarding should collect the smallest useful set of facts for a first career-transition estimate.
+The onboarding should collect the smallest useful set of facts for a first public simulation estimate.
 
 The user does not need an account before submitting the simulation. Registration/login happens later, when the user chooses a paid plan or explicitly clicks "Вхід" in the header.
 

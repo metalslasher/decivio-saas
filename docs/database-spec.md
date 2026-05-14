@@ -57,6 +57,7 @@ Important columns:
 Current product behavior:
 
 - Dashboard access is granted when `plan = 'pro'` and status is `active`, `trial`, or still-valid `canceled`.
+- Explicit manual full-access overrides are handled in code through `src/lib/manual-full-access.ts`; they do not create a `subscriptions` row.
 - Annual access is activated from a successful mono invoice.
 - Monthly access is activated from an active mono subscription.
 - There is a unique index on `user_id`, so one user has one current subscription/access row.

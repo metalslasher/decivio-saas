@@ -32,6 +32,7 @@ Status: current repository map for product work.
 - Result payload mapper: `src/lib/simulation-results-payload.ts`.
 - Pricing config: `src/lib/pricing.ts`.
 - Mono billing integration: `src/lib/mono-acquiring.ts`, `src/lib/billing.ts`, `src/lib/billing-store.ts`, `src/lib/billing-security.ts`.
+- Manual dashboard access overrides: `src/lib/manual-full-access.ts`.
 - Auth/session helpers: `src/lib/request-auth.ts`, `src/lib/auth-session-client.ts`.
 - Dashboard data loading: `src/components/dashboard/use-dashboard-data.ts`.
 - Dashboard shared types: `src/components/dashboard/types.ts`.

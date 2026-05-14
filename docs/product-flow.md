@@ -5,7 +5,7 @@ Status: current public product flow. The dashboard internals are intentionally o
 ## Correct User Path
 
 1. User lands on `/`.
-2. Header CTA "Оцінити перехід" opens `/simulate`.
+2. Header CTA "Змінити кар'єру" opens `/simulate`.
 3. User completes the four-step simulation without registration.
 4. App creates a guest simulation and opens `/results?simulationId=<id>`.
 5. Result page gives a useful first answer and sends the user to `/pricing`.
@@ -20,20 +20,20 @@ Status: current public product flow. The dashboard internals are intentionally o
 - Header "Вхід" opens login.
 - Header CTA does not open registration; it sends users to the simulation.
 - Registration should happen only when it is needed for checkout or account ownership.
-- A user should not reach the paid dashboard without active paid access.
+- A user should not reach the paid dashboard without active paid access or an explicit manual full-access override.
 
 ## Billing Rules
 
 - Monthly plan: mono subscription.
 - Annual plan: mono one-time invoice.
-- Access is active when the checkout/subscription state is paid or active.
+- Access is active when the checkout/subscription state is paid or active, or when an explicit manual full-access override exists.
 - Local E2E tests use a successful mock checkout; production must use real mono callbacks/status.
 - Failed, expired, canceled, reversed, pending, and processing payment states should keep the user on a clear recovery path instead of opening the paid dashboard.
 
 ## What The Free Result Should Do
 
 - Confirm that Decivio understood the user's current role, target role, market, English level, and priority.
-- Show the main career-transition estimate in a compact, credible way.
+- Show the main simulation estimate in a compact, credible way.
 - Explain the reasoning enough to build trust.
 - Lead naturally to pricing for the full practical plan.
 

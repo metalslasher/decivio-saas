@@ -4,14 +4,15 @@ Status: current working process for project documentation.
 
 ## What Docs Are For
 
-Docs are the short current map of the product and codebase. They should help Codex, you, or another developer quickly answer:
+Docs are the short current map of the product, codebase, and approved product direction. They should help Codex, you, or another developer quickly answer:
 
 - how the product works now;
 - where the relevant code lives;
 - which flow is considered correct;
-- which database/API contracts must not be broken.
+- which database/API contracts must not be broken;
+- which approved product direction should guide the next implementation work.
 
-Docs are not a backlog, archive, or place for old task descriptions.
+Docs are not a backlog, archive, or place for old task descriptions. `product-concept.md` is the only exception: it captures the approved direction for upcoming product changes, while route-level docs continue to describe current behavior until the code changes.
 
 ## When To Update Docs
 
@@ -59,4 +60,4 @@ This catches common stale references, old paths, removed onboarding fields, and 
 
 ## Backlog Rule
 
-Future ideas should live in issues, a backlog, or a separate planning note outside active docs. If an idea is not implemented, it should not look like current product behavior in `docs/`.
+Future ideas should live in issues, a backlog, or a separate planning note outside active docs. If an idea is approved as the product direction, keep it in `product-concept.md` and clearly separate it from current route-level behavior.

@@ -18,7 +18,7 @@ The user should never feel stuck after payment. Every return from mono must lead
 4. The user is sent to mono or, in local test mode, directly to `/billing/return`.
 5. `/billing/return` checks `/api/payments/mono/checkout/[checkoutId]`.
 6. The status endpoint may poll mono in production, then reads the latest subscription/access row.
-7. The dashboard link is shown only when the checkout is successful and active subscription access exists.
+7. The dashboard link is shown when the checkout is successful and active subscription access exists, or when the account has an explicit manual full-access override.
 
 ## Status Behavior
 
