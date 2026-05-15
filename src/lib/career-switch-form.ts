@@ -45,14 +45,6 @@ function isKnownValue<T extends string>(value: unknown, allowed: readonly T[]): 
   return typeof value === "string" && allowed.includes(value as T);
 }
 
-export function normalizeRoleText(value: string) {
-  return value.trim().replace(/\s+/g, " ").toLocaleLowerCase("uk-UA");
-}
-
-export function isSameRoleText(left: string, right: string) {
-  return normalizeRoleText(left) === normalizeRoleText(right);
-}
-
 export function parseCareerSwitchFormPayload(payload: Record<string, unknown>): ParseResult<CareerSwitchFormInput> {
   const currentIncome = parseNonNegativeNumber(payload.current_income, "Поточний чистий дохід");
   if (!currentIncome.ok) {
@@ -76,13 +68,9 @@ export function parseCareerSwitchFormPayload(payload: Record<string, unknown>): 
     };
   }
 
-  const targetRole = parseRequiredString(payload.target_role, "Цільова роль");
+  const targetRole = parseRequiredString(payload.target_role, "Бажана роль або тип вакансій");
   if (!targetRole.ok) {
     return targetRole;
-  }
-
-  if (isSameRoleText(currentRole.value, targetRole.value)) {
-    return { ok: false, error: "Цільова роль має відрізнятись від поточної." };
   }
 
   if (!isKnownValue(payload.experience_level, EXPERIENCE_LEVEL_VALUES)) {

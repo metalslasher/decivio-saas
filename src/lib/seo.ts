@@ -42,7 +42,7 @@ const googleSiteVerification = process.env.GOOGLE_SITE_VERIFICATION?.trim();
 export const siteConfig = {
   name: "Decivio",
   description:
-    "Decivio допомагає оцінити ваш дохід, ринок і кар'єрний потенціал, посилити резюме та підготуватися до сильнішого оферу.",
+    "Decivio допомагає оцінити ваш дохід, ринок і кар'єрний потенціал, посилити резюме та підготуватися до кращої пропозиції.",
   url: getPublicSiteUrl(),
   locale: "uk_UA",
   language: "uk-UA",

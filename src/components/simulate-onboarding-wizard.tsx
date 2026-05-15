@@ -7,7 +7,6 @@ import { buildAuthorizedHeaders, getAccessTokenFromSupabase } from "@/lib/auth-s
 import {
   englishLevelOptions,
   experienceLevelOptions,
-  isSameRoleText,
   targetMarketOptions,
   transitionPriorityOptions,
   type EnglishLevel,
@@ -44,8 +43,8 @@ const steps: Array<{ title: string; helper: string; fields: WizardField[] }> = [
     fields: ["current_role", "current_experience_years"]
   },
   {
-    title: "Цільова можливість",
-    helper: "Вкажіть роль або рівень можливостей, на який хочете цілитись далі.",
+    title: "Краща можливість",
+    helper: "Вкажіть роль або тип вакансій, які хочете перевірити: у своїй сфері, на сильнішому ринку або в кращій компанії.",
     fields: ["target_role", "experience_level"]
   },
   {
@@ -199,10 +198,6 @@ export function SimulateOnboardingWizard() {
       }
     }
 
-    if (stepIndex === 2 && values.current_role !== "" && isSameRoleText(values.current_role, values.target_role)) {
-      nextErrors.target_role = "Цільова роль має відрізнятись від поточної.";
-    }
-
     setErrors((prev) => {
       const filtered = { ...prev };
       for (const field of fields) {
@@ -289,7 +284,7 @@ export function SimulateOnboardingWizard() {
           Оцініть <span className="text-accent">дохід і ринок</span>
         </h1>
         <p className="lead-copy">
-          Надайте інформацію про поточну роль і ціль, а Decivio підготує прогноз доходу, ринку та першого практичного кроку.
+          Надайте інформацію про поточну роль і бажану можливість, а ми підготуємо прогноз доходу, ринку та першого практичного кроку.
         </p>
       </header>
 
@@ -385,7 +380,7 @@ export function SimulateOnboardingWizard() {
             {currentStep === 2 ? (
               <div className="grid gap-4 md:grid-cols-[minmax(0,1.15fr)_minmax(14rem,0.85fr)]">
                 <label className="block text-sm font-medium leading-[1.6] text-[var(--text-muted)]" htmlFor="target-role">
-                  Цільова роль
+                  Бажана роль або тип вакансій
                   <input
                     id="target-role"
                     type="text"

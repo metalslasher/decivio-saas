@@ -19,7 +19,7 @@ import { createFaqSchema, createMetadata, createSoftwareApplicationSchema } from
 export const metadata = createMetadata({
   title: "Зрозумійте, де ваш досвід коштує більше",
   description:
-    "Decivio аналізує ваш поточний дохід, роль і ринок, показує де можна заробляти більше та допомагає підготувати резюме, вакансії, співбесіди й офер.",
+    "Сервіс аналізує ваш поточний дохід, роль і ринок, показує де можна заробляти більше та допомагає підготувати резюме, вакансії, співбесіди й пропозиції.",
   path: "/",
   keywords: [
     "аналіз зарплати",
@@ -33,7 +33,7 @@ export const metadata = createMetadata({
 const homeSoftwareSchema = createSoftwareApplicationSchema({
   path: "/",
   description:
-    "Decivio аналізує ваш поточний дохід, роль і ринок, показує де можна заробляти більше та допомагає підготувати резюме, вакансії, співбесіди й офер.",
+    "Сервіс аналізує ваш поточний дохід, роль і ринок, показує де можна заробляти більше та допомагає підготувати резюме, вакансії, співбесіди й пропозиції.",
   featureList: featureShowcases.map((item) => item.title),
   offers: [
     {
@@ -138,8 +138,8 @@ export default function HomePage() {
                     <span className="home-section-heading-accent">сильнішу позицію на ринку</span>
                   </h2>
                   <p className="mt-4 max-w-full break-words text-[0.9rem] leading-[1.72] text-[var(--text-muted)] [overflow-wrap:anywhere] md:text-[1.04rem]">
-                    Decivio показує, чи відповідає ваш дохід ринку, де є реалістичний потенціал росту та що варто посилити,
-                    щоб претендувати на кращі вакансії й офери.
+                    Ми показуємо, чи відповідає ваш дохід ринку, де є реалістичний потенціал росту та що варто посилити,
+                    щоб претендувати на кращі вакансії й пропозиції.
                   </p>
                   <div className="mt-6 flex justify-center sm:justify-start">
                     <Link href="/simulate" className="btn-primary w-full max-w-[18rem] px-4 py-3 text-center text-[0.9rem] leading-tight sm:w-auto sm:max-w-full sm:px-7 md:px-8 md:text-[0.94rem]">
@@ -191,17 +191,13 @@ export default function HomePage() {
         <Reveal>
           <div className="relative">
             <div className="overflow-hidden px-1 pt-4 md:px-2 md:pt-5">
-              <div className="reviews-marquee-track flex w-max gap-5">
+              <div className="reviews-marquee-track flex w-max items-start gap-5">
                 {[...reviews, ...reviews].map((review, index) => (
                   <article
                     key={`${review.name}-${index}`}
                     aria-hidden={index >= reviews.length}
-                    className="surface-panel relative flex min-h-[345px] w-[22.5rem] flex-none flex-col overflow-hidden rounded-[2rem] px-6 py-6 md:w-[23.5rem]"
+                    className="surface-panel relative flex min-h-[285px] w-[22.5rem] flex-none flex-col overflow-hidden rounded-[2rem] px-6 py-6 md:w-[23.5rem]"
                   >
-                    <span className="pointer-events-none absolute left-4 top-2 font-display text-[4.6rem] leading-none text-[rgba(74,108,255,0.08)]">
-                      “
-                    </span>
-
                     <p className="relative text-[0.97rem] leading-[1.72] text-[var(--text-strong)]">
                       {review.quote}
                     </p>
@@ -250,7 +246,7 @@ export default function HomePage() {
           <div className="grid min-w-0 items-center gap-8 lg:grid-cols-[0.98fr_1.02fr] lg:gap-10">
             <div className="relative z-10 min-w-0 text-center lg:text-left">
               <h2 id="career-brands-title" className="home-section-heading mx-auto max-w-[36rem] lg:mx-0">
-                Цільтеся в можливості, де ваш досвід{" "}
+                Обирайте можливості, де ваш досвід{" "}
                 <span className="home-section-heading-accent">оцінюють вище</span>
               </h2>
               <p className="mx-auto mt-5 max-w-[35rem] text-[0.98rem] leading-[1.72] text-[var(--text-muted)] md:text-[1.06rem] lg:mx-0">
@@ -339,14 +335,11 @@ export default function HomePage() {
                 <span className="ml-2 text-[0.94rem] font-semibold text-[var(--text-muted)]">{socialProof.rating} за відгуками користувачів</span>
               </div>
 
-              <p className="mt-7 text-[0.82rem] font-extrabold uppercase tracking-normal text-[var(--accent-strong)] md:text-[0.88rem]">
-                Перед тим як погоджуватись на менше
-              </p>
-              <h2 id="final-cta-title" className="mt-4 max-w-[42rem] font-display text-[2.12rem] font-extrabold leading-[1.04] tracking-normal text-[var(--text-strong)] sm:text-[2.65rem] md:text-[3.25rem]">
+              <h2 id="final-cta-title" className="mt-7 max-w-[42rem] font-display text-[2.12rem] font-extrabold leading-[1.04] tracking-normal text-[var(--text-strong)] sm:text-[2.65rem] md:text-[3.25rem]">
                 Перевірте, де ваш досвід може коштувати більше
               </h2>
               <p className="mt-6 max-w-[39rem] text-[1rem] font-medium leading-[1.72] text-[var(--text-muted)] md:text-[1.12rem]">
-                Decivio покаже ринковий потенціал, сильні сторони, прогалини та перші кроки, щоб ви йшли до кращого оферу
+                Побачте ринковий потенціал, сильні сторони, прогалини та перші кроки, щоб рухатися до кращої пропозиції
                 з реалістичною аргументацією.
               </p>
 

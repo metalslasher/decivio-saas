@@ -1,5 +1,6 @@
 ﻿"use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 
 const chartWidth = 560;
@@ -16,16 +17,18 @@ type HeroHeadlineSegment = {
 type HeroScenario = {
   fullText: string;
   segments: readonly HeroHeadlineSegment[];
-  role: string;
+  pillLabel: string;
+  pillValue: string;
+  growthPercent: number;
   nextValues: readonly number[];
 };
 
 const chartData = [
-  { year: "1", stay: 34 },
-  { year: "2", stay: 38 },
-  { year: "3", stay: 42 },
-  { year: "4", stay: 46 },
-  { year: "5", stay: 51 }
+  { label: "Оцінка", gain: "+4%" },
+  { label: "План", gain: "+9%" },
+  { label: "Резюме", gain: "+18%" },
+  { label: "Вакансії", gain: "+27%" },
+  { label: "Розмови", gain: "+36%" }
 ] as const;
 
 const heroScenarios = [
@@ -35,8 +38,10 @@ const heroScenarios = [
       { text: "Дізнайтесь, де ваш " },
       { text: "досвід коштує більше", accent: true }
     ],
-    role: "Сильніший ринок",
-    nextValues: [28, 45, 61, 78, 93]
+    pillLabel: "Після аналізу",
+    pillValue: "видно сильніший ринок",
+    growthPercent: 36,
+    nextValues: [34, 39, 49, 63, 78]
   },
   {
     fullText: "Перевірте, чи відповідає зарплата ринку",
@@ -44,17 +49,21 @@ const heroScenarios = [
       { text: "Перевірте, чи відповідає " },
       { text: "зарплата ринку", accent: true }
     ],
-    role: "Ринкова вилка",
-    nextValues: [31, 47, 60, 73, 86]
+    pillLabel: "Стартова точка",
+    pillValue: "зарплата без здогадок",
+    growthPercent: 29,
+    nextValues: [34, 38, 46, 58, 72]
   },
   {
-    fullText: "Підготуйте резюме під сильніші вакансії",
+    fullText: "Посильте резюме під кращі вакансії",
     segments: [
-      { text: "Підготуйте резюме під " },
-      { text: "сильніші вакансії", accent: true }
+      { text: "Посильте резюме під " },
+      { text: "кращі вакансії", accent: true }
     ],
-    role: "Кращі вакансії",
-    nextValues: [30, 43, 56, 68, 81]
+    pillLabel: "Після правок",
+    pillValue: "цінність видно швидше",
+    growthPercent: 31,
+    nextValues: [33, 37, 48, 59, 74]
   },
   {
     fullText: "Йдіть на співбесіди з кращими аргументами",
@@ -62,17 +71,18 @@ const heroScenarios = [
       { text: "Йдіть на співбесіди з " },
       { text: "кращими аргументами", accent: true }
     ],
-    role: "Сильніший офер",
-    nextValues: [29, 42, 54, 66, 79]
+    pillLabel: "На співбесіді",
+    pillValue: "легше пояснити цінність",
+    growthPercent: 24,
+    nextValues: [33, 37, 45, 55, 67]
   }
 ] as const satisfies readonly HeroScenario[];
 
 const subheadline =
-  "Decivio оцінює ваш поточний дохід, роль і ринок, показує реалістичний потенціал та план до сильнішого оферу.";
+  "Ми оцінюємо ваш поточний дохід, роль і ринок, показуємо реалістичний потенціал та перші кроки до кращої пропозиції.";
 
 const ctaLabel = "Почати аналіз кар’єри";
 const ctaMeta = "\u0411\u0435\u0437\u043a\u043e\u0448\u0442\u043e\u0432\u043d\u043e \u2022 2\u20133 \u0445\u0432\u0438\u043b\u0438\u043d\u0438";
-const axisYearSuffix = "\u0440\u0456\u043a";
 
 type ChartPoint = { x: number; y: number };
 
@@ -122,15 +132,8 @@ function buildSmoothAreaPath(points: ChartPoint[]) {
   return `${buildSmoothPath(points)} L ${endX} ${baselineY} L ${startX} ${baselineY} Z`;
 }
 
-const stayLastValue = chartData[chartData.length - 1]?.stay ?? 0;
-
 function getForecastPoints(scenario: HeroScenario) {
   return scenario.nextValues.map((value, index) => toChartPoint(value, index, chartData.length));
-}
-
-function getGrowthPercent(scenario: HeroScenario) {
-  const nextLastValue = scenario.nextValues[scenario.nextValues.length - 1] ?? 0;
-  return stayLastValue > 0 ? Math.round(((nextLastValue - stayLastValue) / stayLastValue) * 100) : 0;
 }
 
 function renderTypedHeadline(segments: readonly HeroHeadlineSegment[], visibleLength: number) {
@@ -160,7 +163,6 @@ function HeroForecastCard({ scenario }: { scenario: HeroScenario }) {
   const nextPoints = getForecastPoints(scenario);
   const nextPath = buildSmoothPath(nextPoints);
   const nextAreaPath = buildSmoothAreaPath(nextPoints);
-  const growthPercent = getGrowthPercent(scenario);
   const finalForecastPoint = nextPoints[nextPoints.length - 1];
 
   return (
@@ -179,13 +181,13 @@ function HeroForecastCard({ scenario }: { scenario: HeroScenario }) {
               </svg>
             </span>
             <span className="min-w-0">
-              <span className="block text-[0.74rem] font-semibold text-[rgba(102,112,133,0.78)]">Ваша наступна ціль</span>
-              <span className="block truncate text-[0.9rem] font-extrabold text-[var(--text-strong)]">{scenario.role}</span>
+              <span className="block text-[0.74rem] font-semibold text-[rgba(102,112,133,0.78)]">{scenario.pillLabel}</span>
+              <span className="block truncate text-[0.9rem] font-extrabold text-[var(--text-strong)]">{scenario.pillValue}</span>
             </span>
           </div>
 
           <div className="hero-growth-pill">
-            <span className="block text-[1.8rem] font-extrabold leading-none text-[#28b86f]">+{growthPercent}%</span>
+            <span className="block text-[1.8rem] font-extrabold leading-none text-[#28b86f]">+{scenario.growthPercent}%</span>
             <span className="mt-1 block max-w-[5.5rem] text-[0.74rem] font-semibold leading-[1.16] text-[rgba(92,103,128,0.9)]">
               до доходу
             </span>
@@ -203,7 +205,7 @@ function HeroForecastCard({ scenario }: { scenario: HeroScenario }) {
 
             {nextPoints.map((point, index) => (
               <line
-                key={`guide-${chartData[index].year}`}
+                key={`guide-${chartData[index].label}`}
                 x1={point.x}
                 x2={point.x}
                 y1={point.y + 8}
@@ -219,7 +221,7 @@ function HeroForecastCard({ scenario }: { scenario: HeroScenario }) {
             ) : null}
             {nextPoints.map((point, index) => (
               <circle
-                key={`point-${chartData[index].year}`}
+                key={`point-${chartData[index].label}`}
                 cx={point.x}
                 cy={point.y}
                 r={index === nextPoints.length - 1 ? 8 : 4.6}
@@ -230,8 +232,9 @@ function HeroForecastCard({ scenario }: { scenario: HeroScenario }) {
 
           <div className="hero-forecast-labels">
             {chartData.map((item) => (
-              <span key={item.year}>
-                {item.year} {axisYearSuffix}
+              <span key={item.label}>
+                <strong>{item.gain}</strong>
+                <small>{item.label}</small>
               </span>
             ))}
           </div>
@@ -242,8 +245,27 @@ function HeroForecastCard({ scenario }: { scenario: HeroScenario }) {
 }
 
 export function HeroBeforeAfter() {
-  const activeScenario = heroScenarios[0];
-  const typedHeadline = renderTypedHeadline(activeScenario.segments, activeScenario.fullText.length);
+  const [activeScenarioIndex, setActiveScenarioIndex] = useState(0);
+  const [visibleLength, setVisibleLength] = useState(0);
+  const activeScenario = heroScenarios[activeScenarioIndex];
+  const typedHeadline = renderTypedHeadline(activeScenario.segments, visibleLength);
+
+  useEffect(() => {
+    setVisibleLength(0);
+  }, [activeScenarioIndex]);
+
+  useEffect(() => {
+    if (visibleLength < activeScenario.fullText.length) {
+      const timeout = window.setTimeout(() => setVisibleLength((prev) => prev + 1), 34);
+      return () => window.clearTimeout(timeout);
+    }
+
+    const timeout = window.setTimeout(() => {
+      setActiveScenarioIndex((prev) => (prev + 1) % heroScenarios.length);
+    }, 2600);
+
+    return () => window.clearTimeout(timeout);
+  }, [activeScenario.fullText.length, visibleLength]);
 
   return (
     <section className="relative pt-0 md:pt-1 lg:pt-0">
@@ -251,6 +273,9 @@ export function HeroBeforeAfter() {
         <div className="relative z-10 flex flex-col items-center text-center lg:items-start lg:text-left">
           <h1 className="min-h-[8.9rem] max-w-[12.5ch] font-display text-[2.28rem] font-extrabold leading-[0.96] tracking-normal text-[var(--text-strong)] sm:min-h-[8.4rem] sm:max-w-[13.5ch] sm:text-[2.85rem] md:min-h-[9.2rem] md:text-[3.15rem] lg:min-h-[8.4rem] lg:max-w-[36rem] lg:text-[2.85rem] xl:min-h-[8.8rem] xl:max-w-[39rem] xl:text-[3.05rem]">
             {typedHeadline}
+            <span className="hero-caret text-[var(--accent-strong)]" aria-hidden="true">
+              |
+            </span>
           </h1>
 
           <p className="mt-6 max-w-[21rem] text-balance text-[1rem] font-medium leading-[1.66] text-[rgba(92,103,128,0.94)] sm:max-w-[30rem] sm:text-[1.08rem] md:max-w-[34rem] md:text-[1.16rem] md:leading-[1.62]">

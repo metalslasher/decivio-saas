@@ -8,7 +8,7 @@ import { createBreadcrumbSchema, createMetadata, createSoftwareApplicationSchema
 export const metadata = createMetadata({
   title: "Ціни",
   description:
-    "Два формати повного доступу до Decivio: помісячно або на рік. Оцінка доходу й ринку, резюме, вакансії, співбесіди та офери в одному доступі.",
+    "Два формати повного доступу: помісячно або на рік. Оцінка доходу й ринку, резюме, вакансії, співбесіди та пропозиції в одному доступі.",
   path: "/pricing",
   keywords: ["тарифи decivio", "ціни decivio", "вартість доступу decivio", "оцінка зарплати decivio", "підготовка до співбесіди decivio"]
 });
@@ -18,49 +18,49 @@ const pricingReviews = [
     name: "Ірина Коваль",
     avatar: "/reviews/iryna-koval.jpg",
     quote:
-      "Я думала, що моя зарплата нормальна для маркетолога. Після аналізу побачила, що для мого досвіду можна цілитись вище, якщо перепакувати кейси в цифри й дивитись не тільки локальні вакансії.",
+      "Я прийшла просто перевірити зарплату. Виявилось, що для мого досвіду в маркетингу можна просити більше, але резюме треба було переписати з акцентом на результати. Після правок стало легше пояснювати свою цінність.",
     rating: 5
   },
   {
     name: "Олексій Мельник",
     avatar: "/reviews/oleksiy-melnyk.jpg",
     quote:
-      "Не все вийшло ідеально з першого разу: довелося кілька разів уточнити рівень ринку, бо я завищив очікування. Але в результаті зрозумів, які вакансії реально відповідають моєму досвіду в operations.",
+      "Очікував, що мені одразу покажуть найвищу зарплату. Насправді висновок був тверезіший: частина вакансій була зависока для мого профілю. Це трохи приземлило, зате я перестав витрачати час на слабкі збіги.",
     rating: 4
   },
   {
     name: "Наталія Бондар",
     avatar: "/reviews/nataliya-bondar.jpg",
     quote:
-      "Я не розуміла, як пояснити свій HR-досвід для сильнішої people operations ролі. Decivio витягнув 5 історій з цифрами, які можна показати в резюме й на співбесіді без загальних фраз.",
+      "Найкорисніше було побачити, які історії з попередньої роботи можна нормально показати в резюме. До цього я писала загально, без цифр і результату.",
     rating: 5
   },
   {
     name: "Дмитро Литвин",
     avatar: "/reviews/dmytro-lytvyn.jpg",
     quote:
-      "Я раніше відгукувався майже на все підряд. Тут відсіяв 7 вакансій, залишив 4 нормальні під мій досвід у sales і з двох отримав перший дзвінок. Не магія, просто менше хаосу.",
+      "Я раніше відгукувався майже на все підряд. Тут відсіяв зайве, залишив кілька нормальних вакансій під мій досвід у продажах і з двох отримав перший дзвінок. Не магія, просто менше хаосу.",
     rating: 5
   },
   {
     name: "Анна Романюк",
     avatar: "/reviews/anna-romanyuk.jpg",
     quote:
-      "Мені треба було не 'повір у себе', а список що робити в понеділок. План на 30-60-90 днів допоміг. Спочатку пунктів було забагато, я половину відклала, але маршрут нарешті став реальним.",
+      "Мені треба було не 'повір у себе', а список що робити в понеділок. План допоміг. Спочатку пунктів було забагато, я половину відклала, але маршрут нарешті став реальним.",
     rating: 4
   },
   {
     name: "Владислав Гнатюк",
     avatar: "/reviews/vladyslav-hnatyuk.jpg",
     quote:
-      "Я був майже впевнений, що без комерційного досвіду в QA мене ніхто не гляне. Аналіз витягнув задачі з support, які можна показати як релевантні, і дав список, що доробити в портфоліо.",
+      "Я працював у підтримці клієнтів і хотів перейти в сильнішу команду. Аналіз показав, які метрики винести першими, щоб досвід не виглядав просто операційною роботою.",
     rating: 5
   },
   {
     name: "Катерина Шевчук",
     avatar: "/reviews/kateryna-shevchuk.jpg",
     quote:
-      "Я хотіла просити більше, ніж реально тягнула на старті. Прогноз трохи приземлив, але чесно: краще знати це до співбесіди. Зараз цілюсь у нижчий діапазон і паралельно закриваю payroll.",
+      "Прогноз трохи приземлив мої очікування, але чесно: краще знати це до співбесіди. Тепер називаю зарплату спокійніше і розумію, що треба підтягнути.",
     rating: 5
   },
   {
@@ -79,7 +79,7 @@ const pricingSchemas = [
   ]),
   createSoftwareApplicationSchema({
     path: "/pricing",
-    description: "Сторінка цін Decivio з двома платними форматами повного доступу для оцінки доходу, ринку і підготовки до сильнішого оферу.",
+    description: "Сторінка цін з двома платними форматами повного доступу для оцінки доходу, ринку і підготовки до кращої пропозиції.",
     featureList: paidFeatureSections.flatMap((section) => section.items.map((item) => item.title)),
     offers: pricingPlans.map((plan) => ({
       name: plan.name,
@@ -123,7 +123,6 @@ function PlanCard({ plan }: { plan: PricingPlan }) {
           <h2 className="font-display text-[1.28rem] font-extrabold leading-[1.12] tracking-normal text-[var(--text-strong)] md:text-[1.42rem]">
             {plan.name}
           </h2>
-          <p className="mt-3 max-w-[31rem] text-[0.94rem] leading-[1.66] text-[var(--text-muted)]">{plan.description}</p>
         </div>
 
         <div className="shrink-0 text-left sm:text-right">
@@ -160,12 +159,8 @@ function PricingReviewCard({ review, index }: { review: (typeof pricingReviews)[
   return (
     <article
       aria-hidden={index >= pricingReviews.length}
-      className="surface-panel relative flex min-h-[345px] w-[22.5rem] flex-none flex-col overflow-hidden rounded-[2rem] px-6 py-6 md:w-[23.5rem]"
+      className="surface-panel relative flex min-h-[285px] w-[22.5rem] flex-none flex-col overflow-hidden rounded-[2rem] px-6 py-6 md:w-[23.5rem]"
     >
-      <span className="pointer-events-none absolute left-4 top-2 font-display text-[4.6rem] leading-none text-[rgba(74,108,255,0.08)]">
-        “
-      </span>
-
       <p className="relative text-[0.97rem] leading-[1.72] text-[var(--text-strong)]">{review.quote}</p>
 
       <div className="relative mt-auto flex items-center gap-4 pt-5">
@@ -267,7 +262,7 @@ export default function PricingPage() {
 
         <section className="relative mx-auto max-w-[80rem]" aria-label="Відгуки користувачів">
           <div className="overflow-hidden px-1 pb-12 pt-2 md:px-2 md:pb-14">
-            <div className="reviews-marquee-track flex w-max gap-5">
+            <div className="reviews-marquee-track flex w-max items-start gap-5">
               {[...pricingReviews, ...pricingReviews].map((review, index) => (
                 <PricingReviewCard key={`${review.name}-${index}`} review={review} index={index} />
               ))}

@@ -83,7 +83,7 @@ export function SiteFooter() {
           <div className="space-y-5">
             <WordmarkLogo tone="light" className="text-[2.6rem] md:text-[3rem]" />
             <p className="max-w-xl text-[0.98rem] font-medium leading-[1.65] text-white/78 md:text-[1.08rem]">
-              Оцініть свій дохід і ринок, посильте резюме й підготуйтеся до вакансій, співбесід та оферів,
+              Оцініть свій дохід і ринок, посильте резюме й підготуйтеся до вакансій, співбесід та пропозицій,
               які краще відповідають вашому досвіду.
             </p>
           </div>
