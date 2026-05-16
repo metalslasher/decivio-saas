@@ -2,20 +2,39 @@ export const EXPERIENCE_LEVEL_VALUES = ["none", "basic", "practical"] as const;
 export const ENGLISH_LEVEL_VALUES = ["basic", "intermediate", "upper_intermediate", "advanced"] as const;
 export const TARGET_MARKET_VALUES = ["ukraine", "remote", "abroad"] as const;
 export const TRANSITION_PRIORITY_VALUES = ["speed", "income"] as const;
+export const SENIORITY_LEVEL_VALUES = ["junior", "middle", "senior", "lead", "manager"] as const;
+export const UPGRADE_GOAL_VALUES = [
+  "higher_income",
+  "better_company",
+  "international_market",
+  "relocation",
+  "faster_search"
+] as const;
+export const JOB_SEARCH_STATUS_VALUES = ["not_started", "preparing", "applying", "interviewing", "offer"] as const;
+export const RESUME_STATUS_VALUES = ["none", "outdated", "ready", "needs_improvement"] as const;
 
 export type ExperienceLevel = (typeof EXPERIENCE_LEVEL_VALUES)[number];
 export type EnglishLevel = (typeof ENGLISH_LEVEL_VALUES)[number];
 export type TargetMarket = (typeof TARGET_MARKET_VALUES)[number];
 export type TransitionPriority = (typeof TRANSITION_PRIORITY_VALUES)[number];
+export type SeniorityLevel = (typeof SENIORITY_LEVEL_VALUES)[number];
+export type UpgradeGoal = (typeof UPGRADE_GOAL_VALUES)[number];
+export type JobSearchStatus = (typeof JOB_SEARCH_STATUS_VALUES)[number];
+export type ResumeStatus = (typeof RESUME_STATUS_VALUES)[number];
 
 export type CareerSwitchFormInput = {
   current_income: number;
+  current_market: TargetMarket;
   current_role: string;
   current_experience_years: number;
+  seniority_level: SeniorityLevel;
   target_role: string;
-  experience_level: ExperienceLevel;
+  upgrade_goal: UpgradeGoal;
   english_level: EnglishLevel;
   target_market: TargetMarket;
+  job_search_status: JobSearchStatus;
+  resume_status: ResumeStatus;
+  experience_level: ExperienceLevel;
   transition_priority: TransitionPriority;
 };
 
@@ -41,8 +60,40 @@ function parseRequiredString(value: unknown, fieldLabel: string): ParseResult<st
   return { ok: true, value: value.trim() };
 }
 
+function parseOptionalString(value: unknown) {
+  return typeof value === "string" && value.trim() !== "" ? value.trim() : null;
+}
+
 function isKnownValue<T extends string>(value: unknown, allowed: readonly T[]): value is T {
   return typeof value === "string" && allowed.includes(value as T);
+}
+
+function inferSeniority(years: number): SeniorityLevel {
+  if (years >= 8) {
+    return "lead";
+  }
+
+  if (years >= 5) {
+    return "senior";
+  }
+
+  if (years >= 2) {
+    return "middle";
+  }
+
+  return "junior";
+}
+
+function inferExperienceLevel(years: number, seniority: SeniorityLevel): ExperienceLevel {
+  if (seniority === "junior" && years < 1) {
+    return "basic";
+  }
+
+  return "practical";
+}
+
+function inferTransitionPriority(goal: UpgradeGoal): TransitionPriority {
+  return goal === "faster_search" ? "speed" : "income";
 }
 
 export function parseCareerSwitchFormPayload(payload: Record<string, unknown>): ParseResult<CareerSwitchFormInput> {
@@ -50,6 +101,10 @@ export function parseCareerSwitchFormPayload(payload: Record<string, unknown>): 
   if (!currentIncome.ok) {
     return currentIncome;
   }
+
+  const currentMarket: TargetMarket = isKnownValue(payload.current_market, TARGET_MARKET_VALUES)
+    ? payload.current_market
+    : "ukraine";
 
   const currentRole = parseRequiredString(payload.current_role, "Поточна роль");
   if (!currentRole.ok) {
@@ -68,38 +123,56 @@ export function parseCareerSwitchFormPayload(payload: Record<string, unknown>): 
     };
   }
 
-  const targetRole = parseRequiredString(payload.target_role, "Бажана роль або тип вакансій");
-  if (!targetRole.ok) {
-    return targetRole;
-  }
+  const seniorityLevel: SeniorityLevel = isKnownValue(payload.seniority_level, SENIORITY_LEVEL_VALUES)
+    ? payload.seniority_level
+    : inferSeniority(currentExperienceYears.value);
 
-  if (!isKnownValue(payload.experience_level, EXPERIENCE_LEVEL_VALUES)) {
-    return { ok: false, error: "Релевантний досвід: оберіть один із варіантів." };
-  }
+  const targetRole = parseOptionalString(payload.target_role) ?? currentRole.value;
+
+  const upgradeGoal: UpgradeGoal = isKnownValue(payload.upgrade_goal, UPGRADE_GOAL_VALUES)
+    ? payload.upgrade_goal
+    : "higher_income";
 
   if (!isKnownValue(payload.english_level, ENGLISH_LEVEL_VALUES)) {
     return { ok: false, error: "Англійська: оберіть один із варіантів." };
   }
 
   if (!isKnownValue(payload.target_market, TARGET_MARKET_VALUES)) {
-    return { ok: false, error: "Цільовий ринок: оберіть один із варіантів." };
+    return { ok: false, error: "Ринок для покращення: оберіть один із варіантів." };
   }
 
-  if (!isKnownValue(payload.transition_priority, TRANSITION_PRIORITY_VALUES)) {
-    return { ok: false, error: "Головний пріоритет: оберіть один із варіантів." };
-  }
+  const jobSearchStatus: JobSearchStatus = isKnownValue(payload.job_search_status, JOB_SEARCH_STATUS_VALUES)
+    ? payload.job_search_status
+    : "not_started";
+
+  const resumeStatus: ResumeStatus = isKnownValue(payload.resume_status, RESUME_STATUS_VALUES)
+    ? payload.resume_status
+    : "outdated";
+
+  const experienceLevel: ExperienceLevel = isKnownValue(payload.experience_level, EXPERIENCE_LEVEL_VALUES)
+    ? payload.experience_level
+    : inferExperienceLevel(currentExperienceYears.value, seniorityLevel);
+
+  const transitionPriority: TransitionPriority = isKnownValue(payload.transition_priority, TRANSITION_PRIORITY_VALUES)
+    ? payload.transition_priority
+    : inferTransitionPriority(upgradeGoal);
 
   return {
     ok: true,
     value: {
       current_income: currentIncome.value,
+      current_market: currentMarket,
       current_role: currentRole.value,
       current_experience_years: currentExperienceYears.value,
-      target_role: targetRole.value,
-      experience_level: payload.experience_level,
+      seniority_level: seniorityLevel,
+      target_role: targetRole,
+      upgrade_goal: upgradeGoal,
       english_level: payload.english_level,
       target_market: payload.target_market,
-      transition_priority: payload.transition_priority
+      job_search_status: jobSearchStatus,
+      resume_status: resumeStatus,
+      experience_level: experienceLevel,
+      transition_priority: transitionPriority
     }
   };
 }
@@ -130,6 +203,43 @@ export const targetMarketOptions: Array<{ value: TargetMarket; label: string }> 
   { value: "ukraine", label: "Україна" },
   { value: "remote", label: "Міжнародний ринок" },
   { value: "abroad", label: "Локальна робота за кордоном" }
+];
+
+export const currentMarketOptions: Array<{ value: TargetMarket; label: string }> = [
+  { value: "ukraine", label: "Україна" },
+  { value: "remote", label: "Працюю з міжнародним ринком" },
+  { value: "abroad", label: "Працюю локально за кордоном" }
+];
+
+export const seniorityLevelOptions: Array<{ value: SeniorityLevel; label: string }> = [
+  { value: "junior", label: "Junior / початковий рівень" },
+  { value: "middle", label: "Middle / самостійний спеціаліст" },
+  { value: "senior", label: "Senior / сильний спеціаліст" },
+  { value: "lead", label: "Lead / керівний рівень" },
+  { value: "manager", label: "Manager / керую командою" }
+];
+
+export const upgradeGoalOptions: Array<{ value: UpgradeGoal; label: string }> = [
+  { value: "higher_income", label: "Заробляти більше в поточній ролі" },
+  { value: "better_company", label: "Перейти в сильнішу компанію" },
+  { value: "international_market", label: "Вийти на міжнародний ринок" },
+  { value: "relocation", label: "Знайти роботу за кордоном" },
+  { value: "faster_search", label: "Швидше отримати нову пропозицію" }
+];
+
+export const jobSearchStatusOptions: Array<{ value: JobSearchStatus; label: string }> = [
+  { value: "not_started", label: "Ще не шукаю активно" },
+  { value: "preparing", label: "Готую резюме й профіль" },
+  { value: "applying", label: "Відгукуюсь, але мало відповідей" },
+  { value: "interviewing", label: "Вже проходжу співбесіди" },
+  { value: "offer", label: "Є пропозиція, хочу порівняти" }
+];
+
+export const resumeStatusOptions: Array<{ value: ResumeStatus; label: string }> = [
+  { value: "none", label: "Резюме ще немає" },
+  { value: "outdated", label: "Є, але давно не оновлював" },
+  { value: "ready", label: "Є актуальне резюме" },
+  { value: "needs_improvement", label: "Є, але воно слабко працює" }
 ];
 
 export const transitionPriorityOptions: Array<{ value: TransitionPriority; label: string }> = [

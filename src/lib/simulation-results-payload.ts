@@ -5,9 +5,11 @@ import {
 import {
   parseStoredCareerSwitchInputs,
   type EnglishLevel,
-  type ExperienceLevel,
+  type JobSearchStatus,
+  type ResumeStatus,
+  type SeniorityLevel,
   type TargetMarket,
-  type TransitionPriority
+  type UpgradeGoal
 } from "@/lib/career-switch-form";
 
 type AnalysisMeta = {
@@ -120,16 +122,12 @@ function formatSignedCurrency(value: number) {
   return `${sign}${currencyFormatter.format(Math.abs(rounded)).replace(/\u00A0/g, " ")} грн`;
 }
 
+function formatPercent(value: number) {
+  return `${Math.round(value)}%`;
+}
+
 function formatRange(low: number, high: number) {
   return `${formatCurrency(low)} - ${formatCurrency(high)}`;
-}
-
-function formatMonths(value: number) {
-  return `${Math.round(value)} міс.`;
-}
-
-function formatProbability(value: number) {
-  return `${Math.round(value * 100)}%`;
 }
 
 function formatConfidence(value: number) {
@@ -182,6 +180,23 @@ function levelLabel(level: "junior" | "middle" | "senior" | "lead") {
   }
 }
 
+function seniorityLevelLabel(level: SeniorityLevel) {
+  switch (level) {
+    case "junior":
+      return "Junior";
+    case "middle":
+      return "Middle";
+    case "senior":
+      return "Senior";
+    case "lead":
+      return "Lead";
+    case "manager":
+      return "Manager";
+    default:
+      return level;
+  }
+}
+
 function englishLevelLabel(level: EnglishLevel) {
   switch (level) {
     case "basic":
@@ -210,27 +225,52 @@ function targetMarketLabel(market: TargetMarket) {
   }
 }
 
-function experienceLevelLabel(level: ExperienceLevel) {
-  switch (level) {
-    case "none":
-      return "Немає досвіду";
-    case "basic":
-      return "Є базові знання";
-    case "practical":
-      return "Є практичний досвід";
+function upgradeGoalLabel(goal: UpgradeGoal) {
+  switch (goal) {
+    case "higher_income":
+      return "Вищий дохід";
+    case "better_company":
+      return "Сильніша компанія";
+    case "international_market":
+      return "Міжнародний ринок";
+    case "relocation":
+      return "Робота за кордоном";
+    case "faster_search":
+      return "Швидший пошук";
     default:
-      return level;
+      return goal;
   }
 }
 
-function transitionPriorityLabel(priority: TransitionPriority) {
-  switch (priority) {
-    case "speed":
-      return "Швидше перейти";
-    case "income":
-      return "Максимізувати дохід";
+function jobSearchStatusLabel(status: JobSearchStatus) {
+  switch (status) {
+    case "not_started":
+      return "Ще не шукаєте активно";
+    case "preparing":
+      return "Готуєтесь до пошуку";
+    case "applying":
+      return "Відгукуєтесь на вакансії";
+    case "interviewing":
+      return "Проходите співбесіди";
+    case "offer":
+      return "Маєте пропозицію";
     default:
-      return priority;
+      return status;
+  }
+}
+
+function resumeStatusLabel(status: ResumeStatus) {
+  switch (status) {
+    case "none":
+      return "Резюме ще немає";
+    case "outdated":
+      return "Резюме потрібно оновити";
+    case "ready":
+      return "Резюме актуальне";
+    case "needs_improvement":
+      return "Резюме варто посилити";
+    default:
+      return status;
   }
 }
 
@@ -280,11 +320,11 @@ export function buildSimulationResultsPayload({
 
   const targetDetails: DetailRow[] = [
     {
-      label: `Реалістичний стартовий рівень (${levelLabel(targetRole.entry_level_for_switcher)})`,
+      label: `Реалістичний рівень входу (${levelLabel(targetRole.entry_level_for_switcher)})`,
       value: formatCurrency(targetRole.entry_salary_range.median)
     },
     {
-      label: "Стартова вилка входу",
+      label: "Вилка для найближчих вакансій",
       value: formatRange(targetRole.entry_salary_range.low, targetRole.entry_salary_range.high)
     },
     {
@@ -299,16 +339,28 @@ export function buildSimulationResultsPayload({
 
   const metaChips = [
     `Поточна роль: ${currentRole.canonical_title}`,
-    `Цільова роль: ${targetRole.canonical_title}`,
+    `Рівень: ${seniorityLevelLabel(inputs.seniority_level)}`,
+    `Поточний ринок: ${targetMarketLabel(inputs.current_market)}`,
+    `Ціль: ${upgradeGoalLabel(inputs.upgrade_goal)}`,
+    `Напрям: ${targetMarketLabel(inputs.target_market)}`,
     `Англійська: ${englishLevelLabel(inputs.english_level)}`,
-    `Ринок: ${targetMarketLabel(inputs.target_market)}`,
-    `Пріоритет: ${transitionPriorityLabel(inputs.transition_priority)}`,
-    `Досвід у цілі: ${experienceLevelLabel(inputs.experience_level)}`
+    resumeStatusLabel(inputs.resume_status)
   ];
 
   if (createdAt) {
     metaChips.push(`Дата аналізу: ${createdAt}`);
   }
+
+  const marketMedianGap = currentRole.current_market_salary_range.median - inputs.current_income;
+  const incomePosition =
+    Math.abs(marketMedianGap) <= inputs.current_income * 0.08
+      ? "близько до ринку"
+      : marketMedianGap > 0
+        ? "нижче орієнтира ринку"
+        : "вище базового орієнтира";
+  const strongerDirectionMedian = Math.max(targetRole.entry_salary_range.median, targetRole.senior_salary_range.median);
+  const growthPotentialPercent =
+    inputs.current_income > 0 ? Math.max(0, ((strongerDirectionMedian - inputs.current_income) / inputs.current_income) * 100) : 0;
 
   return {
     headline: narrative.headline,
@@ -318,36 +370,36 @@ export function buildSimulationResultsPayload({
       {
         label: "Ваш дохід зараз",
         value: formatCurrency(inputs.current_income),
-        note: "Фактична точка, від якої формується висновок.",
+        note: `Оцінка відносно ринку: ${incomePosition}.`,
         tone: "default"
       },
       {
-        label: "Шанс оферу за 12 міс.",
-        value: formatProbability(targetRole.probability_of_getting_job_within_12_months),
-        note: "Оцінка реалістичності отримати офер за вашим профілем.",
+        label: "Орієнтир ринку",
+        value: formatCurrency(currentRole.current_market_salary_range.median),
+        note: `Типова середина вилки для рівня ${levelLabel(currentRole.current_level_estimate)} у вашому ринку.`,
         tone: "default"
       },
       {
-        label: "Час до першого оферу",
-        value: formatMonths(targetRole.time_to_first_offer_months.base),
-        note: "Не гарантія, а орієнтир для поточного ринку й вашого профілю.",
+        label: "Сильніший напрям",
+        value: targetMarketLabel(inputs.target_market),
+        note: targetRole.summary,
         tone: "default"
       },
       {
-        label: "Різниця в стелі ролей",
-        value: formatSignedCurrency(comparison.ceiling_gap_median),
-        note: "Різниця між потенційною стелею поточної та цільової ролі.",
-        tone: "default"
+        label: "Потенціал росту",
+        value: `+${formatPercent(growthPotentialPercent)}`,
+        note: `Орієнтир для сильнішого напряму: ${formatCurrency(strongerDirectionMedian)} на місяць.`,
+        tone: growthPotentialPercent > 15 ? "success" : "default"
       },
       {
-        label: "Ризик сценарію",
+        label: "Складність шляху",
         value: riskLevelLabel(riskAssessment.level),
         note: riskAssessment.summary,
         tone: riskLevelTone(riskAssessment.level)
       }
     ],
     currentSnapshot: {
-      eyebrow: `Поточна роль • ${currentRole.market_scope_label}`,
+      eyebrow: `Поточний профіль • ${currentRole.market_scope_label}`,
       title: currentRole.canonical_title,
       summary: currentRole.summary,
       details: currentDetails,
@@ -355,7 +407,7 @@ export function buildSimulationResultsPayload({
       caveats: currentRole.caveats
     },
     targetSnapshot: {
-      eyebrow: `Цільова роль • ${targetRole.market_scope_label}`,
+      eyebrow: `Сильніший напрям • ${targetRole.market_scope_label}`,
       title: targetRole.canonical_title,
       summary: targetRole.summary,
       details: targetDetails,
@@ -367,15 +419,15 @@ export function buildSimulationResultsPayload({
       interpretation: comparison.interpretation,
       rows: [
         {
-          label: "Потенційна стеля поточної ролі",
+          label: "Потенційна стеля поточного напряму",
           value: `${levelLabel(currentRole.best_case_level)} • ${formatCurrency(currentRole.best_case_salary_range.median)}`
         },
         {
-          label: "Потенційна стеля цільової ролі",
+          label: "Потенційна стеля сильнішого напряму",
           value: `${levelLabel(targetRole.best_case_level)} • ${formatCurrency(targetRole.best_case_salary_range.median)}`
         },
         {
-          label: "Різниця між стелями",
+          label: "Різниця між верхніми орієнтирами",
           value: formatSignedCurrency(comparison.ceiling_gap_median)
         }
       ]

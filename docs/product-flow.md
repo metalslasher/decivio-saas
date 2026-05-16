@@ -6,7 +6,7 @@ Status: current public product flow. The dashboard internals are intentionally o
 
 1. User lands on `/`.
 2. Header CTA "Змінити кар'єру" opens `/simulate`.
-3. User completes the four-step simulation without registration.
+3. User completes the four-step income-and-market assessment without registration.
 4. App creates a guest simulation and opens `/results?simulationId=<id>`.
 5. Result page gives a useful first answer and sends the user to `/pricing`.
 6. User chooses a plan.
@@ -32,8 +32,8 @@ Status: current public product flow. The dashboard internals are intentionally o
 
 ## What The Free Result Should Do
 
-- Confirm that Decivio understood the user's current role, target role, market, English level, and priority.
-- Show the main simulation estimate in a compact, credible way.
+- Confirm that the service understood the user's current role, income, market, goal, English level, search status, and resume readiness.
+- Show the main income-and-market diagnosis in a compact, credible way.
 - Explain the reasoning enough to build trust.
 - Lead naturally to pricing for the full practical plan.
 

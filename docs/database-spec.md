@@ -105,16 +105,23 @@ Current `inputs` contract:
 ```json
 {
   "current_income": 45000,
+  "current_market": "ukraine|remote|abroad",
   "current_role": "Маркетолог",
   "current_experience_years": 5,
-  "target_role": "Product Manager",
-  "experience_level": "none|basic|practical",
+  "seniority_level": "junior|middle|senior|lead|manager",
+  "target_role": "Маркетолог",
+  "upgrade_goal": "higher_income|better_company|international_market|relocation|faster_search",
   "english_level": "basic|intermediate|upper_intermediate|advanced",
   "target_market": "ukraine|remote|abroad",
+  "job_search_status": "not_started|preparing|applying|interviewing|offer",
+  "resume_status": "none|outdated|ready|needs_improvement",
+  "experience_level": "none|basic|practical",
   "transition_priority": "speed|income",
   "country": "UA"
 }
 ```
+
+`experience_level` and `transition_priority` are derived compatibility fields for dashboard code that still reads the previous contract.
 
 ### `simulation_results`
 

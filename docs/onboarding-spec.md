@@ -12,84 +12,97 @@ Status: current. This document describes the public `/simulate` flow.
 
 ## Goal
 
-The onboarding should collect the smallest useful set of facts for a first public simulation estimate.
+The onboarding collects enough facts to produce a useful first income-and-market diagnosis.
 
-The user does not need an account before submitting the simulation. Registration/login happens later, when the user chooses a paid plan or explicitly clicks "Вхід" in the header.
+The user does not need an account before submitting the form. Registration/login happens later, when the user chooses a paid plan or explicitly clicks "Вхід" in the header.
+
+The current product direction is career upgrade, not radical career change from zero. The form can still accept a desired role, but leaving it empty means "evaluate my current role and better opportunities around it".
 
 ## Current Steps
 
-### Step 1: Income
+### Step 1: Income And Market
 
-Purpose: understand the current financial baseline.
+Purpose: understand the current financial and market baseline.
 
-Field:
+Fields:
 
-- `current_income`: required number, minimum `0`, shown as monthly net income in UAH.
+- `current_income`: required number, minimum `0`, monthly net income in UAH.
+- `current_market`: required select:
+  - `ukraine`
+  - `remote` (shown as international market)
+  - `abroad`
 
 UI notes:
 
-- The input is full width.
-- Do not show an example placeholder.
-- Show the unit as "грн/міс" near the field.
+- Do not show an example placeholder in the income field.
+- Show the income unit as "грн/міс".
 
-### Step 2: Current Situation
+### Step 2: Role And Experience
 
-Purpose: understand where the user is now.
+Purpose: understand the user's actual profile.
 
 Fields:
 
 - `current_role`: required text.
 - `current_experience_years`: required number, minimum `0`, maximum `60`, shown in years.
+- `seniority_level`: required select:
+  - `junior`
+  - `middle`
+  - `senior`
+  - `lead`
+  - `manager`
 
-UI notes:
+### Step 3: Improvement Goal
 
-- The two fields share the row on desktop and stack on mobile.
-- The experience field uses a visible "років" unit instead of putting "(років)" in the label.
-
-### Step 3: Target
-
-Purpose: understand the role the user wants to move into.
-
-Fields:
-
-- `target_role`: required text.
-- `experience_level`: required select with values:
-  - `none`
-  - `basic`
-  - `practical`
-
-Validation:
-
-- `target_role` should not be identical to `current_role` after trimming and lowercasing.
-
-### Step 4: Transition Conditions
-
-Purpose: tune the result to the user's constraints and main priority.
+Purpose: understand what the user wants to improve next.
 
 Fields:
 
-- `english_level`: required select with values:
+- `upgrade_goal`: required select:
+  - `higher_income`
+  - `better_company`
+  - `international_market`
+  - `relocation`
+  - `faster_search`
+- `target_role`: optional text. If empty, the API uses `current_role`.
+- `target_market`: required select:
+  - `ukraine`
+  - `remote` (shown as international market)
+  - `abroad`
+
+### Step 4: Search Readiness
+
+Purpose: tune the result to the user's practical constraints.
+
+Fields:
+
+- `english_level`: required select:
   - `basic`
   - `intermediate`
   - `upper_intermediate`
   - `advanced`
-- `target_market`: required select with values:
-  - `ukraine`
-  - `remote`
-  - `abroad`
-- `transition_priority`: required select with values:
-  - `speed`
-  - `income`
+- `job_search_status`: required select:
+  - `not_started`
+  - `preparing`
+  - `applying`
+  - `interviewing`
+  - `offer`
+- `resume_status`: required select:
+  - `none`
+  - `outdated`
+  - `ready`
+  - `needs_improvement`
 
-UI copy should explain the options in user language, for example:
+## Compatibility Fields
 
-- `basic`: "A1-A2 (базовий рівень)"
-- `intermediate`: "B1 (можу спілкуватися)"
-- `upper_intermediate`: "B2 (можу проходити інтерв'ю)"
-- `advanced`: "C1+ (вільна комунікація)"
-- `ukraine`: "Україна"
-- `remote`: "Міжнародний ринок"
-- `abroad`: "Локальна робота за кордоном"
+`experience_level` and `transition_priority` remain in the form parser as derived compatibility fields because existing dashboard code still reads them.
+
+For new public submissions:
+
+- `experience_level` is inferred from experience and seniority.
+- `transition_priority` is inferred from `upgrade_goal`.
+
+Do not add these two fields back to the public wizard unless the product direction changes.
 
 ## Submit Behavior
 

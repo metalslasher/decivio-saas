@@ -1,6 +1,6 @@
 # Results Page Spec
 
-Status: current. This document describes the public result page after the four-step simulation.
+Status: current. This document describes the public result page after the four-step `/simulate` form.
 
 ## Source Of Truth
 
@@ -28,12 +28,13 @@ Access rules:
 
 ## Page Goal
 
-The free result should give the user a useful first answer:
+The free result should give the user a useful first diagnosis:
 
-- what the transition looks like,
-- how realistic it is,
-- where the main risk sits,
-- what the next paid product unlocks.
+- where their current income sits relative to role and market;
+- which direction looks stronger for the next move;
+- what risk or readiness issue matters most;
+- which facts were used for personalization;
+- why the paid product is the natural next step.
 
 It should not expose the full paid dashboard plan before checkout.
 
@@ -45,39 +46,40 @@ Content:
 
 - Generated headline.
 - Short summary.
-- Meta chips based on selected target role, market, English level, and priority.
+- Meta chips based on current role, seniority, current market, goal, target market, English level, and resume status.
 
 ### Metric Cards
 
 Current cards:
 
 - Current income.
-- Chance of first offer within 12 months.
-- Time to first offer.
-- Ceiling gap.
-- Transition risk.
+- Market reference.
+- Stronger direction.
+- Growth potential.
+- Path difficulty.
 
-Important:
+The page should not show optimistic/base/pessimistic timing rows in the free result.
 
-- The "Time to first offer" card shows one base value only.
-- Do not show optimistic/base/pessimistic rows unless the product decision changes again.
+### Profile Snapshot
 
-### Scenario Snapshot
+Shows current role and market context in a compact salary/profile panel.
 
-Shows current-role and target-role salary/market context in a compact comparison.
+### Stronger Direction Snapshot
+
+Shows the stronger direction being evaluated: same role, better company, international market, local work abroad, or a specified desired role.
 
 ### Comparison
 
-Shows the main side-by-side comparison between the current direction and target direction.
+Explains the practical meaning of the result without over-promising.
 
 ### Explanation
 
 Sections:
 
 - Why this result.
-- Personalization notes.
+- What personalized the answer.
 
-These sections should explain the reasoning in plain Ukrainian and avoid generic motivational text.
+These sections should use plain Ukrainian and avoid generic motivational text.
 
 ### CTA
 
@@ -85,11 +87,13 @@ Primary path:
 
 - Go to `/pricing`.
 
+The CTA should make clear that the paid plan opens the practical route: profile improvements, resume, vacancies, interview preparation, and offer evaluation.
+
 Authenticated paid users may also get a path into the dashboard scenario when access is active.
 
 ## Data Contract
 
-`simulation_results.summary_metrics` contains the numeric basis for the cards:
+`simulation_results.summary_metrics` remains a compact technical summary:
 
 ```json
 {
@@ -105,9 +109,9 @@ Authenticated paid users may also get a path into the dashboard scenario when ac
 }
 ```
 
-`simulation_results.ai_summary` contains the generated market profile, narrative, guidance, and metadata.
+This shape is still used internally by the analysis generator. The public UI maps it into income/market language through `buildSimulationResultsPayload()` and should not depend directly on raw AI JSON.
 
-The UI should read through `buildSimulationResultsPayload()` instead of depending directly on raw AI JSON shape.
+`simulation_results.ai_summary` contains the generated market profile, narrative, guidance, and metadata.
 
 ## Error Handling
 

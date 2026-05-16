@@ -288,13 +288,18 @@ export async function POST(request: Request) {
     analysisResult = await generateCareerSwitchAnalysis({
       country: "UA",
       current_income: parsed.value.current_income,
+      current_market: parsed.value.current_market,
       current_role_text: parsed.value.current_role,
       years_in_current_role: parsed.value.current_experience_years,
+      seniority_level: parsed.value.seniority_level,
       target_role_text: parsed.value.target_role,
+      upgrade_goal: parsed.value.upgrade_goal,
       target_experience_level: parsed.value.experience_level,
       english_level: parsed.value.english_level,
       target_market: parsed.value.target_market,
-      transition_priority: parsed.value.transition_priority
+      transition_priority: parsed.value.transition_priority,
+      job_search_status: parsed.value.job_search_status,
+      resume_status: parsed.value.resume_status
     });
   } catch (error) {
     return NextResponse.json(

@@ -236,9 +236,9 @@ Recommendation: keep it as a later helper layer that works inside the route. Do 
 
 ## Onboarding Direction
 
-The current onboarding should eventually change from career switch to career upgrade.
+The public onboarding now follows the career upgrade concept.
 
-Future fields should support:
+Current fields support:
 
 - current role;
 - current income;
@@ -248,7 +248,7 @@ Future fields should support:
 - English level;
 - current job-search status;
 - resume availability;
-- main goal: higher income, better company, remote work, relocation, faster job search, salary negotiation.
+- main goal: higher income, better company, international market, relocation, or faster job search.
 
 Important product change:
 
@@ -352,19 +352,16 @@ This protects AI costs and keeps pricing predictable.
 
 ## Implementation Order
 
-1. Update product copy and docs around the new concept.
-2. Reframe landing page from career switch to career upgrade and income potential.
-3. Rework `/simulate` onboarding to support same-role upgrade and market comparison.
-4. Rework `/results` to show income-market diagnosis instead of career-switch diagnosis.
-5. Rework dashboard home into a guided career upgrade route.
-6. Implement Income And Market Audit as the first true paid module.
-7. Implement Resume Upgrade.
-8. Implement Vacancy Match.
-9. Implement Interview Prep.
-10. Implement Offer And Salary Decision.
-11. Add AI usage limits and credit accounting.
-12. Revisit pricing page around monthly vs 3-month plan.
-13. Add funnel analytics before scaling paid traffic.
+1. Keep public copy and docs aligned around career upgrade and income potential.
+2. Rework dashboard home into a guided career upgrade route.
+3. Implement Income And Market Audit as the first true paid module.
+4. Implement Resume Upgrade.
+5. Implement Vacancy Match.
+6. Implement Interview Prep.
+7. Implement Offer And Salary Decision.
+8. Add AI usage limits and credit accounting.
+9. Revisit pricing page around monthly vs 3-month plan.
+10. Add funnel analytics before scaling paid traffic.
 
 ## Success Metrics
 

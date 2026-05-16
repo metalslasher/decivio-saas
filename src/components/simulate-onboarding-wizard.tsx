@@ -5,25 +5,33 @@ import { useMemo, useState } from "react";
 import { getSupabaseBrowserClient } from "@/lib/db/supabase-browser";
 import { buildAuthorizedHeaders, getAccessTokenFromSupabase } from "@/lib/auth-session-client";
 import {
+  currentMarketOptions,
   englishLevelOptions,
-  experienceLevelOptions,
+  jobSearchStatusOptions,
+  resumeStatusOptions,
+  seniorityLevelOptions,
   targetMarketOptions,
-  transitionPriorityOptions,
   type EnglishLevel,
-  type ExperienceLevel,
+  type JobSearchStatus,
+  type ResumeStatus,
+  type SeniorityLevel,
   type TargetMarket,
-  type TransitionPriority
+  type UpgradeGoal,
+  upgradeGoalOptions
 } from "@/lib/career-switch-form";
 
 type WizardForm = {
   current_income: string;
+  current_market: TargetMarket | "";
   current_role: string;
   current_experience_years: string;
+  seniority_level: SeniorityLevel | "";
   target_role: string;
-  experience_level: ExperienceLevel | "";
+  upgrade_goal: UpgradeGoal | "";
   english_level: EnglishLevel | "";
   target_market: TargetMarket | "";
-  transition_priority: TransitionPriority | "";
+  job_search_status: JobSearchStatus | "";
+  resume_status: ResumeStatus | "";
 };
 
 type WizardField = keyof WizardForm;
@@ -33,36 +41,39 @@ const REQUIRED_ERROR = "Поле обов'язкове.";
 
 const steps: Array<{ title: string; helper: string; fields: WizardField[] }> = [
   {
-    title: "Ваш поточний дохід",
-    helper: "Це потрібно, щоб відштовхуватись від вашої реальної стартової точки.",
-    fields: ["current_income"]
+    title: "Дохід і ринок зараз",
+    helper: "Потрібно зрозуміти вашу стартову точку: скільки ви отримуєте і на якому ринку працюєте.",
+    fields: ["current_income", "current_market"]
   },
   {
-    title: "Поточна ситуація",
-    helper: "Додайте роль і досвід, щоб оцінка спиралась на вашу реальну базу.",
-    fields: ["current_role", "current_experience_years"]
+    title: "Роль і досвід",
+    helper: "Додайте вашу роль, стаж і рівень, щоб оцінка не була відірвана від реального профілю.",
+    fields: ["current_role", "current_experience_years", "seniority_level"]
   },
   {
-    title: "Краща можливість",
-    helper: "Вкажіть роль або тип вакансій, які хочете перевірити: у своїй сфері, на сильнішому ринку або в кращій компанії.",
-    fields: ["target_role", "experience_level"]
+    title: "Що хочете покращити",
+    helper: "Оберіть головну ціль. Якщо хочете залишитись у тій самій ролі, поле з бажаною роллю можна не заповнювати.",
+    fields: ["upgrade_goal", "target_market"]
   },
   {
-    title: "Умови ринку",
-    helper: "Оберіть мовний рівень, ринок і головний пріоритет, щоб прогноз точніше врахував ваші обмеження.",
-    fields: ["english_level", "target_market", "transition_priority"]
+    title: "Готовність до пошуку",
+    helper: "Ці відповіді допоможуть оцінити, що саме може стримувати кращі відповіді від роботодавців.",
+    fields: ["english_level", "job_search_status", "resume_status"]
   }
 ];
 
 const initialValues: WizardForm = {
   current_income: "",
+  current_market: "",
   current_role: "",
   current_experience_years: "",
+  seniority_level: "",
   target_role: "",
-  experience_level: "",
+  upgrade_goal: "",
   english_level: "",
   target_market: "",
-  transition_priority: ""
+  job_search_status: "",
+  resume_status: ""
 };
 
 const inputClassName = "field-surface mt-1 h-[3.3rem]";
@@ -242,13 +253,16 @@ export function SimulateOnboardingWizard() {
         }),
         body: JSON.stringify({
           current_income: Number(values.current_income),
+          current_market: values.current_market,
           current_role: values.current_role,
           current_experience_years: Number(values.current_experience_years),
+          seniority_level: values.seniority_level,
           target_role: values.target_role,
-          experience_level: values.experience_level,
+          upgrade_goal: values.upgrade_goal,
           english_level: values.english_level,
           target_market: values.target_market,
-          transition_priority: values.transition_priority
+          job_search_status: values.job_search_status,
+          resume_status: values.resume_status
         })
       });
 
@@ -281,10 +295,10 @@ export function SimulateOnboardingWizard() {
     <section className="space-y-6 py-4 md:space-y-8 md:py-8">
       <header className="mx-auto max-w-3xl space-y-3 text-center">
         <h1 className="page-title mx-auto max-w-[13ch]">
-          Оцініть <span className="text-accent">дохід і ринок</span>
+          Оцініть <span className="text-accent">свій дохід</span>
         </h1>
         <p className="lead-copy">
-          Надайте інформацію про поточну роль і бажану можливість, а ми підготуємо прогноз доходу, ринку та першого практичного кроку.
+          Дайте кілька фактів про роль, ринок і пошук, а ми покажемо, де зараз є простір для кращої пропозиції.
         </p>
       </header>
 
@@ -312,31 +326,44 @@ export function SimulateOnboardingWizard() {
               </div>
 
               {currentStep === 0 ? (
-                <div className="grid gap-2">
-                <label className="sr-only" htmlFor="current-income">
-                  Поточний чистий дохід
-                </label>
-                <div className={unitInputShellClassName}>
-                  <input
-                    id="current-income"
-                    type="number"
-                    min={0}
-                    inputMode="decimal"
-                    value={values.current_income}
-                    onChange={(event) => updateValue("current_income", event.target.value)}
-                    className={unitInputClassName}
-                    aria-invalid={Boolean(errors.current_income)}
-                    aria-describedby={errors.current_income ? "current-income-error" : undefined}
+                <div className="grid gap-4 md:grid-cols-[minmax(0,1.05fr)_minmax(14rem,0.95fr)]">
+                  <div className="grid gap-2">
+                    <label className="sr-only" htmlFor="current-income">
+                      Поточний чистий дохід
+                    </label>
+                    <div className={unitInputShellClassName}>
+                      <input
+                        id="current-income"
+                        type="number"
+                        min={0}
+                        inputMode="decimal"
+                        value={values.current_income}
+                        onChange={(event) => updateValue("current_income", event.target.value)}
+                        className={unitInputClassName}
+                        aria-invalid={Boolean(errors.current_income)}
+                        aria-describedby={errors.current_income ? "current-income-error" : undefined}
+                        disabled={isSubmitting}
+                      />
+                      <span className={unitLabelClassName}>грн/міс</span>
+                    </div>
+                    <FieldError id="current-income-error" message={errors.current_income} />
+                  </div>
+
+                  <SelectField
+                    id="current-market"
+                    label="Поточний ринок"
+                    value={values.current_market}
+                    options={currentMarketOptions}
+                    placeholder="Оберіть ринок"
+                    onChange={(nextValue) => updateValue("current_market", nextValue)}
                     disabled={isSubmitting}
+                    error={errors.current_market}
                   />
-                  <span className={unitLabelClassName}>грн/міс</span>
                 </div>
-                <FieldError id="current-income-error" message={errors.current_income} />
-              </div>
               ) : null}
 
             {currentStep === 1 ? (
-              <div className="grid gap-4 md:grid-cols-2">
+              <div className="grid gap-4 lg:grid-cols-3">
                 <label className="block text-sm font-medium leading-[1.6] text-[var(--text-muted)]" htmlFor="current-role">
                   Поточна роль
                   <input
@@ -374,11 +401,33 @@ export function SimulateOnboardingWizard() {
                   </div>
                   <FieldError id="current-experience-years-error" message={errors.current_experience_years} />
                 </label>
+
+                <SelectField
+                  id="seniority-level"
+                  label="Ваш рівень у ролі"
+                  value={values.seniority_level}
+                  options={seniorityLevelOptions}
+                  placeholder="Оберіть рівень"
+                  onChange={(nextValue) => updateValue("seniority_level", nextValue)}
+                  disabled={isSubmitting}
+                  error={errors.seniority_level}
+                />
               </div>
             ) : null}
 
             {currentStep === 2 ? (
-              <div className="grid gap-4 md:grid-cols-[minmax(0,1.15fr)_minmax(14rem,0.85fr)]">
+              <div className="grid gap-4 lg:grid-cols-3">
+                <SelectField
+                  id="upgrade-goal"
+                  label="Головна ціль"
+                  value={values.upgrade_goal}
+                  options={upgradeGoalOptions}
+                  placeholder="Оберіть ціль"
+                  onChange={(nextValue) => updateValue("upgrade_goal", nextValue)}
+                  disabled={isSubmitting}
+                  error={errors.upgrade_goal}
+                />
+
                 <label className="block text-sm font-medium leading-[1.6] text-[var(--text-muted)]" htmlFor="target-role">
                   Бажана роль або тип вакансій
                   <input
@@ -392,18 +441,21 @@ export function SimulateOnboardingWizard() {
                     autoComplete="off"
                     disabled={isSubmitting}
                   />
+                  <span className="mt-1 block text-xs leading-[1.5] text-[var(--text-soft)]">
+                    Якщо роль не змінюєте, можна залишити порожнім.
+                  </span>
                   <FieldError id="target-role-error" message={errors.target_role} />
                 </label>
 
                 <SelectField
-                  id="experience-level"
-                  label="Релевантний досвід у цій ролі"
-                  value={values.experience_level}
-                  options={experienceLevelOptions}
-                  placeholder="Оберіть рівень"
-                  onChange={(nextValue) => updateValue("experience_level", nextValue)}
+                  id="target-market"
+                  label="Ринок для покращення"
+                  value={values.target_market}
+                  options={targetMarketOptions}
+                  placeholder="Оберіть ринок"
+                  onChange={(nextValue) => updateValue("target_market", nextValue)}
                   disabled={isSubmitting}
-                  error={errors.experience_level}
+                  error={errors.target_market}
                 />
               </div>
             ) : null}
@@ -422,25 +474,25 @@ export function SimulateOnboardingWizard() {
                 />
 
                 <SelectField
-                  id="target-market"
-                  label="Цільовий ринок"
-                  value={values.target_market}
-                  options={targetMarketOptions}
-                  placeholder="Оберіть ринок"
-                  onChange={(nextValue) => updateValue("target_market", nextValue)}
+                  id="job-search-status"
+                  label="Стан пошуку"
+                  value={values.job_search_status}
+                  options={jobSearchStatusOptions}
+                  placeholder="Оберіть стан"
+                  onChange={(nextValue) => updateValue("job_search_status", nextValue)}
                   disabled={isSubmitting}
-                  error={errors.target_market}
+                  error={errors.job_search_status}
                 />
 
                 <SelectField
-                  id="transition-priority"
-                  label="Головний пріоритет"
-                  value={values.transition_priority}
-                  options={transitionPriorityOptions}
-                  placeholder="Оберіть пріоритет"
-                  onChange={(nextValue) => updateValue("transition_priority", nextValue)}
+                  id="resume-status"
+                  label="Стан резюме"
+                  value={values.resume_status}
+                  options={resumeStatusOptions}
+                  placeholder="Оберіть стан"
+                  onChange={(nextValue) => updateValue("resume_status", nextValue)}
                   disabled={isSubmitting}
-                  error={errors.transition_priority}
+                  error={errors.resume_status}
                 />
               </div>
             ) : null}

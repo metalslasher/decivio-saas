@@ -190,23 +190,26 @@ test("guest can simulate, register before checkout, pay in local test mode, and 
   await page.goto("/simulate");
 
   await page.locator("#current-income").fill("45000");
+  await page.locator("#current-market").selectOption("ukraine");
   await page.getByRole("button", { name: "Далі" }).click();
 
   await page.locator("#current-role").fill("Маркетолог");
   await page.locator("#current-experience-years").fill("5");
+  await page.locator("#seniority-level").selectOption("senior");
   await page.getByRole("button", { name: "Далі" }).click();
 
-  await page.locator("#target-role").fill("Product Manager");
-  await page.locator("#experience-level").selectOption("basic");
+  await page.locator("#upgrade-goal").selectOption("higher_income");
+  await page.locator("#target-role").fill("Маркетолог");
+  await page.locator("#target-market").selectOption("remote");
   await page.getByRole("button", { name: "Далі" }).click();
 
   await page.locator("#english-level").selectOption("intermediate");
-  await page.locator("#target-market").selectOption("ukraine");
-  await page.locator("#transition-priority").selectOption("income");
+  await page.locator("#job-search-status").selectOption("preparing");
+  await page.locator("#resume-status").selectOption("outdated");
   await page.getByRole("button", { name: /Отримати мій висновок/ }).click();
 
   await expect(page).toHaveURL(/\/results\?simulationId=/, { timeout: 60_000 });
-  await expect(page.getByText("тестовий прогноз переходу готовий")).toBeVisible();
+  await expect(page.getByText("Маркетолог: тестова оцінка доходу готова")).toBeVisible();
 
   await page.getByRole("link", { name: "Перейти до тарифів" }).click();
   await expect(page).toHaveURL(/\/pricing/);

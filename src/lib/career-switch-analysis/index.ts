@@ -2,8 +2,12 @@ import OpenAI from "openai";
 import type {
   EnglishLevel,
   ExperienceLevel,
+  JobSearchStatus,
+  ResumeStatus,
+  SeniorityLevel,
   TargetMarket,
-  TransitionPriority
+  TransitionPriority,
+  UpgradeGoal
 } from "@/lib/career-switch-form";
 import { isLocalTestModeEnabled } from "@/lib/test-mode";
 import { ANALYSIS_SCHEMA_NAME, careerSwitchAnalysisSchema } from "./schema";
@@ -60,6 +64,37 @@ const targetMarketDescriptions: Record<TargetMarket, string> = {
   ukraine: "орієнтир на ринок України",
   remote: "орієнтир на міжнародний ринок",
   abroad: "орієнтир на локальний ринок за кордоном"
+};
+
+const seniorityLevelDescriptions: Record<SeniorityLevel, string> = {
+  junior: "початковий рівень або перші самостійні задачі",
+  middle: "самостійний спеціаліст із помітним практичним досвідом",
+  senior: "сильний спеціаліст, який може вести складні задачі",
+  lead: "керівний або провідний рівень у функції",
+  manager: "керує командою, процесом або напрямом"
+};
+
+const upgradeGoalDescriptions: Record<UpgradeGoal, string> = {
+  higher_income: "головна ціль - підняти дохід у поточній ролі",
+  better_company: "головна ціль - перейти в сильнішу компанію",
+  international_market: "головна ціль - вийти на міжнародний ринок",
+  relocation: "головна ціль - знайти локальну роботу за кордоном",
+  faster_search: "головна ціль - швидше отримати нову пропозицію"
+};
+
+const jobSearchStatusDescriptions: Record<JobSearchStatus, string> = {
+  not_started: "ще не шукає активно",
+  preparing: "готує резюме, профіль і матеріали",
+  applying: "відгукується, але отримує мало відповідей",
+  interviewing: "вже проходить співбесіди",
+  offer: "має пропозицію і хоче оцінити її силу"
+};
+
+const resumeStatusDescriptions: Record<ResumeStatus, string> = {
+  none: "резюме ще немає",
+  outdated: "резюме є, але давно не оновлювалось",
+  ready: "є актуальне резюме",
+  needs_improvement: "резюме є, але воно слабко працює"
 };
 
 const transitionPriorityDescriptions: Record<TransitionPriority, string> = {
@@ -332,13 +367,14 @@ function buildSystemInstructions(currentDate: string) {
     "Мета сторінки результату: дати персоналізований, зрозумілий і переконливий висновок, який підштовхує людину перейти до глибшого платного плану.",
     "Використовуй веб-пошук, якщо він доступний, щоб спиратися на актуальні сигнали ринку, зарплат і вакансій.",
     "Не будуй п'ятирічний графік, не роби модель точки окупності, не описуй окупність по роках.",
-    "Фокус: поточна роль, цільова можливість, шанс отримати офер, стеля ролей на рівні Senior/Lead, вплив англійської, цільового ринку і пріоритету користувача.",
+    "Фокус: поточна роль і поточний ринок, чи відповідає дохід ринку, який напрям виглядає сильнішим, що блокує вищий дохід і чому платний план має допомогти пройти наступний етап.",
     "Усі зарплатні вилки поверни як приблизні щомісячні значення в UAH. Якщо ринок міжнародний або закордонний, конвертуй у UAH-еквівалент і чесно відобрази caveats.",
     "Відповідь має бути відчутно персоналізованою під вхідні дані. Уникай шаблонних загальних фраз.",
     "У видимому для користувача тексті уникай англіцизмів на кшталт best case, switcher, roadmap, remote. Пиши природною українською.",
     "Додатково поверни м’який індикатор ризику сценарію: рівень low|medium|high і коротке пояснення одним-двома реченнями.",
     "Безкоштовна сторінка може пояснювати, чому висновок саме такий, але не повинна розкривати повний покроковий план або детальний план виконання.",
-    "Заклик до дії має продавати наступний крок, але не розкривати платний функціонал.",
+    "Заклик до дії має вести до тарифів і платного плану, але не розкривати повний план дій.",
+    "Не подавай радикальну зміну професії як основну ідею. Якщо target_role_text збігається з current_role_text, трактуй це як підсилення поточної ролі або вихід на сильніший ринок.",
     "Для current_role.summary і target_role.summary пиши простою людською мовою, без канцеляриту.",
     "why_this_result і personalization_notes повинні бути короткими, конкретними і читабельними в UI.",
     "Використовуй conservative confidence і caveats, якщо ринок неоднорідний або дані неповні.",
@@ -351,9 +387,15 @@ function buildUserInput(input: CareerSwitchAnalysisRequest) {
     {
       country: input.country,
       current_income_uah_per_month: input.current_income,
+      current_market: input.current_market,
+      current_market_description: targetMarketDescriptions[input.current_market],
       current_role_text: input.current_role_text,
       years_in_current_role: input.years_in_current_role,
+      seniority_level: input.seniority_level,
+      seniority_level_description: seniorityLevelDescriptions[input.seniority_level],
       target_role_text: input.target_role_text,
+      upgrade_goal: input.upgrade_goal,
+      upgrade_goal_description: upgradeGoalDescriptions[input.upgrade_goal],
       target_experience_level: input.target_experience_level,
       target_experience_level_description: experienceLevelDescriptions[input.target_experience_level],
       english_level: input.english_level,
@@ -362,8 +404,12 @@ function buildUserInput(input: CareerSwitchAnalysisRequest) {
       target_market_description: targetMarketDescriptions[input.target_market],
       transition_priority: input.transition_priority,
       transition_priority_description: transitionPriorityDescriptions[input.transition_priority],
+      job_search_status: input.job_search_status,
+      job_search_status_description: jobSearchStatusDescriptions[input.job_search_status],
+      resume_status: input.resume_status,
+      resume_status_description: resumeStatusDescriptions[input.resume_status],
       product_goal:
-        "Безкоштовна сторінка має сказати, що зараз виглядає сильніше: залишатися в поточній ролі чи переходити в цільову. Пояснення має бути персональним, але без повного покрокового плану. Окремо потрібна м’яка оцінка ризику. Заклик до дії має підштовхувати до наступного кроку без детального розкриття платного функціоналу."
+        "Безкоштовна сторінка має показати персональний висновок: де людина зараз по доходу й ринку, який напрям може дати кращий дохід, що найбільше блокує зростання, і чому варто перейти до платного плану. Не розкривай повний покроковий план у безкоштовній відповіді."
     },
     null,
     2
@@ -540,16 +586,57 @@ function getMarketScopeLabel(market: TargetMarket) {
   }
 }
 
+function getSalaryLevelFromSeniority(level: SeniorityLevel): SalaryLevel {
+  switch (level) {
+    case "middle":
+      return "middle";
+    case "senior":
+      return "senior";
+    case "lead":
+    case "manager":
+      return "lead";
+    case "junior":
+    default:
+      return "junior";
+  }
+}
+
+function getGoalLabel(goal: UpgradeGoal) {
+  switch (goal) {
+    case "better_company":
+      return "сильніша компанія";
+    case "international_market":
+      return "міжнародний ринок";
+    case "relocation":
+      return "робота за кордоном";
+    case "faster_search":
+      return "швидший пошук";
+    case "higher_income":
+    default:
+      return "вищий дохід";
+  }
+}
+
 function buildMockCareerSwitchAnalysis(input: CareerSwitchAnalysisRequest): CareerSwitchAnalysisResult {
   const currentTitle = input.current_role_text.trim();
   const targetTitle = input.target_role_text.trim();
   const currentMedian = roundToHundreds(Math.max(input.current_income, 25000));
   const marketMultiplier = input.target_market === "remote" ? 1.28 : input.target_market === "abroad" ? 1.18 : 1;
+  const currentMarketMultiplier = input.current_market === "remote" ? 1.22 : input.current_market === "abroad" ? 1.14 : 1;
+  const seniorityMultiplier =
+    input.seniority_level === "lead" || input.seniority_level === "manager"
+      ? 1.18
+      : input.seniority_level === "senior"
+        ? 1.1
+        : input.seniority_level === "middle"
+          ? 1
+          : 0.86;
   const experienceMultiplier =
     input.target_experience_level === "practical" ? 1.05 : input.target_experience_level === "basic" ? 0.9 : 0.72;
   const targetEntryMedian = roundToHundreds(Math.max(18000, currentMedian * experienceMultiplier * marketMultiplier));
-  const currentSeniorMedian = roundToHundreds(Math.max(currentMedian + 12000, currentMedian * 1.35));
-  const currentBestMedian = roundToHundreds(Math.max(currentSeniorMedian + 10000, currentMedian * 1.65));
+  const currentMarketMedian = roundToHundreds(currentMedian * currentMarketMultiplier * seniorityMultiplier);
+  const currentSeniorMedian = roundToHundreds(Math.max(currentMarketMedian + 12000, currentMarketMedian * 1.28));
+  const currentBestMedian = roundToHundreds(Math.max(currentSeniorMedian + 10000, currentMarketMedian * 1.52));
   const targetSeniorMedian = roundToHundreds(Math.max(targetEntryMedian + 18000, targetEntryMedian * 1.55));
   const targetBestMedian = roundToHundreds(Math.max(targetSeniorMedian + 12000, targetEntryMedian * 1.9));
   const ceilingGapMedian = targetBestMedian - currentBestMedian;
@@ -585,6 +672,8 @@ function buildMockCareerSwitchAnalysis(input: CareerSwitchAnalysisRequest): Care
         : "low";
   const verdictLabel: VerdictLabel = betterLongTermDirection === "target_role" ? "switch" : "depends";
   const marketScopeLabel = getMarketScopeLabel(input.target_market);
+  const currentMarketScopeLabel = getMarketScopeLabel(input.current_market);
+  const goalLabel = getGoalLabel(input.upgrade_goal);
   const generatedAt = new Date().toISOString();
 
   return {
@@ -592,15 +681,15 @@ function buildMockCareerSwitchAnalysis(input: CareerSwitchAnalysisRequest): Care
       market_profile: {
         current_role: {
           canonical_title: currentTitle,
-          market_scope_label: "Україна",
-          current_level_estimate: input.years_in_current_role >= 5 ? "senior" : input.years_in_current_role >= 2 ? "middle" : "junior",
-          current_market_salary_range: buildSalaryRange(currentMedian),
+          market_scope_label: currentMarketScopeLabel,
+          current_level_estimate: getSalaryLevelFromSeniority(input.seniority_level),
+          current_market_salary_range: buildSalaryRange(currentMarketMedian),
           senior_salary_range: buildSalaryRange(currentSeniorMedian),
           best_case_level: "lead",
           best_case_salary_range: buildSalaryRange(currentBestMedian),
           confidence: 0.72,
           caveats: ["Локальний test mode використовує фіксований прогноз без зовнішнього AI-запиту."],
-          summary: `Поточна роль ${currentTitle} взята як стартова точка для перевірки всього сценарію.`
+          summary: `Поточна роль ${currentTitle} на ринку "${currentMarketScopeLabel}" взята як стартова точка для оцінки доходу й наступного кращого кроку.`
         },
         target_role: {
           canonical_title: targetTitle,
@@ -618,7 +707,7 @@ function buildMockCareerSwitchAnalysis(input: CareerSwitchAnalysisRequest): Care
           probability_of_getting_job_within_12_months: probability,
           confidence: 0.7,
           caveats: ["Прогноз призначений для локальної автоматичної перевірки flow, а не для реальної консультації."],
-          summary: `Цільова роль ${targetTitle} оцінена для ринку: ${marketScopeLabel}.`
+          summary: `${targetTitle} оцінено як напрям для цілі "${goalLabel}" на ринку: ${marketScopeLabel}.`
         },
         comparison: {
           better_long_term_direction: betterLongTermDirection,
@@ -637,23 +726,23 @@ function buildMockCareerSwitchAnalysis(input: CareerSwitchAnalysisRequest): Care
       },
       narrative: {
         verdict_label: verdictLabel,
-        headline: `${targetTitle}: тестовий прогноз готовий`,
+        headline: `${currentTitle}: тестова оцінка доходу готова`,
         summary:
-          "Decivio сформував контрольний результат без витрати OpenAI-запиту. Цей висновок потрібен, щоб автоматично перевірити шлях від симуляції до оплати й кабінету.",
+          `Ми порівняли ваш дохід із поточною роллю, рівнем "${input.seniority_level}" і напрямом "${goalLabel}". Це тестовий висновок без витрати OpenAI-запиту, але він повторює логіку персоналізованої сторінки результатів.`,
         why_this_result: [
           `Поточний дохід ${currentMedian} грн/міс використано як базу для порівняння.`,
-          `Цільовий ринок: ${marketScopeLabel}.`,
-          `Ймовірність отримати перший офер за 12 місяців оцінена на ${Math.round(probability * 100)}%.`
+          `Поточний ринок: ${currentMarketScopeLabel}; напрям для покращення: ${marketScopeLabel}.`,
+          `Стан пошуку: ${jobSearchStatusDescriptions[input.job_search_status]}; резюме: ${resumeStatusDescriptions[input.resume_status]}.`
         ],
         personalization_notes: [
           `Поточна роль: ${currentTitle}.`,
-          `Цільова роль: ${targetTitle}.`,
+          `Напрям, який перевіряємо: ${targetTitle}.`,
           input.transition_priority === "income"
-            ? "У прогнозі підсилено фокус на доході."
-            : "У прогнозі підсилено фокус на швидкості результату."
+            ? "У висновку посилено фокус на доході й сильнішому ринку."
+            : "У висновку посилено фокус на швидшому виході до нової пропозиції."
         ],
-        cta_title: "Відкрити практичний план підсилення",
-        cta_body: "Після оплати Decivio має прив'язати цей сценарій до акаунта і відкрити кабінет."
+        cta_title: "Відкрити повний маршрут під вищий дохід",
+        cta_body: "Після оплати результат прив'язується до акаунта, а в кабінеті відкривається практична частина: план, резюме, підготовка до співбесід і робота з пропозиціями."
       },
       guidance: {
         risk_assessment: {

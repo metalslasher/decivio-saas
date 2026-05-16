@@ -1,8 +1,12 @@
 import type {
   EnglishLevel,
   ExperienceLevel,
+  JobSearchStatus,
+  ResumeStatus,
+  SeniorityLevel,
   TargetMarket,
-  TransitionPriority
+  TransitionPriority,
+  UpgradeGoal
 } from "@/lib/career-switch-form";
 
 export type SalaryLevel = "junior" | "middle" | "senior" | "lead";
@@ -14,13 +18,18 @@ export type RiskLevel = "low" | "medium" | "high";
 export type CareerSwitchAnalysisRequest = {
   country: "UA";
   current_income: number;
+  current_market: TargetMarket;
   current_role_text: string;
   years_in_current_role: number;
+  seniority_level: SeniorityLevel;
   target_role_text: string;
+  upgrade_goal: UpgradeGoal;
   target_experience_level: ExperienceLevel;
   english_level: EnglishLevel;
   target_market: TargetMarket;
   transition_priority: TransitionPriority;
+  job_search_status: JobSearchStatus;
+  resume_status: ResumeStatus;
 };
 
 export type SalaryRange = {
