@@ -1043,7 +1043,7 @@ main {
 
 @media (min-width: 1024px) {
   .hero-forecast-shell {
-    max-width: none;
+    max-width: 35rem;
   }
 }
 

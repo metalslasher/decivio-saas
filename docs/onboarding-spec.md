@@ -59,7 +59,6 @@ Purpose: understand what the user wants to improve next.
 Fields:
 
 - `upgrade_goal`: required select:
-  - `higher_income`
   - `better_company`
   - `international_market`
   - `relocation`

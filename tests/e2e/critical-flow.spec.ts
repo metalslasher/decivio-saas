@@ -198,7 +198,7 @@ test("guest can simulate, register before checkout, pay in local test mode, and 
   await page.locator("#seniority-level").selectOption("senior");
   await page.getByRole("button", { name: "Далі" }).click();
 
-  await page.locator("#upgrade-goal").selectOption("higher_income");
+  await page.locator("#upgrade-goal").selectOption("better_company");
   await page.locator("#desired-income").fill("65000");
   await page.getByRole("button", { name: "Далі" }).click();
 

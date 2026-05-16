@@ -8,6 +8,7 @@ import {
   currentMarketOptions,
   englishLevelOptions,
   jobSearchStatusOptions,
+  publicUpgradeGoalOptions,
   resumeStatusOptions,
   seniorityLevelOptions,
   type EnglishLevel,
@@ -16,7 +17,6 @@ import {
   type SeniorityLevel,
   type TargetMarket,
   type UpgradeGoal,
-  upgradeGoalOptions
 } from "@/lib/career-switch-form";
 
 type WizardForm = {
@@ -427,7 +427,7 @@ export function SimulateOnboardingWizard() {
                   id="upgrade-goal"
                   label="Головна ціль"
                   value={values.upgrade_goal}
-                  options={upgradeGoalOptions}
+                  options={publicUpgradeGoalOptions}
                   placeholder="Оберіть ціль"
                   onChange={(nextValue) => updateValue("upgrade_goal", nextValue)}
                   disabled={isSubmitting}
@@ -451,9 +451,6 @@ export function SimulateOnboardingWizard() {
                     />
                     <span className={unitLabelClassName}>грн/міс</span>
                   </div>
-                  <span className="mt-1 block text-xs leading-[1.5] text-[var(--text-soft)]">
-                    Орієнтир, до якого хочете наблизитися в наступному переході.
-                  </span>
                   <FieldError id="desired-income-error" message={errors.desired_income} />
                 </label>
               </div>
