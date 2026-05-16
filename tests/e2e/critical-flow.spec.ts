@@ -199,8 +199,7 @@ test("guest can simulate, register before checkout, pay in local test mode, and 
   await page.getByRole("button", { name: "Далі" }).click();
 
   await page.locator("#upgrade-goal").selectOption("higher_income");
-  await page.locator("#target-role").fill("Маркетолог");
-  await page.locator("#target-market").selectOption("remote");
+  await page.locator("#desired-income").fill("65000");
   await page.getByRole("button", { name: "Далі" }).click();
 
   await page.locator("#english-level").selectOption("intermediate");

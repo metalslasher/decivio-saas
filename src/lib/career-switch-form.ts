@@ -2,7 +2,7 @@ export const EXPERIENCE_LEVEL_VALUES = ["none", "basic", "practical"] as const;
 export const ENGLISH_LEVEL_VALUES = ["basic", "intermediate", "upper_intermediate", "advanced"] as const;
 export const TARGET_MARKET_VALUES = ["ukraine", "remote", "abroad"] as const;
 export const TRANSITION_PRIORITY_VALUES = ["speed", "income"] as const;
-export const SENIORITY_LEVEL_VALUES = ["junior", "middle", "senior", "lead", "manager"] as const;
+export const SENIORITY_LEVEL_VALUES = ["junior", "middle", "senior", "lead", "unknown"] as const;
 export const UPGRADE_GOAL_VALUES = [
   "higher_income",
   "better_company",
@@ -28,6 +28,7 @@ export type CareerSwitchFormInput = {
   current_role: string;
   current_experience_years: number;
   seniority_level: SeniorityLevel;
+  desired_income: number;
   target_role: string;
   upgrade_goal: UpgradeGoal;
   english_level: EnglishLevel;
@@ -85,6 +86,10 @@ function inferSeniority(years: number): SeniorityLevel {
 }
 
 function inferExperienceLevel(years: number, seniority: SeniorityLevel): ExperienceLevel {
+  if (seniority === "unknown") {
+    return years >= 1 ? "practical" : "basic";
+  }
+
   if (seniority === "junior" && years < 1) {
     return "basic";
   }
@@ -94,6 +99,18 @@ function inferExperienceLevel(years: number, seniority: SeniorityLevel): Experie
 
 function inferTransitionPriority(goal: UpgradeGoal): TransitionPriority {
   return goal === "faster_search" ? "speed" : "income";
+}
+
+function inferTargetMarket(goal: UpgradeGoal, currentMarket: TargetMarket): TargetMarket {
+  if (goal === "international_market") {
+    return "remote";
+  }
+
+  if (goal === "relocation") {
+    return "abroad";
+  }
+
+  return currentMarket;
 }
 
 export function parseCareerSwitchFormPayload(payload: Record<string, unknown>): ParseResult<CareerSwitchFormInput> {
@@ -133,13 +150,21 @@ export function parseCareerSwitchFormPayload(payload: Record<string, unknown>): 
     ? payload.upgrade_goal
     : "higher_income";
 
+  const desiredIncome = parseNonNegativeNumber(
+    typeof payload.desired_income === "number" ? payload.desired_income : currentIncome.value,
+    "Бажаний чистий дохід"
+  );
+  if (!desiredIncome.ok) {
+    return desiredIncome;
+  }
+
   if (!isKnownValue(payload.english_level, ENGLISH_LEVEL_VALUES)) {
     return { ok: false, error: "Англійська: оберіть один із варіантів." };
   }
 
-  if (!isKnownValue(payload.target_market, TARGET_MARKET_VALUES)) {
-    return { ok: false, error: "Ринок для покращення: оберіть один із варіантів." };
-  }
+  const targetMarket: TargetMarket = isKnownValue(payload.target_market, TARGET_MARKET_VALUES)
+    ? payload.target_market
+    : inferTargetMarket(upgradeGoal, currentMarket);
 
   const jobSearchStatus: JobSearchStatus = isKnownValue(payload.job_search_status, JOB_SEARCH_STATUS_VALUES)
     ? payload.job_search_status
@@ -165,10 +190,11 @@ export function parseCareerSwitchFormPayload(payload: Record<string, unknown>): 
       current_role: currentRole.value,
       current_experience_years: currentExperienceYears.value,
       seniority_level: seniorityLevel,
+      desired_income: desiredIncome.value,
       target_role: targetRole,
       upgrade_goal: upgradeGoal,
       english_level: payload.english_level,
-      target_market: payload.target_market,
+      target_market: targetMarket,
       job_search_status: jobSearchStatus,
       resume_status: resumeStatus,
       experience_level: experienceLevel,
@@ -212,15 +238,15 @@ export const currentMarketOptions: Array<{ value: TargetMarket; label: string }>
 ];
 
 export const seniorityLevelOptions: Array<{ value: SeniorityLevel; label: string }> = [
-  { value: "junior", label: "Junior / початковий рівень" },
-  { value: "middle", label: "Middle / самостійний спеціаліст" },
-  { value: "senior", label: "Senior / сильний спеціаліст" },
-  { value: "lead", label: "Lead / керівний рівень" },
-  { value: "manager", label: "Manager / керую командою" }
+  { value: "junior", label: "Junior (початковий рівень)" },
+  { value: "middle", label: "Middle (самостійний спеціаліст)" },
+  { value: "senior", label: "Senior (сильний спеціаліст)" },
+  { value: "lead", label: "Lead (керівний рівень)" },
+  { value: "unknown", label: "Не знаю свій рівень" }
 ];
 
 export const upgradeGoalOptions: Array<{ value: UpgradeGoal; label: string }> = [
-  { value: "higher_income", label: "Заробляти більше в поточній ролі" },
+  { value: "higher_income", label: "Заробляти більше" },
   { value: "better_company", label: "Перейти в сильнішу компанію" },
   { value: "international_market", label: "Вийти на міжнародний ринок" },
   { value: "relocation", label: "Знайти роботу за кордоном" },

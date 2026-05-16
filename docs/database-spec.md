@@ -108,7 +108,8 @@ Current `inputs` contract:
   "current_market": "ukraine|remote|abroad",
   "current_role": "Маркетолог",
   "current_experience_years": 5,
-  "seniority_level": "junior|middle|senior|lead|manager",
+  "seniority_level": "junior|middle|senior|lead|unknown",
+  "desired_income": 65000,
   "target_role": "Маркетолог",
   "upgrade_goal": "higher_income|better_company|international_market|relocation|faster_search",
   "english_level": "basic|intermediate|upper_intermediate|advanced",
@@ -121,7 +122,7 @@ Current `inputs` contract:
 }
 ```
 
-`experience_level` and `transition_priority` are derived compatibility fields for dashboard code that still reads the previous contract.
+`experience_level`, `transition_priority`, `target_role` and `target_market` are derived compatibility fields for dashboard and results code that still reads the previous contract. The public wizard does not ask for `target_role` or `target_market` directly.
 
 ### `simulation_results`
 

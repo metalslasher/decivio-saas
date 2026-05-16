@@ -328,7 +328,7 @@ export function SiteHeader() {
                     href={simulateCtaHref}
                     className="header-cta-button hidden min-w-[11.25rem] items-center justify-center md:inline-flex"
                   >
-                    Змінити кар’єру
+                    Покращити кар’єру
                   </a>
                 </>
               )}
@@ -407,7 +407,7 @@ export function SiteHeader() {
                     onClick={() => setIsOpen(false)}
                     className="btn-primary"
                   >
-                    Змінити кар’єру
+                    Покращити кар’єру
                   </a>
                 </>
               )}

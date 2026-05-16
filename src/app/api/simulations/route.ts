@@ -292,6 +292,7 @@ export async function POST(request: Request) {
       current_role_text: parsed.value.current_role,
       years_in_current_role: parsed.value.current_experience_years,
       seniority_level: parsed.value.seniority_level,
+      desired_income: parsed.value.desired_income,
       target_role_text: parsed.value.target_role,
       upgrade_goal: parsed.value.upgrade_goal,
       target_experience_level: parsed.value.experience_level,

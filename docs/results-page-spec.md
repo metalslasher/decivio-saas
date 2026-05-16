@@ -46,7 +46,7 @@ Content:
 
 - Generated headline.
 - Short summary.
-- Meta chips based on current role, seniority, current market, goal, target market, English level, and resume status.
+- Meta chips based on current role, seniority, current market, desired income, goal, derived target market, English level, and resume status.
 
 ### Metric Cards
 
@@ -66,7 +66,7 @@ Shows current role and market context in a compact salary/profile panel.
 
 ### Stronger Direction Snapshot
 
-Shows the stronger direction being evaluated: same role, better company, international market, local work abroad, or a specified desired role.
+Shows the stronger direction being evaluated: same role, better company, international market, or local work abroad. Public onboarding does not collect a separate desired role.
 
 ### Comparison
 

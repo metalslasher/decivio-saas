@@ -16,7 +16,7 @@ The onboarding collects enough facts to produce a useful first income-and-market
 
 The user does not need an account before submitting the form. Registration/login happens later, when the user chooses a paid plan or explicitly clicks "Вхід" in the header.
 
-The current product direction is career upgrade, not radical career change from zero. The form can still accept a desired role, but leaving it empty means "evaluate my current role and better opportunities around it".
+The current product direction is career upgrade, not radical career change from zero. Public onboarding evaluates the user's current role, market, desired income and practical readiness for a stronger opportunity.
 
 ## Current Steps
 
@@ -50,7 +50,7 @@ Fields:
   - `middle`
   - `senior`
   - `lead`
-  - `manager`
+  - `unknown`
 
 ### Step 3: Improvement Goal
 
@@ -64,11 +64,12 @@ Fields:
   - `international_market`
   - `relocation`
   - `faster_search`
-- `target_role`: optional text. If empty, the API uses `current_role`.
-- `target_market`: required select:
-  - `ukraine`
-  - `remote` (shown as international market)
-  - `abroad`
+- `desired_income`: required number, minimum `0`, monthly net income in UAH.
+
+The public wizard does not ask for `target_role` or `target_market`. The API keeps those fields for compatibility:
+
+- `target_role` is derived from `current_role`.
+- `target_market` is derived from `upgrade_goal` and `current_market`.
 
 ### Step 4: Search Readiness
 
@@ -95,14 +96,16 @@ Fields:
 
 ## Compatibility Fields
 
-`experience_level` and `transition_priority` remain in the form parser as derived compatibility fields because existing dashboard code still reads them.
+`experience_level`, `transition_priority`, `target_role` and `target_market` remain in the form parser as derived compatibility fields because existing dashboard and results code still read them.
 
 For new public submissions:
 
 - `experience_level` is inferred from experience and seniority.
 - `transition_priority` is inferred from `upgrade_goal`.
+- `target_role` defaults to the current role.
+- `target_market` is inferred from the improvement goal.
 
-Do not add these two fields back to the public wizard unless the product direction changes.
+Do not add these fields back to the public wizard unless the product direction changes.
 
 ## Submit Behavior
 

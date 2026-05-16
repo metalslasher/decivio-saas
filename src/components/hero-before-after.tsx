@@ -1,176 +1,42 @@
-﻿"use client";
-
-import { useEffect, useState } from "react";
 import Link from "next/link";
 
-const chartWidth = 560;
-const chartHeight = 250;
-const chartPadding = 22;
-const maxValue = 100;
-const chartCurveInset = 22;
+const ctaLabel = "Почати аналіз кар’єри";
+const ctaMeta = "Безкоштовно • 2–3 хвилини";
 
-type HeroHeadlineSegment = {
-  text: string;
-  accent?: boolean;
-};
-
-type HeroScenario = {
-  fullText: string;
-  segments: readonly HeroHeadlineSegment[];
-  pillLabel: string;
-  pillValue: string;
-  growthPercent: number;
-  nextValues: readonly number[];
-};
-
-const chartData = [
-  { label: "Оцінка", gain: "+4%" },
-  { label: "План", gain: "+9%" },
-  { label: "Резюме", gain: "+18%" },
-  { label: "Вакансії", gain: "+27%" },
-  { label: "Розмови", gain: "+36%" }
+const routeStages = [
+  {
+    step: "01",
+    title: "Оцінка доходу",
+    description: "поточна роль, ринок і реалістичний потенціал",
+    gain: "+0%"
+  },
+  {
+    step: "02",
+    title: "Сильніша позиція",
+    description: "резюме, профіль і аргументи для роботодавця",
+    gain: "+11%"
+  },
+  {
+    step: "03",
+    title: "Кращі розмови",
+    description: "підготовка до співбесід і відповідей",
+    gain: "+19%"
+  },
+  {
+    step: "04",
+    title: "Рішення по пропозиціях",
+    description: "порівняння умов, зарплати й наступного кроку",
+    gain: "+28%"
+  }
 ] as const;
 
-const heroScenarios = [
-  {
-    fullText: "Дізнайтесь, де ваш досвід коштує більше",
-    segments: [
-      { text: "Дізнайтесь, де ваш " },
-      { text: "досвід коштує більше", accent: true }
-    ],
-    pillLabel: "Після аналізу",
-    pillValue: "видно сильніший ринок",
-    growthPercent: 36,
-    nextValues: [34, 39, 49, 63, 78]
-  },
-  {
-    fullText: "Перевірте, чи відповідає зарплата ринку",
-    segments: [
-      { text: "Перевірте, чи відповідає " },
-      { text: "зарплата ринку", accent: true }
-    ],
-    pillLabel: "Стартова точка",
-    pillValue: "зарплата без здогадок",
-    growthPercent: 29,
-    nextValues: [34, 38, 46, 58, 72]
-  },
-  {
-    fullText: "Посильте резюме під кращі вакансії",
-    segments: [
-      { text: "Посильте резюме під " },
-      { text: "кращі вакансії", accent: true }
-    ],
-    pillLabel: "Після правок",
-    pillValue: "цінність видно швидше",
-    growthPercent: 31,
-    nextValues: [33, 37, 48, 59, 74]
-  },
-  {
-    fullText: "Йдіть на співбесіди з кращими аргументами",
-    segments: [
-      { text: "Йдіть на співбесіди з " },
-      { text: "кращими аргументами", accent: true }
-    ],
-    pillLabel: "На співбесіді",
-    pillValue: "легше пояснити цінність",
-    growthPercent: 24,
-    nextValues: [33, 37, 45, 55, 67]
-  }
-] as const satisfies readonly HeroScenario[];
-
-const subheadline =
-  "Ми оцінюємо ваш поточний дохід, роль і ринок, показуємо реалістичний потенціал та перші кроки до кращої пропозиції.";
-
-const ctaLabel = "Почати аналіз кар’єри";
-const ctaMeta = "\u0411\u0435\u0437\u043a\u043e\u0448\u0442\u043e\u0432\u043d\u043e \u2022 2\u20133 \u0445\u0432\u0438\u043b\u0438\u043d\u0438";
-
-type ChartPoint = { x: number; y: number };
-
-function toChartPoint(value: number, index: number, total: number): ChartPoint {
-  const usableWidth = chartWidth - chartCurveInset * 2;
-  const x = total > 1 ? (index / (total - 1)) * usableWidth + chartCurveInset : chartWidth / 2;
-  const y = chartHeight - chartPadding - (value / maxValue) * (chartHeight - chartPadding * 2);
-  return { x, y };
-}
-
-function buildSmoothPath(points: ChartPoint[]) {
-  if (points.length === 0) {
-    return "";
-  }
-
-  if (points.length === 1) {
-    return `M ${points[0].x} ${points[0].y}`;
-  }
-
-  let path = `M ${points[0].x} ${points[0].y}`;
-
-  for (let index = 0; index < points.length - 1; index += 1) {
-    const p0 = points[index - 1] ?? points[index];
-    const p1 = points[index];
-    const p2 = points[index + 1];
-    const p3 = points[index + 2] ?? p2;
-
-    const controlPoint1X = p1.x + (p2.x - p0.x) / 6;
-    const controlPoint1Y = p1.y + (p2.y - p0.y) / 6;
-    const controlPoint2X = p2.x - (p3.x - p1.x) / 6;
-    const controlPoint2Y = p2.y - (p3.y - p1.y) / 6;
-
-    path += ` C ${controlPoint1X} ${controlPoint1Y}, ${controlPoint2X} ${controlPoint2Y}, ${p2.x} ${p2.y}`;
-  }
-
-  return path;
-}
-
-function buildSmoothAreaPath(points: ChartPoint[]) {
-  if (points.length === 0) {
-    return "";
-  }
-
-  const baselineY = chartHeight - chartPadding;
-  const startX = points[0].x;
-  const endX = points[points.length - 1].x;
-  return `${buildSmoothPath(points)} L ${endX} ${baselineY} L ${startX} ${baselineY} Z`;
-}
-
-function getForecastPoints(scenario: HeroScenario) {
-  return scenario.nextValues.map((value, index) => toChartPoint(value, index, chartData.length));
-}
-
-function renderTypedHeadline(segments: readonly HeroHeadlineSegment[], visibleLength: number) {
-  let remaining = visibleLength;
-
-  return segments.flatMap((segment, index) => {
-    if (remaining <= 0) {
-      return [];
-    }
-
-    const visibleText = segment.text.slice(0, remaining);
-    remaining -= visibleText.length;
-
-    if (!visibleText) {
-      return [];
-    }
-
-    return (
-      <span key={`${index}-${segment.text}`} className={segment.accent ? "text-warm" : undefined}>
-        {visibleText}
-      </span>
-    );
-  });
-}
-
-function HeroForecastCard({ scenario }: { scenario: HeroScenario }) {
-  const nextPoints = getForecastPoints(scenario);
-  const nextPath = buildSmoothPath(nextPoints);
-  const nextAreaPath = buildSmoothAreaPath(nextPoints);
-  const finalForecastPoint = nextPoints[nextPoints.length - 1];
-
+function HeroProductCard() {
   return (
     <div id="hero-preview" className="hero-forecast-card">
       <div className="absolute -right-12 -top-16 h-44 w-44 rounded-full bg-[rgba(67,97,255,0.12)] blur-3xl" />
       <div className="absolute -bottom-16 left-10 h-40 w-40 rounded-full bg-[rgba(152,165,255,0.14)] blur-3xl" />
 
-      <div className="relative z-10 flex h-full min-h-[16.5rem] flex-col justify-between p-3.5 sm:min-h-[23rem] sm:p-5 md:p-6 lg:min-h-[24rem]">
+      <div className="relative z-10 flex h-full min-h-[18.5rem] flex-col justify-between p-4 sm:min-h-[23rem] sm:p-5 md:p-6 lg:min-h-[24rem]">
         <div className="flex items-start justify-between gap-3">
           <div className="hero-career-pill">
             <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[rgba(238,242,255,0.94)] text-[var(--accent-strong)]">
@@ -181,63 +47,56 @@ function HeroForecastCard({ scenario }: { scenario: HeroScenario }) {
               </svg>
             </span>
             <span className="min-w-0">
-              <span className="block text-[0.74rem] font-semibold text-[rgba(102,112,133,0.78)]">{scenario.pillLabel}</span>
-              <span className="block truncate text-[0.9rem] font-extrabold text-[var(--text-strong)]">{scenario.pillValue}</span>
+              <span className="block text-[0.74rem] font-semibold text-[rgba(102,112,133,0.78)]">Ваша ситуація зараз</span>
+              <span className="block truncate text-[0.9rem] font-extrabold text-[var(--text-strong)]">Маркетолог · 45 000 грн</span>
             </span>
           </div>
 
           <div className="hero-growth-pill">
-            <span className="block text-[1.8rem] font-extrabold leading-none text-[#28b86f]">+{scenario.growthPercent}%</span>
-            <span className="mt-1 block max-w-[5.5rem] text-[0.74rem] font-semibold leading-[1.16] text-[rgba(92,103,128,0.9)]">
-              до доходу
+            <span className="block text-[1.8rem] font-extrabold leading-none text-[#28b86f]">+28%</span>
+            <span className="mt-1 block max-w-[5.8rem] text-[0.74rem] font-semibold leading-[1.16] text-[rgba(92,103,128,0.9)]">
+              потенціал росту
             </span>
           </div>
         </div>
 
-        <div className="relative mt-3 h-[10rem] sm:mt-4 sm:h-[15rem] md:h-[16rem]">
-          <svg viewBox={`0 0 ${chartWidth} ${chartHeight}`} className="hero-forecast-svg" aria-hidden="true" preserveAspectRatio="none">
-            <defs>
-              <linearGradient id="hero-forecast-card-area" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stopColor="var(--chart-transition)" stopOpacity="0.2" />
-                <stop offset="100%" stopColor="var(--chart-transition)" stopOpacity="0.02" />
-              </linearGradient>
-            </defs>
+        <div className="mt-5 grid gap-3">
+          {routeStages.map((stage, index) => (
+            <div
+              key={stage.step}
+              className="relative overflow-hidden rounded-[1.25rem] border border-white/70 bg-white/72 px-4 py-3 shadow-[0_14px_36px_rgba(34,43,84,0.08)]"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex min-w-0 gap-3">
+                  <span className="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[rgba(238,242,255,0.96)] text-xs font-extrabold text-[var(--accent-strong)]">
+                    {stage.step}
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block text-sm font-extrabold text-[var(--text-strong)] sm:text-[0.98rem]">{stage.title}</span>
+                    <span className="mt-0.5 block text-xs font-medium leading-[1.45] text-[var(--text-muted)] sm:text-[0.82rem]">
+                      {stage.description}
+                    </span>
+                  </span>
+                </div>
+                <span className="shrink-0 rounded-full bg-[rgba(40,184,111,0.11)] px-2.5 py-1 text-xs font-extrabold text-[#28a866]">
+                  {stage.gain}
+                </span>
+              </div>
+              <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-[rgba(226,231,244,0.92)]">
+                <div
+                  className="h-full rounded-full bg-[linear-gradient(90deg,var(--accent-strong),rgba(40,184,111,0.82))]"
+                  style={{ width: `${32 + index * 18}%` }}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
 
-            {nextPoints.map((point, index) => (
-              <line
-                key={`guide-${chartData[index].label}`}
-                x1={point.x}
-                x2={point.x}
-                y1={point.y + 8}
-                y2={chartHeight - chartPadding}
-                className="hero-forecast-guide"
-              />
-            ))}
-
-            <path d={nextAreaPath} className="hero-forecast-area" />
-            <path d={nextPath} className="hero-forecast-line" pathLength={1} />
-            {finalForecastPoint ? (
-              <circle cx={finalForecastPoint.x} cy={finalForecastPoint.y} r="17" className="hero-forecast-end-glow" />
-            ) : null}
-            {nextPoints.map((point, index) => (
-              <circle
-                key={`point-${chartData[index].label}`}
-                cx={point.x}
-                cy={point.y}
-                r={index === nextPoints.length - 1 ? 8 : 4.6}
-                className={index === nextPoints.length - 1 ? "hero-forecast-dot hero-forecast-dot--end" : "hero-forecast-dot"}
-              />
-            ))}
-          </svg>
-
-          <div className="hero-forecast-labels">
-            {chartData.map((item) => (
-              <span key={item.label}>
-                <strong>{item.gain}</strong>
-                <small>{item.label}</small>
-              </span>
-            ))}
-          </div>
+        <div className="mt-5 rounded-[1.5rem] border border-[rgba(67,97,255,0.16)] bg-[rgba(248,250,255,0.82)] px-4 py-3">
+          <span className="block text-xs font-bold uppercase tracking-[0.12em] text-[var(--accent-strong)]">Після аналізу</span>
+          <strong className="mt-1 block text-sm leading-[1.45] text-[var(--text-strong)]">
+            Зрозумілий маршрут: що змінити в профілі, де шукати кращі вакансії і як говорити про зарплату.
+          </strong>
         </div>
       </div>
     </div>
@@ -245,41 +104,17 @@ function HeroForecastCard({ scenario }: { scenario: HeroScenario }) {
 }
 
 export function HeroBeforeAfter() {
-  const [activeScenarioIndex, setActiveScenarioIndex] = useState(0);
-  const [visibleLength, setVisibleLength] = useState(0);
-  const activeScenario = heroScenarios[activeScenarioIndex];
-  const typedHeadline = renderTypedHeadline(activeScenario.segments, visibleLength);
-
-  useEffect(() => {
-    setVisibleLength(0);
-  }, [activeScenarioIndex]);
-
-  useEffect(() => {
-    if (visibleLength < activeScenario.fullText.length) {
-      const timeout = window.setTimeout(() => setVisibleLength((prev) => prev + 1), 34);
-      return () => window.clearTimeout(timeout);
-    }
-
-    const timeout = window.setTimeout(() => {
-      setActiveScenarioIndex((prev) => (prev + 1) % heroScenarios.length);
-    }, 2600);
-
-    return () => window.clearTimeout(timeout);
-  }, [activeScenario.fullText.length, visibleLength]);
-
   return (
     <section className="relative pt-0 md:pt-1 lg:pt-0">
       <div className="mx-auto grid max-w-[80rem] items-center gap-8 py-7 pb-10 md:gap-8 md:py-8 md:pb-10 lg:min-h-[clamp(30rem,calc(100svh-34rem),34rem)] lg:grid-cols-[0.92fr_1.08fr] lg:gap-10 lg:py-3 xl:gap-12">
         <div className="relative z-10 flex flex-col items-center text-center lg:items-start lg:text-left">
-          <h1 className="min-h-[8.9rem] max-w-[12.5ch] font-display text-[2.28rem] font-extrabold leading-[0.96] tracking-normal text-[var(--text-strong)] sm:min-h-[8.4rem] sm:max-w-[13.5ch] sm:text-[2.85rem] md:min-h-[9.2rem] md:text-[3.15rem] lg:min-h-[8.4rem] lg:max-w-[36rem] lg:text-[2.85rem] xl:min-h-[8.8rem] xl:max-w-[39rem] xl:text-[3.05rem]">
-            {typedHeadline}
-            <span className="hero-caret text-[var(--accent-strong)]" aria-hidden="true">
-              |
-            </span>
+          <h1 className="max-w-[12.5ch] font-display text-[2.28rem] font-extrabold leading-[0.96] tracking-normal text-[var(--text-strong)] sm:max-w-[13.5ch] sm:text-[2.85rem] md:text-[3.15rem] lg:max-w-[36rem] lg:text-[2.85rem] xl:max-w-[39rem] xl:text-[3.05rem]">
+            Підсиліть кар’єру <span className="text-warm">на основі вашого досвіду</span>
           </h1>
 
           <p className="mt-6 max-w-[21rem] text-balance text-[1rem] font-medium leading-[1.66] text-[rgba(92,103,128,0.94)] sm:max-w-[30rem] sm:text-[1.08rem] md:max-w-[34rem] md:text-[1.16rem] md:leading-[1.62]">
-            {subheadline}
+            Ми порівнюємо ваш дохід із ринком, показуємо сильніший напрям і допомагаємо підготувати резюме, вакансії,
+            співбесіди та рішення по пропозиціях.
           </p>
 
           <div className="mt-7 flex w-full max-w-[18rem] flex-col items-center gap-3.5 sm:max-w-[22rem] lg:items-start">
@@ -303,10 +138,9 @@ export function HeroBeforeAfter() {
         </div>
 
         <div className="hero-forecast-shell relative z-10 mx-auto">
-          <HeroForecastCard scenario={activeScenario} />
+          <HeroProductCard />
         </div>
       </div>
     </section>
   );
 }
-

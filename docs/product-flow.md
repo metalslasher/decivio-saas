@@ -5,7 +5,7 @@ Status: current public product flow. The dashboard internals are intentionally o
 ## Correct User Path
 
 1. User lands on `/`.
-2. Header CTA "Змінити кар'єру" opens `/simulate`.
+2. Header CTA "Покращити кар'єру" opens `/simulate`.
 3. User completes the four-step income-and-market assessment without registration.
 4. App creates a guest simulation and opens `/results?simulationId=<id>`.
 5. Result page gives a useful first answer and sends the user to `/pricing`.

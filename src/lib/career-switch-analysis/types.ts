@@ -22,6 +22,7 @@ export type CareerSwitchAnalysisRequest = {
   current_role_text: string;
   years_in_current_role: number;
   seniority_level: SeniorityLevel;
+  desired_income: number;
   target_role_text: string;
   upgrade_goal: UpgradeGoal;
   target_experience_level: ExperienceLevel;

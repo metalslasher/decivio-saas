@@ -31,6 +31,7 @@ export type ProfileContext = {
   current_role: string | null;
   current_experience_years: number | null;
   seniority_level?: SeniorityLevel | null;
+  desired_income?: number | null;
   target_role: string | null;
   upgrade_goal?: UpgradeGoal | null;
   experience_level: ExperienceLevel | null;
@@ -54,6 +55,7 @@ const emptyContext: ProfileContext = {
   current_role: null,
   current_experience_years: null,
   seniority_level: null,
+  desired_income: null,
   target_role: null,
   upgrade_goal: null,
   experience_level: null,
@@ -116,6 +118,7 @@ export function parseProfileContext(value: unknown): ProfileContext {
     current_role: toOptionalString(value.current_role),
     current_experience_years: toOptionalNumber(value.current_experience_years),
     seniority_level: isKnownValue(value.seniority_level, SENIORITY_LEVEL_VALUES) ? value.seniority_level : null,
+    desired_income: toOptionalNumber(value.desired_income),
     target_role: toOptionalString(value.target_role),
     upgrade_goal: isKnownValue(value.upgrade_goal, UPGRADE_GOAL_VALUES) ? value.upgrade_goal : null,
     experience_level: isKnownValue(value.experience_level, EXPERIENCE_LEVEL_VALUES) ? value.experience_level : null,
@@ -140,6 +143,7 @@ export function buildOnboardingProfileContext(input: CareerSwitchFormInput): Par
     current_role: input.current_role,
     current_experience_years: input.current_experience_years,
     seniority_level: input.seniority_level,
+    desired_income: input.desired_income,
     target_role: input.target_role,
     upgrade_goal: input.upgrade_goal,
     experience_level: input.experience_level,
@@ -159,6 +163,7 @@ export function mergeProfileContext(primary: ProfileContext, fallback: Partial<P
     current_role: primary.current_role ?? fallback.current_role ?? null,
     current_experience_years: primary.current_experience_years ?? fallback.current_experience_years ?? null,
     seniority_level: primary.seniority_level ?? fallback.seniority_level ?? null,
+    desired_income: primary.desired_income ?? fallback.desired_income ?? null,
     target_role: primary.target_role ?? fallback.target_role ?? null,
     upgrade_goal: primary.upgrade_goal ?? fallback.upgrade_goal ?? null,
     experience_level: primary.experience_level ?? fallback.experience_level ?? null,

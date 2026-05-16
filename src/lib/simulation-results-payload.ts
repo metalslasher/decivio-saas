@@ -190,8 +190,8 @@ function seniorityLevelLabel(level: SeniorityLevel) {
       return "Senior";
     case "lead":
       return "Lead";
-    case "manager":
-      return "Manager";
+    case "unknown":
+      return "Не знаю";
     default:
       return level;
   }
@@ -341,6 +341,7 @@ export function buildSimulationResultsPayload({
     `Поточна роль: ${currentRole.canonical_title}`,
     `Рівень: ${seniorityLevelLabel(inputs.seniority_level)}`,
     `Поточний ринок: ${targetMarketLabel(inputs.current_market)}`,
+    `Бажаний дохід: ${formatCurrency(inputs.desired_income)}`,
     `Ціль: ${upgradeGoalLabel(inputs.upgrade_goal)}`,
     `Напрям: ${targetMarketLabel(inputs.target_market)}`,
     `Англійська: ${englishLevelLabel(inputs.english_level)}`,

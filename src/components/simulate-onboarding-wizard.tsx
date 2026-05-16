@@ -10,7 +10,6 @@ import {
   jobSearchStatusOptions,
   resumeStatusOptions,
   seniorityLevelOptions,
-  targetMarketOptions,
   type EnglishLevel,
   type JobSearchStatus,
   type ResumeStatus,
@@ -26,10 +25,9 @@ type WizardForm = {
   current_role: string;
   current_experience_years: string;
   seniority_level: SeniorityLevel | "";
-  target_role: string;
   upgrade_goal: UpgradeGoal | "";
+  desired_income: string;
   english_level: EnglishLevel | "";
-  target_market: TargetMarket | "";
   job_search_status: JobSearchStatus | "";
   resume_status: ResumeStatus | "";
 };
@@ -52,8 +50,8 @@ const steps: Array<{ title: string; helper: string; fields: WizardField[] }> = [
   },
   {
     title: "Що хочете покращити",
-    helper: "Оберіть головну ціль. Якщо хочете залишитись у тій самій ролі, поле з бажаною роллю можна не заповнювати.",
-    fields: ["upgrade_goal", "target_market"]
+    helper: "Оберіть головну ціль і вкажіть дохід, до якого хочете прийти. Так висновок краще відрізнить реалістичний крок від завищеного очікування.",
+    fields: ["upgrade_goal", "desired_income"]
   },
   {
     title: "Готовність до пошуку",
@@ -68,10 +66,9 @@ const initialValues: WizardForm = {
   current_role: "",
   current_experience_years: "",
   seniority_level: "",
-  target_role: "",
   upgrade_goal: "",
+  desired_income: "",
   english_level: "",
-  target_market: "",
   job_search_status: "",
   resume_status: ""
 };
@@ -209,6 +206,18 @@ export function SimulateOnboardingWizard() {
       }
     }
 
+    if (stepIndex === 2) {
+      const rawDesiredIncome = values.desired_income;
+      if (rawDesiredIncome.trim() !== "") {
+        const parsedDesiredIncome = parseNumber(rawDesiredIncome);
+        if (parsedDesiredIncome === null) {
+          nextErrors.desired_income = "Бажаний дохід: введіть коректне число.";
+        } else if (parsedDesiredIncome <= 0) {
+          nextErrors.desired_income = "Бажаний дохід: значення має бути більшим за 0.";
+        }
+      }
+    }
+
     setErrors((prev) => {
       const filtered = { ...prev };
       for (const field of fields) {
@@ -257,10 +266,9 @@ export function SimulateOnboardingWizard() {
           current_role: values.current_role,
           current_experience_years: Number(values.current_experience_years),
           seniority_level: values.seniority_level,
-          target_role: values.target_role,
+          desired_income: Number(values.desired_income),
           upgrade_goal: values.upgrade_goal,
           english_level: values.english_level,
-          target_market: values.target_market,
           job_search_status: values.job_search_status,
           resume_status: values.resume_status
         })
@@ -327,10 +335,8 @@ export function SimulateOnboardingWizard() {
 
               {currentStep === 0 ? (
                 <div className="grid gap-4 md:grid-cols-[minmax(0,1.05fr)_minmax(14rem,0.95fr)]">
-                  <div className="grid gap-2">
-                    <label className="sr-only" htmlFor="current-income">
-                      Поточний чистий дохід
-                    </label>
+                  <label className="block text-sm font-medium leading-[1.6] text-[var(--text-muted)]" htmlFor="current-income">
+                    Поточний чистий дохід
                     <div className={unitInputShellClassName}>
                       <input
                         id="current-income"
@@ -347,11 +353,11 @@ export function SimulateOnboardingWizard() {
                       <span className={unitLabelClassName}>грн/міс</span>
                     </div>
                     <FieldError id="current-income-error" message={errors.current_income} />
-                  </div>
+                  </label>
 
                   <SelectField
                     id="current-market"
-                    label="Поточний ринок"
+                    label="Де ви працюєте зараз"
                     value={values.current_market}
                     options={currentMarketOptions}
                     placeholder="Оберіть ринок"
@@ -416,7 +422,7 @@ export function SimulateOnboardingWizard() {
             ) : null}
 
             {currentStep === 2 ? (
-              <div className="grid gap-4 lg:grid-cols-3">
+              <div className="grid gap-4 md:grid-cols-2">
                 <SelectField
                   id="upgrade-goal"
                   label="Головна ціль"
@@ -428,35 +434,28 @@ export function SimulateOnboardingWizard() {
                   error={errors.upgrade_goal}
                 />
 
-                <label className="block text-sm font-medium leading-[1.6] text-[var(--text-muted)]" htmlFor="target-role">
-                  Бажана роль або тип вакансій
-                  <input
-                    id="target-role"
-                    type="text"
-                    value={values.target_role}
-                    onChange={(event) => updateValue("target_role", event.target.value)}
-                    className={inputClassName}
-                    aria-invalid={Boolean(errors.target_role)}
-                    aria-describedby={errors.target_role ? "target-role-error" : undefined}
-                    autoComplete="off"
-                    disabled={isSubmitting}
-                  />
+                <label className="block text-sm font-medium leading-[1.6] text-[var(--text-muted)]" htmlFor="desired-income">
+                  Бажаний чистий дохід
+                  <div className={unitInputShellClassName}>
+                    <input
+                      id="desired-income"
+                      type="number"
+                      min={0}
+                      inputMode="decimal"
+                      value={values.desired_income}
+                      onChange={(event) => updateValue("desired_income", event.target.value)}
+                      className={unitInputClassName}
+                      aria-invalid={Boolean(errors.desired_income)}
+                      aria-describedby={errors.desired_income ? "desired-income-error" : undefined}
+                      disabled={isSubmitting}
+                    />
+                    <span className={unitLabelClassName}>грн/міс</span>
+                  </div>
                   <span className="mt-1 block text-xs leading-[1.5] text-[var(--text-soft)]">
-                    Якщо роль не змінюєте, можна залишити порожнім.
+                    Орієнтир, до якого хочете наблизитися в наступному переході.
                   </span>
-                  <FieldError id="target-role-error" message={errors.target_role} />
+                  <FieldError id="desired-income-error" message={errors.desired_income} />
                 </label>
-
-                <SelectField
-                  id="target-market"
-                  label="Ринок для покращення"
-                  value={values.target_market}
-                  options={targetMarketOptions}
-                  placeholder="Оберіть ринок"
-                  onChange={(nextValue) => updateValue("target_market", nextValue)}
-                  disabled={isSubmitting}
-                  error={errors.target_market}
-                />
               </div>
             ) : null}
 
@@ -507,12 +506,12 @@ export function SimulateOnboardingWizard() {
         </div>
 
         <div className="relative mt-7 flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className={dimmedBackButtonClassName}>
+          <div className={`${dimmedBackButtonClassName} w-full sm:w-auto`}>
             <button
               type="button"
               onClick={handleBack}
               disabled={currentStep === 0 || isSubmitting}
-              className="btn-secondary disabled:cursor-not-allowed disabled:opacity-50"
+              className="btn-secondary w-full justify-center disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
             >
               Назад
             </button>
@@ -522,7 +521,7 @@ export function SimulateOnboardingWizard() {
             type="button"
             onClick={isLastStep ? handleSubmit : handleNext}
             disabled={isSubmitting}
-            className="btn-primary relative z-20 disabled:cursor-wait disabled:opacity-100"
+            className="btn-primary relative z-20 w-full justify-center disabled:cursor-wait disabled:opacity-100 sm:w-auto"
           >
             {isLastStep ? (isSubmitting ? "Формуємо висновок..." : "Отримати мій висновок") : "Далі"}
           </button>

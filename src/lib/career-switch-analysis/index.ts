@@ -71,7 +71,7 @@ const seniorityLevelDescriptions: Record<SeniorityLevel, string> = {
   middle: "самостійний спеціаліст із помітним практичним досвідом",
   senior: "сильний спеціаліст, який може вести складні задачі",
   lead: "керівний або провідний рівень у функції",
-  manager: "керує командою, процесом або напрямом"
+  unknown: "людина не впевнена у своєму рівні, тому оцінку треба прив'язувати до стажу, доходу й ролі"
 };
 
 const upgradeGoalDescriptions: Record<UpgradeGoal, string> = {
@@ -393,6 +393,7 @@ function buildUserInput(input: CareerSwitchAnalysisRequest) {
       years_in_current_role: input.years_in_current_role,
       seniority_level: input.seniority_level,
       seniority_level_description: seniorityLevelDescriptions[input.seniority_level],
+      desired_income_uah_per_month: input.desired_income,
       target_role_text: input.target_role_text,
       upgrade_goal: input.upgrade_goal,
       upgrade_goal_description: upgradeGoalDescriptions[input.upgrade_goal],
@@ -543,6 +544,10 @@ function assertValidCareerSwitchRequest(input: CareerSwitchAnalysisRequest) {
     throw new Error("current_income має бути числом >= 0.");
   }
 
+  if (!Number.isFinite(input.desired_income) || input.desired_income < 0) {
+    throw new Error("desired_income має бути числом >= 0.");
+  }
+
   if (!Number.isFinite(input.years_in_current_role) || input.years_in_current_role < 0) {
     throw new Error("years_in_current_role має бути числом >= 0.");
   }
@@ -593,8 +598,9 @@ function getSalaryLevelFromSeniority(level: SeniorityLevel): SalaryLevel {
     case "senior":
       return "senior";
     case "lead":
-    case "manager":
       return "lead";
+    case "unknown":
+      return "middle";
     case "junior":
     default:
       return "junior";
@@ -621,19 +627,22 @@ function buildMockCareerSwitchAnalysis(input: CareerSwitchAnalysisRequest): Care
   const currentTitle = input.current_role_text.trim();
   const targetTitle = input.target_role_text.trim();
   const currentMedian = roundToHundreds(Math.max(input.current_income, 25000));
+  const desiredMedian = roundToHundreds(clamp(input.desired_income, currentMedian, currentMedian * 2.2));
   const marketMultiplier = input.target_market === "remote" ? 1.28 : input.target_market === "abroad" ? 1.18 : 1;
   const currentMarketMultiplier = input.current_market === "remote" ? 1.22 : input.current_market === "abroad" ? 1.14 : 1;
   const seniorityMultiplier =
-    input.seniority_level === "lead" || input.seniority_level === "manager"
+    input.seniority_level === "lead"
       ? 1.18
       : input.seniority_level === "senior"
         ? 1.1
         : input.seniority_level === "middle"
           ? 1
-          : 0.86;
+          : input.seniority_level === "unknown"
+            ? 1
+            : 0.86;
   const experienceMultiplier =
     input.target_experience_level === "practical" ? 1.05 : input.target_experience_level === "basic" ? 0.9 : 0.72;
-  const targetEntryMedian = roundToHundreds(Math.max(18000, currentMedian * experienceMultiplier * marketMultiplier));
+  const targetEntryMedian = roundToHundreds(Math.max(18000, desiredMedian * 0.82, currentMedian * experienceMultiplier * marketMultiplier));
   const currentMarketMedian = roundToHundreds(currentMedian * currentMarketMultiplier * seniorityMultiplier);
   const currentSeniorMedian = roundToHundreds(Math.max(currentMarketMedian + 12000, currentMarketMedian * 1.28));
   const currentBestMedian = roundToHundreds(Math.max(currentSeniorMedian + 10000, currentMarketMedian * 1.52));
@@ -664,8 +673,11 @@ function buildMockCareerSwitchAnalysis(input: CareerSwitchAnalysisRequest): Care
     (input.transition_priority === "speed" ? 1 : 0);
   const offerBaseMonths = Math.max(3, baseMonths);
   const targetEntryLevel = getTargetEntryLevel(input.target_experience_level);
+  const desiredIncomeLooksAggressive = input.desired_income > targetEntryMedian * 1.25;
   const riskLevel: RiskLevel =
-    probability < 0.52 || (input.transition_priority === "income" && targetEntryMedian < currentMedian * 0.85)
+    probability < 0.52 ||
+    desiredIncomeLooksAggressive ||
+    (input.transition_priority === "income" && targetEntryMedian < currentMedian * 0.85)
       ? "high"
       : probability < 0.66
         ? "medium"
@@ -731,6 +743,7 @@ function buildMockCareerSwitchAnalysis(input: CareerSwitchAnalysisRequest): Care
           `Ми порівняли ваш дохід із поточною роллю, рівнем "${input.seniority_level}" і напрямом "${goalLabel}". Це тестовий висновок без витрати OpenAI-запиту, але він повторює логіку персоналізованої сторінки результатів.`,
         why_this_result: [
           `Поточний дохід ${currentMedian} грн/міс використано як базу для порівняння.`,
+          `Бажаний дохід ${roundToHundreds(input.desired_income)} грн/міс використано як орієнтир для сили наступного кроку.`,
           `Поточний ринок: ${currentMarketScopeLabel}; напрям для покращення: ${marketScopeLabel}.`,
           `Стан пошуку: ${jobSearchStatusDescriptions[input.job_search_status]}; резюме: ${resumeStatusDescriptions[input.resume_status]}.`
         ],
