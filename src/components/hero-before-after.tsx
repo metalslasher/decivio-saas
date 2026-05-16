@@ -3,69 +3,106 @@ import Link from "next/link";
 const ctaLabel = "Почати аналіз кар’єри";
 const ctaMeta = "Безкоштовно • 2–3 хвилини";
 
-const insightCards = [
+const incomeSteps = [
   {
-    label: "Ринок",
-    value: "58 000 грн"
+    label: "Зараз",
+    value: "45 000",
+    delta: "старт",
+    x: 58,
+    y: 172
   },
   {
-    label: "Ціль",
-    value: "65 000 грн"
+    label: "Оцінка",
+    value: "49 000",
+    delta: "+6%",
+    x: 158,
+    y: 150
   },
   {
-    label: "Фокус",
-    value: "резюме + співбесіди"
+    label: "Профіль",
+    value: "56 000",
+    delta: "+13%",
+    x: 258,
+    y: 122
+  },
+  {
+    label: "Співбесіди",
+    value: "61 000",
+    delta: "+21%",
+    x: 358,
+    y: 84
+  },
+  {
+    label: "Умови",
+    value: "69 000",
+    delta: "+28%",
+    x: 442,
+    y: 42
   }
 ] as const;
+
+const incomePath = incomeSteps.map((point, index) => `${index === 0 ? "M" : "L"} ${point.x} ${point.y}`).join(" ");
+const incomeAreaPath = `${incomePath} L ${incomeSteps[incomeSteps.length - 1].x} 190 L ${incomeSteps[0].x} 190 Z`;
 
 function HeroProductCard() {
   return (
     <div id="hero-preview" className="hero-forecast-card">
-      <div className="absolute -right-12 -top-16 h-44 w-44 rounded-full bg-[rgba(67,97,255,0.12)] blur-3xl" />
-      <div className="absolute -bottom-16 left-10 h-40 w-40 rounded-full bg-[rgba(152,165,255,0.14)] blur-3xl" />
+      <div className="absolute -right-10 -top-14 h-36 w-36 rounded-full bg-[rgba(67,97,255,0.1)] blur-3xl" />
+      <div className="absolute -bottom-14 left-8 h-32 w-32 rounded-full bg-[rgba(152,165,255,0.12)] blur-3xl" />
 
-      <div className="relative z-10 flex h-full min-h-[17rem] flex-col justify-between p-4 sm:min-h-[20rem] sm:p-5 md:p-6">
+      <div className="relative z-10 p-4 sm:p-5 md:p-6">
         <div className="flex items-start justify-between gap-4">
-          <div className="min-w-0">
-            <span className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--accent-strong)]">Після аналізу</span>
-            <h2 className="mt-2 max-w-[18rem] font-display text-[1.45rem] font-extrabold leading-[1.06] text-[var(--text-strong)] sm:text-[1.7rem]">
-              Видно, де ваш дохід можна посилити
-            </h2>
+          <div>
+            <span className="block text-xs font-bold uppercase tracking-[0.14em] text-[var(--accent-strong)]">Потенціал доходу</span>
+            <strong className="mt-2 block font-display text-[1.22rem] leading-none text-[var(--text-strong)] sm:text-[1.42rem]">
+              45 000 → 69 000 грн
+            </strong>
           </div>
-          <span className="shrink-0 rounded-full bg-[rgba(40,184,111,0.12)] px-3 py-2 text-sm font-extrabold text-[#28a866]">
-            +20 000 грн
-          </span>
+          <span className="rounded-full bg-[rgba(40,184,111,0.12)] px-3 py-1.5 text-sm font-extrabold text-[#28a866]">+28%</span>
         </div>
 
-        <div className="mt-6 rounded-[1.45rem] border border-white/72 bg-white/72 p-4 shadow-[0_18px_44px_-34px_rgba(22,29,43,0.26)]">
-          <div className="flex items-end justify-between gap-3">
-            <div>
-              <span className="block text-xs font-bold uppercase tracking-[0.12em] text-[var(--text-soft)]">Зараз</span>
-              <strong className="mt-1 block text-[1.35rem] leading-none text-[var(--text-strong)]">45 000</strong>
-            </div>
-            <div className="text-right">
-              <span className="block text-xs font-bold uppercase tracking-[0.12em] text-[var(--text-soft)]">Після підготовки</span>
-              <strong className="mt-1 block text-[1.55rem] leading-none text-[var(--accent-strong)]">65 000</strong>
-            </div>
-          </div>
+        <div className="mt-4">
+          <svg viewBox="0 0 500 224" className="h-[12.75rem] w-full overflow-visible sm:h-[13.75rem]" role="img" aria-labelledby="hero-income-chart-title">
+            <title id="hero-income-chart-title">Графік потенційного доходу після дій сервісу</title>
+            <defs>
+              <linearGradient id="hero-income-area" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="var(--accent-strong)" stopOpacity="0.14" />
+                <stop offset="100%" stopColor="var(--accent-strong)" stopOpacity="0.02" />
+              </linearGradient>
+            </defs>
 
-          <svg viewBox="0 0 420 132" className="mt-3 h-28 w-full overflow-visible" aria-hidden="true" preserveAspectRatio="none">
-            <path d="M24 106H396" stroke="rgba(148,163,184,0.22)" strokeWidth="2" strokeLinecap="round" />
-            <path d="M28 92C96 82 132 76 184 66C250 54 298 42 390 22" fill="none" stroke="rgba(67,97,255,0.18)" strokeWidth="15" strokeLinecap="round" />
-            <path d="M28 92C96 82 132 76 184 66C250 54 298 42 390 22" fill="none" stroke="var(--accent-strong)" strokeWidth="4.5" strokeLinecap="round" />
-            <circle cx="28" cy="92" r="8" fill="white" stroke="var(--accent-strong)" strokeWidth="4" />
-            <circle cx="184" cy="66" r="7" fill="white" stroke="rgba(67,97,255,0.74)" strokeWidth="3.5" />
-            <circle cx="390" cy="22" r="9" fill="white" stroke="#28b86f" strokeWidth="4" />
+            {[44, 88, 132, 176].map((y, index) => (
+              <g key={y}>
+                <line x1="54" x2="452" y1={y} y2={y} stroke="rgba(148,163,184,0.18)" strokeWidth="1" />
+                <text x="18" y={y + 4} className="fill-[var(--text-soft)] text-[0.62rem] font-bold">
+                  {70 - index * 10}
+                </text>
+              </g>
+            ))}
+
+            <line x1="54" x2="54" y1="24" y2="190" stroke="rgba(148,163,184,0.24)" strokeWidth="1.5" />
+            <line x1="54" x2="452" y1="190" y2="190" stroke="rgba(148,163,184,0.24)" strokeWidth="1.5" />
+            <text x="0" y="23" className="fill-[var(--text-soft)] text-[0.62rem] font-bold">
+              тис. грн
+            </text>
+
+            <path d={incomeAreaPath} fill="url(#hero-income-area)" />
+            <path d={incomePath} fill="none" stroke="rgba(67,97,255,0.18)" strokeWidth="12" strokeLinecap="round" strokeLinejoin="round" />
+            <path d={incomePath} fill="none" stroke="var(--accent-strong)" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+
+            {incomeSteps.map((point) => (
+              <g key={point.label}>
+                <line x1={point.x} x2={point.x} y1={point.y + 12} y2="190" stroke="rgba(148,163,184,0.2)" strokeDasharray="3 7" />
+                <circle cx={point.x} cy={point.y} r="8" fill="white" stroke="var(--accent-strong)" strokeWidth="3.5" />
+                <text x={point.x} y={point.y - 16} textAnchor="middle" className="fill-[#28a866] text-[0.68rem] font-extrabold">
+                  {point.delta}
+                </text>
+                <text x={point.x} y="212" textAnchor="middle" className="fill-[var(--text-strong)] text-[0.64rem] font-extrabold">
+                  {point.label}
+                </text>
+              </g>
+            ))}
           </svg>
-        </div>
-
-        <div className="mt-4 grid gap-2 sm:grid-cols-3">
-          {insightCards.map((item) => (
-            <div key={item.label} className="rounded-[1rem] border border-[rgba(67,97,255,0.1)] bg-[rgba(248,250,255,0.7)] px-3 py-2.5">
-              <span className="block text-[0.68rem] font-bold uppercase tracking-[0.11em] text-[var(--text-soft)]">{item.label}</span>
-              <strong className="mt-1 block truncate text-sm text-[var(--text-strong)]">{item.value}</strong>
-            </div>
-          ))}
         </div>
       </div>
     </div>

@@ -893,20 +893,20 @@ main {
 
 .hero-forecast-card {
   position: relative;
-  min-height: 22rem;
+  min-height: 17.5rem;
   overflow: hidden;
-  border-radius: 1.75rem;
+  border-radius: 1.45rem;
   border: 1px solid rgba(255, 255, 255, 0.82);
   background:
     linear-gradient(145deg, rgba(255, 255, 255, 0.88), rgba(243, 247, 255, 0.72)),
     radial-gradient(34rem 20rem at 86% 12%, rgba(67, 97, 255, 0.16), transparent 62%);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.96),
-    0 34px 70px -48px rgba(63, 94, 255, 0.42),
-    0 22px 46px -42px rgba(22, 29, 43, 0.18);
+    0 30px 58px -46px rgba(63, 94, 255, 0.36),
+    0 18px 38px -36px rgba(22, 29, 43, 0.16);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  transform: perspective(78rem) rotateY(-4deg) rotateX(2deg);
+  transform: none;
 }
 
 .hero-forecast-card::before {
@@ -920,115 +920,6 @@ main {
   pointer-events: none;
 }
 
-.hero-career-pill,
-.hero-growth-pill {
-  display: inline-flex;
-  align-items: center;
-  border: 1px solid rgba(255, 255, 255, 0.78);
-  background: rgba(255, 255, 255, 0.74);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.94),
-    0 18px 32px -28px rgba(22, 29, 43, 0.22);
-  backdrop-filter: blur(16px);
-}
-
-.hero-career-pill {
-  max-width: min(15rem, 62%);
-  gap: 0.72rem;
-  border-radius: 1.15rem;
-  padding: 0.58rem 0.74rem;
-}
-
-.hero-growth-pill {
-  min-width: 7.4rem;
-  flex-direction: column;
-  align-items: flex-start;
-  border-radius: 1.15rem;
-  padding: 0.82rem 0.92rem;
-}
-
-.hero-forecast-svg {
-  position: absolute;
-  inset: 0;
-  height: 100%;
-  width: 100%;
-  overflow: visible;
-}
-
-.hero-forecast-guide {
-  stroke: rgba(123, 139, 183, 0.28);
-  stroke-width: 1;
-  stroke-dasharray: 3 7;
-}
-
-.hero-forecast-area {
-  fill: url("#hero-forecast-card-area");
-}
-
-.hero-forecast-line {
-  fill: none;
-  stroke: var(--chart-transition);
-  stroke-width: 4.2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-dasharray: 1;
-  stroke-dashoffset: 1;
-  filter: drop-shadow(0 8px 10px rgba(67, 97, 255, 0.2));
-  animation: hero-forecast-line-draw 1.35s cubic-bezier(0.2, 0.9, 0.24, 1) 0.1s forwards;
-}
-
-.hero-forecast-dot {
-  fill: #ffffff;
-  stroke: rgba(67, 97, 255, 0.64);
-  stroke-width: 2.4;
-  filter: drop-shadow(0 5px 8px rgba(67, 97, 255, 0.18));
-}
-
-.hero-forecast-dot--end {
-  fill: var(--accent);
-  stroke: #ffffff;
-  stroke-width: 5;
-  filter: drop-shadow(0 10px 16px rgba(67, 97, 255, 0.36));
-}
-
-.hero-forecast-end-glow {
-  fill: rgba(67, 97, 255, 0.14);
-  stroke: rgba(67, 97, 255, 0.14);
-  stroke-width: 1;
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: hero-forecast-dot-pulse 2.4s ease-in-out infinite;
-}
-
-.hero-forecast-labels {
-  position: absolute;
-  inset-inline: 5%;
-  bottom: 0.15rem;
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 0.5rem;
-  text-align: center;
-  font-size: 0.72rem;
-  font-weight: 700;
-  color: rgba(102, 112, 133, 0.78);
-}
-
-.hero-forecast-labels span {
-  display: grid;
-  gap: 0.16rem;
-  line-height: 1.05;
-}
-
-.hero-forecast-labels strong {
-  font-size: 0.72rem;
-  color: var(--accent-strong);
-}
-
-.hero-forecast-labels small {
-  font-size: 0.68rem;
-  font-weight: 700;
-}
-
 @media (max-width: 1023px) {
   .hero-forecast-card {
     transform: none;
@@ -1037,13 +928,13 @@ main {
 
 @media (min-width: 640px) {
   .hero-forecast-shell {
-    max-width: 38rem;
+    max-width: 34rem;
   }
 }
 
 @media (min-width: 1024px) {
   .hero-forecast-shell {
-    max-width: 35rem;
+    max-width: 30rem;
   }
 }
 
@@ -1064,40 +955,6 @@ main {
   .hero-forecast-card {
     min-height: 16.5rem;
     border-radius: 1.35rem;
-  }
-
-  .hero-career-pill {
-    max-width: 64%;
-    gap: 0.5rem;
-    padding: 0.46rem 0.52rem;
-  }
-
-  .hero-growth-pill {
-    min-width: 4.9rem;
-    padding: 0.58rem 0.56rem;
-  }
-
-  .hero-career-pill > span:last-child > span:first-child {
-    font-size: 0.6rem;
-  }
-
-  .hero-career-pill > span:last-child > span:last-child {
-    font-size: 0.78rem;
-  }
-
-  .hero-growth-pill > span:first-child {
-    font-size: 1.35rem;
-  }
-
-  .hero-growth-pill > span:last-child {
-    max-width: 4.7rem;
-    font-size: 0.6rem;
-  }
-
-  .hero-forecast-labels {
-    inset-inline: 6%;
-    bottom: 0.3rem;
-    font-size: 0.62rem;
   }
 }
 
@@ -1553,27 +1410,6 @@ main {
   }
 }
 
-@keyframes hero-forecast-line-draw {
-  from {
-    stroke-dashoffset: 1;
-  }
-  to {
-    stroke-dashoffset: 0;
-  }
-}
-
-@keyframes hero-forecast-dot-pulse {
-  0%,
-  100% {
-    transform: scale(0.88);
-    opacity: 0.38;
-  }
-  50% {
-    transform: scale(1.18);
-    opacity: 0.78;
-  }
-}
-
 @keyframes wizard-step-fade {
   from {
     opacity: 0;
@@ -1669,8 +1505,6 @@ main {
   .reviews-marquee-track,
   .career-brand-track,
   .hero-caret,
-  .hero-forecast-line,
-  .hero-forecast-end-glow,
   .timeline-marker,
   .wizard-step-enter,
   .feature-line-draw,
