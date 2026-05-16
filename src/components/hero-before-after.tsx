@@ -3,46 +3,41 @@ import Link from "next/link";
 const ctaLabel = "Почати аналіз кар’єри";
 const ctaMeta = "Безкоштовно • 2–3 хвилини";
 
-const incomeSteps = [
+const moduleImpactSteps = [
   {
-    label: "Зараз",
-    value: "45 000",
-    delta: "старт",
+    label: "Старт",
+    impact: "0%",
     x: 58,
-    y: 172
+    y: 196
   },
   {
     label: "Оцінка",
-    value: "49 000",
-    delta: "+6%",
-    x: 158,
-    y: 150
+    impact: "+6%",
+    x: 154,
+    y: 169
   },
   {
     label: "Профіль",
-    value: "56 000",
-    delta: "+13%",
-    x: 258,
-    y: 122
+    impact: "+13%",
+    x: 250,
+    y: 138
   },
   {
     label: "Співбесіди",
-    value: "61 000",
-    delta: "+21%",
-    x: 358,
-    y: 84
+    impact: "+21%",
+    x: 346,
+    y: 102
   },
   {
     label: "Умови",
-    value: "69 000",
-    delta: "+28%",
+    impact: "+28%",
     x: 442,
-    y: 42
+    y: 71
   }
 ] as const;
 
-const incomePath = incomeSteps.map((point, index) => `${index === 0 ? "M" : "L"} ${point.x} ${point.y}`).join(" ");
-const incomeAreaPath = `${incomePath} L ${incomeSteps[incomeSteps.length - 1].x} 190 L ${incomeSteps[0].x} 190 Z`;
+const moduleImpactPath = moduleImpactSteps.map((point, index) => `${index === 0 ? "M" : "L"} ${point.x} ${point.y}`).join(" ");
+const moduleImpactAreaPath = `${moduleImpactPath} L ${moduleImpactSteps[moduleImpactSteps.length - 1].x} 196 L ${moduleImpactSteps[0].x} 196 Z`;
 
 function HeroProductCard() {
   return (
@@ -51,59 +46,53 @@ function HeroProductCard() {
       <div className="absolute -bottom-14 left-8 h-32 w-32 rounded-full bg-[rgba(152,165,255,0.12)] blur-3xl" />
 
       <div className="relative z-10 p-4 sm:p-5 md:p-6">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <span className="block text-xs font-bold uppercase tracking-[0.14em] text-[var(--accent-strong)]">Потенціал доходу</span>
-            <strong className="mt-2 block font-display text-[1.22rem] leading-none text-[var(--text-strong)] sm:text-[1.42rem]">
-              45 000 → 69 000 грн
-            </strong>
-          </div>
-          <span className="rounded-full bg-[rgba(40,184,111,0.12)] px-3 py-1.5 text-sm font-extrabold text-[#28a866]">+28%</span>
-        </div>
-
-        <div className="mt-4">
-          <svg viewBox="0 0 500 224" className="h-[12.75rem] w-full overflow-visible sm:h-[13.75rem]" role="img" aria-labelledby="hero-income-chart-title">
-            <title id="hero-income-chart-title">Графік потенційного доходу після дій сервісу</title>
+        <svg viewBox="0 0 500 248" className="h-[15rem] w-full overflow-visible sm:h-[15.75rem]" role="img" aria-labelledby="hero-impact-chart-title">
+          <title id="hero-impact-chart-title">Графік впливу модулів сервісу на приріст доходу</title>
             <defs>
-              <linearGradient id="hero-income-area" x1="0%" y1="0%" x2="0%" y2="100%">
+              <linearGradient id="hero-module-impact-area" x1="0%" y1="0%" x2="0%" y2="100%">
                 <stop offset="0%" stopColor="var(--accent-strong)" stopOpacity="0.14" />
                 <stop offset="100%" stopColor="var(--accent-strong)" stopOpacity="0.02" />
               </linearGradient>
             </defs>
 
-            {[44, 88, 132, 176].map((y, index) => (
-              <g key={y}>
-                <line x1="54" x2="452" y1={y} y2={y} stroke="rgba(148,163,184,0.18)" strokeWidth="1" />
-                <text x="18" y={y + 4} className="fill-[var(--text-soft)] text-[0.62rem] font-bold">
-                  {70 - index * 10}
+            <text x="18" y="24" className="fill-[var(--text-strong)] text-[0.86rem] font-extrabold">
+              Вплив модулів на дохід
+            </text>
+
+            {[
+              { y: 62, label: "30%" },
+              { y: 107, label: "20%" },
+              { y: 151, label: "10%" },
+              { y: 196, label: "0%" }
+            ].map((line) => (
+              <g key={line.label}>
+                <line x1="54" x2="452" y1={line.y} y2={line.y} stroke="rgba(148,163,184,0.18)" strokeWidth="1" />
+                <text x="18" y={line.y + 4} className="fill-[var(--text-soft)] text-[0.62rem] font-bold">
+                  {line.label}
                 </text>
               </g>
             ))}
 
-            <line x1="54" x2="54" y1="24" y2="190" stroke="rgba(148,163,184,0.24)" strokeWidth="1.5" />
-            <line x1="54" x2="452" y1="190" y2="190" stroke="rgba(148,163,184,0.24)" strokeWidth="1.5" />
-            <text x="0" y="23" className="fill-[var(--text-soft)] text-[0.62rem] font-bold">
-              тис. грн
-            </text>
+            <line x1="54" x2="54" y1="62" y2="196" stroke="rgba(148,163,184,0.24)" strokeWidth="1.5" />
+            <line x1="54" x2="452" y1="196" y2="196" stroke="rgba(148,163,184,0.24)" strokeWidth="1.5" />
 
-            <path d={incomeAreaPath} fill="url(#hero-income-area)" />
-            <path d={incomePath} fill="none" stroke="rgba(67,97,255,0.18)" strokeWidth="12" strokeLinecap="round" strokeLinejoin="round" />
-            <path d={incomePath} fill="none" stroke="var(--accent-strong)" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+            <path d={moduleImpactAreaPath} fill="url(#hero-module-impact-area)" />
+            <path d={moduleImpactPath} fill="none" stroke="rgba(67,97,255,0.18)" strokeWidth="12" strokeLinecap="round" strokeLinejoin="round" />
+            <path d={moduleImpactPath} fill="none" stroke="var(--accent-strong)" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
 
-            {incomeSteps.map((point) => (
+            {moduleImpactSteps.map((point) => (
               <g key={point.label}>
-                <line x1={point.x} x2={point.x} y1={point.y + 12} y2="190" stroke="rgba(148,163,184,0.2)" strokeDasharray="3 7" />
+                <line x1={point.x} x2={point.x} y1={point.y + 12} y2="196" stroke="rgba(148,163,184,0.2)" strokeDasharray="3 7" />
                 <circle cx={point.x} cy={point.y} r="8" fill="white" stroke="var(--accent-strong)" strokeWidth="3.5" />
                 <text x={point.x} y={point.y - 16} textAnchor="middle" className="fill-[#28a866] text-[0.68rem] font-extrabold">
-                  {point.delta}
+                  {point.impact}
                 </text>
-                <text x={point.x} y="212" textAnchor="middle" className="fill-[var(--text-strong)] text-[0.64rem] font-extrabold">
+                <text x={point.x} y="224" textAnchor="middle" className="fill-[var(--text-strong)] text-[0.64rem] font-extrabold">
                   {point.label}
                 </text>
               </g>
             ))}
-          </svg>
-        </div>
+        </svg>
       </div>
     </div>
   );
