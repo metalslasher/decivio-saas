@@ -3,66 +3,101 @@ import Link from "next/link";
 const ctaLabel = "Почати аналіз кар’єри";
 const ctaMeta = "Безкоштовно • 2–3 хвилини";
 
-const routeModules = [
+const heroCases = [
   {
-    number: "01",
-    title: "Оцінка ринку",
-    detail: "де є запас для росту"
+    name: "Марія",
+    role: "маркетологиня",
+    market: "Україна",
+    before: "45 000 грн",
+    after: "62 000 грн",
+    change: "+17 000 грн",
+    focus: "Оновили резюме й аргументи для сильнішої компанії.",
+    avatar: "М"
   },
   {
-    number: "02",
-    title: "Профіль",
-    detail: "резюме і аргументи"
+    name: "Олександр",
+    role: "продакт-менеджер",
+    market: "міжнародні вакансії",
+    before: "80 000 грн",
+    after: "$2 900",
+    change: "новий ринок",
+    focus: "Звузили ринок і підготували профіль під англомовні співбесіди.",
+    avatar: "О"
   },
   {
-    number: "03",
-    title: "Співбесіди",
-    detail: "відповіді та приклади"
+    name: "Ірина",
+    role: "HR-спеціалістка",
+    market: "сильніша компанія",
+    before: "38 000 грн",
+    after: "55 000 грн",
+    change: "+45%",
+    focus: "Підсвітили навички, сильні відповіді та сценарій переговорів.",
+    avatar: "І"
   },
   {
-    number: "04",
-    title: "Пропозиції",
-    detail: "зарплата, умови, рішення"
+    name: "Денис",
+    role: "менеджер з продажів",
+    market: "нова пропозиція",
+    before: "52 000 грн",
+    after: "78 000 грн",
+    change: "+26 000 грн",
+    focus: "Порівняли умови й підготували питання до роботодавця.",
+    avatar: "Д"
   }
 ] as const;
 
 function HeroProductCard() {
   return (
     <div id="hero-preview" className="hero-forecast-card">
-      <div className="hero-route-visual">
-        <div className="hero-route-status">
-          <div className="hero-route-state hero-route-state--current">
-            <span>Зараз</span>
-            <strong>Поточна позиція</strong>
-            <small>дохід, профіль і переговори без чіткого ринкового орієнтира</small>
-          </div>
-
-          <div className="hero-route-arrow" aria-hidden="true">
-            <span />
-          </div>
-
-          <div className="hero-route-state hero-route-state--target">
-            <span>Після підготовки</span>
-            <strong>Сильніша пропозиція</strong>
-            <small>зрозумілий план, сильні аргументи і кращі умови</small>
-          </div>
+      <div className="hero-cases-visual">
+        <div className="hero-cases-heading">
+          <span>Анонімізовані сценарії</span>
+          <strong>Як може виглядати сильніший наступний крок</strong>
         </div>
 
-        <div className="hero-route-modules" aria-label="Модулі підготовки до сильнішої пропозиції">
-          {routeModules.map((module, index) => (
-            <div key={module.number} className={`hero-route-module hero-route-module--${index + 1}`}>
-              <span>{module.number}</span>
-              <div>
-                <strong>{module.title}</strong>
-                <small>{module.detail}</small>
-              </div>
-            </div>
-          ))}
-        </div>
+        <div className="hero-case-slider" aria-label="Приклади кар'єрних сценаріїв">
+          <div className="hero-case-track">
+            {heroCases.map((caseItem, index) => (
+              <article className={`hero-case-card hero-case-card--${index + 1}`} key={caseItem.name}>
+                <div className="hero-case-card-top">
+                  <div className={`hero-case-avatar hero-case-avatar--${(index % heroCases.length) + 1}`} aria-hidden="true">
+                    <span>{caseItem.avatar}</span>
+                  </div>
+                  <div>
+                    <strong>{caseItem.name}</strong>
+                    <span>{caseItem.role}</span>
+                  </div>
+                  <small>{caseItem.market}</small>
+                </div>
 
-        <div className="hero-route-result">
-          <span>На виході</span>
-          <strong>маршрут до кращої вакансії, зарплати та умов</strong>
+                <div className="hero-case-pay">
+                  <div>
+                    <span>було</span>
+                    <strong>{caseItem.before}</strong>
+                  </div>
+                  <svg viewBox="0 0 38 16" aria-hidden="true">
+                    <path d="M2 8h31m-6-5 6 5-6 5" />
+                  </svg>
+                  <div>
+                    <span>стало</span>
+                    <strong>{caseItem.after}</strong>
+                  </div>
+                </div>
+
+                <p>{caseItem.focus}</p>
+
+                <div className="hero-case-result">
+                  <span>{caseItem.change}</span>
+                  <small>після підготовки</small>
+                </div>
+              </article>
+            ))}
+          </div>
+          <div className="hero-case-dots" aria-hidden="true">
+            {heroCases.map((caseItem) => (
+              <span key={caseItem.name} />
+            ))}
+          </div>
         </div>
       </div>
     </div>
@@ -75,12 +110,11 @@ export function HeroBeforeAfter() {
       <div className="mx-auto grid max-w-[80rem] items-center gap-8 py-7 pb-10 md:gap-8 md:py-8 md:pb-10 lg:min-h-[clamp(30rem,calc(100svh-34rem),34rem)] lg:grid-cols-[1.05fr_0.95fr] lg:gap-10 lg:py-3 xl:gap-12">
         <div className="relative z-10 flex flex-col items-center text-center lg:items-start lg:text-left">
           <h1 className="max-w-[12.5ch] font-display text-[2.28rem] font-extrabold leading-[0.96] tracking-normal text-[var(--text-strong)] sm:max-w-[13.5ch] sm:text-[2.85rem] md:text-[3.15rem] lg:max-w-[36rem] lg:text-[2.85rem] xl:max-w-[39rem] xl:text-[3.05rem]">
-            Підсиліть кар’єру <span className="text-warm">на основі вашого досвіду</span>
+            Зрозумійте, де ваша кар’єра <span className="text-warm">може приносити більше</span>
           </h1>
 
           <p className="mt-6 max-w-[21rem] text-balance text-[1rem] font-medium leading-[1.66] text-[rgba(92,103,128,0.94)] sm:max-w-[30rem] sm:text-[1.08rem] md:max-w-[34rem] md:text-[1.16rem] md:leading-[1.62]">
-            Ми порівнюємо ваш дохід із ринком, показуємо сильніший напрям і допомагаємо підготувати резюме, вакансії,
-            співбесіди та рішення по пропозиціях.
+            Порівнюємо ваш дохід із ринком, показуємо реалістичний потенціал і ведемо через профіль, резюме, вакансії, співбесіди та переговори про умови.
           </p>
 
           <div className="mt-7 flex w-full max-w-[18rem] flex-col items-center gap-3.5 sm:max-w-[22rem] lg:items-start">
