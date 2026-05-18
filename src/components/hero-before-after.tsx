@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 const ctaLabel = "Почати аналіз кар’єри";
@@ -5,44 +6,44 @@ const ctaMeta = "Безкоштовно • 2–3 хвилини";
 
 const heroCases = [
   {
-    name: "Марія",
+    name: "Ліза Марченко",
     role: "маркетологиня",
-    market: "Україна",
+    badge: "резюме + вакансії",
     before: "45 000 грн",
     after: "62 000 грн",
-    change: "+17 000 грн",
-    focus: "Оновили резюме й аргументи для сильнішої компанії.",
-    avatar: "М"
+    change: "+38%",
+    focus: "Оновили резюме під конкретні вакансії, додали результати по проєктах і прибрали слабкі формулювання.",
+    photo: "/reviews/liza-marchenko.jpg"
   },
   {
-    name: "Олександр",
-    role: "продакт-менеджер",
-    market: "міжнародні вакансії",
-    before: "80 000 грн",
-    after: "$2 900",
-    change: "новий ринок",
-    focus: "Звузили ринок і підготували профіль під англомовні співбесіди.",
-    avatar: "О"
-  },
-  {
-    name: "Ірина",
+    name: "Ірина Коваль",
     role: "HR-спеціалістка",
-    market: "сильніша компанія",
+    badge: "співбесіди",
     before: "38 000 грн",
     after: "55 000 грн",
     change: "+45%",
-    focus: "Підсвітили навички, сильні відповіді та сценарій переговорів.",
-    avatar: "І"
+    focus: "Підготували відповіді на складні питання, приклади з досвіду й сценарій розмови про зарплату.",
+    photo: "/reviews/iryna-koval.jpg"
   },
   {
-    name: "Денис",
+    name: "Дмитро Литвин",
     role: "менеджер з продажів",
-    market: "нова пропозиція",
+    badge: "підбір вакансій",
     before: "52 000 грн",
     after: "78 000 грн",
-    change: "+26 000 грн",
-    focus: "Порівняли умови й підготували питання до роботодавця.",
-    avatar: "Д"
+    change: "+50%",
+    focus: "Відсіяли слабкі вакансії, залишили сильніші збіги й підготували аргументи для першої розмови.",
+    photo: "/reviews/dmytro-lytvyn.jpg"
+  },
+  {
+    name: "Андрій Мороз",
+    role: "розробник",
+    badge: "пропозиції",
+    before: "70 000 грн",
+    after: "95 000 грн",
+    change: "+36%",
+    focus: "Зібрали сильну історію досвіду, порівняли умови пропозицій і підготували питання до роботодавця.",
+    photo: "/reviews/andriy-moroz.jpg"
   }
 ] as const;
 
@@ -50,24 +51,25 @@ function HeroProductCard() {
   return (
     <div id="hero-preview" className="hero-forecast-card">
       <div className="hero-cases-visual">
-        <div className="hero-cases-heading">
-          <span>Анонімізовані сценарії</span>
-          <strong>Як може виглядати сильніший наступний крок</strong>
-        </div>
-
-        <div className="hero-case-slider" aria-label="Приклади кар'єрних сценаріїв">
+        <div className="hero-case-slider" aria-label="Приклади кар'єрних покращень">
           <div className="hero-case-track">
             {heroCases.map((caseItem, index) => (
               <article className={`hero-case-card hero-case-card--${index + 1}`} key={caseItem.name}>
                 <div className="hero-case-card-top">
-                  <div className={`hero-case-avatar hero-case-avatar--${(index % heroCases.length) + 1}`} aria-hidden="true">
-                    <span>{caseItem.avatar}</span>
+                  <div className="hero-case-photo">
+                    <Image
+                      src={caseItem.photo}
+                      alt={`${caseItem.name}, ${caseItem.role}`}
+                      width={64}
+                      height={64}
+                      sizes="64px"
+                    />
                   </div>
                   <div>
                     <strong>{caseItem.name}</strong>
                     <span>{caseItem.role}</span>
                   </div>
-                  <small>{caseItem.market}</small>
+                  <small>{caseItem.badge}</small>
                 </div>
 
                 <div className="hero-case-pay">
@@ -88,7 +90,7 @@ function HeroProductCard() {
 
                 <div className="hero-case-result">
                   <span>{caseItem.change}</span>
-                  <small>після підготовки</small>
+                  <small>приріст доходу</small>
                 </div>
               </article>
             ))}
@@ -110,11 +112,11 @@ export function HeroBeforeAfter() {
       <div className="mx-auto grid max-w-[80rem] items-center gap-8 py-7 pb-10 md:gap-8 md:py-8 md:pb-10 lg:min-h-[clamp(30rem,calc(100svh-34rem),34rem)] lg:grid-cols-[1.05fr_0.95fr] lg:gap-10 lg:py-3 xl:gap-12">
         <div className="relative z-10 flex flex-col items-center text-center lg:items-start lg:text-left">
           <h1 className="max-w-[12.5ch] font-display text-[2.28rem] font-extrabold leading-[0.96] tracking-normal text-[var(--text-strong)] sm:max-w-[13.5ch] sm:text-[2.85rem] md:text-[3.15rem] lg:max-w-[36rem] lg:text-[2.85rem] xl:max-w-[39rem] xl:text-[3.05rem]">
-            Зрозумійте, де ваша кар’єра <span className="text-warm">може приносити більше</span>
+            Ваш досвід <span className="text-warm">може коштувати більше</span>
           </h1>
 
           <p className="mt-6 max-w-[21rem] text-balance text-[1rem] font-medium leading-[1.66] text-[rgba(92,103,128,0.94)] sm:max-w-[30rem] sm:text-[1.08rem] md:max-w-[34rem] md:text-[1.16rem] md:leading-[1.62]">
-            Порівнюємо ваш дохід із ринком, показуємо реалістичний потенціал і ведемо через профіль, резюме, вакансії, співбесіди та переговори про умови.
+            Допомагаємо зрозуміти ринкову позицію, вийти на сильніші вакансії та впевнено просити кращі умови.
           </p>
 
           <div className="mt-7 flex w-full max-w-[18rem] flex-col items-center gap-3.5 sm:max-w-[22rem] lg:items-start">
