@@ -28,11 +28,11 @@ Goal: the wow loop works end to end locally.
 ## Iteration 2 — Monetization And Polish
 
 - [x] `robots.ts` blocks cabinet, apply pages, checkout; `/hire/new` stays indexable.
-
 - [x] Free limits enforced in API (`src/lib/hiring/plan.ts`): 1 active vacancy (create + reopen → 402), 10 AI-screened candidates per account (after that candidates are still saved, just unscored). Usage banner in cabinet and shortlist.
 - [x] `/pricing` rebuilt (Start / Pro 990 / Pro 90 days 2490, comparison table); reuses mono checkout via `PricingPurchaseButton`.
 - [x] Privacy/terms rewritten for the hiring product (candidate data, controller/processor roles, OpenAI, anti-discrimination). Have a lawyer review before scaling.
-- [ ] Edit vacancy after publish; close / reopen vacancy.
+- [x] Close / reopen vacancy (respects the active-vacancy limit).
+- [ ] Edit vacancy text and questions after publish.
 - [ ] QR code + downloadable poster for the apply link.
 - [ ] Email notification to employer on new strong candidate.
 - [ ] Update e2e flow test for the new loop.
