@@ -5,7 +5,7 @@ import { createMetadata } from "@/lib/seo";
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = createMetadata({
   title: "Результат",
-  description: "Персоналізований результат оцінки доходу, ринку та наступного кар'єрного кроку.",
+  description: "Персональний результат оцінки зарплати, ринку та наступного кар'єрного кроку.",
   path: "/results",
   noIndex: true
 });

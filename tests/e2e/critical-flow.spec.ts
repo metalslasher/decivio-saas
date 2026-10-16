@@ -32,7 +32,7 @@ test("billing security helpers reject mismatched provider payment details", () =
     id: "checkout_annual",
     plan_id: "annual" as const,
     billing_kind: "one_time" as const,
-    amount: 478800,
+    amount: 219900,
     ccy: 980,
     mono_invoice_id: "invoice_1",
     mono_subscription_id: null
@@ -42,9 +42,9 @@ test("billing security helpers reject mismatched provider payment details", () =
     getInvoiceCheckoutMismatch(annualCheckout, {
       invoiceId: "invoice_1",
       status: "success",
-      amount: 478800,
+      amount: 219900,
       ccy: 980,
-      finalAmount: 478800,
+      finalAmount: 219900,
       reference: "checkout_annual"
     })
   ).toBeNull();
@@ -64,9 +64,9 @@ test("billing security helpers reject mismatched provider payment details", () =
     getInvoiceCheckoutMismatch(annualCheckout, {
       invoiceId: "invoice_1",
       status: "success",
-      amount: 478800,
+      amount: 219900,
       ccy: 980,
-      finalAmount: 478800,
+      finalAmount: 219900,
       reference: "other_checkout"
     })
   ).toBe("invoice_reference_mismatch");
@@ -75,7 +75,7 @@ test("billing security helpers reject mismatched provider payment details", () =
     id: "checkout_monthly",
     plan_id: "monthly" as const,
     billing_kind: "subscription" as const,
-    amount: 79900,
+    amount: 89900,
     ccy: 980,
     mono_invoice_id: null,
     mono_subscription_id: "subscription_1"
@@ -86,7 +86,7 @@ test("billing security helpers reject mismatched provider payment details", () =
       subscriptionId: "subscription_1",
       status: "active",
       startDate: "2026-05-10T09:00:00.000Z",
-      amount: 79900,
+      amount: 89900,
       ccy: 980,
       interval: "1m"
     })
@@ -97,7 +97,7 @@ test("billing security helpers reject mismatched provider payment details", () =
       subscriptionId: "subscription_1",
       status: "active",
       startDate: "2026-05-10T09:00:00.000Z",
-      amount: 79900,
+      amount: 89900,
       ccy: 840,
       interval: "1m"
     })
@@ -108,7 +108,7 @@ test("billing security helpers reject mismatched provider payment details", () =
       subscriptionId: "subscription_1",
       status: "active",
       startDate: "2026-05-10T09:00:00.000Z",
-      amount: 79900,
+      amount: 89900,
       ccy: 980,
       interval: "1y"
     })
@@ -120,13 +120,21 @@ function readLocalEnvValue(key: string) {
     return process.env[key];
   }
 
-  try {
-    const envFile = readFileSync(".env.local", "utf8");
-    const match = envFile.match(new RegExp(`^${key}=(.*)$`, "m"));
-    return match?.[1]?.trim().replace(/^['"]|['"]$/g, "") || undefined;
-  } catch {
-    return undefined;
+  for (const envPath of [".env.flow.local", ".env.local"]) {
+    try {
+      const envFile = readFileSync(envPath, "utf8");
+      const match = envFile.match(new RegExp(`^${key}=(.*)$`, "m"));
+      const value = match?.[1]?.trim().replace(/^['"]|['"]$/g, "");
+
+      if (value) {
+        return value;
+      }
+    } catch {
+      continue;
+    }
   }
+
+  return undefined;
 }
 
 async function createLocalTestAccessToken() {
@@ -205,7 +213,7 @@ test("guest can simulate, register before checkout, pay in local test mode, and 
   await page.locator("#english-level").selectOption("intermediate");
   await page.locator("#job-search-status").selectOption("preparing");
   await page.locator("#resume-status").selectOption("outdated");
-  await page.getByRole("button", { name: /Отримати мій висновок/ }).click();
+  await page.getByRole("button", { name: /Показати висновок/ }).click();
 
   await expect(page).toHaveURL(/\/results\?simulationId=/, { timeout: 60_000 });
   await expect(page.getByText("Маркетолог: тестова оцінка доходу готова")).toBeVisible();

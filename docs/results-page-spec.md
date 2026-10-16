@@ -1,6 +1,6 @@
 # Results Page Spec
 
-Status: current. This document describes the public result page after the four-step `/simulate` form.
+Status: target `/results` behavior for the Decivio rebuild.
 
 ## Source Of Truth
 
@@ -28,15 +28,16 @@ Access rules:
 
 ## Page Goal
 
-The free result should give the user a useful first diagnosis:
+The free result should give the user a credible first diagnosis and a reason to continue.
 
-- where their current income sits relative to role and market;
-- which direction looks stronger for the next move;
-- what risk or readiness issue matters most;
-- which facts were used for personalization;
-- why the paid product is the natural next step.
+It should answer:
 
-It should not expose the full paid dashboard plan before checkout.
+- where their current income sits relative to their role and market;
+- whether their next move should focus on better local positioning, international remote, relocation, faster applications, or salary calibration;
+- which blocker matters most right now;
+- which paid action is the best next step.
+
+It should not try to be the full career plan.
 
 ## Visible Structure
 
@@ -46,50 +47,91 @@ Content:
 
 - Generated headline.
 - Short summary.
-- Meta chips based on current role, seniority, current market, desired income, goal, derived target market, English level, and resume status.
+- Meta chips based on current role, seniority, current market, current income, desired income, goal, derived target market, English level, search status, and resume status.
 
-### Metric Cards
+### Diagnosis Cards
 
-Current cards:
+Target cards:
 
 - Current income.
 - Market reference.
+- Market position verdict.
 - Stronger direction.
-- Growth potential.
-- Path difficulty.
+- Main blocker.
 
-The page should not show optimistic/base/pessimistic timing rows in the free result.
+Avoid showing old transition-ROI framing or long forecast horizons in the free result.
 
-### Profile Snapshot
+### Market Position Snapshot
 
-Shows current role and market context in a compact salary/profile panel.
+Shows the user's current role, market, income, seniority, and likely positioning.
 
-### Stronger Direction Snapshot
+The UI should make clear whether the result is:
 
-Shows the stronger direction being evaluated: same role, better company, international market, or local work abroad. Public onboarding does not collect a separate desired role.
+- underpaid;
+- near market;
+- ambitious but possible;
+- unrealistic without gap-closing;
+- not enough data.
 
-### Comparison
+### Recommended Next Action
 
-Explains the practical meaning of the result without over-promising.
+This should be the bridge into paid value.
+
+Possible next actions:
+
+- run Vacancy Fit on a real vacancy;
+- improve resume positioning first;
+- calibrate salary expectations;
+- prepare interview/salary script;
+- compare an offer if the user is already late-stage.
+
+The result should recommend one primary action, not every available feature.
 
 ### Explanation
 
 Sections:
 
-- Why this result.
+- Why this diagnosis.
 - What personalized the answer.
+- What remains uncertain.
 
-These sections should use plain Ukrainian and avoid generic motivational text.
+Use plain Ukrainian and avoid generic motivational text.
+
+### Source And Confidence Notes
+
+Market and salary claims should expose enough provenance to build trust.
+
+Target behavior:
+
+- show whether live web research was used;
+- list high-level source categories when available, such as Ukrainian job boards, salary statistics, vacancy text, or user-provided inputs;
+- explain when estimates are broad or confidence is limited.
+
+Do not expose internal prompts or raw model JSON.
 
 ### CTA
 
 Primary path:
 
-- Go to `/pricing`.
+```text
+/pricing
+```
 
-The CTA should make clear that the paid plan opens the practical route: profile improvements, resume, vacancies, interview preparation, and offer evaluation.
+The CTA should sell the next paid action, not a generic "dashboard".
 
-Authenticated paid users may also get a path into the dashboard scenario when access is active.
+Preferred CTA language:
+
+```text
+Перевірити вакансію і підготувати подачу
+```
+
+or:
+
+```text
+Відкрити план до сильнішої пропозиції
+```
+
+Authenticated paid users may also get a path into the relevant dashboard workspace when access is active.
 
 ## Data Contract
 
@@ -109,9 +151,9 @@ Authenticated paid users may also get a path into the dashboard scenario when ac
 }
 ```
 
-This shape is still used internally by the analysis generator. The public UI maps it into income/market language through `buildSimulationResultsPayload()` and should not depend directly on raw AI JSON.
+This shape is still used internally by the analysis generator. The public UI should map it into market-position language through `buildSimulationResultsPayload()` and should not depend directly on raw AI JSON.
 
-`simulation_results.ai_summary` contains the generated market profile, narrative, guidance, and metadata.
+`simulation_results.ai_summary` contains generated market profile, narrative, guidance, and metadata.
 
 ## Error Handling
 
@@ -122,3 +164,4 @@ User-facing errors should be specific enough to guide action:
 - server failure: ask the user to retry.
 
 Avoid raw technical errors in the UI.
+

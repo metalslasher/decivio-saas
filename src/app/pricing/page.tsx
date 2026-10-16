@@ -2,13 +2,13 @@ import Image from "next/image";
 import { Suspense } from "react";
 import { JsonLd } from "@/components/json-ld";
 import { PricingPurchaseButton } from "@/components/pricing-purchase-button";
-import { formatUah, paidFeatureSections, pricingPlans } from "@/lib/pricing";
+import { formatUah, paidFeatureSections, pricingFlowSteps, pricingPlans } from "@/lib/pricing";
 import { createBreadcrumbSchema, createMetadata, createSoftwareApplicationSchema } from "@/lib/seo";
 
 export const metadata = createMetadata({
-  title: "Ціни",
+  title: "Тарифи на доступ",
   description:
-    "Два формати повного доступу: помісячно або на рік. Оцінка доходу й ринку, резюме, вакансії, співбесіди та пропозиції в одному доступі.",
+    "Оберіть місячний або 90-денний доступ після безкоштовної оцінки кар'єрної позиції: вакансії, резюме, співбесіди та зарплатні аргументи.",
   path: "/pricing",
   keywords: ["тарифи decivio", "ціни decivio", "вартість доступу decivio", "оцінка зарплати decivio", "підготовка до співбесіди decivio"]
 });
@@ -18,7 +18,7 @@ const pricingReviews = [
     name: "Ірина Коваль",
     avatar: "/reviews/iryna-koval.jpg",
     quote:
-      "Я прийшла просто перевірити зарплату. Виявилось, що для мого досвіду в маркетингу можна просити більше, але резюме треба було переписати з акцентом на результати. Після правок стало легше пояснювати свою цінність.",
+      "Я хотіла зрозуміти, чи недооцінюю себе. Виявилось, що для мого досвіду в маркетингу можна просити більше, але резюме треба було переписати з акцентом на результати. Після правок стало легше пояснювати свою цінність.",
     rating: 5
   },
   {
@@ -79,7 +79,7 @@ const pricingSchemas = [
   ]),
   createSoftwareApplicationSchema({
     path: "/pricing",
-    description: "Сторінка цін з двома платними форматами повного доступу для оцінки доходу, ринку і підготовки до кращої пропозиції.",
+    description: "Тарифи для доступу до практичної підготовки після безкоштовної оцінки кар'єрної позиції.",
     featureList: paidFeatureSections.flatMap((section) => section.items.map((item) => item.title)),
     offers: pricingPlans.map((plan) => ({
       name: plan.name,
@@ -96,7 +96,7 @@ type PricingPlan = (typeof pricingPlans)[number];
 function PlanCard({ plan }: { plan: PricingPlan }) {
   const isFeatured = plan.featured;
   const monthlyDiscount = plan.oldMonthlyEquivalentUah ? Math.round((1 - plan.monthlyEquivalentUah / plan.oldMonthlyEquivalentUah) * 100) : null;
-  const ctaLabel = plan.id === "annual" ? "Обрати річний доступ" : "Обрати місячний доступ";
+  const ctaLabel = plan.id === "annual" ? "Обрати 90-денний план" : "Обрати місячний доступ";
 
   return (
     <article
@@ -113,16 +113,27 @@ function PlanCard({ plan }: { plan: PricingPlan }) {
       {isFeatured ? (
         <div className="absolute right-5 top-0 hidden -translate-y-1/2 sm:block">
           <span className="inline-flex rounded-full border border-[rgba(67,97,255,0.16)] bg-[rgba(238,242,255,0.96)] px-5 py-3 text-[0.95rem] font-extrabold leading-none text-[var(--accent-strong)] shadow-[0_18px_34px_-24px_rgba(41,73,244,0.36)]">
-            Найкраща ціна
+            Основний план
           </span>
         </div>
       ) : null}
 
       <div className="flex flex-1 flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
-        <div className="min-w-0">
+        <div className="min-w-0 sm:max-w-[32rem]">
           <h2 className="font-display text-[1.28rem] font-extrabold leading-[1.12] tracking-normal text-[var(--text-strong)] md:text-[1.42rem]">
             {plan.name}
           </h2>
+          <p className="mt-3 text-[0.94rem] leading-[1.62] text-[var(--text-muted)] md:text-[0.98rem]">{plan.description}</p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <span className="rounded-full border border-[var(--line-soft)] bg-[rgba(255,255,255,0.68)] px-3 py-1.5 text-[0.78rem] font-bold text-[var(--text-muted)]">
+              {plan.billingLabel}
+            </span>
+            {plan.savingsUah > 0 ? (
+              <span className="rounded-full border border-[rgba(67,97,255,0.18)] bg-[rgba(238,242,255,0.92)] px-3 py-1.5 text-[0.78rem] font-bold text-[var(--accent-strong)]">
+                Економія {formatUah(plan.savingsUah)}
+              </span>
+            ) : null}
+          </div>
         </div>
 
         <div className="shrink-0 text-left sm:text-right">
@@ -133,6 +144,9 @@ function PlanCard({ plan }: { plan: PricingPlan }) {
             {formatUah(plan.monthlyEquivalentUah)}
           </p>
           <p className="mt-1 text-[0.94rem] font-semibold text-[var(--text-strong)]">за місяць</p>
+          <p className="mt-2 text-[0.86rem] font-semibold leading-[1.45] text-[var(--text-muted)]">
+            Списання зараз: {formatUah(plan.billedNowUah)}
+          </p>
         </div>
       </div>
 
@@ -200,9 +214,9 @@ function PricingReviewCard({ review, index }: { review: (typeof pricingReviews)[
 
 export default function PricingPage() {
   const monthlyPlan = pricingPlans.find((plan) => plan.id === "monthly");
-  const annualPlan = pricingPlans.find((plan) => plan.id === "annual");
+  const mainPlan = pricingPlans.find((plan) => plan.id === "annual");
 
-  if (!monthlyPlan || !annualPlan) {
+  if (!monthlyPlan || !mainPlan) {
     return null;
   }
 
@@ -214,23 +228,43 @@ export default function PricingPage() {
         <section className="relative py-3 md:py-5">
           <div className="relative">
             <header className="mx-auto max-w-3xl text-center">
-              <h1 className="page-title mx-auto max-w-[14ch]">
-                Оберіть формат <span className="text-accent">доступу</span>
+              <h1 className="page-title mx-auto max-w-[16ch]">
+                Перевіряйте вакансії перед <span className="text-accent">подачею</span>
               </h1>
+              <p className="lead-copy mx-auto mt-4 max-w-2xl">
+                Безкоштовна оцінка показує вашу ринкову позицію. Платний доступ відкриває Vacancy Fit: аналіз конкретних вакансій, resume-правки і зарплатні аргументи для подачі.
+              </p>
             </header>
 
             <div className="mt-12 grid gap-5 md:mt-14 lg:grid-cols-2">
               <PlanCard plan={monthlyPlan} />
-              <PlanCard plan={annualPlan} />
+              <PlanCard plan={mainPlan} />
             </div>
+          </div>
+        </section>
+
+        <section className="py-3 md:py-5" aria-label="Як відкривається доступ">
+          <div className="grid gap-4 md:grid-cols-3">
+            {pricingFlowSteps.map((step, index) => (
+              <article key={step.title} className="surface-panel rounded-[1.8rem] px-5 py-5 md:px-6 md:py-6">
+                <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[var(--accent-soft)] text-[0.78rem] font-extrabold text-[var(--accent-strong)]">
+                  {index + 1}
+                </span>
+                <h2 className="panel-title mt-4">{step.title}</h2>
+                <p className="body-copy mt-3">{step.description}</p>
+              </article>
+            ))}
           </div>
         </section>
 
         <section className="space-y-8 py-6 md:space-y-10 md:py-9">
           <div className="mx-auto max-w-3xl text-center">
             <h2 className="section-title mx-auto max-w-[15ch]">
-              Усі інструменти в <span className="text-accent">одному місці</span>
+              Що входить у <span className="text-accent">платний доступ</span>
             </h2>
+            <p className="body-copy mx-auto mt-4 max-w-2xl">
+              Фокус не на кількості модулів, а на робочому циклі: оцінити позицію, перевірити вакансію, посилити подачу й підготувати розмову про зарплату.
+            </p>
           </div>
 
           <div className="grid gap-4 lg:grid-cols-3">

@@ -11,7 +11,7 @@ import {
   isAccessGrantedForCheckoutStatus,
   mapMonoInvoiceStatusToCheckoutStatus,
   mapMonoSubscriptionStatusToCheckoutStatus,
-  resolveAnnualAccessEndsAt,
+  resolveOneTimeAccessEndsAt,
   resolveMonthlyAccessEndsAt
 } from "@/lib/billing";
 import {
@@ -314,7 +314,7 @@ function buildSubscriptionAccessFromInvoice(checkout: BillingCheckoutRow, status
       user_id: checkout.user_id,
       plan: "pro",
       status: "active",
-      current_period_end: resolveAnnualAccessEndsAt(eventTime),
+      current_period_end: resolveOneTimeAccessEndsAt(eventTime),
       provider: MONO_PROVIDER,
       mono_invoice_id: status.invoiceId,
       mono_subscription_id: null,

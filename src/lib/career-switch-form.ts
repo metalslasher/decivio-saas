@@ -253,9 +253,7 @@ export const upgradeGoalOptions: Array<{ value: UpgradeGoal; label: string }> = 
   { value: "faster_search", label: "Швидше отримати нову пропозицію" }
 ];
 
-export const publicUpgradeGoalOptions: Array<{ value: UpgradeGoal; label: string }> = upgradeGoalOptions.filter(
-  (option) => option.value !== "higher_income"
-);
+export const publicUpgradeGoalOptions: Array<{ value: UpgradeGoal; label: string }> = upgradeGoalOptions;
 
 export const jobSearchStatusOptions: Array<{ value: JobSearchStatus; label: string }> = [
   { value: "not_started", label: "Ще не шукаю активно" },

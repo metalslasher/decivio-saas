@@ -34,7 +34,7 @@ export async function claimGuestSimulationsForUser(
     .select("id");
 
   if (simulationsError) {
-    throw new Error(`Не вдалося закріпити сценарії за акаунтом: ${simulationsError.message}`);
+    throw new Error(`Не вдалося закріпити оцінки за акаунтом: ${simulationsError.message}`);
   }
 
   const { data: updatedResults, error: resultsError } = await supabase
@@ -48,7 +48,7 @@ export async function claimGuestSimulationsForUser(
     .select("id");
 
   if (resultsError) {
-    throw new Error(`Не вдалося закріпити результати сценаріїв за акаунтом: ${resultsError.message}`);
+    throw new Error(`Не вдалося закріпити результати оцінок за акаунтом: ${resultsError.message}`);
   }
 
   return {

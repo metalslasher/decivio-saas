@@ -6,11 +6,11 @@ import { getSupabaseBrowserClient } from "@/lib/db/supabase-browser";
 import { DashboardAccess } from "./dashboard/dashboard-access";
 import { DashboardAccessRequired, DashboardError, DashboardGuest } from "./dashboard/dashboard-gates";
 import { DashboardLayout } from "./dashboard/dashboard-layout";
-import { DashboardModuleWorkspace } from "./dashboard/dashboard-module-workspace";
 import { DashboardOverview } from "./dashboard/dashboard-overview";
 import { DashboardProfileWorkspace } from "./dashboard/dashboard-profile-workspace";
 import { DashboardScenarioWorkspace } from "./dashboard/dashboard-scenario-workspace";
 import { DashboardSkeleton } from "./dashboard/dashboard-primitives";
+import { DashboardVacancyFitWorkspace } from "./dashboard/dashboard-vacancy-fit-workspace";
 import { useDashboardData } from "./dashboard/use-dashboard-data";
 import {
   getDashboardView,
@@ -117,14 +117,6 @@ export function DashboardShell({
     state.subscription.status,
   );
   const lastSimulation = state.recentSimulations[0] ?? null;
-  const moduleView =
-    activeView === "resume" ||
-    activeView === "interviews" ||
-    activeView === "jobs" ||
-    activeView === "offers" ||
-    activeView === "assistant"
-      ? activeView
-      : null;
   const canCompactSidebar = !isPhoneViewport;
   const isSidebarCompact = canCompactSidebar && isSidebarCollapsed;
 
@@ -154,9 +146,17 @@ export function DashboardShell({
         />
       ) : null}
 
-      {activeView === "scenario" ? (
+      {activeView === "market" ? (
         <DashboardScenarioWorkspace
           recentSimulations={state.recentSimulations}
+        />
+      ) : null}
+
+      {activeView === "vacancies" ? (
+        <DashboardVacancyFitWorkspace
+          supabase={supabase}
+          profile={state.profile}
+          lastSimulation={lastSimulation}
         />
       ) : null}
 
@@ -169,8 +169,6 @@ export function DashboardShell({
           onProfileSaved={handleProfileSaved}
         />
       ) : null}
-
-      {moduleView ? <DashboardModuleWorkspace moduleView={moduleView} /> : null}
 
       {activeView === "access" ? (
         <DashboardAccess

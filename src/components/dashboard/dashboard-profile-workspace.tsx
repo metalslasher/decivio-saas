@@ -99,7 +99,7 @@ export function DashboardProfileWorkspace({
   const jobSearchStage = mapJobSearchStageLabel(draft.job_search_stage || null);
   const profileHeroSummary =
     missingItems.length > 0
-      ? "Тут видно короткий зріз профілю, а нижче можна дозібрати стабільний контекст без повторного введення в кожному новому сценарії."
+      ? "Тут видно короткий зріз профілю, а нижче можна дозібрати стабільний контекст для аналізу вакансій."
       : "Профіль уже зібраний: нижче можна швидко оновити основні дані, пароль і додатковий контекст в одному місці.";
 
   const handleProfileSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -397,7 +397,7 @@ export function DashboardProfileWorkspace({
           </div>
 
           <h1 className="mt-5 max-w-[15ch] text-[2.2rem] font-semibold leading-[0.94] tracking-[-0.055em] text-[var(--text-strong)] md:text-[3.05rem]">
-            Контекст, який працює на всі модулі
+            Контекст для вакансій і подачі
           </h1>
           <p className="mt-5 max-w-3xl text-[1rem] leading-[1.78] text-[var(--text-muted)]">
             {profileHeroSummary}
@@ -412,7 +412,7 @@ export function DashboardProfileWorkspace({
             <DashboardMetricCard
               label="Цільова роль"
               value={profileTargetRole ?? "ще не вказано"}
-              description="Головний орієнтир для модулів і сценаріїв."
+              description="Головний орієнтир для аналізу вакансій."
             />
             <DashboardMetricCard
               label="Формат роботи"
@@ -505,7 +505,7 @@ export function DashboardProfileWorkspace({
               <div className="surface-soft rounded-[1.2rem] p-4">
                 <p className="text-[0.92rem] leading-[1.68] text-[var(--text-muted)]">
                   Профіль виглядає зібрано. Його контекст уже можна
-                  використовувати по всьому кабінету.
+                  використовувати для перевірки вакансій.
                 </p>
               </div>
             )}
@@ -521,8 +521,8 @@ export function DashboardProfileWorkspace({
                 Основне
               </h2>
               <p className="mt-3 text-[0.94rem] leading-[1.72] text-[var(--text-muted)]">
-                Базові дані профілю та сигнали, які варто не тягнути з кожного
-                нового сценарію окремо.
+                Базові дані профілю та сигнали, які варто не вводити повторно
+                перед кожною перевіркою вакансії.
               </p>
             </div>
 
@@ -621,7 +621,7 @@ export function DashboardProfileWorkspace({
               </h2>
               <p className="mt-3 text-[0.94rem] leading-[1.72] text-[var(--text-muted)]">
                 Ці поля підтягуються з останнього онбордингу, але тут їх можна
-                тримати як стабільну базу для всіх модулів.
+                тримати як стабільну базу для Vacancy Fit.
               </p>
             </div>
 
@@ -917,10 +917,10 @@ export function DashboardProfileWorkspace({
             </h2>
             <div className="mt-5 space-y-3">
               {[
-                "Сценарії використовують ролі, ринок і пріоритет переходу для нових розрахунків.",
-                "Резюме та вакансії підтягують англійську, досвід і формат роботи без повторного введення.",
-                "Співбесіди спираються на стадію пошуку й темп підготовки, щоб радити реалістичні наступні кроки.",
-                "Пропозиції та нова робота використовують зарплатний контекст і ваші очікування від переходу.",
+                "Ринкова позиція використовує роль, дохід, ринок і пріоритет переходу для нових оцінок.",
+                "Vacancy Fit підтягує англійську, досвід і формат роботи без повторного введення.",
+                "Resume-правки спираються на цільову роль і конкретну вакансію.",
+                "Salary talking points використовують зарплатний контекст і вашу стадію пошуку.",
               ].map((item) => (
                 <div key={item} className="surface-soft rounded-[1.2rem] p-4">
                   <p className="text-[0.92rem] leading-[1.68] text-[var(--text-muted)]">

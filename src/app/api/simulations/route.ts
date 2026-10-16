@@ -347,7 +347,7 @@ export async function POST(request: Request) {
       );
     }
 
-    return NextResponse.json({ error: `Не вдалося зберегти симуляцію: ${simulationError.message}` }, { status: 500 });
+    return NextResponse.json({ error: `Не вдалося зберегти оцінку: ${simulationError.message}` }, { status: 500 });
   }
 
   const { error: resultInsertError } = await supabase.from("simulation_results").insert({
@@ -365,7 +365,7 @@ export async function POST(request: Request) {
     await supabase.from("simulations").update({ status: "failed" }).eq("id", simulation.id);
     return NextResponse.json(
       {
-        error: `Не вдалося зберегти результат симуляції: ${resultInsertError.message}`
+        error: `Не вдалося зберегти результат оцінки: ${resultInsertError.message}`
       },
       { status: 500 }
     );
@@ -379,7 +379,7 @@ export async function POST(request: Request) {
   if (simulationStatusError) {
     return NextResponse.json(
       {
-        error: `Результат збережено, але не вдалося оновити статус симуляції: ${simulationStatusError.message}`
+        error: `Результат збережено, але не вдалося оновити статус оцінки: ${simulationStatusError.message}`
       },
       { status: 500 }
     );

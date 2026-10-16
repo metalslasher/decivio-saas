@@ -1,29 +1,32 @@
 # Decivio Documentation
 
-These docs describe the current product and the approved product direction, not historical prompts or early design ideas.
+These docs describe the current product contracts and the approved rebuild direction.
 
 ## Active Documents
 
-- `codebase-map.md`: where the main product areas live in the repository.
-- `engineering-guide.md`: conventions for adding and refactoring code.
-- `documentation-workflow.md`: how and when docs should be updated.
-- `product-concept.md`: approved product direction for the next Decivio iteration, used to guide upcoming implementation.
+- `product-concept.md`: approved strategic direction and product guardrails.
+- `market-validation.md`: demand hypotheses, pricing tests, and decision gates.
+- `product-flow.md`: target public user path from landing to paid workspace.
+- `onboarding-spec.md`: target `/simulate` assessment.
+- `results-page-spec.md`: target `/results` diagnosis.
+- `dashboard-workspace-spec.md`: target paid job-to-offer workspace.
 - `billing-flow.md`: current checkout, mono status, and dashboard-access behavior.
 - `database-setup.md`: how to apply Supabase migrations and run the critical flow test.
 - `database-spec.md`: current database schema and table behavior.
-- `product-flow.md`: current public user path from simulation to paid dashboard.
-- `onboarding-spec.md`: current four-step `/simulate` form.
-- `results-page-spec.md`: current `/results` behavior and data contract.
+- `codebase-map.md`: where the main product areas live in the repository.
+- `engineering-guide.md`: conventions for adding and refactoring code.
+- `documentation-workflow.md`: how and when docs should be updated.
 
 ## Documentation Rules
 
-- Code and migrations are the source of truth.
-- `product-concept.md` is the only planning-oriented document kept in active docs. Route-level docs remain the source of truth until code is updated.
-- Update docs in the same commit when changing public flow, auth, billing, database schema, simulation fields, or result payloads.
+- Code and migrations remain the source of truth for shipped behavior.
+- Product strategy lives in `product-concept.md` and `market-validation.md`.
+- During the rebuild, route-level docs may describe target behavior when their status says so.
+- Before release, route-level docs must match shipped behavior.
+- Update docs in the same commit when changing public flow, auth, billing, database schema, simulation fields, result payloads, or dashboard structure.
 - Delete obsolete specs instead of keeping them as active docs.
 - Keep historical ideas in issues/backlog, not in `docs/`.
 - Keep files UTF-8 encoded and check for broken mojibake before committing.
-- Prefer short documents that answer "what is current?" over long aspirational specs.
 
 ## Recommended Maintenance Flow
 
@@ -33,3 +36,4 @@ Before a product-facing release:
 2. Check whether `/simulate`, `/results`, `/pricing`, auth, checkout, or dashboard access changed.
 3. Update the matching doc only where behavior actually changed.
 4. Run `npm run test:flow` when the critical user path is affected.
+

@@ -1,8 +1,7 @@
 import Link from "next/link";
 import { formatUah } from "@/lib/pricing";
-import { dashboardModules } from "./dashboard-config";
 import { ActivityIcon, CreditCardIcon, SparkIcon } from "./icons";
-import { DashboardChip, DashboardMetricCard, DashboardModuleCard, DashboardProgressRow } from "./dashboard-primitives";
+import { DashboardChip, DashboardMetricCard, DashboardProgressRow } from "./dashboard-primitives";
 import type { DashboardAccessState, DashboardSimulation, DashboardUserProfile } from "./types";
 import {
   buildActivityItems,
@@ -75,17 +74,15 @@ export function DashboardOverview({
     lastSimulation,
   );
   const focusTitle =
-    lastSimulation?.currentRole && lastSimulation.targetRole
-      ? `${lastSimulation.currentRole} -> ${lastSimulation.targetRole}`
-      : lastSimulation?.targetRole
-        ? `Фокус на переході в ${lastSimulation.targetRole}`
-        : "Почнімо зі стартового сценарію переходу";
+    lastSimulation?.currentRole
+      ? `Позиція: ${lastSimulation.currentRole}`
+      : "Почнімо з оцінки ринкової позиції";
   const heroSummary = lastSimulation
     ? longTermDirectionInsight ??
       (lastVerdict
         ? `${lastVerdict}.`
-        : "Останній розрахунок уже можна тримати як базовий фокус для наступних модулів.")
-    : "Після першої симуляції тут з'явиться коротке зведення з вердиктом, шансом входу, доходом і ризиком переходу.";
+        : "Останній результат уже можна використовувати як базу для перевірки конкретних вакансій.")
+    : "Після першої оцінки тут з'явиться діагноз по доходу, ринку, ризику й наступній дії.";
 
   return (
     <div className="space-y-6">
@@ -116,16 +113,16 @@ export function DashboardOverview({
             description={
               currentCeiling
                 ? "Орієнтир по верхній межі доходу в поточній ролі."
-                : "Після першого результату тут з'явиться базовий орієнтир для порівняння."
+                : "Після першого результату тут з'явиться базовий орієнтир."
             }
           />
           <DashboardMetricCard
-            label="Цільова стеля"
+            label="Сильніша стеля"
             value={targetCeiling ?? "Ще не пораховано"}
             description={
               targetCeiling
-                ? "Орієнтир по верхній межі доходу після переходу."
-                : "Цільова роль покаже свою стелю після першого розрахунку."
+                ? "Орієнтир по верхній межі доходу в сильнішому напрямі."
+                : "Сильніший напрям з'явиться після першого результату."
             }
           />
           <DashboardMetricCard
@@ -156,8 +153,9 @@ export function DashboardOverview({
             План прогресу
           </h2>
           <p className="mt-3 text-[0.95rem] leading-[1.72] text-[var(--text-muted)]">
-            Це зона, яка тримає людину не в хаосі модулів, а в послідовному
-            маршруті переходу.
+            Маршрут тримає фокус не на кількості функцій, а на наступній
+            практичній дії: перевірити вакансію, підготувати подачу, посилити
+            зарплатні аргументи.
           </p>
 
           <div className="mt-6 space-y-5">
@@ -224,8 +222,8 @@ export function DashboardOverview({
               </p>
               <p className="mt-2 text-[0.92rem] leading-[1.68] text-[var(--text-muted)]">
                 {subscription.plan === "pro"
-                  ? "Сценарії, модулі підготовки та сервісні екрани вже прив'язані до цього акаунта."
-                  : "Базовий сценарний контур активний. Платні модулі вже мають місце в навігації та готові до підключення."}
+                  ? "Платний workspace прив'язаний до цього акаунта. Почніть із перевірки конкретної вакансії."
+                  : "Базова оцінка доступна без оплати. Платний workspace відкриває аналіз вакансій і підготовку подачі."}
               </p>
             </div>
           </div>
@@ -273,26 +271,6 @@ export function DashboardOverview({
           </div>
         </article>
       </div>
-
-      <section id="dashboard-modules" className="space-y-4 scroll-mt-28">
-        <div className="flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <h2 className="text-[1.85rem] font-semibold leading-[1.02] tracking-[-0.045em] text-[var(--text-strong)]">
-              Модулі
-            </h2>
-            <p className="mt-2 text-[0.96rem] leading-[1.72] text-[var(--text-muted)]">
-              Усі інструменти видно одразу, але головний екран не перевантажений
-              і тримає акцент на наступних діях.
-            </p>
-          </div>
-        </div>
-
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {dashboardModules.map((module) => (
-            <DashboardModuleCard key={module.view} module={module} />
-          ))}
-        </div>
-      </section>
     </div>
   );
 }

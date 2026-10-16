@@ -14,13 +14,14 @@ export function DashboardGuest({ onLogin }: { onLogin: () => void }) {
 
         <div className="mt-6 grid gap-6 xl:grid-cols-[1.08fr,0.92fr] xl:items-center">
           <article className="dashboard-spotlight-card rounded-[2.3rem] p-6 md:p-8">
-            <DashboardChip tone="accent">Особистий кабінет</DashboardChip>
+            <DashboardChip tone="accent">Paid workspace</DashboardChip>
             <h1 className="mt-5 max-w-[11ch] text-[2.5rem] font-semibold leading-[0.92] tracking-[-0.055em] text-[var(--text-strong)] md:text-[3.5rem]">
               Кабінет відкривається після оплати.
             </h1>
             <p className="mt-5 max-w-2xl text-[1rem] leading-[1.78] text-[var(--text-muted)]">
               Якщо у вас уже є оплачений акаунт, увійдіть, щоб відкрити робочий
-              простір. Новий профіль створюється під час оформлення оплати.
+              простір для перевірки вакансій і підготовки подачі. Новий профіль
+              створюється під час оформлення оплати.
             </p>
 
             <div className="mt-7 flex flex-wrap gap-3">
@@ -36,16 +37,16 @@ export function DashboardGuest({ onLogin }: { onLogin: () => void }) {
           <div className="grid gap-4 md:grid-cols-2">
             {[
               [
-                "Ліва навігація",
-                "Бокове меню живе окремо від контенту й лишається під рукою.",
+                "Позиція",
+                "Після оцінки кабінет тримає ваш ринковий діагноз під рукою.",
               ],
               [
-                "Модулі",
-                "Кожен інструмент має свій розділ, а не змішується в один екран.",
+                "Вакансії",
+                "Головна paid-дія: перевірити вакансію перед подачею.",
               ],
               [
-                "Останній сценарій",
-                "У фокусі завжди останній розрахунок або онбординг, якщо його ще не було.",
+                "Подача",
+                "Результат одразу дає resume-правки й аргументи для розмови.",
               ],
               [
                 "Доступ",
@@ -96,8 +97,8 @@ export function DashboardAccessRequired({
               Кабінет доступний після оплати.
             </h1>
             <p className="mt-5 max-w-2xl text-[1rem] leading-[1.78] text-[var(--text-muted)]">
-              Ви увійшли як {email}. Щоб відкрити модулі, історію сценаріїв і
-              робочі екрани, оформіть доступ на сторінці тарифів.
+              Ви увійшли як {email}. Щоб відкрити аналіз вакансій і робочий
+              простір подачі, оформіть доступ на сторінці тарифів.
             </p>
 
             <div className="mt-7 flex flex-wrap gap-3">
@@ -126,7 +127,7 @@ export function DashboardAccessRequired({
               ],
               [
                 "Оплата закріплює доступ",
-                "Після успішної mono-оплати саме цей профіль отримує платні модулі.",
+                "Після успішної mono-оплати саме цей профіль отримує paid workspace.",
               ],
               [
                 "Вхід для чинних клієнтів",
@@ -170,7 +171,7 @@ export function DashboardError({ message }: { message: string }) {
           </p>
           <div className="mt-7 flex flex-wrap gap-3">
             <Link href="/simulate" className="btn-primary">
-              Перейти до симуляції
+              Перейти до оцінки
             </Link>
             <Link href="/" className="btn-secondary">
               На головну

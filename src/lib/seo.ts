@@ -42,7 +42,7 @@ const googleSiteVerification = process.env.GOOGLE_SITE_VERIFICATION?.trim();
 export const siteConfig = {
   name: "Decivio",
   description:
-    "Decivio допомагає оцінити ваш дохід, ринок і кар'єрний потенціал, посилити резюме та підготуватися до кращої пропозиції.",
+    "Сервіс допомагає оцінити ринкову позицію, зрозуміти сильні й слабкі місця профілю та підготувати резюме, вакансії, співбесіди й розмову про кращі умови.",
   url: getPublicSiteUrl(),
   locale: "uk_UA",
   language: "uk-UA",
@@ -57,9 +57,12 @@ export const siteConfig = {
 
 const defaultKeywords = [
   "оцінка зарплати",
+  "перевірити зарплату",
   "аналіз доходу",
   "прогноз доходу",
   "ринкова зарплата",
+  "зарплатні очікування",
+  "ринок праці Україна",
   "підготовка до співбесіди",
   "покращення резюме",
   "аналіз зарплати",
@@ -98,6 +101,10 @@ export function buildAbsoluteUrl(path = "/") {
 }
 
 function buildBrandedTitle(title: string) {
+  if (title.toLowerCase().includes(siteConfig.name.toLowerCase())) {
+    return title;
+  }
+
   return `${title} | ${siteConfig.name}`;
 }
 

@@ -1,6 +1,6 @@
 # Billing Flow
 
-Status: current checkout and paid-access behavior.
+Status: current checkout and paid-access behavior, with target pricing notes for the rebuild.
 
 ## Goal
 
@@ -20,11 +20,38 @@ The user should never feel stuck after payment. Every return from mono must lead
 6. The status endpoint may poll mono in production, then reads the latest subscription/access row.
 7. The dashboard link is shown when the checkout is successful and active subscription access exists, or when the account has an explicit manual full-access override.
 
+## Current Plans
+
+Current implementation:
+
+- monthly plan: mono subscription;
+- legacy `annual` plan id: mono one-time invoice, currently used as the 90-day Career Upgrade plan for database compatibility.
+
+These are the shipped payment paths until pricing code is updated.
+
+## Target Pricing Direction
+
+The Decivio rebuild should not lead with annual access.
+
+Target plan hierarchy:
+
+1. 90-day Career Upgrade Plan as the main offer.
+2. Monthly plan as a lower-entry option.
+3. One-time entry offer for a concrete paid action, such as one vacancy fit plus resume-positioning output.
+4. Annual plan only later as a secondary option after retention is proven.
+
+Implementation should keep billing access checks strict regardless of plan shape:
+
+- registration alone must not open the dashboard;
+- successful checkout or active subscription/access row must open paid access;
+- manual full-access override stays isolated in `src/lib/manual-full-access.ts`;
+- mono amount, currency, interval/reference, and provider target must be validated before access is opened.
+
 ## Status Behavior
 
 - `pending`: mono has not confirmed the payment yet; user can check again or reopen the current payment.
 - `processing`: mono is processing the payment; page polls for a limited time, then lets the user check manually.
-- `paid`: one-time invoice succeeded and annual Pro access should be active.
+- `paid`: one-time invoice succeeded and one-time Pro access should be active.
 - `active`: subscription succeeded and monthly Pro access should be active.
 - `failed`: payment failed; user can create a new payment.
 - `expired`: invoice expired; user can create a new payment.
@@ -44,7 +71,7 @@ The checkout endpoint supports test-only status simulation through `testCheckout
 }
 ```
 
-Supported annual invoice test statuses:
+Supported one-time invoice test statuses for legacy `annual` plan id:
 
 - `pending`
 - `processing`
@@ -61,7 +88,7 @@ Supported monthly subscription test statuses:
 - `canceled`
 - `failed`
 
-The default local test status remains successful: `paid` for annual and `active` for monthly.
+The default local test status remains successful: `paid` for the one-time plan and `active` for monthly.
 
 ## Production Notes
 

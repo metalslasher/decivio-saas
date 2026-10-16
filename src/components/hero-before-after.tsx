@@ -1,48 +1,48 @@
 import Image from "next/image";
 import Link from "next/link";
 
-const ctaLabel = "Почати аналіз кар’єри";
-const ctaMeta = "Безкоштовно • 2–3 хвилини";
+const ctaLabel = "Перевірити позицію";
+const ctaMeta = "Без оплати • 2–3 хвилини";
 
 const heroCases = [
   {
     name: "Ліза Марченко",
     role: "маркетологиня",
-    badge: "резюме + вакансії",
+    badge: "резюме",
     before: "45 000 грн",
     after: "62 000 грн",
     change: "+38%",
-    focus: "Оновили резюме під конкретні вакансії, додали результати по проєктах і прибрали слабкі формулювання.",
+    focus: "Показали, які результати винести в резюме першими і під які вакансії краще адаптувати досвід.",
     photo: "/reviews/liza-marchenko.jpg"
   },
   {
     name: "Ірина Коваль",
     role: "HR-спеціалістка",
-    badge: "співбесіди",
+    badge: "співбесіда",
     before: "38 000 грн",
     after: "55 000 грн",
     change: "+45%",
-    focus: "Підготували відповіді на складні питання, приклади з досвіду й сценарій розмови про зарплату.",
+    focus: "Зібрали приклади з досвіду і спокійні аргументи для розмови про зарплатні очікування.",
     photo: "/reviews/iryna-koval.jpg"
   },
   {
     name: "Дмитро Литвин",
     role: "менеджер з продажів",
-    badge: "підбір вакансій",
+    badge: "вакансії",
     before: "52 000 грн",
     after: "78 000 грн",
     change: "+50%",
-    focus: "Відсіяли слабкі вакансії, залишили сильніші збіги й підготували аргументи для першої розмови.",
+    focus: "Відділили слабкі вакансії від реалістичних збігів і підготували коротку подачу для першого дзвінка.",
     photo: "/reviews/dmytro-lytvyn.jpg"
   },
   {
     name: "Андрій Мороз",
     role: "розробник",
-    badge: "пропозиції",
+    badge: "пропозиція",
     before: "70 000 грн",
     after: "95 000 грн",
     change: "+36%",
-    focus: "Зібрали сильну історію досвіду, порівняли умови пропозицій і підготували питання до роботодавця.",
+    focus: "Порівняли умови пропозиції з ринком і підготували питання, які варто уточнити до відповіді.",
     photo: "/reviews/andriy-moroz.jpg"
   }
 ] as const;
@@ -51,7 +51,7 @@ function HeroProductCard() {
   return (
     <div id="hero-preview" className="hero-forecast-card">
       <div className="hero-cases-visual">
-        <div className="hero-case-slider" aria-label="Приклади кар'єрних покращень">
+        <div className="hero-case-slider" aria-label="Приклади кар'єрних оцінок">
           <div className="hero-case-track">
             {heroCases.map((caseItem, index) => (
               <article className={`hero-case-card hero-case-card--${index + 1}`} key={caseItem.name}>
@@ -74,14 +74,14 @@ function HeroProductCard() {
 
                 <div className="hero-case-pay">
                   <div>
-                    <span>було</span>
+                    <span>зараз</span>
                     <strong>{caseItem.before}</strong>
                   </div>
                   <svg viewBox="0 0 38 16" aria-hidden="true">
                     <path d="M2 8h31m-6-5 6 5-6 5" />
                   </svg>
                   <div>
-                    <span>стало</span>
+                    <span>орієнтир</span>
                     <strong>{caseItem.after}</strong>
                   </div>
                 </div>
@@ -90,7 +90,7 @@ function HeroProductCard() {
 
                 <div className="hero-case-result">
                   <span>{caseItem.change}</span>
-                  <small>приріст доходу</small>
+                  <small>можливий приріст</small>
                 </div>
               </article>
             ))}
@@ -112,11 +112,11 @@ export function HeroBeforeAfter() {
       <div className="mx-auto grid max-w-[80rem] items-center gap-8 py-7 pb-10 md:gap-8 md:py-8 md:pb-10 lg:min-h-[clamp(30rem,calc(100svh-34rem),34rem)] lg:grid-cols-[1.05fr_0.95fr] lg:gap-10 lg:py-3 xl:gap-12">
         <div className="relative z-10 flex flex-col items-center text-center lg:items-start lg:text-left">
           <h1 className="max-w-[12.5ch] font-display text-[2.28rem] font-extrabold leading-[0.96] tracking-normal text-[var(--text-strong)] sm:max-w-[13.5ch] sm:text-[2.85rem] md:text-[3.15rem] lg:max-w-[36rem] lg:text-[2.85rem] xl:max-w-[39rem] xl:text-[3.05rem]">
-            Ваш досвід <span className="text-warm">може коштувати більше</span>
+            Перевірте, де ваш досвід <span className="text-warm">може коштувати більше</span>
           </h1>
 
           <p className="mt-6 max-w-[21rem] text-balance text-[1rem] font-medium leading-[1.66] text-[rgba(92,103,128,0.94)] sm:max-w-[30rem] sm:text-[1.08rem] md:max-w-[34rem] md:text-[1.16rem] md:leading-[1.62]">
-            Допомагаємо зрозуміти ринкову позицію, вийти на сильніші вакансії та впевнено просити кращі умови.
+            Почніть з ринкової позиції, а після оплати перевіряйте конкретні вакансії: чи варто подаватися, що змінити в резюме і як говорити про зарплату.
           </p>
 
           <div className="mt-7 flex w-full max-w-[18rem] flex-col items-center gap-3.5 sm:max-w-[22rem] lg:items-start">

@@ -13,13 +13,12 @@ import type {
 
 export type DashboardView =
   | "overview"
-  | "scenario"
+  | "market"
+  | "vacancies"
   | "profile"
   | "resume"
   | "interviews"
-  | "jobs"
   | "offers"
-  | "assistant"
   | "access";
 
 export type ChipTone = "default" | "accent" | "success" | "gold";
@@ -114,27 +113,6 @@ export type DashboardNavItem = {
   label: string;
   helper: string;
   icon: ReactNode;
-};
-
-export type DashboardModule = {
-  view: Exclude<DashboardView, "overview" | "scenario" | "profile" | "access">;
-  title: string;
-  description: string;
-  helper: string;
-  searchTerms: string[];
-  icon: ReactNode;
-};
-
-export type ModuleWorkspaceConfig = {
-  eyebrow: string;
-  title: string;
-  description: string;
-  summary: Array<{ label: string; value: string }>;
-  columns: Array<{
-    title: string;
-    description: string;
-    items: string[];
-  }>;
 };
 
 export type ProfileDraft = {

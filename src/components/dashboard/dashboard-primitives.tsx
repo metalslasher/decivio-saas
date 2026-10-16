@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
-import type { ChipTone, DashboardModule, DashboardProgressStep } from "./types";
-import { getDashboardHref, getInitials } from "./dashboard-utils";
+import type { ChipTone, DashboardProgressStep } from "./types";
+import { getInitials } from "./dashboard-utils";
 
 export function chipClasses(tone: ChipTone) {
   switch (tone) {
@@ -154,30 +154,3 @@ export function DashboardProgressRow({
   );
 }
 
-export function DashboardModuleCard({ module }: { module: DashboardModule }) {
-  return (
-    <article className="surface-panel group rounded-[1.85rem] p-5 transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_28px_58px_-40px_rgba(22,29,43,0.18)] md:p-6">
-      <span className="surface-soft inline-flex h-12 w-12 items-center justify-center rounded-[1rem] text-[var(--accent-strong)]">
-        {module.icon}
-      </span>
-
-      <h3 className="mt-5 text-[1.28rem] font-semibold leading-[1.1] tracking-[-0.04em] text-[var(--text-strong)]">
-        {module.title}
-      </h3>
-      <p className="mt-3 text-[0.95rem] leading-[1.72] text-[var(--text-muted)]">
-        {module.description}
-      </p>
-      <p className="mt-2 text-[0.88rem] leading-[1.65] text-[var(--text-soft)]">
-        {module.helper}
-      </p>
-
-      <Link
-        href={getDashboardHref(module.view)}
-        className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-[var(--accent-strong)] transition hover:text-[var(--accent)]"
-      >
-        Відкрити
-        <span aria-hidden="true">›</span>
-      </Link>
-    </article>
-  );
-}

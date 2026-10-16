@@ -19,7 +19,7 @@ export default function ResultsError({ error, reset }: ResultsErrorProps) {
           Спробувати ще раз
         </button>
         <Link href="/simulate" className="btn-primary">
-          Повернутися до симуляції
+          Повернутися до оцінки
         </Link>
       </div>
     </section>

@@ -5,12 +5,12 @@ Status: current repository map for product work.
 ## Public Product Flow
 
 - `/`: landing page and current visual theme.
-- `/simulate`: four-step career transition simulation.
-- `/results`: free generated result for a submitted simulation.
+- `/simulate`: career position assessment.
+- `/results`: free generated diagnosis for a submitted assessment.
 - `/pricing`: plan selection before auth/checkout.
 - `/login` and `/signup`: account entry points used around checkout.
 - `/checkout`: starts payment after plan selection and auth.
-- `/dashboard`: paid workspace, intentionally handled as its own product area.
+- `/dashboard`: paid job-to-offer workspace.
 
 ## Main Directories
 
@@ -19,11 +19,11 @@ Status: current repository map for product work.
 - `src/components/home`: landing page sections and homepage data.
 - `src/components/dashboard`: dashboard layout, navigation, data hook, view workspaces, and dashboard-only primitives.
 - `src/lib`: domain logic shared by routes and components.
-- `src/lib/career-switch-analysis`: AI and mock career-switch result generation.
+- `src/lib/career-switch-analysis`: AI and mock career-position result generation.
 - `src/lib/db`: Supabase clients and server/browser DB setup.
 - `supabase/migrations`: database schema, triggers, policies, and storage setup.
 - `tests/e2e`: critical user-flow tests.
-- `docs`: current product and engineering reference only.
+- `docs`: current product, strategy, and engineering reference.
 
 ## Important Domain Files
 
@@ -36,6 +36,7 @@ Status: current repository map for product work.
 - Auth/session helpers: `src/lib/request-auth.ts`, `src/lib/auth-session-client.ts`.
 - Dashboard data loading: `src/components/dashboard/use-dashboard-data.ts`.
 - Dashboard shared types: `src/components/dashboard/types.ts`.
+- Dashboard target structure: `docs/dashboard-workspace-spec.md`.
 
 ## Current Boundary Rules
 
@@ -45,4 +46,15 @@ Status: current repository map for product work.
 - Dashboard-only UI should stay under `src/components/dashboard`.
 - Homepage-only UI should stay under `src/components/home`.
 - Shared UI can live in `src/components` only when it is reused outside one feature area.
-- Docs should describe what exists now, not future ideas.
+- Docs should clearly mark whether they describe current shipped behavior or approved target behavior.
+
+## Rebuild Boundary
+
+During the current rebuild, keep changes organized around the job-to-offer route:
+
+```text
+Assessment -> Result diagnosis -> Pricing -> Paid workspace -> Vacancy Fit -> Resume Positioning -> Interview/Salary -> Offer Decision
+```
+
+Avoid adding product areas that do not support this route.
+

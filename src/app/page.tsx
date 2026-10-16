@@ -17,14 +17,16 @@ import { pricingPlans } from "@/lib/pricing";
 import { createFaqSchema, createMetadata, createSoftwareApplicationSchema } from "@/lib/seo";
 
 export const metadata = createMetadata({
-  title: "Зрозумійте, де ваш досвід коштує більше",
+  title: "Перевірка вакансій, ринку і зарплатної позиції",
   description:
-    "Сервіс аналізує ваш поточний дохід, роль і ринок, показує де можна заробляти більше та допомагає підготувати резюме, вакансії, співбесіди й пропозиції.",
+    "Оцініть свою ринкову позицію, перевіряйте конкретні вакансії перед подачею та готуйте резюме, співбесіди й зарплатні аргументи під роль.",
   path: "/",
   keywords: [
-    "аналіз зарплати",
+    "оцінка зарплати онлайн",
+    "перевірити зарплату",
     "оцінка доходу",
     "ринкова зарплата",
+    "зарплатні очікування",
     "підготовка до співбесіди",
     "покращення резюме"
   ]
@@ -33,13 +35,13 @@ export const metadata = createMetadata({
 const homeSoftwareSchema = createSoftwareApplicationSchema({
   path: "/",
   description:
-    "Сервіс аналізує ваш поточний дохід, роль і ринок, показує де можна заробляти більше та допомагає підготувати резюме, вакансії, співбесіди й пропозиції.",
+    "Сервіс допомагає оцінити ринкову позицію, перевіряти конкретні вакансії перед подачею та готувати резюме, співбесіди й розмову про кращі умови.",
   featureList: featureShowcases.map((item) => item.title),
   offers: [
     {
-      name: "Безкоштовний висновок",
+      name: "Безкоштовна оцінка кар'єрної позиції",
       price: 0,
-      description: "Перший персоналізований аналіз доходу, ринку і наступного кар'єрного кроку без оплати.",
+      description: "Перший персональний висновок про ринок, потенціал, слабкі місця профілю й наступний крок без оплати.",
       urlPath: "/simulate"
     },
     ...pricingPlans.map((plan) => ({
@@ -118,7 +120,7 @@ export default function HomePage() {
                     100%
                   </p>
                   <p className="mt-2 max-w-[13rem] text-[1.02rem] font-semibold leading-[1.25] text-[var(--text-muted)] md:text-[1.14rem]">
-                    індивідуальний підхід
+                    висновок під вашу роль
                   </p>
                 </div>
               </article>
@@ -134,16 +136,16 @@ export default function HomePage() {
                 <div className="surface-panel relative w-full min-w-0 overflow-hidden rounded-[2rem] px-5 py-6 text-center sm:text-left md:px-7 md:py-8 lg:px-8 lg:py-9">
                   <div className="pointer-events-none absolute -right-16 -top-20 h-44 w-44 rounded-full bg-[rgba(63,94,255,0.08)] blur-3xl" />
                   <h2 className="home-section-heading max-w-full break-words [overflow-wrap:anywhere]">
-                    Ми поруч, щоб перетворити ваш досвід на{" "}
-                    <span className="home-section-heading-accent">сильнішу позицію на ринку</span>
+                    Зрозумійте, де саме ваш досвід{" "}
+                    <span className="home-section-heading-accent">може коштувати більше</span>
                   </h2>
                   <p className="mt-4 max-w-full break-words text-[0.9rem] leading-[1.72] text-[var(--text-muted)] [overflow-wrap:anywhere] md:text-[1.04rem]">
-                    Ми показуємо, чи відповідає ваш дохід ринку, де є реалістичний потенціал росту та що варто посилити,
-                    щоб претендувати на кращі вакансії й пропозиції.
+                    Починаємо з доходу й ринку, але не зупиняємось на цифрі. Далі ви перевіряєте конкретні вакансії,
+                    бачите ризики подачі й отримуєте правки для резюме та розмови про зарплату.
                   </p>
                   <div className="mt-6 flex justify-center sm:justify-start">
                     <Link href="/simulate" className="btn-primary w-full max-w-[18rem] px-4 py-3 text-center text-[0.9rem] leading-tight sm:w-auto sm:max-w-full sm:px-7 md:px-8 md:text-[0.94rem]">
-                      Оцінити дохід і ринок
+                      Перевірити позицію
                     </Link>
                   </div>
                 </div>
@@ -246,12 +248,12 @@ export default function HomePage() {
           <div className="grid min-w-0 items-center gap-8 lg:grid-cols-[0.98fr_1.02fr] lg:gap-10">
             <div className="relative z-10 min-w-0 text-center lg:text-left">
               <h2 id="career-brands-title" className="home-section-heading mx-auto max-w-[36rem] lg:mx-0">
-                Обирайте можливості, де ваш досвід{" "}
-                <span className="home-section-heading-accent">оцінюють вище</span>
+                Обирайте вакансії, де ваш досвід{" "}
+                <span className="home-section-heading-accent">легше пояснити й продати</span>
               </h2>
               <p className="mx-auto mt-5 max-w-[35rem] text-[0.98rem] leading-[1.72] text-[var(--text-muted)] md:text-[1.06rem] lg:mx-0">
-                Наш сервіс допомагає порівняти поточну ситуацію з українським та міжнародним ринком, посилити резюме й підготовку
-                так, щоб претендувати не на випадкові вакансії, а на сильніші пропозиції.
+                Вища зарплата рідко приходить просто за стаж. Потрібно показати результат, обрати правильний ринок і не витрачати сили
+                на вакансії, де ваш профіль завідомо слабкий або не той.
               </p>
             </div>
 
@@ -336,16 +338,15 @@ export default function HomePage() {
               </div>
 
               <h2 id="final-cta-title" className="mt-7 max-w-[42rem] font-display text-[2.12rem] font-extrabold leading-[1.04] tracking-normal text-[var(--text-strong)] sm:text-[2.65rem] md:text-[3.25rem]">
-                Перевірте, де ваш досвід може коштувати більше
+                Почніть з оцінки й перевіряйте вакансії перед подачею
               </h2>
               <p className="mt-6 max-w-[39rem] text-[1rem] font-medium leading-[1.72] text-[var(--text-muted)] md:text-[1.12rem]">
-                Побачте ринковий потенціал, сильні сторони, прогалини та перші кроки, щоб рухатися до кращої пропозиції
-                з реалістичною аргументацією.
+                За кілька хвилин ви побачите ринковий орієнтир, сильні сторони профілю, слабкі місця й перший практичний крок. Платний workspace відкриває аналіз реальних вакансій.
               </p>
 
               <div className="mt-8 flex w-full flex-col items-center justify-center gap-3 sm:w-auto sm:flex-row">
                 <Link href="/simulate" className="final-cta-button">
-                  Почати аналіз карʼєри
+                  Отримати перший висновок
                 </Link>
                 <span className="text-[0.9rem] font-semibold text-[var(--text-muted)]">Безкоштовно · 2–3 хвилини</span>
               </div>

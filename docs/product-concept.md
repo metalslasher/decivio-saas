@@ -1,402 +1,331 @@
 # Product Concept
 
-Status: approved product direction for the next product iteration.
+Status: approved product direction for the Decivio rebuild.
 
-This document defines the product concept Decivio should move toward. It is not a database or UI contract. Route-level behavior remains documented in `product-flow.md`, `onboarding-spec.md`, `results-page-spec.md`, and `billing-flow.md` until those parts are updated in code.
+This document is the strategic source of truth. It explains what Decivio is, what it is not, why the product should be narrowed, and which value proposition should guide implementation. Route-level behavior is documented in `product-flow.md`, `onboarding-spec.md`, `results-page-spec.md`, `billing-flow.md`, and `dashboard-workspace-spec.md`.
 
 ## Core Decision
 
-Decivio is moving away from the idea of radical career change from zero.
+Decivio should not become a generic AI resume builder, a job board, a learning platform, or a broad career assistant.
 
-The product should focus on people who already have experience, skills, and a current role, then help them understand where this experience can earn more money and how to prepare for a stronger opportunity.
+The product should become a focused career upgrade workspace for people who already have professional experience and want a stronger job, company, market, or salary outcome.
 
-Public positioning should move from:
-
-```text
-Change your career from scratch.
-```
-
-to:
+Internal positioning:
 
 ```text
-Understand where your current experience is worth more, then prepare for a better role, company, or market.
+Career upgrade workspace for moving from current position to stronger offer.
 ```
+
+Public positioning:
+
+```text
+Decivio helps you understand which vacancies are worth pursuing, how to position your experience for them, and how to argue for a stronger salary.
+```
+
+The market audit remains important, but it is not the full product. It is the diagnostic layer that explains where the user stands and what route they should take next.
+
+## Product Thesis
+
+People are more likely to pay when the product is close to an active job-search decision:
+
+- should I apply to this vacancy;
+- does this role fit my experience;
+- how should I adapt my resume;
+- what salary can I reasonably ask for;
+- what risks will appear in an interview;
+- whether an offer is strong enough to accept.
+
+A standalone career report is useful, but it is usually one-time value. Decivio should use the report to start a repeatable workflow around real vacancies, resume positioning, interview preparation, salary negotiation, and offer decisions.
 
 ## Product Definition
 
-Decivio is a career upgrade system for people who want to improve their income and market position using the experience they already have.
+Decivio is a guided job-to-offer workspace.
+
+It helps users:
+
+- diagnose their current income and market position;
+- identify realistic better markets or roles;
+- check concrete vacancies before applying;
+- adapt resume positioning to each vacancy;
+- prepare interview and salary arguments;
+- evaluate offers against their goals and market potential.
 
 The product should answer:
 
-- whether the user's current income matches their role and market;
-- whether they can realistically earn more in Ukraine;
-- whether international remote work or local work abroad gives stronger upside;
-- which gaps prevent them from getting better offers;
-- what should be fixed in their positioning, resume, vacancy targeting, interview answers, and salary negotiation;
-- what the next practical step should be.
+- whether the user's current income is below, near, or above the realistic market range;
+- which direction gives the strongest upside: better local role, stronger company, international remote, relocation, or improved current-market positioning;
+- which vacancies are worth applying to;
+- what should change in the user's resume for a specific vacancy;
+- what interview risks and salary objections the user should prepare for;
+- which next action matters this week.
 
 ## Target User
 
 Primary users:
 
 - people with existing professional experience;
-- people who believe they may be underpaid;
-- people who want a better company, better market, remote work, relocation path, or higher salary;
-- people who are close enough to the job market that resume, vacancies, interviews, and offers are relevant now or soon.
+- people who suspect they are underpaid;
+- people who are preparing for active job search or already applying;
+- people comparing Ukraine, remote, relocation, or stronger local companies;
+- people who need practical positioning, not a long education path.
 
 Good examples:
 
-- marketer who wants a higher salary or stronger company;
-- project manager who wants international remote roles;
-- sales specialist who wants better-paying B2B or SaaS roles;
-- designer who wants to move from local clients to product companies;
-- analyst who wants to understand Ukraine vs international market potential;
-- specialist who already works in a role but gets weak responses from vacancies.
+- marketer who wants a better company and higher salary;
+- project manager targeting international remote roles;
+- sales specialist moving toward B2B, SaaS, or higher-ticket markets;
+- designer moving from local clients to product companies;
+- analyst comparing Ukrainian and international market options;
+- specialist who applies to vacancies but gets weak responses.
 
 Secondary users:
 
-- people considering an adjacent move where existing experience is still useful.
+- people considering an adjacent role where their existing experience remains useful.
 
 Out of scope for the main product:
 
-- radical switch from zero, such as accountant to programmer with no technical background;
-- long education programs;
-- learning platforms, course paths, homework review, or mentoring-heavy skill acquisition;
-- promises of guaranteed jobs or guaranteed salary increases.
+- radical career switch from zero;
+- long courses and homework-heavy learning paths;
+- guaranteed job placement;
+- guaranteed salary increase;
+- generic life coaching;
+- broad AI chat without a specific job-search object.
 
-## Product Promise
+## Value Proposition
 
-The product promise should be practical and money-adjacent:
+The strongest public promise:
 
 ```text
-Decivio shows whether you are underpaid, where your experience can earn more, and what to fix to reach a stronger offer.
+Paste a vacancy and understand whether it is worth applying, what to adjust in your resume, and how to defend your salary expectation.
 ```
 
-Supporting promises:
+Supporting promise:
 
-- compare current income with realistic market opportunities;
-- choose the better market direction;
-- improve resume and positioning;
-- target better vacancies;
-- prepare for interviews and salary conversations;
-- keep the user moving through one clear route instead of scattered tools.
+```text
+Start with a market diagnosis, then use Decivio to move through vacancies, resume positioning, interviews, salary conversations, and offers.
+```
 
-## User Journey
+Avoid leading with:
 
-The desired journey:
+```text
+Career market advisor.
+```
+
+That can remain internal language, but it is too abstract as the main paid promise.
+
+## Core Journey
+
+The target journey:
 
 1. User lands on the site.
-2. User starts a short career income and market assessment.
-3. User provides current role, income, experience, market, English level, and goal.
-4. Decivio returns a useful free diagnostic.
-5. Diagnostic shows the best next direction: improve current-market positioning, target international remote, target local work abroad, or first close specific gaps.
-6. User upgrades to paid access to open a guided route.
-7. Dashboard guides the user through the next concrete steps.
-8. User improves resume, checks vacancies, prepares interviews, and evaluates offers.
+2. User starts a short career position assessment without registration.
+3. User enters current role, experience, income, market, goal, English level, job-search status, and resume readiness.
+4. Decivio returns a useful free diagnosis.
+5. The diagnosis explains the user's market position and points to one next paid action.
+6. User upgrades to paid access.
+7. Paid workspace opens the user's career upgrade route.
+8. User checks vacancies, adapts resume positioning, prepares interview/salary scripts, and evaluates offers.
 
 The route should feel like:
 
 ```text
-Current position -> Market potential -> Action plan -> Resume -> Vacancies -> Interviews -> Offers
+Current position -> Market diagnosis -> Vacancy fit -> Resume positioning -> Interview and salary script -> Offer decision
 ```
 
 ## Free Result
 
-The free result should not try to deliver the full paid value.
+The free result should create trust and urgency, not deliver the full paid product.
 
-It should answer enough to build trust:
+It should show:
 
-- current income context;
-- stronger market direction;
-- main blockers;
-- one or two concrete next steps;
-- why the paid route is useful.
+- current income and market context;
+- likely positioning: underpaid, near-market, above-market but risky, or unclear;
+- strongest next direction;
+- main blocker;
+- one concrete next step;
+- why the paid workspace is useful.
 
-It should avoid:
+It should not include:
 
-- long generic advice;
 - full resume rewrites;
+- unlimited market alternatives;
 - full vacancy strategy;
-- full interview plan;
-- anything that makes the dashboard feel unnecessary.
+- full interview prep;
+- detailed salary negotiation script;
+- enough detail that the dashboard feels unnecessary.
 
 ## Paid Product
 
-The paid dashboard should be a guided workspace, not only a list of modules.
+The paid product is not a list of disconnected modules. It is a guided workspace organized around the job-search cycle.
 
-The main dashboard should always show:
+Recommended paid structure:
 
-- user's current market position;
-- best recommended direction;
-- next step;
-- progress through the route;
-- available tools for the current step.
+1. Market Position
+2. Vacancy Fit
+3. Resume Positioning
+4. Interview And Salary Script
+5. Offer Decision
 
-The product should reduce choice overload. The user should not need to decide which module matters first.
+The workspace should always answer:
 
-## Recommended Modules
+- what the user should do next;
+- why this next step matters;
+- which input is needed;
+- what output the user gets after completing it.
 
-### Keep And Reposition
+## Module Strategy
 
-#### Income And Market Audit
-
-This should become the product core.
-
-Purpose:
-
-- compare current income with realistic market opportunities;
-- show whether the user is underpaid, fairly paid, or has stronger upside elsewhere;
-- compare Ukraine, international remote, and local abroad directions;
-- identify the most useful target market.
-
-This is the first paid module to implement.
-
-#### Resume Upgrade
+### Market Position
 
 Purpose:
 
-- analyze and improve the user's existing resume;
-- make experience sound stronger and more measurable;
-- adapt positioning for a better role, company, or market;
-- prepare resume versions for different vacancy types.
+- diagnose whether the user's income and expectations match the market;
+- compare local, remote, and relocation directions;
+- identify upside and blockers;
+- choose the next action.
 
-This should be built after the audit route is clear.
+This is the onboarding-to-paid bridge, not the only product.
 
-#### Vacancy Match
+### Vacancy Fit
 
 Purpose:
 
 - let the user paste a vacancy;
-- estimate whether it is worth applying;
-- show strong matches and weak spots;
-- suggest resume adjustments and talking points.
+- evaluate whether it is worth applying;
+- show fit, gaps, risks, salary angle, and application recommendation;
+- create practical outputs for resume and interview preparation.
 
-This is likely one of the strongest retention modules because users can reuse it during an active job search.
+This should be the first true paid feature because it is repeatable and close to an active buying moment.
 
-#### Interview Prep
-
-Purpose:
-
-- prepare answers for recruiter and hiring manager conversations;
-- explain salary expectations;
-- strengthen the user's story;
-- train weak answers.
-
-This module works best after resume and vacancy targeting exist.
-
-#### Offer And Salary Decision
+### Resume Positioning
 
 Purpose:
 
-- evaluate an offer against current income, market potential, and user goals;
-- support salary negotiation;
-- compare two possible offers or markets.
+- adapt the user's existing experience to a specific vacancy or role direction;
+- improve claims, metrics, wording, and relevance;
+- avoid becoming a generic resume template builder.
 
-This is valuable, but it is later in the user journey.
+This module should depend on Market Position and Vacancy Fit context.
 
-### Rename Or Rework
-
-#### Plan Transition 30/60/90
-
-Old framing: transition to a new career.
-
-New framing:
-
-```text
-30-day career upgrade plan
-```
+### Interview And Salary Script
 
 Purpose:
 
-- what to fix first;
-- which documents to update;
-- which vacancies to target;
-- how many applications or interviews to prepare for;
-- what to do this week.
+- prepare answers for likely objections;
+- explain transitions, gaps, salary expectations, and strengths;
+- generate recruiter and hiring-manager talking points.
 
-### Remove Or Deprioritize
+This module should be contextual, not generic interview advice.
 
-#### Model Of A Workday In A New Role
+### Offer Decision
 
-This is not central to the new concept. It belongs to radical role exploration, not income and market upgrade.
+Purpose:
 
-Recommendation: remove from public positioning and paid feature lists for now.
+- compare an offer with current income, market range, personal goals, and risk;
+- support negotiation;
+- help decide whether to accept, negotiate, or keep searching.
 
-#### First Days In A New Job
+This can become a strong later-stage premium feature.
 
-This is late-stage and not needed for the initial paid product.
+### Assistant
 
-Recommendation: remove from the first dashboard/module scope. It may return later as a small post-offer feature.
+The assistant should not be a standalone product promise.
 
-#### General AI Assistant
+Use it later as a contextual helper inside a vacancy, resume, interview, or offer workflow.
 
-The assistant should not be the main product promise.
+### First Days In A New Job
 
-Recommendation: keep it as a later helper layer that works inside the route. Do not make it the first paid feature.
-
-## Onboarding Direction
-
-The public onboarding now follows the career upgrade concept.
-
-Current fields support:
-
-- current role;
-- current income;
-- experience in current role;
-- current market;
-- target market interest;
-- English level;
-- current job-search status;
-- resume availability;
-- main goal: higher income, better company, international market, relocation, or faster job search.
-
-Important product change:
-
-- target role should no longer be required to differ from current role;
-- same-role upgrade should be a first-class scenario;
-- adjacent-role movement can still exist;
-- radical from-zero transition should not be the default route.
-
-## Dashboard Direction
-
-The dashboard should be route-first.
-
-Recommended navigation:
-
-- Home
-- Market Audit
-- Plan
-- Resume
-- Vacancies
-- Interviews
-- Offers
-- Access/Profile
-
-Recommended home structure:
-
-- current income and market summary;
-- recommended direction;
-- next step;
-- progress route;
-- recent vacancy/resume/interview actions;
-- paid access status.
-
-Avoid presenting modules as independent cards without explaining the recommended order.
+Remove from the MVP. It happens after the core paid decision and distracts from the job-to-offer route.
 
 ## Monetization Direction
 
-The new concept fits subscription better than radical career change from zero because users can actively use the product during a 1-3 month job-search cycle.
-
-Recommended pricing model to test:
+The product should test willingness to pay before growing feature scope.
 
 ### Free
 
-- short assessment;
+- assessment;
 - limited result;
-- one clear next step;
-- no full resume/vacancy/interview outputs.
+- one recommended next step;
+- CTA into paid workspace.
+
+### One-Time Entry Offer
+
+Potential test:
+
+```text
+499-799 UAH for one vacancy fit and resume positioning output.
+```
+
+This can validate paid demand without requiring subscription trust.
+
+### Main Plan
+
+Recommended initial main offer:
+
+```text
+1999-2499 UAH for 90 days.
+```
+
+This fits the job-search cycle better than an annual subscription.
+
+Includes:
+
+- market diagnosis;
+- limited vacancy checks;
+- resume positioning outputs;
+- interview and salary scripts;
+- offer decision support when available.
 
 ### Monthly
 
-Suggested range:
+Secondary option:
 
 ```text
-799-999 UAH per month
+799-999 UAH per month.
 ```
 
-Use case:
-
-- active job search;
-- resume iterations;
-- vacancy checks;
-- interview preparation.
-
-### 3-Month Career Upgrade Plan
-
-Suggested range:
-
-```text
-1999-2499 UAH
-```
-
-This should likely be the main paid-traffic offer because job search and salary upgrade often take more than one month.
-
-Positioning:
-
-```text
-3 months to prepare your profile, target better vacancies, and improve interview readiness.
-```
+Use when users prefer lower entry price.
 
 ### Annual
 
-Keep annual as a secondary option.
+Keep annual secondary until retention is proven.
 
-Suggested role:
+Annual should not be the primary cold-traffic offer in the MVP.
 
-- best value for long-term career tracking;
-- not the main cold-traffic offer at the beginning.
+## Validation Metrics
 
-### Credits Later
+Do not scale development or paid traffic without funnel evidence.
 
-Add usage limits before scaling paid traffic.
+Track:
 
-Possible credit-controlled actions:
+- landing to assessment start;
+- assessment start to completion;
+- result to paid CTA click;
+- pricing to auth/checkout start;
+- checkout success;
+- paid activation;
+- first paid action completion;
+- second session return;
+- number of vacancy checks per paid user;
+- AI cost per paid user;
+- refund and cancellation reasons.
 
-- resume analyses;
-- vacancy checks;
-- interview simulations;
-- full plan regenerations;
-- offer evaluations.
+Decision gates:
 
-This protects AI costs and keeps pricing predictable.
+- If fewer than 5 percent of completed assessments click paid CTA, positioning is weak.
+- If users click but do not pay even a low entry price, the paid promise is weak.
+- If 1-3 percent of completed assessments pay for 999-2499 UAH, continue.
+- If paid users do not run repeat vacancy checks, treat the product as one-time, not subscription.
+- If paid users return with multiple vacancies, subscription or 90-day plan becomes credible.
 
-## Implementation Order
+## Implementation Guardrails
 
-1. Keep public copy and docs aligned around career upgrade and income potential.
-2. Rework dashboard home into a guided career upgrade route.
-3. Implement Income And Market Audit as the first true paid module.
-4. Implement Resume Upgrade.
-5. Implement Vacancy Match.
-6. Implement Interview Prep.
-7. Implement Offer And Salary Decision.
-8. Add AI usage limits and credit accounting.
-9. Revisit pricing page around monthly vs 3-month plan.
-10. Add funnel analytics before scaling paid traffic.
+- Keep registration after free diagnosis unless payment/account ownership requires it.
+- Do not show paid dashboard value before access is active.
+- Do not add independent modules unless they fit the job-to-offer route.
+- Do not promise guaranteed jobs or salary increases.
+- Do not make AI chat the central paid feature.
+- Do not optimize for feature count before one paid flow works end to end.
+- Make source/provenance visible for market and salary claims where possible.
+- Use the user's actual vacancy/resume/interview context before giving detailed paid outputs.
 
-## Success Metrics
-
-Track product and funnel quality by:
-
-- landing to onboarding start rate;
-- onboarding completion rate;
-- result to pricing click rate;
-- pricing to auth/checkout start rate;
-- checkout success rate;
-- paid user dashboard activation rate;
-- first paid action completion rate;
-- second-session return rate;
-- average AI cost per paid user;
-- refund or cancellation reasons.
-
-## Product Guardrails
-
-- Do not promise guaranteed jobs.
-- Do not promise guaranteed salary increase.
-- Do not position the product as a replacement for education or mentoring from zero.
-- Do not let users reach the paid dashboard without payment or explicit manual full access.
-- Do not make AI chat the central product before the route and modules are useful.
-- Do not add modules that are interesting but disconnected from the income upgrade journey.
-
-## Working Name
-
-Internal concept:
-
-```text
-Career Upgrade Operating System
-```
-
-Public language should stay simpler:
-
-```text
-Find where your experience is worth more, then prepare for a stronger offer.
-```

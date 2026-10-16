@@ -24,18 +24,18 @@ export function DashboardScenarioWorkspace({
     return (
       <div className="space-y-6">
         <article className="dashboard-spotlight-card rounded-[2.3rem] p-6 md:p-8">
-          <DashboardChip tone="accent">Сценарії</DashboardChip>
+          <DashboardChip tone="accent">Market Position</DashboardChip>
           <h1 className="mt-5 max-w-[13ch] text-[2.3rem] font-semibold leading-[0.94] tracking-[-0.055em] text-[var(--text-strong)] md:text-[3.15rem]">
-            Тут зʼявиться перший сценарій переходу.
+            Тут з&apos;явиться ринкова позиція.
           </h1>
           <p className="mt-5 max-w-3xl text-[1rem] leading-[1.78] text-[var(--text-muted)]">
-            У цьому розділі житиме окрема історія сценаріїв. Після першого
-            проходження симуляції сюди підтягнеться останній маршрут, а нижче
-            збережуться попередні варіанти для порівняння.
+            Після першої оцінки сюди підтягнеться ваш дохід, роль, ринок,
+            ризик і сильніший напрям. Це база для наступного кроку: перевірки
+            конкретної вакансії.
           </p>
           <div className="mt-7 flex flex-wrap gap-3">
             <Link href="/simulate" className="btn-primary">
-              Пройти симуляцію
+              Пройти оцінку
             </Link>
             <Link href="/dashboard" className="btn-secondary">
               Повернутися на головну
@@ -49,7 +49,7 @@ export function DashboardScenarioWorkspace({
   const focusTitle =
     latest.currentRole && latest.targetRole
       ? `${latest.currentRole} -> ${latest.targetRole}`
-      : (latest.targetRole ?? latest.currentRole ?? "Кар'єрний сценарій");
+      : (latest.targetRole ?? latest.currentRole ?? "Ринкова позиція");
   const verdict = verdictLabel(latest.verdictLabel);
   const probability = probabilityLabel(latest.probabilityOfGettingJob);
   const market = mapTargetMarketLabel(latest.targetMarket);
@@ -63,15 +63,15 @@ export function DashboardScenarioWorkspace({
   const scenarioSummary =
     longTermDirectionInsight ??
     (latestUpdatedLabel
-      ? `Останній розрахунок збережено ${latestUpdatedLabel}. Тут зручно тримати робочий сценарій і повертатися до нього перед наступними модулями.`
-      : "Тут зручно тримати робочий сценарій і повертатися до нього перед наступними модулями.");
+      ? `Останній розрахунок збережено ${latestUpdatedLabel}. Тут зручно тримати ринкову позицію перед перевіркою конкретних вакансій.`
+      : "Тут зручно тримати ринкову позицію перед перевіркою конкретних вакансій.");
 
   return (
     <div className="space-y-6">
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.14fr),23rem]">
         <article className="dashboard-spotlight-card rounded-[2.3rem] p-6 md:p-8">
           <div className="flex flex-wrap items-center gap-2">
-            <DashboardChip tone="success">Останній сценарій</DashboardChip>
+            <DashboardChip tone="success">Остання оцінка</DashboardChip>
             <DashboardChip tone="default">
               {simulationStatusLabel(latest.status)}
             </DashboardChip>
@@ -91,7 +91,7 @@ export function DashboardScenarioWorkspace({
             <DashboardMetricCard
               label="Вердикт"
               value={verdict ?? "Базовий висновок"}
-              description="Ключове формулювання з останнього сценарію."
+              description="Ключове формулювання з останньої оцінки."
             />
             <DashboardMetricCard
               label="Шанс входу"
@@ -112,23 +112,23 @@ export function DashboardScenarioWorkspace({
 
           <div className="mt-7 flex flex-wrap gap-3">
             <Link href="/simulate" className="btn-primary">
-              Перерахувати сценарій
+              Оновити оцінку
             </Link>
-            <Link href={getDashboardHref("resume")} className="btn-secondary">
-              Перейти до розділу резюме
+            <Link href={getDashboardHref("vacancies")} className="btn-secondary">
+              Перевірити вакансію
             </Link>
           </div>
         </article>
 
         <article className="surface-panel rounded-[2rem] p-5 md:p-6">
           <h2 className="text-[1.45rem] font-semibold leading-[1.06] tracking-[-0.04em] text-[var(--text-strong)]">
-            Що робити далі
+            Наступна дія
           </h2>
           <div className="mt-5 space-y-3">
             {[
-              "Зафіксувати цільову роль і перевести її в розділ резюме.",
-              "Порівняти ще один альтернативний маршрут, якщо рішення все ще неочевидне.",
-              "Після сильного сценарію перейти в модулі підготовки до ринку.",
+              "Візьміть реальну вакансію, яка виглядає цікавою по грошах або компанії.",
+              "Перевірте її через Vacancy Fit перед тим, як витрачати час на подачу.",
+              "Після аналізу використайте resume-правки і зарплатні аргументи з результату.",
             ].map((item) => (
               <div key={item} className="surface-soft rounded-[1.2rem] p-4">
                 <p className="text-[0.93rem] leading-[1.72] text-[var(--text-muted)]">
@@ -143,11 +143,11 @@ export function DashboardScenarioWorkspace({
       <section className="space-y-4">
         <div>
           <h2 className="text-[1.8rem] font-semibold leading-[1.04] tracking-[-0.045em] text-[var(--text-strong)]">
-            Історія сценаріїв
+            Історія оцінок
           </h2>
           <p className="mt-2 text-[0.95rem] leading-[1.72] text-[var(--text-muted)]">
-            Усі попередні розрахунки зберігаються тут у хронології, щоб можна було
-            повернутись до них і порівняти маршрути між собою.
+            Усі попередні оцінки зберігаються тут у хронології, щоб можна було
+            повернутись до них перед вибором вакансій.
           </p>
         </div>
 
@@ -158,7 +158,7 @@ export function DashboardScenarioWorkspace({
                 ? `${simulation.currentRole} -> ${simulation.targetRole}`
                 : (simulation.targetRole ??
                   simulation.currentRole ??
-                  "Кар'єрний сценарій");
+                  "Ринкова оцінка");
 
             return (
               <article

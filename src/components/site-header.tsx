@@ -8,16 +8,13 @@ import { useAuthDialog } from "@/components/auth-dialog-provider";
 import { WordmarkLogo } from "@/components/wordmark-logo";
 import { getSupabaseBrowserClient } from "@/lib/db/supabase-browser";
 import { PROFILE_UPDATED_EVENT, isBroadcastProfilePayload } from "@/lib/profile-broadcast";
-import { CANONICAL_SITE_URL } from "@/lib/site-url";
 
 const publicNavItems = [
   { href: "/#features", label: "Можливості" },
   { href: "/#faq", label: "Часті питання" },
   { href: "/#reviews", label: "Відгуки" },
-  { href: "/pricing", label: "Ціни" }
+  { href: "/pricing", label: "Тарифи" }
 ];
-
-const simulateCtaHref = `${CANONICAL_SITE_URL}/simulate`;
 
 type AuthState =
   | { status: "loading" }
@@ -324,12 +321,12 @@ export function SiteHeader() {
                   >
                     Вхід
                   </button>
-                  <a
-                    href={simulateCtaHref}
+                  <Link
+                    href="/simulate"
                     className="header-cta-button hidden min-w-[11.25rem] items-center justify-center md:inline-flex"
                   >
-                    Покращити кар’єру
-                  </a>
+                    Почати оцінку
+                  </Link>
                 </>
               )}
 
@@ -402,13 +399,13 @@ export function SiteHeader() {
                   >
                     Вхід
                   </button>
-                  <a
-                    href={simulateCtaHref}
+                  <Link
+                    href="/simulate"
                     onClick={() => setIsOpen(false)}
                     className="btn-primary"
                   >
-                    Покращити кар’єру
-                  </a>
+                    Почати оцінку
+                  </Link>
                 </>
               )}
             </div>

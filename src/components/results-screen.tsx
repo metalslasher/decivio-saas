@@ -18,24 +18,24 @@ type RequestState =
 
 const decivioNextSteps = [
   {
-    title: "Резюме під кращі вакансії",
-    description: "Допоможе показати досвід мовою роботодавця й прибрати слабкі місця, через які профіль можуть пропускати."
+    title: "Vacancy Fit",
+    description: "Вставляєте конкретну вакансію і бачите, чи варто подаватися, де ризики і що підготувати."
   },
   {
-    title: "План підсилення профілю",
-    description: "Розкладе підготовку на послідовні дії: що поправити зараз, що підтягнути і коли починати активний пошук."
+    title: "Resume-правки",
+    description: "Отримуєте акценти, які варто змінити в резюме саме під цю роль."
   },
   {
-    title: "Вакансії, які варто дивитись",
-    description: "Покаже, які компанії, ринки й формати роботи більше відповідають вашому досвіду та цілі по доходу."
+    title: "Salary angle",
+    description: "Формуєте зарплатну позицію під вимоги ролі, а не просто називаєте бажану суму."
   },
   {
-    title: "Підготовка до співбесід",
-    description: "Допоможе підготувати відповіді, приклади з досвіду й аргументи, чому ви варті сильнішої пропозиції."
+    title: "Talking points",
+    description: "Готуєте тези для рекрутера і hiring manager на базі вашого профілю й вакансії."
   },
   {
-    title: "Оцінка пропозицій",
-    description: "Допоможе порівняти не тільки суму, а й умови, ризики, перспективу росту та якість наступного кроку."
+    title: "Повторні перевірки",
+    description: "Повертаєтесь із новими вакансіями й бачите, які ролі справді варто пріоритезувати."
   }
 ] as const;
 
@@ -47,7 +47,7 @@ function EmptyState({ title, description }: { title: string; description: string
         <p className="lead-copy mx-auto mt-4 max-w-2xl">{description}</p>
         <div className="mt-6 flex flex-wrap justify-center gap-3">
           <Link href="/simulate" className="btn-primary">
-            Пройти симуляцію
+            Пройти оцінку
           </Link>
           <Link href="/" className="btn-secondary">
             На головну
@@ -160,8 +160,8 @@ function DecivioNextStepsPanel({
           <h2 className="mt-3 section-title">{cta.title}</h2>
           <p className="body-copy mt-3">
             {isAuthenticated
-              ? "Ваш результат уже збережено. Після оплати відкривається практична частина: план дій, резюме, підготовка до співбесід і підтримка до сильнішої пропозиції."
-              : "Висновок уже показав, де є простір для кращого доходу. На тарифах можна відкрити повний маршрут: що змінити в профілі, куди подаватись і як пройти підготовку без хаосу."}
+              ? "Ваш результат уже збережено. Після оплати відкривається Vacancy Fit: аналіз конкретних вакансій, resume-правки й зарплатні аргументи."
+              : "Висновок уже показав стартову картину. На тарифах можна відкрити практичну перевірку вакансій і підготовку подачі без хаосу."}
           </p>
         </div>
 
@@ -170,8 +170,8 @@ function DecivioNextStepsPanel({
             Перейти до тарифів
           </Link>
           {isAuthenticated ? (
-            <Link href="/dashboard?view=scenario" className="btn-secondary">
-              Відкрити сценарії
+            <Link href="/dashboard?view=vacancies" className="btn-secondary">
+              Перевірити вакансію
             </Link>
           ) : null}
         </div>
@@ -225,7 +225,7 @@ export function ResultsScreen({ simulationId }: ResultsScreenProps) {
       : {
           status: "error",
           title: "Немає даних для результату",
-          description: "Відкрийте сторінку результату з simulationId або пройдіть симуляцію заново, щоб отримати новий персоналізований висновок."
+          description: "Відкрийте результат з правильного посилання або пройдіть оцінку заново, щоб отримати новий персональний висновок."
         }
   );
 
@@ -260,7 +260,7 @@ export function ResultsScreen({ simulationId }: ResultsScreenProps) {
             description:
               data && "description" in data && data.description
                 ? data.description
-                : "Спробуйте оновити сторінку або пройти симуляцію ще раз."
+                : "Спробуйте оновити сторінку або пройти оцінку ще раз."
           });
           return;
         }

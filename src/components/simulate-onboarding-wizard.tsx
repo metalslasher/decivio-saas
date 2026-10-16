@@ -39,23 +39,23 @@ const REQUIRED_ERROR = "Поле обов'язкове.";
 
 const steps: Array<{ title: string; helper: string; fields: WizardField[] }> = [
   {
-    title: "Дохід і ринок зараз",
-    helper: "Потрібно зрозуміти вашу стартову точку: скільки ви отримуєте і на якому ринку працюєте.",
+    title: "Стартова позиція",
+    helper: "Починаємо з доходу й ринку, щоб висновок прив'язувався до реальної ситуації, а не до абстрактної цифри.",
     fields: ["current_income", "current_market"]
   },
   {
     title: "Роль і досвід",
-    helper: "Додайте вашу роль, стаж і рівень, щоб оцінка не була відірвана від реального профілю.",
+    helper: "Додайте роль, стаж і рівень, щоб висновок не був відірваний від вашого реального профілю.",
     fields: ["current_role", "current_experience_years", "seniority_level"]
   },
   {
-    title: "Що хочете покращити",
-    helper: "Оберіть головну ціль і вкажіть дохід, до якого хочете прийти. Так висновок краще відрізнить реалістичний крок від завищеного очікування.",
+    title: "До чого хочете прийти",
+    helper: "Оберіть головну ціль і бажаний дохід. Так легше зрозуміти, чи це реалістичний крок зараз, чи спершу треба посилити профіль.",
     fields: ["upgrade_goal", "desired_income"]
   },
   {
     title: "Готовність до пошуку",
-    helper: "Ці відповіді допоможуть оцінити, що саме може стримувати кращі відповіді від роботодавців.",
+    helper: "Ці відповіді покажуть, що може стримувати відповіді від роботодавців: мова, резюме або сам етап пошуку.",
     fields: ["english_level", "job_search_status", "resume_status"]
   }
 ];
@@ -302,11 +302,11 @@ export function SimulateOnboardingWizard() {
   return (
     <section className="space-y-6 py-4 md:space-y-8 md:py-8">
       <header className="mx-auto max-w-3xl space-y-3 text-center">
-        <h1 className="page-title mx-auto max-w-[13ch]">
-          Оцініть <span className="text-accent">свій дохід</span>
+        <h1 className="page-title mx-auto max-w-[16ch]">
+          Оцініть свою <span className="text-accent">позицію на ринку</span>
         </h1>
         <p className="lead-copy">
-          Дайте кілька фактів про роль, ринок і пошук, а ми покажемо, де зараз є простір для кращої пропозиції.
+          Дайте кілька фактів про роль, дохід і пошук, а ми покажемо, чи є простір для кращих умов, що може заважати і з чого варто почати.
         </p>
       </header>
 
@@ -346,6 +346,7 @@ export function SimulateOnboardingWizard() {
                         value={values.current_income}
                         onChange={(event) => updateValue("current_income", event.target.value)}
                         className={unitInputClassName}
+                        placeholder="45000"
                         aria-invalid={Boolean(errors.current_income)}
                         aria-describedby={errors.current_income ? "current-income-error" : undefined}
                         disabled={isSubmitting}
@@ -378,6 +379,7 @@ export function SimulateOnboardingWizard() {
                     value={values.current_role}
                     onChange={(event) => updateValue("current_role", event.target.value)}
                     className={inputClassName}
+                    placeholder="Наприклад: маркетолог"
                     aria-invalid={Boolean(errors.current_role)}
                     aria-describedby={errors.current_role ? "current-role-error" : undefined}
                     autoComplete="off"
@@ -399,6 +401,7 @@ export function SimulateOnboardingWizard() {
                       value={values.current_experience_years}
                       onChange={(event) => updateValue("current_experience_years", event.target.value)}
                       className={unitInputClassName}
+                      placeholder="3"
                       aria-invalid={Boolean(errors.current_experience_years)}
                       aria-describedby={errors.current_experience_years ? "current-experience-years-error" : undefined}
                       disabled={isSubmitting}
@@ -445,6 +448,7 @@ export function SimulateOnboardingWizard() {
                       value={values.desired_income}
                       onChange={(event) => updateValue("desired_income", event.target.value)}
                       className={unitInputClassName}
+                      placeholder="65000"
                       aria-invalid={Boolean(errors.desired_income)}
                       aria-describedby={errors.desired_income ? "desired-income-error" : undefined}
                       disabled={isSubmitting}
@@ -520,7 +524,7 @@ export function SimulateOnboardingWizard() {
             disabled={isSubmitting}
             className="btn-primary relative z-20 w-full justify-center disabled:cursor-wait disabled:opacity-100 sm:w-auto"
           >
-            {isLastStep ? (isSubmitting ? "Формуємо висновок..." : "Отримати мій висновок") : "Далі"}
+            {isLastStep ? (isSubmitting ? "Готуємо висновок..." : "Показати висновок") : "Далі"}
           </button>
         </div>
       </div>

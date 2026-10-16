@@ -14,10 +14,10 @@ export function CareerHelpSection() {
 
           <div className="relative z-20 max-w-[33rem] text-center sm:text-left">
             <h2 id="career-help-title" className="home-section-heading max-w-full break-words [overflow-wrap:anywhere]">
-              Шлях до <span className="home-section-heading-accent">кращої пропозиції</span>
+              Від здогадок до <span className="home-section-heading-accent">зрозумілого маршруту</span>
             </h2>
             <p className="mt-5 max-w-[29rem] text-[0.98rem] font-medium leading-[1.72] text-[var(--text-muted)] md:text-[1.06rem]">
-              Перетворюємо вашу реальну ситуацію на зрозумілий план дій.
+              Спочатку перевіряємо, де ви зараз. Потім показуємо, що саме варто змінити, щоб сильніша пропозиція стала реалістичнішою.
             </p>
           </div>
 

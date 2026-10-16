@@ -184,48 +184,6 @@ export function InterviewPreview() {
   );
 }
 
-export function DayModelPreview() {
-  return (
-    <FeaturePreviewShell>
-      <div className="grid grid-cols-[auto,1fr] items-center gap-4">
-        <div
-          className="feature-score-ring"
-          style={{
-            width: "7.25rem",
-            height: "7.25rem",
-            background:
-              "conic-gradient(var(--accent) 0deg 151deg, rgba(145,160,186,0.86) 151deg 252deg, rgba(196,205,223,0.9) 252deg 360deg)"
-          }}
-        >
-          <div className="feature-score-ring-inner">
-            <span className="text-[0.9rem] font-semibold text-[var(--text-strong)]">42%</span>
-          </div>
-        </div>
-
-        <div className="grid gap-2.5">
-          {["42%", "28%", "30%"].map((value, index) => (
-            <div key={value} className="flex items-center justify-between rounded-[1rem] border border-[rgba(24,26,32,0.08)] bg-[rgba(255,255,255,0.74)] px-3 py-2.5">
-              <div className="flex gap-1.5">
-                <span className={`h-2.5 w-2.5 rounded-full ${index === 0 ? "bg-[var(--accent)]" : index === 1 ? "bg-[rgba(148,160,183,0.86)]" : "bg-[rgba(196,205,223,0.94)]"}`} />
-                <span className={`h-2.5 w-2.5 rounded-full ${index === 0 ? "bg-[var(--accent)]/45" : index === 1 ? "bg-[rgba(148,160,183,0.45)]" : "bg-[rgba(196,205,223,0.55)]"}`} />
-              </div>
-              <span className={`text-[0.95rem] font-semibold ${index === 0 ? "text-[var(--accent-strong)]" : "text-[var(--text-strong)]"}`}>{value}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="mt-4 rounded-[1.3rem] border border-[rgba(24,26,32,0.08)] bg-[rgba(255,255,255,0.72)] p-3">
-        <div className="flex overflow-hidden rounded-full">
-          <div className="feature-segment-block bg-[linear-gradient(90deg,var(--accent-strong),var(--accent))]" style={{ width: "42%" }} />
-          <div className="feature-segment-block bg-[rgba(148,160,183,0.86)]" style={{ width: "28%" }} />
-          <div className="feature-segment-block bg-[rgba(194,203,219,0.94)]" style={{ width: "30%" }} />
-        </div>
-      </div>
-    </FeaturePreviewShell>
-  );
-}
-
 export function PlanPreview() {
   return (
     <FeaturePreviewShell>
@@ -368,8 +326,6 @@ export function FeaturePreview({ item }: { item: FeatureShowcase }) {
       return <ResumePreview />;
     case "interview":
       return <InterviewPreview />;
-    case "dayModel":
-      return <DayModelPreview />;
     case "plan":
       return <PlanPreview />;
     case "match":

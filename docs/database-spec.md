@@ -58,7 +58,7 @@ Current product behavior:
 
 - Dashboard access is granted when `plan = 'pro'` and status is `active`, `trial`, or still-valid `canceled`.
 - Explicit manual full-access overrides are handled in code through `src/lib/manual-full-access.ts`; they do not create a `subscriptions` row.
-- Annual access is activated from a successful mono invoice.
+- One-time access is activated from a successful mono invoice. The current legacy `annual` plan id is used for the 90-day Career Upgrade plan until a pricing-plan migration is introduced.
 - Monthly access is activated from an active mono subscription.
 - There is a unique index on `user_id`, so one user has one current subscription/access row.
 
@@ -198,7 +198,7 @@ Important columns:
 - `id uuid primary key`
 - `user_id uuid` references `profiles(id)`
 - `provider text`: currently `mono`
-- `plan_id text`: `monthly`, `annual`
+- `plan_id text`: `monthly`, `annual`. The `annual` id is currently a legacy technical id for the 90-day one-time plan.
 - `billing_kind text`: `subscription`, `one_time`
 - `status text`: `pending`, `processing`, `paid`, `active`, `failed`, `canceled`, `expired`, `reversed`
 - `amount integer`
@@ -212,7 +212,7 @@ Important columns:
 
 Current behavior:
 
-- Annual plan uses `billing_kind = 'one_time'` and mono invoice.
+- The legacy `annual` plan id uses `billing_kind = 'one_time'` and mono invoice.
 - Monthly plan uses `billing_kind = 'subscription'` and mono subscription.
 - Only one mono target can be set: invoice or subscription, not both.
 - Access is granted when checkout status is `paid` or `active`.

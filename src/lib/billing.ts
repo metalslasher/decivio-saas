@@ -26,7 +26,7 @@ type BillingPlanConfig = {
 const BILLING_PLAN_CONFIG: Record<PaidPlanId, BillingPlanConfig> = {
   monthly: {
     planId: "monthly",
-    amount: 79900,
+    amount: 89900,
     billingKind: "subscription",
     monoInterval: "1m",
     destination: "Decivio Pro monthly subscription",
@@ -34,11 +34,11 @@ const BILLING_PLAN_CONFIG: Record<PaidPlanId, BillingPlanConfig> = {
   },
   annual: {
     planId: "annual",
-    amount: 478800,
+    amount: 219900,
     billingKind: "one_time",
     monoInterval: null,
-    destination: "Decivio Pro annual access",
-    successLabel: "Річний доступ Decivio Pro активовано."
+    destination: "Decivio 90-day Career Upgrade access",
+    successLabel: "90-денний доступ Decivio активовано."
   }
 };
 
@@ -96,9 +96,9 @@ export function addYears(date: Date, years: number) {
   return result;
 }
 
-export function resolveAnnualAccessEndsAt(sourceIso: string | null | undefined) {
+export function resolveOneTimeAccessEndsAt(sourceIso: string | null | undefined) {
   const sourceDate = sourceIso ? new Date(sourceIso) : new Date();
-  return addYears(sourceDate, 1).toISOString();
+  return addMonths(sourceDate, 3).toISOString();
 }
 
 export function resolveMonthlyAccessEndsAt(nextChargeDate: string | null | undefined, startDate: string | null | undefined) {

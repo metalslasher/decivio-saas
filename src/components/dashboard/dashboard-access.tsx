@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { formatUah, getPricingPurchaseHref, pricingPlans } from "@/lib/pricing";
-import { dashboardModules } from "./dashboard-config";
 import { DashboardChip, DashboardMetricCard } from "./dashboard-primitives";
 import type { DashboardAccessState } from "./types";
 import { accessTone, formatShortDate } from "./dashboard-utils";
@@ -19,7 +18,7 @@ export function DashboardAccess({
   isSigningOut: boolean;
 }) {
   const monthlyPlan = pricingPlans[0];
-  const annualPlan = pricingPlans[1];
+  const mainPlan = pricingPlans[1];
 
   return (
     <div className="space-y-6">
@@ -44,14 +43,14 @@ export function DashboardAccess({
           <p className="mt-5 max-w-3xl text-[1rem] leading-[1.78] text-[var(--text-muted)]">
             Це окремий сервісний екран для всього, що стосується доступу:
             поточний план, електронна пошта акаунта, орієнтир по цінах і
-            майбутня оплата.
+            доступ до paid workspace.
           </p>
 
           <div className="mt-7 grid gap-4 md:grid-cols-3">
             <DashboardMetricCard
               label="Акаунт"
               value={email}
-              description="Саме за цим профілем закріплений доступ до модулів."
+              description="Саме за цим профілем закріплений paid workspace."
             />
             <DashboardMetricCard
               label="Поточний план"
@@ -125,15 +124,15 @@ export function DashboardAccess({
             <div className="surface-soft rounded-[1.35rem] p-4">
               <div className="flex items-center justify-between gap-3">
                 <p className="text-[1.02rem] font-semibold text-[var(--text-strong)]">
-                  {annualPlan.name}
+                  {mainPlan.name}
                 </p>
                 <DashboardChip tone="success">
-                  {formatUah(annualPlan.billedNowUah)}
+                  {formatUah(mainPlan.billedNowUah)}
                 </DashboardChip>
               </div>
               <p className="mt-3 text-[0.92rem] leading-[1.68] text-[var(--text-muted)]">
-                {annualPlan.billingLabel}. Економія{" "}
-                {formatUah(annualPlan.savingsUah)} за рік.
+                {mainPlan.billingLabel}. Економія{" "}
+                {formatUah(mainPlan.savingsUah)} проти трьох окремих місяців.
               </p>
             </div>
           </div>
@@ -141,25 +140,39 @@ export function DashboardAccess({
 
         <article className="surface-panel rounded-[1.9rem] p-5 md:p-6">
           <h2 className="text-[1.45rem] font-semibold leading-[1.06] tracking-[-0.04em] text-[var(--text-strong)]">
-            Що входить у кабінет
+            Що відкриває paid workspace
           </h2>
 
           <div className="mt-5 grid gap-3 md:grid-cols-2">
-            {dashboardModules.map((module) => (
+            {[
+              [
+                "Ринкова позиція",
+                "Останній результат зберігається як база для подальших дій.",
+              ],
+              [
+                "Vacancy Fit",
+                "Вставляєте вакансію і отримуєте apply/maybe/skip, fit score та ризики.",
+              ],
+              [
+                "Resume-правки",
+                "Результат показує, що змінити в резюме під конкретну роль.",
+              ],
+              [
+                "Salary talking points",
+                "Отримуєте аргументи для рекрутера, hiring manager і зарплатної розмови.",
+              ],
+            ].map(([title, description]) => (
               <div
-                key={module.view}
+                key={title}
                 className="rounded-[1.25rem] border border-[rgba(24,26,32,0.08)] bg-[rgba(255,255,255,0.72)] p-4"
               >
                 <div className="flex items-center gap-3">
-                  <span className="surface-soft inline-flex h-10 w-10 items-center justify-center rounded-[0.95rem] text-[var(--accent-strong)]">
-                    {module.icon}
-                  </span>
                   <p className="text-[0.98rem] font-semibold text-[var(--text-strong)]">
-                    {module.title}
+                    {title}
                   </p>
                 </div>
                 <p className="mt-3 text-[0.88rem] leading-[1.62] text-[var(--text-muted)]">
-                  {module.description}
+                  {description}
                 </p>
               </div>
             ))}

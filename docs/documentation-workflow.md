@@ -4,15 +4,28 @@ Status: current working process for project documentation.
 
 ## What Docs Are For
 
-Docs are the short current map of the product, codebase, and approved product direction. They should help Codex, you, or another developer quickly answer:
+Docs are the short current map of the product, codebase, and approved direction. They should help Codex, you, or another developer quickly answer:
 
 - how the product works now;
 - where the relevant code lives;
 - which flow is considered correct;
+- which target behavior is approved for the rebuild;
 - which database/API contracts must not be broken;
-- which approved product direction should guide the next implementation work.
+- which product guardrails should guide implementation.
 
-Docs are not a backlog, archive, or place for old task descriptions. `product-concept.md` is the only exception: it captures the approved direction for upcoming product changes, while route-level docs continue to describe current behavior until the code changes.
+Docs are not a backlog, archive, or place for old task descriptions.
+
+## Current Vs Target Docs
+
+Most docs should describe shipped behavior.
+
+During the Decivio rebuild, some route-level docs intentionally describe target behavior before code fully catches up. Those files must say so in their status line.
+
+Before a release:
+
+- target docs must either be implemented or updated back to actual behavior;
+- placeholder-only product promises must be removed from user-facing code;
+- stale modules should be deleted or hidden instead of documented as active paid value.
 
 ## When To Update Docs
 
@@ -36,10 +49,10 @@ You do not need to manually edit docs every time. The most useful thing is to te
 Зроби цю правку і онови docs, якщо змінюється flow/schema/auth/billing/dashboard structure.
 ```
 
-For bigger ideas, it is better to ask for one of two modes:
+For bigger ideas, use one of two modes:
 
 - "спочатку опиши в docs/spec, потім реалізуй" when the product decision is still being shaped;
-- "реалізуй і після цього приведи docs до фактичного стану" when the behavior is already clear.
+- "реалізуй і після цього приведи docs до фактичного стану" when behavior is already clear.
 
 ## Maintenance Cadence
 
@@ -58,6 +71,3 @@ npm run docs:check
 
 This catches common stale references, old paths, removed onboarding fields, and likely encoding artifacts in `docs/`.
 
-## Backlog Rule
-
-Future ideas should live in issues, a backlog, or a separate planning note outside active docs. If an idea is approved as the product direction, keep it in `product-concept.md` and clearly separate it from current route-level behavior.

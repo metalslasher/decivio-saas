@@ -257,7 +257,7 @@ export function buildMissingProfileItems(
   }
 
   if (!context.target_role) {
-    items.push("Уточніть цільову роль для модулів і сценаріїв.");
+    items.push("Уточніть цільову роль для аналізу вакансій і подачі.");
   }
 
   if (!context.target_market) {
@@ -505,29 +505,16 @@ export function buildLongTermDirectionInsight(
   switch (value) {
     case "current_role":
       return simulation?.currentRole
-        ? `У довшій перспективі сильнішим виглядає поточний напрям: ${simulation.currentRole}. Цільову роль краще тестувати через альтернативні сценарії.`
-        : "У довшій перспективі сильнішим виглядає поточний напрям, тому цільову роль краще тестувати через альтернативні сценарії.";
+        ? `У довшій перспективі сильнішим виглядає поточний напрям: ${simulation.currentRole}. Нові ролі краще перевіряти через конкретні вакансії.`
+        : "У довшій перспективі сильнішим виглядає поточний напрям, тому нові ролі краще перевіряти через конкретні вакансії.";
     case "target_role":
       return simulation?.targetRole
-        ? `У довшій перспективі сильнішим виглядає ${simulation.targetRole}. Саме цей напрям варто тримати як базовий для наступних модулів.`
-        : "У довшій перспективі сильнішим виглядає цільовий напрям. Саме його варто тримати як базовий для наступних модулів.";
+        ? `У довшій перспективі сильнішим виглядає ${simulation.targetRole}. Саме цей напрям варто тримати як базовий для перевірки вакансій.`
+        : "У довшій перспективі сильнішим виглядає цільовий напрям. Саме його варто тримати як базовий для перевірки вакансій.";
     case "balanced":
-      return "У довшій перспективі обидва напрями виглядають близько, тому рішення краще приймати через порівняння кількох маршрутів, а не одного сценарію.";
+      return "У довшій перспективі обидва напрями виглядають близько, тому рішення краще приймати через конкретні вакансії, а не один абстрактний напрям.";
     default:
       return null;
-  }
-}
-
-export function moduleSummaryDescription(label: string) {
-  switch (label) {
-    case "Вхід":
-      return "Що саме модуль бере за основу перед стартом.";
-    case "Фокус":
-      return "На чому тримається головна цінність цього розділу.";
-    case "Вихід":
-      return "Що користувач має отримати на виході з цього модуля.";
-    default:
-      return "Ключовий зріз цього розділу.";
   }
 }
 
@@ -606,12 +593,16 @@ export function extractSimulationSnapshot(
 export function getDashboardView(value: string | null): DashboardView {
   switch (value) {
     case "scenario":
-    case "profile":
+    case "market":
+      return "market";
+    case "vacancies":
+    case "jobs":
+    case "assistant":
     case "resume":
     case "interviews":
-    case "jobs":
     case "offers":
-    case "assistant":
+      return "vacancies";
+    case "profile":
     case "access":
       return value;
     default:
@@ -651,38 +642,29 @@ export function buildProgressSteps(
       href: getDashboardHref("profile"),
     },
     {
-      label: "Заповнити стартовий сценарій переходу",
+      label: "Отримати ринкову позицію",
       progress: totalSimulations > 0 ? 100 : 12,
-      href: totalSimulations > 0 ? getDashboardHref("scenario") : "/simulate",
+      href: totalSimulations > 0 ? getDashboardHref("market") : "/simulate",
     },
     {
-      label: "Порівняти 2-3 маршрути переходу",
-      progress:
-        totalSimulations >= 3
-          ? 100
-          : totalSimulations === 2
-            ? 76
-            : totalSimulations === 1
-              ? 42
-              : 0,
-      href: getDashboardHref("scenario"),
+      label: "Перевірити першу вакансію",
+      progress: subscription.plan === "pro" && totalSimulations > 0 ? 35 : 0,
+      href: getDashboardHref("vacancies"),
     },
     {
-      label: "Зібрати резюме під цільову роль",
-      progress:
-        subscription.plan === "pro" ? (totalSimulations > 0 ? 38 : 10) : 0,
-      href: getDashboardHref("resume"),
-    },
-    {
-      label: "Пройти пробну співбесіду",
-      progress:
-        subscription.plan === "pro" ? (totalSimulations > 0 ? 18 : 0) : 0,
-      href: getDashboardHref("interviews"),
-    },
-    {
-      label: "Оцінити відповідність пропозиції",
+      label: "Адаптувати резюме під вакансію",
       progress: 0,
-      href: getDashboardHref("offers"),
+      href: getDashboardHref("vacancies"),
+    },
+    {
+      label: "Підготувати salary talking points",
+      progress: 0,
+      href: getDashboardHref("vacancies"),
+    },
+    {
+      label: "Оцінити офер",
+      progress: 0,
+      href: getDashboardHref("vacancies"),
     },
   ];
 }
@@ -704,29 +686,29 @@ export function buildInsights(
   if (!lastSimulation) {
     return [
       profileCompletion < 60
-        ? "Спершу дозаповніть профіль, щоб кабінет і модулі підлаштовувались під ваш контекст точніше."
-        : "Почніть із першої симуляції, щоб головний екран перестав бути загальним і підлаштувався під ваш маршрут.",
+        ? "Спершу дозаповніть профіль, щоб аналіз вакансій підлаштовувався під ваш контекст точніше."
+        : "Почніть із першої оцінки, щоб головний екран перестав бути загальним і підлаштувався під ваш маршрут.",
       subscription.plan === "pro"
-        ? "У вас уже відкритий повний набір модулів. Після першого сценарію можна одразу йти в розділ резюме та підготовку до співбесід."
-        : "Поки достатньо зібрати один сильний сценарій. Платні модулі логічно підключати вже після цього.",
-      "Навігація в кабінеті побудована по маршруту: сценарії -> резюме -> співбесіди -> пропозиції -> нова робота.",
+        ? "У вас уже відкритий paid workspace. Після першої оцінки переходьте до перевірки реальної вакансії."
+        : "Поки достатньо зібрати одну ринкову позицію. Платний workspace логічно відкривати вже після цього.",
+      "Маршрут кабінету: позиція -> вакансія -> резюме -> співбесіда і зарплата -> офер.",
     ];
   }
 
   return [
     verdict
-      ? `${verdict}. Тримайте цей маршрут як базовий фокус кабінету.`
-      : "Останній сценарій уже задає контекст для наступних модулів.",
+      ? `${verdict}. Тримайте це як базовий фокус перед перевіркою вакансій.`
+      : "Остання оцінка вже задає контекст для наступної вакансії.",
     probability
-      ? `${probability}. Це хороший орієнтир, щоб вирішити, чи переходити до розділу резюме й підготовки до співбесід уже зараз.`
-      : "Після сценарію логічно перейти до резюме й перевірки, як ви виглядаєте під реальні вакансії.",
+      ? `${probability}. Це орієнтир для того, наскільки агресивно подаватися на ролі вище поточного рівня.`
+      : "Після оцінки логічно перевірити, як ви виглядаєте під реальні вакансії.",
     profileCompletion < 80
-      ? `Профіль заповнений на ${profileCompletion}%. Дозаповніть його, щоб поради в модулях були точнішими.`
+      ? `Профіль заповнений на ${profileCompletion}%. Дозаповніть його, щоб аналіз вакансій був точнішим.`
       : targetMarket
         ? `Орієнтир зараз: ${targetMarket}. Це впливатиме і на вакансії, і на мову резюме, і на вимоги ринку.`
         : totalSimulations > 1
-          ? "Спробуйте ще один альтернативний маршрут, щоб бачити не одну точку, а поле рішень."
-          : "Після першого розрахунку варто додати альтернативний сценарій для порівняння.",
+          ? "Перейдіть до Vacancy Fit і перевірте не абстрактний напрям, а конкретну роль."
+          : "Після першої оцінки варто перевірити конкретну вакансію.",
   ];
 }
 
@@ -737,10 +719,10 @@ export function buildActivityItems(
   const simulationItems = recentSimulations.slice(0, 4).map((simulation) => {
     const label =
       simulation.currentRole && simulation.targetRole
-        ? `Оновлено сценарій ${simulation.currentRole} -> ${simulation.targetRole}`
+        ? `Оновлено оцінку ${simulation.currentRole} -> ${simulation.targetRole}`
         : simulation.targetRole
           ? `Проаналізовано напрям ${simulation.targetRole}`
-          : "Збережено новий сценарій переходу";
+          : "Збережено нову ринкову оцінку";
 
     return {
       title: label,
@@ -756,9 +738,9 @@ export function buildActivityItems(
 
   return [
     {
-      title: "Кабінет готовий до стартового сценарію",
+      title: "Кабінет готовий до ринкової оцінки",
       description:
-        "Після першого розрахунку тут підтягнуться фокус, історія та рекомендації.",
+        "Після першого результату тут підтягнуться фокус, історія та наступна дія.",
     },
     {
       title:
@@ -767,7 +749,7 @@ export function buildActivityItems(
           : "Базовий доступ активний",
       description:
         subscription.plan === "pro"
-          ? "Усі модулі прив'язані до цього акаунта."
+          ? "Vacancy Fit і платний workspace прив'язані до цього акаунта."
           : "Після оновлення тут з'являться оплата й межі плану.",
     },
   ];
