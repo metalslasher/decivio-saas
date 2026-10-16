@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import { getSupabaseServiceRoleClient } from "@/lib/db/supabase";
 import { errorMessage, jsonError, readJsonBody, requireUser } from "@/lib/hiring/http";
+import { countActiveVacancies, getEmployerUsage, resolveEmployerPlan, vacancyLimitMessage } from "@/lib/hiring/plan";
 import { getOwnerVacancy, listVacancyApplications, updateVacancyStatus } from "@/lib/hiring/store";
+import { PLAN_LIMITS } from "@/lib/hiring/types";
 import { isRecord } from "@/lib/hiring/validate";
 
 type RouteContext = { params: Promise<{ vacancyId: string }> };
@@ -20,8 +22,8 @@ export async function GET(request: Request, { params }: RouteContext) {
       return jsonError("Вакансію не знайдено.", 404);
     }
 
-    const applications = await listVacancyApplications(supabase, vacancy.id);
-    return NextResponse.json({ vacancy, applications });
+    const [applications, usage] = await Promise.all([listVacancyApplications(supabase, vacancy.id), getEmployerUsage(supabase, user)]);
+    return NextResponse.json({ vacancy, applications, usage });
   } catch (error) {
     return jsonError(errorMessage(error, "Не вдалося завантажити вакансію."), 500);
   }
@@ -42,6 +44,13 @@ export async function PATCH(request: Request, { params }: RouteContext) {
   }
 
   try {
+    if (status === "active") {
+      const plan = await resolveEmployerPlan(supabase, user);
+      if ((await countActiveVacancies(supabase, user.userId)) >= PLAN_LIMITS[plan].activeVacancies) {
+        return NextResponse.json({ error: vacancyLimitMessage(plan), code: "vacancy_limit" }, { status: 402 });
+      }
+    }
+
     const updated = await updateVacancyStatus(supabase, user.userId, vacancyId, status);
     return updated ? NextResponse.json({ ok: true }) : jsonError("Вакансію не знайдено.", 404);
   } catch (error) {

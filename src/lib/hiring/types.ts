@@ -66,6 +66,7 @@ export type VacancySummary = {
 
 export type VacancyDetail = {
   id: string;
+  owner_id: string;
   slug: string;
   status: VacancyStatus;
   title: string;
@@ -100,6 +101,20 @@ export type PublicVacancy = {
   requirements: string[];
   questions: ScreeningQuestion[];
   is_open: boolean;
+};
+
+export type EmployerPlan = "free" | "pro";
+
+export const PLAN_LIMITS: Record<EmployerPlan, { activeVacancies: number; screenedApplications: number | null }> = {
+  free: { activeVacancies: 1, screenedApplications: 10 },
+  pro: { activeVacancies: 5, screenedApplications: null },
+};
+
+export type EmployerUsage = {
+  plan: EmployerPlan;
+  limits: { activeVacancies: number; screenedApplications: number | null };
+  activeVacancies: number;
+  screenedApplications: number;
 };
 
 export const APPLICATION_STATUS_LABELS: Record<ApplicationStatus, string> = {

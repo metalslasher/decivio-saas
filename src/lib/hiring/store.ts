@@ -51,6 +51,7 @@ function createSlug() {
 function toVacancyDetail(row: VacancyRow): VacancyDetail {
   return {
     id: row.id,
+    owner_id: row.owner_id,
     slug: row.slug,
     status: row.status,
     title: row.title,

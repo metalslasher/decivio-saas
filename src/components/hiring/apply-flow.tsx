@@ -184,7 +184,10 @@ export function ApplyFlow({ vacancy, preview = false }: ApplyFlowProps) {
             {isSubmitting ? "Надсилаємо..." : "Надіслати відгук"}
           </button>
           <p className="text-center text-[0.72rem] leading-snug text-[var(--text-soft)]">
-            Надсилаючи відгук, ви погоджуєтеся передати ім&apos;я, телефон і відповіді роботодавцю для розгляду кандидатури.
+            Надсилаючи відгук, ви погоджуєтеся передати ім&apos;я, телефон і відповіді роботодавцю для розгляду кандидатури та на попередню автоматичну оцінку відповідей.{" "}
+            <a href="/privacy" target="_blank" className="underline">
+              Політика конфіденційності
+            </a>
           </p>
         </div>
       ) : null}

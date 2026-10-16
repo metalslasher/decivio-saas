@@ -108,7 +108,7 @@ function withBillingSecurityRejection(payload: unknown, reason: string) {
   };
 }
 
-function hasActiveAccess(subscription: Pick<SubscriptionAccessRow, "plan" | "status" | "current_period_end"> | null) {
+export function hasActiveAccess(subscription: Pick<SubscriptionAccessRow, "plan" | "status" | "current_period_end"> | null) {
   if (!subscription || subscription.plan !== "pro") {
     return false;
   }

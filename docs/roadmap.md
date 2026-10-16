@@ -27,13 +27,17 @@ Goal: the wow loop works end to end locally.
 
 ## Iteration 2 — Monetization And Polish
 
-- [ ] Free limits (1 active vacancy / 10 screened candidates) enforced in API.
-- [ ] Rework `/pricing` + `src/lib/pricing.ts` to Free / Pro 990 UAH; reuse mono checkout.
-- [ ] Rewrite privacy/terms for candidate personal data processing (owner = data controller, Decivio = processor).
+- [x] `robots.ts` blocks cabinet, apply pages, checkout; `/hire/new` stays indexable.
+
+- [x] Free limits enforced in API (`src/lib/hiring/plan.ts`): 1 active vacancy (create + reopen → 402), 10 AI-screened candidates per account (after that candidates are still saved, just unscored). Usage banner in cabinet and shortlist.
+- [x] `/pricing` rebuilt (Start / Pro 990 / Pro 90 days 2490, comparison table); reuses mono checkout via `PricingPurchaseButton`.
+- [x] Privacy/terms rewritten for the hiring product (candidate data, controller/processor roles, OpenAI, anti-discrimination). Have a lawyer review before scaling.
 - [ ] Edit vacancy after publish; close / reopen vacancy.
 - [ ] QR code + downloadable poster for the apply link.
 - [ ] Email notification to employer on new strong candidate.
 - [ ] Update e2e flow test for the new loop.
+- [ ] Subscription management for employers (see plan/expiry, cancel monthly mono subscription) — the old dashboard "access" view was removed.
+- [ ] Re-screen unscored candidates after upgrading to Pro.
 
 ## Iteration 3 — Growth Channels
 
@@ -53,10 +57,6 @@ Verified locally on 2026-10-16 with real OpenAI: draft generation (~20 s), publi
 ## Known Gaps / Notes
 
 - Auth dialog default `nextPath` points to `/hire`; signup/login dialog now has a view toggle.
-- `/pricing` page body still has old layout (plans/prices already updated in `src/lib/pricing.ts`); rebuild in iteration 2.
-- Privacy/terms texts still describe the old career product — must be rewritten before real candidates submit data.
-- `robots.ts` does not disallow `/hire` and `/apply` yet (pages are `noIndex` via metadata).
-- Free-plan limits are not enforced yet.
 - Local test employer account credentials are in `.env.local` (`DEV_TEST_EMAIL` / `DEV_TEST_PASSWORD`, local Supabase only).
 - AI pay hints were low without anchors; the prompt now includes 2026 market anchors — revisit quarterly.
 - Legacy tables (`simulations`, `simulation_results`, `lead_requests`, `guest_sessions`) still exist in the DB; drop them in a later migration once production is migrated.

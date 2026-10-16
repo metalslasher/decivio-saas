@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { PlanBanner } from "@/components/hiring/plan-banner";
 import { useEmployerSession } from "@/components/hiring/use-employer-session";
 import { apiRequest, buildApplyUrl, copyText, formatRelativeDate, withApplyLink } from "@/lib/hiring/client";
 import {
@@ -9,6 +10,7 @@ import {
   VERDICT_LABELS,
   type ApplicationRecord,
   type ApplicationStatus,
+  type EmployerUsage,
   type ScreeningVerdict,
   type VacancyDetail,
 } from "@/lib/hiring/types";
@@ -25,19 +27,22 @@ export function VacancyWorkspace({ vacancyId, justCreated }: { vacancyId: string
   const session = useEmployerSession();
   const [vacancy, setVacancy] = useState<VacancyDetail | null>(null);
   const [applications, setApplications] = useState<ApplicationRecord[]>([]);
+  const [usage, setUsage] = useState<EmployerUsage | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
   const [filter, setFilter] = useState<Filter>("all");
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [applyUrl, setApplyUrl] = useState("");
 
   const load = useCallback(async () => {
     try {
-      const result = await apiRequest<{ vacancy: VacancyDetail; applications: ApplicationRecord[] }>(
+      const result = await apiRequest<{ vacancy: VacancyDetail; applications: ApplicationRecord[]; usage: EmployerUsage }>(
         `/api/hiring/vacancies/${vacancyId}`,
         { auth: true },
       );
       setVacancy(result.vacancy);
       setApplications(result.applications);
+      setUsage(result.usage);
       setApplyUrl(buildApplyUrl(result.vacancy.slug));
     } catch (loadError) {
       setError(loadError instanceof Error ? loadError.message : "Не вдалося завантажити вакансію.");
@@ -88,8 +93,14 @@ export function VacancyWorkspace({ vacancyId, justCreated }: { vacancyId: string
   const toggleVacancy = async () => {
     if (!vacancy) return;
     const status = vacancy.status === "active" ? "closed" : "active";
+    setNotice(null);
     setVacancy({ ...vacancy, status });
-    await apiRequest(`/api/hiring/vacancies/${vacancy.id}`, { auth: true, method: "PATCH", body: { status } }).catch(() => load());
+    try {
+      await apiRequest(`/api/hiring/vacancies/${vacancy.id}`, { auth: true, method: "PATCH", body: { status } });
+    } catch (toggleError) {
+      setNotice(toggleError instanceof Error ? toggleError.message : "Не вдалося змінити статус.");
+    }
+    void load();
   };
 
   if (session.status === "guest") {
@@ -143,6 +154,10 @@ export function VacancyWorkspace({ vacancyId, justCreated }: { vacancyId: string
           {vacancy.status === "active" ? "Закрити набір" : "Відновити набір"}
         </button>
       </div>
+
+      {notice ? <p className="mt-4 rounded-2xl bg-[var(--warn-soft)] px-4 py-3 text-sm font-semibold text-[#7a5a0b]">{notice}</p> : null}
+
+      <PlanBanner usage={usage} />
 
       {justCreated ? (
         <div className="card-ink mt-6 p-5 md:p-6">

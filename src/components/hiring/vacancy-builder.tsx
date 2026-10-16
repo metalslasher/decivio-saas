@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useAuthDialog } from "@/components/auth-dialog-provider";
@@ -38,6 +39,7 @@ export function VacancyBuilder() {
   const [error, setError] = useState<string | null>(null);
   const [generationStep, setGenerationStep] = useState(0);
   const [isPublishing, setIsPublishing] = useState(false);
+  const [isLimitReached, setIsLimitReached] = useState(false);
   const autoPublishStarted = useRef(false);
 
   const publish = useCallback(
@@ -62,6 +64,7 @@ export function VacancyBuilder() {
         router.push(`/hire/${created.id}?created=1`);
       } catch (publishError) {
         setError(publishError instanceof ApiError ? publishError.message : "Не вдалося опублікувати вакансію.");
+        setIsLimitReached(publishError instanceof ApiError && publishError.status === 402);
         setIsPublishing(false);
       }
     },
@@ -145,6 +148,7 @@ export function VacancyBuilder() {
         onPublish={() => publish(content, brief, city)}
         isPublishing={isPublishing}
         error={error}
+        isLimitReached={isLimitReached}
       />
     );
   }
@@ -249,6 +253,7 @@ function VacancyEditor({
   onPublish,
   isPublishing,
   error,
+  isLimitReached,
 }: {
   content: VacancyContent;
   city: string;
@@ -257,6 +262,7 @@ function VacancyEditor({
   onPublish: () => void;
   isPublishing: boolean;
   error: string | null;
+  isLimitReached: boolean;
 }) {
   const [copied, setCopied] = useState(false);
   const update = (patch: Partial<VacancyContent>) => onChange({ ...content, ...patch });
@@ -453,6 +459,7 @@ function VacancyEditor({
               </div>
             </div>
             {error ? <p className="text-center text-sm font-semibold text-[var(--bad)]">{error}</p> : null}
+            {isLimitReached ? <UpgradeLinks /> : null}
             <button type="button" className="btn-primary w-full text-[1rem] disabled:opacity-60" disabled={isPublishing} onClick={onPublish}>
               {isPublishing ? "Публікуємо..." : "🚀 Опублікувати й отримати посилання"}
             </button>
@@ -470,11 +477,22 @@ function VacancyEditor({
 
       <div className="fixed inset-x-0 bottom-0 z-40 border-t border-[var(--line-soft)] bg-white/95 p-3 backdrop-blur lg:hidden">
         {error ? <p className="mb-2 text-center text-sm font-semibold text-[var(--bad)]">{error}</p> : null}
+        {isLimitReached ? <UpgradeLinks /> : null}
         <button type="button" className="btn-primary w-full disabled:opacity-60" disabled={isPublishing} onClick={onPublish}>
           {isPublishing ? "Публікуємо..." : "🚀 Опублікувати"}
         </button>
       </div>
     </div>
+  );
+}
+
+function UpgradeLinks() {
+  return (
+    <p className="mb-2 text-center text-sm">
+      <Link href="/hire" className="text-link">Мої вакансії</Link>
+      <span className="mx-2 text-[var(--text-soft)]">·</span>
+      <Link href="/pricing" className="text-link">Перейти на Pro</Link>
+    </p>
   );
 }
 

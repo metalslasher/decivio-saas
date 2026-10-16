@@ -3,22 +3,27 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useAuthDialog } from "@/components/auth-dialog-provider";
+import { PlanBanner } from "@/components/hiring/plan-banner";
 import { useEmployerSession } from "@/components/hiring/use-employer-session";
 import { apiRequest, formatRelativeDate } from "@/lib/hiring/client";
-import type { VacancySummary } from "@/lib/hiring/types";
+import type { EmployerUsage, VacancySummary } from "@/lib/hiring/types";
 
 export function HireCabinet() {
   const session = useEmployerSession();
   const { openAuthDialog } = useAuthDialog();
   const [vacancies, setVacancies] = useState<VacancySummary[] | null>(null);
+  const [usage, setUsage] = useState<EmployerUsage | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (session.status !== "user") {
       return;
     }
-    apiRequest<{ vacancies: VacancySummary[] }>("/api/hiring/vacancies", { auth: true })
-      .then((result) => setVacancies(result.vacancies))
+    apiRequest<{ vacancies: VacancySummary[]; usage: EmployerUsage }>("/api/hiring/vacancies", { auth: true })
+      .then((result) => {
+        setVacancies(result.vacancies);
+        setUsage(result.usage);
+      })
       .catch((loadError: Error) => setError(loadError.message));
   }, [session.status]);
 
@@ -50,6 +55,8 @@ export function HireCabinet() {
           + Нова вакансія
         </Link>
       </div>
+
+      <PlanBanner usage={usage} />
 
       {error ? <p className="mt-6 text-sm font-semibold text-[var(--bad)]">{error}</p> : null}
 

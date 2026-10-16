@@ -2,7 +2,9 @@ import { NextResponse } from "next/server";
 import { getSupabaseServiceRoleClient } from "@/lib/db/supabase";
 import { screenCandidate } from "@/lib/hiring/ai";
 import { enforceRateLimit, errorMessage, jsonError, readJsonBody, readOptionalString } from "@/lib/hiring/http";
+import { countScreenedApplications, resolveEmployerPlan } from "@/lib/hiring/plan";
 import { createApplication, getVacancyBySlug } from "@/lib/hiring/store";
+import { PLAN_LIMITS } from "@/lib/hiring/types";
 import type { CandidateAnswer, CandidateScreening } from "@/lib/hiring/types";
 import { isRecord, normalizePhone } from "@/lib/hiring/validate";
 
@@ -52,7 +54,13 @@ export async function POST(request: Request, { params }: RouteContext) {
 
     let screening: CandidateScreening | null = null;
     try {
-      screening = await screenCandidate({ vacancy: vacancy.content, answers, about });
+      // Free plan: keep accepting candidates, but stop AI screening after the limit.
+      const { data: owner } = await supabase.auth.admin.getUserById(vacancy.owner_id);
+      const plan = await resolveEmployerPlan(supabase, { userId: vacancy.owner_id, email: owner.user?.email ?? null });
+      const screenLimit = PLAN_LIMITS[plan].screenedApplications;
+      const canScreen = screenLimit === null || (await countScreenedApplications(supabase, vacancy.owner_id)) < screenLimit;
+
+      if (canScreen) screening = await screenCandidate({ vacancy: vacancy.content, answers, about });
     } catch (error) {
       // The application must never be lost because of an AI failure.
       console.error("Candidate screening failed", error);
