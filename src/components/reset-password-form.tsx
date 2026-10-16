@@ -94,7 +94,7 @@ export function ResetPasswordForm() {
       }
 
       setNotice("Пароль оновлено. Відкриваємо ваш кабінет...");
-      router.replace("/dashboard");
+      router.replace("/hire");
       router.refresh();
     } catch (submitError) {
       setError(submitError instanceof Error ? mapResetErrorMessage(submitError.message) : "Не вдалося оновити пароль.");
@@ -123,7 +123,7 @@ export function ResetPasswordForm() {
           </p>
 
           <div className="mt-6 flex flex-wrap gap-3">
-            <Link href="/login?next=%2Fdashboard" className="btn-primary">
+            <Link href="/login?next=%2Fhire" className="btn-primary">
               Перейти до входу
             </Link>
             <Link href="/" className="btn-secondary">

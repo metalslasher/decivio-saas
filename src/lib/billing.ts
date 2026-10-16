@@ -26,7 +26,7 @@ type BillingPlanConfig = {
 const BILLING_PLAN_CONFIG: Record<PaidPlanId, BillingPlanConfig> = {
   monthly: {
     planId: "monthly",
-    amount: 89900,
+    amount: 99000,
     billingKind: "subscription",
     monoInterval: "1m",
     destination: "Decivio Pro monthly subscription",
@@ -34,11 +34,11 @@ const BILLING_PLAN_CONFIG: Record<PaidPlanId, BillingPlanConfig> = {
   },
   annual: {
     planId: "annual",
-    amount: 219900,
+    amount: 249000,
     billingKind: "one_time",
     monoInterval: null,
-    destination: "Decivio 90-day Career Upgrade access",
-    successLabel: "90-денний доступ Decivio активовано."
+    destination: "Decivio Pro 90-day access",
+    successLabel: "Доступ Decivio Pro на 90 днів активовано."
   }
 };
 

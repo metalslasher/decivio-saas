@@ -6,7 +6,7 @@ Status: current checkout and paid-access behavior, with target pricing notes for
 
 The user should never feel stuck after payment. Every return from mono must lead to one of these clear states:
 
-- access is active and the dashboard can be opened;
+- access is active and the cabinet can be opened;
 - payment is still waiting or processing and the status can be checked again;
 - payment failed, expired, was canceled, or was reversed and a new payment can be created.
 
@@ -42,7 +42,7 @@ Target plan hierarchy:
 
 Implementation should keep billing access checks strict regardless of plan shape:
 
-- registration alone must not open the dashboard;
+- registration alone must not open the cabinet;
 - successful checkout or active subscription/access row must open paid access;
 - manual full-access override stays isolated in `src/lib/manual-full-access.ts`;
 - mono amount, currency, interval/reference, and provider target must be validated before access is opened.
@@ -98,15 +98,15 @@ The default local test status remains successful: `paid` for the one-time plan a
 - Before opening access, mono status data must match the local checkout amount, currency, provider target, and plan interval/reference where available.
 - Mono webhook responses do not expose internal errors to callers; mismatched signed payment details are logged and ignored without granting access.
 - pRRO/fiscalization is a separate setup topic and should be confirmed before real payment launch.
-- Do not rely on registration alone for dashboard access; access must come from active subscription state or an explicit manual full-access override.
+- Do not rely on registration alone for paid access; access must come from active subscription state or an explicit manual full-access override.
 
 ## Manual Full Access
 
-The account `t0mmy.v4sk1s@gmail.com` has an explicit full-access override for the dashboard.
+The account `t0mmy.v4sk1s@gmail.com` has an explicit full-access override for the cabinet.
 This is handled in `src/lib/manual-full-access.ts` and should stay isolated there.
 
 Behavior:
 
-- dashboard access resolves to `pro` / `active` even without a paid subscription row;
-- checkout creation returns `subscription_already_active` and redirects to `/dashboard?view=access`;
+- paid access resolves to `pro` / `active` even without a paid subscription row;
+- checkout creation returns `subscription_already_active` and redirects to `/hire`;
 - payment/webhook logic for all other users remains unchanged.

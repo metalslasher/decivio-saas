@@ -3,7 +3,6 @@
 import type { EmailOtpType } from "@supabase/supabase-js";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { claimGuestSimulations } from "@/lib/auth-session-client";
 import { getSupabaseBrowserClient } from "@/lib/db/supabase-browser";
 
 type CallbackState =
@@ -12,7 +11,7 @@ type CallbackState =
 
 function normalizeNextPath(value: string | null) {
   if (!value || !value.startsWith("/") || value.startsWith("//")) {
-    return "/dashboard";
+    return "/hire";
   }
 
   return value;
@@ -28,7 +27,7 @@ function resolveNextPath(searchParams: URLSearchParams, hashParams: URLSearchPar
     return normalizeNextPath(nextValue);
   }
 
-  return getFlowType(searchParams, hashParams) === "recovery" ? "/reset-password" : "/dashboard";
+  return getFlowType(searchParams, hashParams) === "recovery" ? "/reset-password" : "/hire";
 }
 
 function getFlowCopy(flowType: string) {
@@ -48,7 +47,7 @@ function getFlowCopy(flowType: string) {
     loadingTitle: "Відкриваємо кабінет",
     loadingMessage: "Це займе лише кілька секунд.",
     errorTitle: "Не вдалося підтвердити акаунт",
-    errorHref: "/login?next=%2Fdashboard",
+    errorHref: "/login?next=%2Fhire",
     errorLabel: "Перейти до входу"
   };
 }
@@ -165,7 +164,6 @@ export default function AuthCallbackPage() {
           throw new Error("У посиланні бракує службових параметрів авторизації.");
         }
 
-        await claimGuestSimulations(sessionAccessToken);
 
         if (!isMounted) {
           return;

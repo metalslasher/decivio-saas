@@ -31,12 +31,12 @@ Before a release:
 
 Update docs in the same commit when changing:
 
-- public flow between `/simulate`, `/results`, `/pricing`, auth, checkout, and `/dashboard`;
-- simulation form fields or validation;
+- public flow between `/`, `/hire/new`, `/apply/<slug>`, `/hire`, pricing, auth, and checkout;
+- vacancy content, screening questions, or AI output contracts;
 - result payload shape or displayed result logic;
 - pricing, checkout, subscription, or dashboard access rules;
 - Supabase schema, RLS policies, triggers, or storage setup;
-- dashboard structure or module ownership;
+- employer cabinet structure;
 - major repository structure.
 
 Small visual tweaks do not need docs unless they change product behavior or a shared convention.
@@ -46,7 +46,7 @@ Small visual tweaks do not need docs unless they change product behavior or a sh
 You do not need to manually edit docs every time. The most useful thing is to tell Codex when a task changes behavior:
 
 ```text
-Зроби цю правку і онови docs, якщо змінюється flow/schema/auth/billing/dashboard structure.
+Зроби цю правку і онови docs, якщо змінюється flow/schema/auth/billing/cabinet structure.
 ```
 
 For bigger ideas, use one of two modes:

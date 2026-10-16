@@ -1,60 +1,38 @@
 # Codebase Map
 
-Status: current repository map for product work.
+Status: current repository map (hiring assistant, since 2026-10-16).
 
 ## Public Product Flow
 
-- `/`: landing page and current visual theme.
-- `/simulate`: career position assessment.
-- `/results`: free generated diagnosis for a submitted assessment.
-- `/pricing`: plan selection before auth/checkout.
-- `/login` and `/signup`: account entry points used around checkout.
-- `/checkout`: starts payment after plan selection and auth.
-- `/dashboard`: paid job-to-offer workspace.
+- `/`: landing page (`src/app/page.tsx`, animated hero demo in `src/components/landing/hero-demo.tsx`).
+- `/hire/new`: vacancy builder — brief → AI draft → editor with live candidate-form preview → publish (auth).
+- `/hire`: employer cabinet — list of vacancies with candidate counts.
+- `/hire/[vacancyId]`: shortlist — candidates ranked by AI score, statuses, apply link, posting text.
+- `/apply/[slug]`: public mobile-first candidate application (no registration).
+- `/pricing`, `/checkout`, `/billing/return`: monobank billing flow (copy still needs a rework, see roadmap).
+- `/login`, `/signup`, `/reset-password`, `/auth/callback`: auth. Default post-auth destination is `/hire`.
+- `/dashboard`: legacy URL, redirects to `/hire`.
 
 ## Main Directories
 
-- `src/app`: Next.js routes, layouts, metadata, API handlers, and server-only route composition.
-- `src/components`: shared UI and route-level React components.
-- `src/components/home`: landing page sections and homepage data.
-- `src/components/dashboard`: dashboard layout, navigation, data hook, view workspaces, and dashboard-only primitives.
-- `src/lib`: domain logic shared by routes and components.
-- `src/lib/career-switch-analysis`: AI and mock career-position result generation.
-- `src/lib/db`: Supabase clients and server/browser DB setup.
-- `supabase/migrations`: database schema, triggers, policies, and storage setup.
-- `tests/e2e`: critical user-flow tests.
-- `docs`: current product, strategy, and engineering reference.
+- `src/lib/hiring`: hiring domain.
+  - `types.ts`: shared types and labels (client + server).
+  - `validate.ts`: parsing/normalising vacancy content, AI screening output, phone numbers.
+  - `ai.ts` (server-only): OpenAI structured outputs for vacancy drafts and candidate screening, deterministic knockout detection, test-mode mocks.
+  - `store.ts` (server-only): Supabase access for vacancies and applications.
+  - `http.ts` (server-only): API route helpers (auth, rate limit, errors).
+  - `client.ts` (browser): authorised fetch, draft persistence in localStorage, clipboard, apply-link helpers.
+- `src/components/hiring`: builder, apply flow, cabinet, vacancy workspace, session hook.
+- `src/app/api/hiring/*`: employer APIs (draft generation is public + rate-limited; the rest require auth).
+- `src/app/api/apply/[slug]`: public candidate submission (rate-limited, screening never blocks saving).
+- `src/lib/db`: Supabase clients.
+- `src/lib/billing*.ts`, `src/lib/mono-acquiring.ts`, `src/app/api/payments/mono/*`: monobank payments.
+- `supabase/migrations`: schema; hiring tables in `20261016120000_add_hiring_core.sql`.
+- `docs`: product concept, roadmap, engineering references.
 
-## Important Domain Files
+## Boundary Rules
 
-- Simulation form contract: `src/lib/career-switch-form.ts`.
-- Simulation submit API: `src/app/api/simulations/route.ts`.
-- Result payload mapper: `src/lib/simulation-results-payload.ts`.
-- Pricing config: `src/lib/pricing.ts`.
-- Mono billing integration: `src/lib/mono-acquiring.ts`, `src/lib/billing.ts`, `src/lib/billing-store.ts`, `src/lib/billing-security.ts`.
-- Manual dashboard access overrides: `src/lib/manual-full-access.ts`.
-- Auth/session helpers: `src/lib/request-auth.ts`, `src/lib/auth-session-client.ts`.
-- Dashboard data loading: `src/components/dashboard/use-dashboard-data.ts`.
-- Dashboard shared types: `src/components/dashboard/types.ts`.
-- Dashboard target structure: `docs/dashboard-workspace-spec.md`.
-
-## Current Boundary Rules
-
-- Public routes should stay focused on composition and metadata.
-- API routes should validate input, call domain helpers, and return a clear response.
-- Business rules should live in `src/lib`, not inside visual components.
-- Dashboard-only UI should stay under `src/components/dashboard`.
-- Homepage-only UI should stay under `src/components/home`.
-- Shared UI can live in `src/components` only when it is reused outside one feature area.
-- Docs should clearly mark whether they describe current shipped behavior or approved target behavior.
-
-## Rebuild Boundary
-
-During the current rebuild, keep changes organized around the job-to-offer route:
-
-```text
-Assessment -> Result diagnosis -> Pricing -> Paid workspace -> Vacancy Fit -> Resume Positioning -> Interview/Salary -> Offer Decision
-```
-
-Avoid adding product areas that do not support this route.
-
+- All hiring tables are accessed only from server routes with the service role; ownership is checked in `store.ts`.
+- AI prompts live in `src/lib/hiring/ai.ts` and must keep the fairness rules from `product-concept.md`.
+- Keep route files thin; business rules in `src/lib/hiring`.
+- Test mode: `DECIVIO_TEST_MODE=1` (non-production only) returns deterministic AI mocks.

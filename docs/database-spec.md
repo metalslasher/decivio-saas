@@ -9,9 +9,31 @@ This document mirrors the live schema and should not invent future tables. If th
 - Schema source: `supabase/migrations/*.sql`
 - Supabase server client: `src/lib/db/supabase.ts`
 - Browser client: `src/lib/db/supabase-browser.ts`
-- Guest transfer: `src/lib/guest-simulation-transfer.ts`
+- Hiring data access: `src/lib/hiring/store.ts`
 - Billing persistence: `src/lib/billing-store.ts`
 - Result payload mapping: `src/lib/simulation-results-payload.ts`
+
+## Hiring Tables (current product)
+
+Migration: `20261016120000_add_hiring_core.sql`. RLS enabled without policies; no grants for `anon`/`authenticated`. Only server routes (service role) read/write, ownership is checked in code.
+
+### `hiring_vacancies`
+
+- `id` uuid PK, `owner_id` → `auth.users` (cascade), `slug` unique public id used in `/apply/<slug>`.
+- `status`: `active` | `closed` (closed vacancies reject new applications with 410).
+- `title`, `city`, `brief` (employer's original description).
+- `content` jsonb: `VacancyContent` from `src/lib/hiring/types.ts` (texts, questions with knockout answers, red flags).
+
+### `hiring_applications`
+
+- `vacancy_id` → `hiring_vacancies` (cascade).
+- `candidate_name`, `candidate_phone` (normalised to +380...), `answers` jsonb (`CandidateAnswer[]`), `about`.
+- `screening` jsonb (`CandidateScreening`, null if AI failed), `score` 0–100, `verdict` `call`|`maybe`|`reject`.
+- `status`: `new` | `invited` | `hired` | `rejected`.
+
+## Legacy Tables
+
+The tables below belong to the removed career product (`simulation_*`, `lead_requests`, `guest_sessions`). They stay until a cleanup migration drops them.
 
 ## Core Tables
 

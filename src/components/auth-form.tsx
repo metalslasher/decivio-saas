@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { claimGuestSimulations } from "@/lib/auth-session-client";
 import { getSupabaseBrowserClient } from "@/lib/db/supabase-browser";
 import { PASSWORD_MIN_LENGTH, PASSWORD_POLICY_HINT } from "@/lib/password-policy";
 import { GoogleIcon } from "./auth-form-google-icon";
@@ -114,7 +113,6 @@ export function AuthForm({
         }
 
         if (data.session) {
-          await claimGuestSimulations(data.session.access_token);
 
           if (!isMounted) {
             return;
@@ -256,7 +254,6 @@ export function AuthForm({
         }
 
         if (data.session) {
-          await claimGuestSimulations(data.session.access_token);
           onClose?.();
           router.replace(redirectTo);
           router.refresh();
@@ -277,7 +274,6 @@ export function AuthForm({
         return;
       }
 
-      await claimGuestSimulations(data.session?.access_token ?? null);
       onClose?.();
       router.replace(redirectTo);
       router.refresh();
@@ -536,7 +532,18 @@ export function AuthForm({
               )}
             </p>
           </div>
-        ) : null}
+        ) : (
+          <p className="mt-5 text-center text-sm text-[var(--text-muted)]">
+            {view === "signup" ? "Вже маєте акаунт? " : "Ще немає акаунта? "}
+            <button
+              type="button"
+              onClick={() => switchView(view === "signup" ? "login" : "signup")}
+              className="font-semibold text-[var(--accent-strong)] transition hover:text-[var(--accent)]"
+            >
+              {view === "signup" ? "Увійти" : "Зареєструватися"}
+            </button>
+          </p>
+        )}
       </div>
     </section>
   );

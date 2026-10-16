@@ -349,7 +349,7 @@ export async function POST(request: Request) {
         {
           error: "Pro-доступ уже активний для цього акаунта.",
           code: "subscription_already_active",
-          redirectTo: "/dashboard?view=access"
+          redirectTo: "/hire"
         },
         { status: 409 }
       );

@@ -26,7 +26,7 @@ const AuthDialogContext = createContext<AuthDialogContextValue | null>(null);
 const initialState: DialogState = {
   isOpen: false,
   view: "login",
-  nextPath: "/dashboard",
+  nextPath: "/hire",
   notice: null,
   version: 0
 };
@@ -61,7 +61,7 @@ export function AuthDialogProvider({
     setState((current) => ({
       isOpen: true,
       view,
-      nextPath: options?.nextPath ?? "/dashboard",
+      nextPath: options?.nextPath ?? "/hire",
       notice: options?.notice ?? null,
       version: current.version + 1
     }));

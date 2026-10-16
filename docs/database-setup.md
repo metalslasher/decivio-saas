@@ -46,7 +46,12 @@ npm run test:flow
 Flow covered:
 
 ```text
-/simulate -> /results -> /pricing -> registration/login -> checkout -> /dashboard
+/hire/new -> publish (auth) -> /apply/<slug> -> /hire/<id> shortlist
+```
+
+The old e2e test was removed with the career product; a new flow test is planned in `roadmap.md`.
+
+```text
 ```
 
 Notes:
@@ -89,7 +94,7 @@ Rules:
 - keep `DECIVIO_TEST_MODE=1` so AI and mono stay mocked;
 - use a non-production test account/email pattern in Playwright;
 - expect test rows to be written to the configured remote project;
-- clean up test users/simulations if the remote project is shared with production data;
+- clean up test users/vacancies if the remote project is shared with production data;
 - do not use remote tests for unverified migrations that have not been applied to that project.
 
 The Playwright config should not force a local Supabase URL. It inherits Supabase values from `DECIVIO_FLOW_*` shell variables, `.env.flow.local`, `.env.local`, or the parent shell, in that order.

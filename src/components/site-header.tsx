@@ -7,13 +7,12 @@ import { useEffect, useMemo, useState } from "react";
 import { useAuthDialog } from "@/components/auth-dialog-provider";
 import { WordmarkLogo } from "@/components/wordmark-logo";
 import { getSupabaseBrowserClient } from "@/lib/db/supabase-browser";
-import { PROFILE_UPDATED_EVENT, isBroadcastProfilePayload } from "@/lib/profile-broadcast";
 
 const publicNavItems = [
-  { href: "/#features", label: "Можливості" },
-  { href: "/#faq", label: "Часті питання" },
-  { href: "/#reviews", label: "Відгуки" },
-  { href: "/pricing", label: "Тарифи" }
+  { href: "/#how", label: "Як це працює" },
+  { href: "/#roles", label: "Для кого" },
+  { href: "/#pricing", label: "Тарифи" },
+  { href: "/#faq", label: "Питання" }
 ];
 
 type AuthState =
@@ -75,25 +74,6 @@ function CabinetIcon() {
       <path d="M4 11.5L12 5l8 6.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
       <path d="M6.5 10.5V19h11V10.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
       <path d="M10 19v-4.5h4V19" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-function ProfileIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="account-menu-icon" fill="none" aria-hidden="true">
-      <circle cx="12" cy="8" r="3.2" stroke="currentColor" strokeWidth="1.8" />
-      <path d="M5 19c1.7-3.4 4.2-5.1 7-5.1s5.3 1.7 7 5.1" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-function BillingIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="account-menu-icon" fill="none" aria-hidden="true">
-      <rect x="3" y="5.5" width="18" height="13" rx="2.5" stroke="currentColor" strokeWidth="1.8" />
-      <path d="M3 10h18" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-      <path d="M7.5 14.5h3.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
     </svg>
   );
 }
@@ -166,33 +146,9 @@ export function SiteHeader() {
       void loadAuthState(session?.user ?? null);
     });
 
-    const handleProfileUpdated = (event: Event) => {
-      const customEvent = event as CustomEvent<unknown>;
-      const detail = customEvent.detail;
-
-      if (!isBroadcastProfilePayload(detail)) {
-        return;
-      }
-
-      setAuthState((current) => {
-        if (current.status !== "user") {
-          return current;
-        }
-
-        return {
-          ...current,
-          displayName: formatDisplayName(detail.fullName, current.email),
-          avatarUrl: detail.avatarUrl
-        };
-      });
-    };
-
-    window.addEventListener(PROFILE_UPDATED_EVENT, handleProfileUpdated as EventListener);
-
     return () => {
       isMounted = false;
       subscription.unsubscribe();
-      window.removeEventListener(PROFILE_UPDATED_EVENT, handleProfileUpdated as EventListener);
     };
   }, [supabase]);
 
@@ -227,7 +183,7 @@ export function SiteHeader() {
     };
   }, [pathname]);
 
-  if (pathname?.startsWith("/auth/callback") || pathname?.startsWith("/dashboard")) {
+  if (pathname?.startsWith("/auth/callback") || pathname?.startsWith("/apply")) {
     return null;
   }
 
@@ -248,7 +204,7 @@ export function SiteHeader() {
   };
 
   const openLoginDialog = () => {
-    openAuthDialog("login", { nextPath: "/dashboard" });
+    openAuthDialog("login", { nextPath: "/hire" });
   };
 
   return (
@@ -291,17 +247,9 @@ export function SiteHeader() {
 
                     <div className="pointer-events-none absolute right-0 top-full z-40 translate-y-1 pt-2 opacity-0 transition-all duration-150 ease-out group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:translate-y-0 group-focus-within:opacity-100">
                       <div className="account-menu-panel min-w-[14rem] p-2">
-                        <Link href="/dashboard" className="account-menu-link">
+                        <Link href="/hire" className="account-menu-link">
                           <CabinetIcon />
-                          <span>Кабінет</span>
-                        </Link>
-                        <Link href="/dashboard?view=profile" className="account-menu-link">
-                          <ProfileIcon />
-                          <span>Профіль</span>
-                        </Link>
-                        <Link href="/dashboard?view=access" className="account-menu-link">
-                          <BillingIcon />
-                          <span>Оплата</span>
+                          <span>Мої вакансії</span>
                         </Link>
                         <div className="account-menu-divider" />
                         <button type="button" onClick={handleSignOut} disabled={isSigningOut} className="account-menu-link account-menu-link-danger disabled:cursor-not-allowed disabled:opacity-60">
@@ -322,10 +270,10 @@ export function SiteHeader() {
                     Вхід
                   </button>
                   <Link
-                    href="/simulate"
+                    href="/hire/new"
                     className="header-cta-button hidden min-w-[11.25rem] items-center justify-center md:inline-flex"
                   >
-                    Почати оцінку
+                    Створити вакансію
                   </Link>
                 </>
               )}
@@ -368,17 +316,9 @@ export function SiteHeader() {
                   </div>
 
                   <div className="account-menu-panel mt-1 p-2">
-                    <Link href="/dashboard" onClick={() => setIsOpen(false)} className="account-menu-link">
+                    <Link href="/hire" onClick={() => setIsOpen(false)} className="account-menu-link">
                       <CabinetIcon />
-                      <span>Кабінет</span>
-                    </Link>
-                    <Link href="/dashboard?view=profile" onClick={() => setIsOpen(false)} className="account-menu-link">
-                      <ProfileIcon />
-                      <span>Профіль</span>
-                    </Link>
-                    <Link href="/dashboard?view=access" onClick={() => setIsOpen(false)} className="account-menu-link">
-                      <BillingIcon />
-                      <span>Оплата</span>
+                      <span>Мої вакансії</span>
                     </Link>
                     <div className="account-menu-divider" />
                     <button type="button" onClick={handleSignOut} disabled={isSigningOut} className="account-menu-link account-menu-link-danger disabled:cursor-not-allowed disabled:opacity-60">
@@ -400,11 +340,11 @@ export function SiteHeader() {
                     Вхід
                   </button>
                   <Link
-                    href="/simulate"
+                    href="/hire/new"
                     onClick={() => setIsOpen(false)}
                     className="btn-primary"
                   >
-                    Почати оцінку
+                    Створити вакансію
                   </Link>
                 </>
               )}

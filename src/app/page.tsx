@@ -1,361 +1,305 @@
 import Link from "next/link";
-import Image from "next/image";
-import { HeroBeforeAfter } from "@/components/hero-before-after";
 import { JsonLd } from "@/components/json-ld";
+import { HeroDemo } from "@/components/landing/hero-demo";
 import { Reveal } from "@/components/reveal";
-import { CareerHelpSection } from "@/components/home/career-help-section";
-import { FeatureStackCard } from "@/components/home/feature-stack-card";
-import {
-  careerBrandNames,
-  faqItems,
-  featureShowcases,
-  painPoints,
-  reviews,
-  socialProof,
-} from "@/components/home/home-data";
-import { pricingPlans } from "@/lib/pricing";
+import { formatUah, pricingPlans } from "@/lib/pricing";
 import { createFaqSchema, createMetadata, createSoftwareApplicationSchema } from "@/lib/seo";
 
 export const metadata = createMetadata({
-  title: "Перевірка вакансій, ринку і зарплатної позиції",
+  title: "ШІ-асистент найму для малого бізнесу",
   description:
-    "Оцініть свою ринкову позицію, перевіряйте конкретні вакансії перед подачею та готуйте резюме, співбесіди й зарплатні аргументи під роль.",
+    "Опишіть, кого шукаєте, одним реченням — Decivio напише вакансію, збере відгуки через розумну анкету і покаже, кому дзвонити першим.",
   path: "/",
-  keywords: [
-    "оцінка зарплати онлайн",
-    "перевірити зарплату",
-    "оцінка доходу",
-    "ринкова зарплата",
-    "зарплатні очікування",
-    "підготовка до співбесіди",
-    "покращення резюме"
-  ]
+  keywords: ["пошук працівників", "як швидко знайти працівника", "текст вакансії", "найм без HR", "відбір кандидатів"],
 });
+
+const pains = [
+  {
+    icon: "📥",
+    title: "80 відгуків — і жодного підходящого",
+    text: "Половина навіть не дочитала вакансію. Ви витрачаєте вечори на перегляд резюме, яких могло й не бути.",
+  },
+  {
+    icon: "📞",
+    title: "Дзвоните — а графік не підходить",
+    text: "Живе на іншому кінці міста, не може у вихідні, хоче вдвічі більше. З'ясовується вже на п'ятій хвилині розмови.",
+  },
+  {
+    icon: "🚪",
+    title: "Новенький пішов через тиждень",
+    text: "Бо очікування не збіглися з реальністю. І все починається спочатку, а зміни закривають ті, хто лишився.",
+  },
+];
+
+const steps = [
+  {
+    title: "Опишіть, кого шукаєте",
+    text: "Одним реченням, як знайомому: «бариста на Поділ, 2/2, можна без досвіду». Ніяких шаблонів і форм.",
+    tag: "30 секунд",
+  },
+  {
+    title: "Отримайте вакансію й анкету",
+    text: "ШІ пише сильний текст з оплатою-орієнтиром і складає 4–6 питань-фільтрів. Розміщуєте посилання на Work.ua, OLX, у Telegram.",
+    tag: "Готово до публікації",
+  },
+  {
+    title: "Дзвоніть тим, хто зверху",
+    text: "Кандидати відповідають з телефону за 2 хвилини. Кожен отримує оцінку, плюси, ризики та питання для дзвінка.",
+    tag: "Рейтинг кандидатів",
+  },
+];
+
+const roles = [
+  "Бариста",
+  "Кухар",
+  "Офіціант",
+  "Продавець-консультант",
+  "Касир",
+  "Кур'єр",
+  "Водій кат. C",
+  "Комплектувальник",
+  "Вантажник",
+  "Будівельник",
+  "Електрик",
+  "Зварювальник",
+  "Адміністратор",
+  "Оператор кол-центру",
+  "Менеджер з продажу",
+  "Майстер манікюру",
+  "Прибиральник",
+  "Охоронець",
+];
+
+const faqItems = [
+  {
+    question: "Мені потрібно відмовлятися від Work.ua чи OLX?",
+    answer:
+      "Ні. Decivio працює поверх майданчиків: ви розміщуєте вакансію там, де звикли, але кандидати відгукуються через коротку анкету, а ви отримуєте впорядкований список замість хаосу в повідомленнях.",
+  },
+  {
+    question: "Кандидатам треба реєструватися або мати резюме?",
+    answer:
+      "Ні. Анкета відкривається за посиланням з будь-якого телефону, займає до 2 хвилин і не вимагає резюме. Тому відгукуються й ті, хто ніколи не писав резюме.",
+  },
+  {
+    question: "ШІ сам відмовляє кандидатам?",
+    answer:
+      "Ні. ШІ лише впорядковує кандидатів і пояснює чому. Рішення завжди за вами: ви бачите всі відповіді та можете подзвонити будь-кому.",
+  },
+  {
+    question: "Чи не буде ШІ дискримінувати кандидатів?",
+    answer:
+      "Ми забороняємо ШІ питати та оцінювати вік, стать, сімейний стан, здоров'я, національність чи зовнішність. Оцінка — лише за умовами роботи та досвідом.",
+  },
+  {
+    question: "Звідки береться оплата-орієнтир?",
+    answer:
+      "Якщо ви вказали оплату — використовується вона. Якщо ні — ШІ пропонує реалістичний діапазон для ролі та міста. Це орієнтир, який варто звірити з вашою ситуацією.",
+  },
+  {
+    question: "Скільки це коштує?",
+    answer:
+      "Перша вакансія і до 10 оцінених кандидатів — безкоштовно. Далі — Pro за 990 грн на місяць або 90 днів одним платежем для сезонного набору.",
+  },
+];
 
 const homeSoftwareSchema = createSoftwareApplicationSchema({
   path: "/",
-  description:
-    "Сервіс допомагає оцінити ринкову позицію, перевіряти конкретні вакансії перед подачею та готувати резюме, співбесіди й розмову про кращі умови.",
-  featureList: featureShowcases.map((item) => item.title),
+  description: "ШІ-асистент найму для малого й середнього бізнесу в Україні.",
+  featureList: steps.map((step) => step.title),
   offers: [
-    {
-      name: "Безкоштовна оцінка кар'єрної позиції",
-      price: 0,
-      description: "Перший персональний висновок про ринок, потенціал, слабкі місця профілю й наступний крок без оплати.",
-      urlPath: "/simulate"
-    },
-    ...pricingPlans.map((plan) => ({
-      name: plan.name,
-      price: plan.billedNowUah,
-      description: plan.description,
-      urlPath: "/pricing"
-    }))
-  ]
+    { name: "Безкоштовно", price: 0, description: "1 вакансія і до 10 оцінених кандидатів.", urlPath: "/hire/new" },
+    ...pricingPlans.map((plan) => ({ name: plan.name, price: plan.billedNowUah, description: plan.description, urlPath: "/pricing" })),
+  ],
 });
 
-const homeFaqSchema = createFaqSchema([...faqItems]);
+const homeFaqSchema = createFaqSchema(faqItems);
 
 export default function HomePage() {
   return (
     <>
       <JsonLd data={homeSoftwareSchema} />
       <JsonLd data={homeFaqSchema} />
-      <div className="pb-12 md:pb-16">
-        <div className="space-y-10 md:space-y-16">
-          <HeroBeforeAfter />
 
-        <section className="py-6 md:py-8">
-          <Reveal>
-            <div className="surface-panel mx-auto grid max-w-[80rem] overflow-hidden rounded-[1.9rem] sm:grid-cols-3">
-              <Link
-                href="#reviews"
-                className="group flex min-h-[8.2rem] flex-col items-center justify-center gap-3 px-5 py-5 text-center transition-opacity hover:opacity-85 sm:items-start sm:text-left md:min-h-[8.5rem] md:px-7"
-              >
-                <div className="flex flex-wrap items-center justify-center gap-3 sm:justify-start">
-                  <div className="flex items-center gap-1" aria-label="Рейтинг 4.5 із 5">
-                    {Array.from({ length: 5 }).map((_, index) => {
-                      const starNumber = index + 1;
-                      const isFull = starNumber <= Math.floor(socialProof.ratingValue);
-                      const isHalf = !isFull && starNumber - socialProof.ratingValue <= 0.5;
+      <section className="grid grid-cols-1 items-center gap-12 pb-10 pt-6 md:pt-12 lg:grid-cols-[1.05fr_1fr] lg:gap-16">
+        <div className="fade-up min-w-0">
+          <span className="eyebrow-pill">ШІ-асистент найму для малого бізнесу</span>
+          <h1 className="mt-6 max-w-[14ch] text-[clamp(2.5rem,6vw,4.6rem)] font-extrabold leading-[0.98] tracking-[-0.05em] text-[var(--text-strong)]">
+            Наймайте людей за <span className="text-[var(--accent)]">дні</span>, а не тижні
+          </h1>
+          <p className="lead-copy mt-6 max-w-xl text-[1.08rem]">
+            Опишіть, кого шукаєте, одним реченням. Decivio напише вакансію, збере відгуки через розумну анкету і покаже, кому
+            дзвонити першим.
+          </p>
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <Link href="/hire/new" className="btn-primary !px-7 !py-4 text-[1rem]">
+              Створити вакансію безкоштовно
+            </Link>
+            <Link href="/#how" className="btn-secondary !px-7 !py-4 text-[1rem]">
+              Як це працює
+            </Link>
+          </div>
+          <ul className="mt-7 flex flex-wrap gap-x-6 gap-y-2 text-sm font-semibold text-[var(--text-muted)]">
+            <li>✓ Без HR-відділу</li>
+            <li>✓ Без реєстрації для кандидатів</li>
+            <li>✓ Перша вакансія безкоштовно</li>
+          </ul>
+        </div>
+        <HeroDemo />
+      </section>
 
-                      return (
-                        <svg key={index} viewBox="0 0 24 24" className="h-5 w-5 md:h-6 md:w-6" aria-hidden="true">
-                          <defs>
-                            <linearGradient id={`trust-half-${index}`} x1="0%" y1="0%" x2="100%" y2="0%">
-                              <stop offset="50%" stopColor="var(--accent)" />
-                              <stop offset="50%" stopColor="#eceef3" />
-                            </linearGradient>
-                          </defs>
-                          <path
-                            d="M12 2.5l2.9 5.88 6.49.94-4.7 4.58 1.11 6.47L12 17.3l-5.8 3.07 1.11-6.47-4.7-4.58 6.49-.94L12 2.5z"
-                            fill={isFull ? "var(--accent)" : isHalf ? `url(#trust-half-${index})` : "#eceef3"}
-                          />
-                        </svg>
-                      );
-                    })}
-                  </div>
-                  <span className="font-display text-[1.35rem] font-bold leading-none tracking-normal text-[var(--text-strong)] md:text-[1.6rem]">
-                    {socialProof.rating}
-                  </span>
-                </div>
-                <p className="text-[1.03rem] font-semibold text-[var(--text-muted)] md:text-[1.15rem]">
-                  {socialProof.reviews} відгуків
-                </p>
+      <section className="py-14 md:py-20">
+        <Reveal>
+          <h2 className="section-title max-w-[22ch]">Знайомо? Найм забирає час, якого у власника немає</h2>
+        </Reveal>
+        <div className="mt-8 grid gap-4 md:grid-cols-3">
+          {pains.map((pain, index) => (
+            <Reveal key={pain.title} delayMs={index * 90}>
+              <div className="card h-full p-6">
+                <p className="text-3xl">{pain.icon}</p>
+                <h3 className="mt-4 text-lg font-extrabold leading-snug text-[var(--text-strong)]">{pain.title}</h3>
+                <p className="body-copy mt-2">{pain.text}</p>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+      </section>
+
+      <section id="how" className="scroll-mt-24 py-14 md:py-20">
+        <Reveal>
+          <span className="eyebrow-pill">Як це працює</span>
+          <h2 className="section-title mt-4 max-w-[20ch]">Від «треба людина» до списку, кому дзвонити, — за вечір</h2>
+        </Reveal>
+        <div className="mt-10 grid gap-4 lg:grid-cols-3">
+          {steps.map((step, index) => (
+            <Reveal key={step.title} delayMs={index * 110}>
+              <div className="card relative h-full overflow-hidden p-6 md:p-7">
+                <span className="absolute -right-2 -top-6 text-[7rem] font-extrabold leading-none text-[rgba(67,97,255,0.06)]">{index + 1}</span>
+                <span className="chip">{step.tag}</span>
+                <h3 className="mt-5 text-xl font-extrabold text-[var(--text-strong)]">{step.title}</h3>
+                <p className="body-copy mt-2">{step.text}</p>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+      </section>
+
+      <section className="py-6">
+        <Reveal>
+          <div className="card-ink grid gap-8 p-7 md:grid-cols-2 md:p-12">
+            <div>
+              <p className="text-sm font-bold uppercase tracking-wide text-white/50">Без Decivio</p>
+              <ul className="mt-4 space-y-3 text-white/75">
+                <li>✕ Пишете вакансію з нуля або копіюєте чужу</li>
+                <li>✕ Читаєте десятки однакових відгуків</li>
+                <li>✕ Дзвоните кожному, щоб дізнатися про графік і доїзд</li>
+                <li>✕ Забуваєте, кому вже дзвонили</li>
+              </ul>
+            </div>
+            <div>
+              <p className="text-sm font-bold uppercase tracking-wide text-[#8fa2ff]">З Decivio</p>
+              <ul className="mt-4 space-y-3 font-semibold">
+                <li>✓ Готова вакансія з оплатою-орієнтиром за 30 секунд</li>
+                <li>✓ Фільтри відсіюють невідповідних ще до дзвінка</li>
+                <li>✓ Рейтинг: кому дзвонити першим і що спитати</li>
+                <li>✓ Статуси кандидатів в одному місці</li>
+              </ul>
+            </div>
+          </div>
+        </Reveal>
+      </section>
+
+      <section id="roles" className="scroll-mt-24 py-14 md:py-20">
+        <Reveal>
+          <span className="eyebrow-pill">Для кого</span>
+          <h2 className="section-title mt-4 max-w-[24ch]">Для кафе, магазинів, складів, будівництва, сервісу — усіх, хто наймає сам</h2>
+          <p className="lead-copy mt-4 max-w-2xl">
+            Особливо добре працює для масових і лінійних посад, де кандидатів багато, а резюме — мало.
+          </p>
+        </Reveal>
+        <div className="mt-8 flex flex-wrap gap-2.5">
+          {roles.map((role) => (
+            <Link key={role} href="/hire/new" className="chip chip-muted !px-4 !py-2 !text-[0.9rem] transition hover:bg-[var(--accent-soft)] hover:text-[var(--accent-strong)]">
+              {role}
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      <section id="pricing" className="scroll-mt-24 py-14 md:py-20">
+        <Reveal>
+          <span className="eyebrow-pill">Тарифи</span>
+          <h2 className="section-title mt-4">Почніть безкоштовно. Платіть, коли наймаєте регулярно</h2>
+        </Reveal>
+        <div className="mt-10 grid gap-4 lg:grid-cols-3">
+          <div className="card flex flex-col p-7">
+            <p className="text-lg font-extrabold text-[var(--text-strong)]">Старт</p>
+            <p className="mt-3 text-4xl font-extrabold tracking-tight text-[var(--text-strong)]">0 грн</p>
+            <p className="body-copy mt-2">Щоб спробувати на реальній вакансії.</p>
+            <ul className="mt-5 flex-1 space-y-2 text-sm font-semibold text-[var(--text-strong)]">
+              <li>✓ 1 активна вакансія</li>
+              <li>✓ До 10 оцінених кандидатів</li>
+              <li>✓ Текст вакансії та анкета</li>
+            </ul>
+            <Link href="/hire/new" className="btn-secondary mt-7">
+              Створити вакансію
+            </Link>
+          </div>
+          {pricingPlans.map((plan) => (
+            <div key={plan.id} className={`flex flex-col p-7 ${plan.featured ? "card-ink" : "card"}`}>
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-lg font-extrabold">{plan.name}</p>
+                <span className={`chip ${plan.featured ? "!bg-white/10 !text-white" : ""}`}>{plan.badge}</span>
+              </div>
+              <p className="mt-3 text-4xl font-extrabold tracking-tight">
+                {formatUah(plan.billedNowUah)}
+                <span className={`text-base font-semibold ${plan.featured ? "text-white/60" : "text-[var(--text-muted)]"}`}>
+                  {plan.id === "monthly" ? " / міс" : " / 90 днів"}
+                </span>
+              </p>
+              <p className={`mt-2 text-[0.95rem] leading-relaxed ${plan.featured ? "text-white/70" : "text-[var(--text-muted)]"}`}>{plan.description}</p>
+              <ul className="mt-5 flex-1 space-y-2 text-sm font-semibold">
+                <li>✓ До 5 активних вакансій</li>
+                <li>✓ Необмежена оцінка кандидатів</li>
+                <li>✓ Пріоритетна підтримка</li>
+              </ul>
+              <Link href={`/pricing?checkoutPlan=${plan.id}`} className={`mt-7 ${plan.featured ? "btn-primary" : "btn-secondary"}`}>
+                Обрати {plan.name}
               </Link>
-
-              <article className="flex min-h-[8.2rem] flex-col items-center justify-center border-t border-[rgba(22,29,43,0.08)] px-5 py-5 text-center sm:items-start sm:border-l sm:border-t-0 sm:text-left md:min-h-[8.5rem] md:px-7">
-                <div className="min-w-0">
-                  <p className="font-display text-[1.65rem] font-bold leading-none tracking-normal text-[var(--text-strong)] md:text-[1.9rem]">
-                    {socialProof.users}
-                  </p>
-                  <p className="mt-2 max-w-[13rem] text-[1.02rem] font-semibold leading-[1.25] text-[var(--text-muted)] md:text-[1.14rem]">
-                    {socialProof.usersCaption}
-                  </p>
-                </div>
-              </article>
-
-              <article className="flex min-h-[8.2rem] flex-col items-center justify-center border-t border-[rgba(22,29,43,0.08)] px-5 py-5 text-center sm:items-start sm:border-l sm:border-t-0 sm:text-left md:min-h-[8.5rem] md:px-7">
-                <div className="min-w-0">
-                  <p className="font-display text-[1.65rem] font-bold leading-none tracking-normal text-[var(--text-strong)] md:text-[1.9rem]">
-                    100%
-                  </p>
-                  <p className="mt-2 max-w-[13rem] text-[1.02rem] font-semibold leading-[1.25] text-[var(--text-muted)] md:text-[1.14rem]">
-                    висновок під вашу роль
-                  </p>
-                </div>
-              </article>
             </div>
-          </Reveal>
-        </section>
-
-        <section id="career-pains" className="relative py-6 md:py-8">
-          <div className="pointer-events-none absolute left-1/2 top-[38%] h-64 w-[88%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[rgba(63,94,255,0.055)] blur-3xl md:h-80" />
-          <div className="relative mx-auto grid w-full max-w-[80rem] min-w-0 gap-5 lg:grid-cols-[1.1fr_0.9fr] lg:items-start lg:gap-6 xl:gap-8">
-            <div className="order-2 min-w-0 lg:order-2 lg:sticky lg:top-28 lg:self-start">
-              <Reveal className="min-w-0">
-                <div className="surface-panel relative w-full min-w-0 overflow-hidden rounded-[2rem] px-5 py-6 text-center sm:text-left md:px-7 md:py-8 lg:px-8 lg:py-9">
-                  <div className="pointer-events-none absolute -right-16 -top-20 h-44 w-44 rounded-full bg-[rgba(63,94,255,0.08)] blur-3xl" />
-                  <h2 className="home-section-heading max-w-full break-words [overflow-wrap:anywhere]">
-                    Зрозумійте, де саме ваш досвід{" "}
-                    <span className="home-section-heading-accent">може коштувати більше</span>
-                  </h2>
-                  <p className="mt-4 max-w-full break-words text-[0.9rem] leading-[1.72] text-[var(--text-muted)] [overflow-wrap:anywhere] md:text-[1.04rem]">
-                    Починаємо з доходу й ринку, але не зупиняємось на цифрі. Далі ви перевіряєте конкретні вакансії,
-                    бачите ризики подачі й отримуєте правки для резюме та розмови про зарплату.
-                  </p>
-                  <div className="mt-6 flex justify-center sm:justify-start">
-                    <Link href="/simulate" className="btn-primary w-full max-w-[18rem] px-4 py-3 text-center text-[0.9rem] leading-tight sm:w-auto sm:max-w-full sm:px-7 md:px-8 md:text-[0.94rem]">
-                      Перевірити позицію
-                    </Link>
-                  </div>
-                </div>
-              </Reveal>
-            </div>
-
-            <Reveal className="order-1 min-w-0 lg:order-1" delayMs={80}>
-              <div className="grid min-w-0 gap-3 md:grid-cols-2 lg:grid-cols-1">
-                {painPoints.map((item, index) => (
-                  <article
-                    key={item.title}
-                    className="surface-panel group relative w-full min-w-0 overflow-hidden rounded-[1.55rem] px-4 py-4 md:px-5 md:py-5 lg:min-h-[86px]"
-                  >
-                    <div className="pointer-events-none absolute -right-10 top-0 h-20 w-32 rounded-full bg-[rgba(63,94,255,0.045)] blur-2xl transition-opacity duration-200 group-hover:opacity-80" />
-                    <div className="relative flex items-center gap-4">
-                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[rgba(63,94,255,0.08)] font-display text-[0.78rem] font-bold text-[var(--accent-strong)]">
-                        {String(index + 1).padStart(2, "0")}
-                      </span>
-                      <div className="min-w-0">
-                        <h3 className="break-words font-display text-[1.08rem] font-bold leading-[1.18] tracking-normal text-[var(--text-strong)] [overflow-wrap:anywhere] md:text-[1.18rem]">
-                          {item.title}
-                        </h3>
-                      </div>
-                    </div>
-                  </article>
-                ))}
-              </div>
-            </Reveal>
-          </div>
-        </section>
-
-        <CareerHelpSection />
-
-      </div>
-
-      <section id="features" className="feature-stack-section mx-auto mt-12 max-w-[80rem] md:mt-16">
-        <div className="feature-card-stack">
-          {featureShowcases.map((item, index) => (
-            <FeatureStackCard key={item.title} item={item} index={index} />
           ))}
         </div>
       </section>
 
-      <section id="reviews" className="relative mx-auto mt-10 max-w-[80rem] md:mt-12">
+      <section id="faq" className="scroll-mt-24 py-14 md:py-20">
         <Reveal>
-          <div className="relative">
-            <div className="overflow-hidden px-1 pt-4 md:px-2 md:pt-5">
-              <div className="reviews-marquee-track flex w-max items-start gap-5">
-                {[...reviews, ...reviews].map((review, index) => (
-                  <article
-                    key={`${review.name}-${index}`}
-                    aria-hidden={index >= reviews.length}
-                    className="surface-panel relative flex min-h-[285px] w-[22.5rem] flex-none flex-col overflow-hidden rounded-[2rem] px-6 py-6 md:w-[23.5rem]"
-                  >
-                    <p className="relative text-[0.97rem] leading-[1.72] text-[var(--text-strong)]">
-                      {review.quote}
-                    </p>
-
-                    <div className="relative mt-auto flex items-center gap-4 pt-5">
-                      <Image
-                        src={review.avatar}
-                        alt=""
-                        aria-hidden="true"
-                        width={112}
-                        height={112}
-                        sizes="56px"
-                        className="h-14 w-14 shrink-0 rounded-full object-cover ring-4 ring-white shadow-[0_12px_28px_rgba(35,48,78,0.16)]"
-                      />
-
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate font-display text-[1.06rem] font-semibold text-[var(--text-strong)] md:text-[1.12rem]">{review.name}</p>
-                        <div className="mt-1.5 flex items-center gap-1">
-                          {Array.from({ length: 5 }).map((_, starIndex) => {
-                            const filled = starIndex < review.rating;
-
-                            return (
-                              <svg
-                                key={`${review.name}-${index}-${starIndex}`}
-                                viewBox="0 0 24 24"
-                                className={`h-5 w-5 ${filled ? "fill-[var(--accent)] text-[var(--accent)]" : "fill-[#eceef3] text-[#eceef3]"}`}
-                                aria-hidden="true"
-                              >
-                                <path d="M12 2.5l2.9 5.88 6.49.94-4.7 4.58 1.11 6.47L12 17.3l-5.8 3.07 1.11-6.47-4.7-4.58 6.49-.94L12 2.5z" />
-                              </svg>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    </div>
-                  </article>
-                ))}
-              </div>
-            </div>
-          </div>
+          <h2 className="section-title">Часті питання</h2>
         </Reveal>
-      </section>
-
-      <section className="career-opportunity-section relative mx-auto mt-10 max-w-[80rem] py-8 md:mt-12 md:py-10" aria-labelledby="career-brands-title">
-        <Reveal>
-          <div className="grid min-w-0 items-center gap-8 lg:grid-cols-[0.98fr_1.02fr] lg:gap-10">
-            <div className="relative z-10 min-w-0 text-center lg:text-left">
-              <h2 id="career-brands-title" className="home-section-heading mx-auto max-w-[36rem] lg:mx-0">
-                Обирайте вакансії, де ваш досвід{" "}
-                <span className="home-section-heading-accent">легше пояснити й продати</span>
-              </h2>
-              <p className="mx-auto mt-5 max-w-[35rem] text-[0.98rem] leading-[1.72] text-[var(--text-muted)] md:text-[1.06rem] lg:mx-0">
-                Вища зарплата рідко приходить просто за стаж. Потрібно показати результат, обрати правильний ринок і не витрачати сили
-                на вакансії, де ваш профіль завідомо слабкий або не той.
-              </p>
-            </div>
-
-            <div className="career-opportunity-visual" aria-hidden="true">
-              <div className="career-target-board">
-                <Image
-                  src="/graphics/career-target-visual.webp"
-                  alt=""
-                  width={1400}
-                  height={933}
-                  sizes="(max-width: 640px) 100vw, (max-width: 1023px) 74vw, 44vw"
-                  className="career-target-asset"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="career-brand-marquee relative mt-7 overflow-hidden py-2 md:mt-8">
-            <div className="career-brand-track flex w-max items-center">
-              {Array.from({ length: 3 }).map((_, groupIndex) => (
-                <div
-                  key={groupIndex}
-                  className="career-brand-group flex items-center gap-6 md:gap-9"
-                  aria-hidden={groupIndex > 0}
-                >
-                  {careerBrandNames.map((brand) => (
-                    <span key={`${brand}-${groupIndex}`} className="career-brand-name">
-                      {brand}
-                    </span>
-                  ))}
-                </div>
-              ))}
-            </div>
-          </div>
-        </Reveal>
-      </section>
-
-      <section id="faq" className="mx-auto mt-16 max-w-[80rem] md:mt-24" aria-label="Часті питання">
-        <div className="grid gap-4 md:grid-cols-2">
-          {faqItems.map((item, index) => (
-            <Reveal key={item.question} delayMs={index * 35}>
-              <details className="surface-panel group rounded-[1.8rem] px-5 py-4 md:px-6 md:py-5">
-                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-display text-[1.04rem] font-semibold leading-[1.28] tracking-normal text-[var(--text-strong)] marker:hidden [&::-webkit-details-marker]:hidden md:text-[1.12rem]">
-                  <span>{item.question}</span>
-                  <span className="text-[1.4rem] font-medium text-[var(--accent-strong)] transition-transform duration-200 group-open:rotate-45">
-                    +
-                  </span>
-                </summary>
-                <p className="mt-3 pr-8 text-[0.96rem] leading-[1.72] text-[var(--text-muted)] md:text-[0.99rem]">{item.answer}</p>
-              </details>
-            </Reveal>
+        <div className="mt-8 grid gap-3 md:grid-cols-2">
+          {faqItems.map((item) => (
+            <details key={item.question} className="card group p-5">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-extrabold text-[var(--text-strong)]">
+                {item.question}
+                <span className="text-xl text-[var(--accent)] transition group-open:rotate-45">+</span>
+              </summary>
+              <p className="body-copy mt-3">{item.answer}</p>
+            </details>
           ))}
         </div>
       </section>
 
-      <section className="final-cta-section mx-auto mt-16 max-w-[80rem] md:mt-24" aria-labelledby="final-cta-title">
+      <section className="py-10">
         <Reveal>
-          <div className="final-cta-panel">
-            <div className="relative z-10 mx-auto flex max-w-[48rem] flex-col items-center text-center">
-              <div className="flex items-center gap-1.5" aria-label="Рейтинг 4.5 із 5">
-                {Array.from({ length: 5 }).map((_, index) => {
-                  const starNumber = index + 1;
-                  const isFull = starNumber <= Math.floor(socialProof.ratingValue);
-                  const isHalf = !isFull && starNumber - socialProof.ratingValue <= 0.5;
-
-                  return (
-                    <svg key={index} viewBox="0 0 24 24" className="h-5 w-5 text-[var(--accent)]" aria-hidden="true">
-                      <defs>
-                        <linearGradient id={`final-trust-half-${index}`} x1="0%" y1="0%" x2="100%" y2="0%">
-                          <stop offset="50%" stopColor="currentColor" />
-                          <stop offset="50%" stopColor="rgba(102,112,133,0.24)" />
-                        </linearGradient>
-                      </defs>
-                      <path
-                        d="M12 2.5l2.9 5.88 6.49.94-4.7 4.58 1.11 6.47L12 17.3l-5.8 3.07 1.11-6.47-4.7-4.58 6.49-.94L12 2.5z"
-                        fill={isFull ? "currentColor" : isHalf ? `url(#final-trust-half-${index})` : "rgba(102,112,133,0.24)"}
-                      />
-                    </svg>
-                  );
-                })}
-                <span className="ml-2 text-[0.94rem] font-semibold text-[var(--text-muted)]">{socialProof.rating} за відгуками користувачів</span>
-              </div>
-
-              <h2 id="final-cta-title" className="mt-7 max-w-[42rem] font-display text-[2.12rem] font-extrabold leading-[1.04] tracking-normal text-[var(--text-strong)] sm:text-[2.65rem] md:text-[3.25rem]">
-                Почніть з оцінки й перевіряйте вакансії перед подачею
-              </h2>
-              <p className="mt-6 max-w-[39rem] text-[1rem] font-medium leading-[1.72] text-[var(--text-muted)] md:text-[1.12rem]">
-                За кілька хвилин ви побачите ринковий орієнтир, сильні сторони профілю, слабкі місця й перший практичний крок. Платний workspace відкриває аналіз реальних вакансій.
-              </p>
-
-              <div className="mt-8 flex w-full flex-col items-center justify-center gap-3 sm:w-auto sm:flex-row">
-                <Link href="/simulate" className="final-cta-button">
-                  Отримати перший висновок
-                </Link>
-                <span className="text-[0.9rem] font-semibold text-[var(--text-muted)]">Безкоштовно · 2–3 хвилини</span>
-              </div>
-            </div>
+          <div className="card relative overflow-hidden p-8 text-center md:p-14">
+            <div className="absolute inset-0 -z-10 bg-[radial-gradient(40rem_16rem_at_50%_0%,rgba(67,97,255,0.14),transparent)]" />
+            <h2 className="section-title mx-auto max-w-[20ch]">Потрібна людина вже на цьому тижні?</h2>
+            <p className="lead-copy mx-auto mt-4 max-w-xl">Створіть вакансію зараз — це займе менше хвилини і нічого не коштує.</p>
+            <Link href="/hire/new" className="btn-primary mt-8 !px-8 !py-4 text-[1rem]">
+              Створити вакансію безкоштовно
+            </Link>
           </div>
         </Reveal>
       </section>
-
-    </div>
     </>
   );
 }

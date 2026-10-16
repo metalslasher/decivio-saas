@@ -527,7 +527,7 @@ export function CheckoutGate({ plan, initialCheckoutId, authNextPath }: Checkout
                 : "Для цього акаунта Pro вже активний"}
               {activeUntilLabel ? ` до ${activeUntilLabel}` : ""}. Повторно запускати оплату не потрібно.
             </p>
-            <Link href="/dashboard?view=access" className="btn-primary w-full text-center" data-testid="billing-dashboard-link">
+            <Link href="/hire" className="btn-primary w-full text-center" data-testid="billing-dashboard-link">
               Перейти в кабінет
             </Link>
           </div>
@@ -588,7 +588,7 @@ export function CheckoutGate({ plan, initialCheckoutId, authNextPath }: Checkout
               ) : null}
 
               {resolvedPayload?.accessGranted ? (
-                <Link href="/dashboard?view=access" className="btn-secondary w-full text-center" data-testid="billing-dashboard-link">
+                <Link href="/hire" className="btn-secondary w-full text-center" data-testid="billing-dashboard-link">
                   Перейти в кабінет
                 </Link>
               ) : null}

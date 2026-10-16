@@ -72,7 +72,7 @@ export function SiteFooter() {
   const pathname = usePathname();
   const year = new Date().getFullYear();
 
-  if (pathname?.startsWith("/dashboard")) {
+  if (pathname?.startsWith("/hire") || pathname?.startsWith("/apply")) {
     return null;
   }
 
@@ -83,8 +83,7 @@ export function SiteFooter() {
           <div className="space-y-5">
             <WordmarkLogo tone="light" className="text-[2.6rem] md:text-[3rem]" />
             <p className="max-w-xl text-[0.98rem] font-medium leading-[1.65] text-white/78 md:text-[1.08rem]">
-              Оцініть свою ринкову позицію, посильте резюме й підготуйтеся до вакансій, співбесід та пропозицій,
-              які справді відповідають вашому досвіду й цілям.
+              ШІ-асистент найму для малого й середнього бізнесу в Україні: вакансія, розумна анкета і рейтинг кандидатів — без HR-відділу.
             </p>
           </div>
 

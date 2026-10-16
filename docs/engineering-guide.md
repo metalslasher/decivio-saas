@@ -22,17 +22,14 @@ Status: current conventions for keeping the project easy to change.
 
 - Route-level components can orchestrate state.
 - Presentational components should receive data and callbacks through props.
-- Dashboard modules should use shared dashboard primitives from `src/components/dashboard/dashboard-primitives.tsx`.
-- New dashboard views should get their own workspace component and, when needed, a focused helper file.
-- Do not put unrelated public-page styling decisions into dashboard components.
+- Hiring UI lives in `src/components/hiring`; landing-only UI in `src/components/landing`.
+- Do not put public landing styling decisions into cabinet components.
 
 ## Data And Flow Rules
 
-- `/simulate` owns the public simulation form.
-- `/results` reads through `buildSimulationResultsPayload()`.
-- `/pricing` is the product gate before account/payment.
-- Registration should happen around checkout/account ownership, not before the free simulation.
-- Paid dashboard access must come from subscription/access state, not from successful registration alone.
+- `/hire/new` lets guests generate a draft; publishing requires an account.
+- Candidates never register; `/apply/<slug>` must stay fast on cheap phones.
+- Paid access must come from subscription/access state, not from successful registration alone.
 
 ## Verification
 

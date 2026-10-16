@@ -8,7 +8,7 @@ import { createBreadcrumbSchema, createMetadata, createSoftwareApplicationSchema
 export const metadata = createMetadata({
   title: "Тарифи на доступ",
   description:
-    "Оберіть місячний або 90-денний доступ після безкоштовної оцінки кар'єрної позиції: вакансії, резюме, співбесіди та зарплатні аргументи.",
+    "Тарифи Decivio для бізнесу: безкоштовний старт, Pro за 990 грн/міс або 90 днів одним платежем.",
   path: "/pricing",
   keywords: ["тарифи decivio", "ціни decivio", "вартість доступу decivio", "оцінка зарплати decivio", "підготовка до співбесіди decivio"]
 });
@@ -79,7 +79,7 @@ const pricingSchemas = [
   ]),
   createSoftwareApplicationSchema({
     path: "/pricing",
-    description: "Тарифи для доступу до практичної підготовки після безкоштовної оцінки кар'єрної позиції.",
+    description: "Тарифи ШІ-асистента найму Decivio для малого й середнього бізнесу.",
     featureList: paidFeatureSections.flatMap((section) => section.items.map((item) => item.title)),
     offers: pricingPlans.map((plan) => ({
       name: plan.name,

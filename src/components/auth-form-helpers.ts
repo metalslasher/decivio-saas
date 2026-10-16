@@ -16,7 +16,7 @@ export type TouchedFields = Record<FieldName, boolean>;
 
 export function normalizeNextPath(value: string | null) {
   if (!value || !value.startsWith("/") || value.startsWith("//")) {
-    return "/dashboard";
+    return "/hire";
   }
 
   return value;
