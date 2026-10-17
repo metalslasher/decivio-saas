@@ -208,6 +208,23 @@ export async function updateVacancyStatus(
   return Boolean(data);
 }
 
+/** Deletes a vacancy with all its applications and bot dialogs (FK cascade). */
+export async function deleteVacancy(supabase: SupabaseClient, ownerId: string, vacancyId: string) {
+  const { data, error } = await supabase
+    .from("hiring_vacancies")
+    .delete()
+    .eq("id", vacancyId)
+    .eq("owner_id", ownerId)
+    .select("id")
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(`Не вдалося видалити вакансію: ${error.message}`);
+  }
+
+  return Boolean(data);
+}
+
 export async function updateVacancyContent(
   supabase: SupabaseClient,
   ownerId: string,

@@ -3,7 +3,7 @@ import { getSupabaseServiceRoleClient } from "@/lib/db/supabase";
 import { errorMessage, jsonError, readJsonBody, requireUser } from "@/lib/hiring/http";
 import { countActiveVacancies, getEmployerUsage, resolveEmployerPlan, vacancyLimitMessage } from "@/lib/hiring/plan";
 import { saveInterviewSettings } from "@/lib/hiring/interview";
-import { getOwnerVacancy, listVacancyApplications, updateVacancyContent, updateVacancyStatus } from "@/lib/hiring/store";
+import { deleteVacancy, getOwnerVacancy, listVacancyApplications, updateVacancyContent, updateVacancyStatus } from "@/lib/hiring/store";
 import { PLAN_LIMITS } from "@/lib/hiring/types";
 import { isRecord, parseVacancyContent } from "@/lib/hiring/validate";
 
@@ -75,5 +75,21 @@ export async function PATCH(request: Request, { params }: RouteContext) {
     return updated ? NextResponse.json({ ok: true }) : jsonError("Вакансію не знайдено.", 404);
   } catch (error) {
     return jsonError(errorMessage(error, "Не вдалося оновити вакансію."), 500);
+  }
+}
+
+export async function DELETE(request: Request, { params }: RouteContext) {
+  const { vacancyId } = await params;
+  const supabase = getSupabaseServiceRoleClient();
+  const user = await requireUser(supabase, request);
+  if (!user) {
+    return jsonError("Потрібно увійти в акаунт.", 401);
+  }
+
+  try {
+    const deleted = await deleteVacancy(supabase, user.userId, vacancyId);
+    return deleted ? NextResponse.json({ ok: true }) : jsonError("Вакансію не знайдено.", 404);
+  } catch (error) {
+    return jsonError(errorMessage(error, "Не вдалося видалити вакансію."), 500);
   }
 }

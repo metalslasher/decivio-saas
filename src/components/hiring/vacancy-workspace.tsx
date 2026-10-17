@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { InterviewSlots } from "@/components/hiring/interview-slots";
 import { PlanBanner } from "@/components/hiring/plan-banner";
@@ -27,7 +28,10 @@ const VERDICT_TONE: Record<ScreeningVerdict, { chip: string; ring: string }> = {
 };
 
 export function VacancyWorkspace({ vacancyId, justCreated }: { vacancyId: string; justCreated: boolean }) {
+  const router = useRouter();
   const session = useEmployerSession();
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [vacancy, setVacancy] = useState<VacancyDetail | null>(null);
   const [applications, setApplications] = useState<ApplicationRecord[]>([]);
   const [usage, setUsage] = useState<EmployerUsage | null>(null);
@@ -129,6 +133,18 @@ export function VacancyWorkspace({ vacancyId, justCreated }: { vacancyId: string
       setNotice(rescreenError instanceof Error ? rescreenError.message : "Не вдалося оцінити кандидатів.");
     } finally {
       setIsRescreening(false);
+    }
+  };
+
+  const removeVacancy = async () => {
+    setIsDeleting(true);
+    try {
+      await apiRequest(`/api/hiring/vacancies/${vacancyId}`, { auth: true, method: "DELETE" });
+      router.push("/hire");
+    } catch (deleteError) {
+      setNotice(deleteError instanceof Error ? deleteError.message : "Не вдалося видалити вакансію.");
+      setIsDeleting(false);
+      setConfirmDelete(false);
     }
   };
 
@@ -317,6 +333,28 @@ export function VacancyWorkspace({ vacancyId, justCreated }: { vacancyId: string
             <pre className="mt-3 max-h-[360px] overflow-y-auto whitespace-pre-wrap rounded-2xl bg-[var(--bg-surface)] p-4 font-[inherit] text-[0.86rem] leading-relaxed text-[var(--text-strong)]">
               {postingText}
             </pre>
+          </section>
+          <section className="rounded-[1.6rem] border border-dashed border-[var(--line-strong)] p-5">
+            {confirmDelete ? (
+              <>
+                <p className="text-sm font-bold text-[var(--text-strong)]">Видалити вакансію назавжди?</p>
+                <p className="mt-1 text-sm text-[var(--text-muted)]">
+                  Разом з нею зникнуть усі кандидати, їхні відповіді й телефони. Посилання на анкету перестане працювати.
+                </p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <button type="button" className="btn-dark !bg-[var(--bad)] !py-2 text-sm disabled:opacity-60" disabled={isDeleting} onClick={removeVacancy}>
+                    {isDeleting ? "Видаляємо..." : "Так, видалити"}
+                  </button>
+                  <button type="button" className="btn-secondary !py-2 text-sm" onClick={() => setConfirmDelete(false)}>
+                    Скасувати
+                  </button>
+                </div>
+              </>
+            ) : (
+              <button type="button" className="text-sm font-bold text-[var(--text-soft)] hover:text-[var(--bad)]" onClick={() => setConfirmDelete(true)}>
+                Видалити вакансію і дані кандидатів
+              </button>
+            )}
           </section>
         </aside>
       </div>

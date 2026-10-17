@@ -271,6 +271,12 @@ test("employer creates a vacancy, candidate applies, employer sees a scored cand
 
     const { data: bookedRow } = await admin.from("hiring_applications").select("interview_slot").eq("id", applications[0].id).single();
     expect(bookedRow!.interview_slot).toBe(`${tomorrow}T15:00`);
+
+    // 7. Deleting the vacancy removes its candidates.
+    expect((await employer.request.delete(`/api/hiring/vacancies/${vacancyId}`, { headers: authHeaders })).status()).toBe(200);
+    expect((await employer.request.get(`/api/hiring/vacancies/${vacancyId}`, { headers: authHeaders })).status()).toBe(404);
+    const { count: leftover } = await admin.from("hiring_applications").select("id", { count: "exact", head: true }).eq("vacancy_id", vacancyId!);
+    expect(leftover).toBe(0);
   } finally {
     await admin.auth.admin.deleteUser(userId);
   }
