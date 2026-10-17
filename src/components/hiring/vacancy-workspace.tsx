@@ -324,6 +324,12 @@ export function VacancyWorkspace({ vacancyId, justCreated }: { vacancyId: string
   );
 }
 
+const STATUS_ACTIONS: Array<{ status: ApplicationStatus; action: string; done: string; primary?: boolean }> = [
+  { status: "invited", action: "📅 Запросити на співбесіду", done: "Запрошено", primary: true },
+  { status: "hired", action: "Найняти", done: "Найнято" },
+  { status: "rejected", action: "Відмовити", done: "Відмова" },
+];
+
 function pluralCandidates(count: number) {
   const mod10 = count % 10;
   const mod100 = count % 100;
@@ -424,16 +430,26 @@ function CandidateCard({
             <a href={`tel:${application.candidate_phone}`} className="btn-primary !px-5 !py-2.5 text-sm">
               📞 {application.candidate_phone}
             </a>
-            {(["invited", "hired", "rejected"] as ApplicationStatus[]).map((status) => (
-              <button
-                key={status}
-                type="button"
-                onClick={() => onStatus(application.id, application.status === status ? "new" : status)}
-                className={`chip transition ${application.status === status ? "" : "chip-muted"}`}
-              >
-                {APPLICATION_STATUS_LABELS[status]}
-              </button>
-            ))}
+            {STATUS_ACTIONS.map(({ status, action, done, primary }) => {
+              const isActive = application.status === status;
+              return (
+                <button
+                  key={status}
+                  type="button"
+                  title={isActive ? "Натисніть, щоб скасувати" : undefined}
+                  onClick={() => onStatus(application.id, isActive ? "new" : status)}
+                  className={
+                    isActive
+                      ? "chip chip-good transition"
+                      : primary
+                        ? "btn-secondary !border-[var(--accent)] !px-4 !py-2 text-sm !text-[var(--accent-strong)]"
+                        : "chip chip-muted transition"
+                  }
+                >
+                  {isActive ? `✓ ${done}` : action}
+                </button>
+              );
+            })}
           </div>
           {application.status === "invited" && !application.interview_slot && inviteMessage && application.source !== "telegram" ? (
             <div className="rounded-2xl border border-dashed border-[var(--line-strong)] p-3">
