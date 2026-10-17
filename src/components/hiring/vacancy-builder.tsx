@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useAuthDialog } from "@/components/auth-dialog-provider";
 import { ApplyFlow } from "@/components/hiring/apply-flow";
+import { trackEvent } from "@/lib/analytics";
 import { ApiError, apiRequest, clearDraft, copyText, getAccessToken, loadDraft, saveDraft } from "@/lib/hiring/client";
 import type { PublicVacancy, ScreeningQuestion, ScreeningQuestionKind, VacancyContent } from "@/lib/hiring/types";
 
@@ -45,6 +46,7 @@ export function VacancyBuilder() {
   const publish = useCallback(
     async (draftContent: VacancyContent, draftBrief: string, draftCity: string) => {
       setError(null);
+      trackEvent("vacancy_publish_clicked", { mode: "create" });
       const token = await getAccessToken();
       if (!token) {
         openAuthDialog("signup", {
@@ -61,10 +63,12 @@ export function VacancyBuilder() {
           body: { content: draftContent, brief: draftBrief, city: draftCity },
         });
         clearDraft();
+        trackEvent("vacancy_published");
         router.push(`/hire/${created.id}?created=1`);
       } catch (publishError) {
         setError(publishError instanceof ApiError ? publishError.message : "Не вдалося опублікувати вакансію.");
         setIsLimitReached(publishError instanceof ApiError && publishError.status === 402);
+        if (publishError instanceof ApiError && publishError.status === 402) trackEvent("vacancy_limit_hit");
         setIsPublishing(false);
       }
     },
@@ -74,6 +78,11 @@ export function VacancyBuilder() {
   // Restore the draft (e.g. after registration) and finish publishing automatically.
   useEffect(() => {
     const draft = loadDraft();
+    const presetBrief = searchParams.get("brief");
+    if (presetBrief && !draft?.content) {
+      setBrief(presetBrief.slice(0, 2000));
+      return;
+    }
     if (!draft) {
       return;
     }
@@ -118,15 +127,18 @@ export function VacancyBuilder() {
     }
 
     setPhase("generating");
+    trackEvent("vacancy_draft_requested", { has_city: Boolean(city.trim()), has_pay: Boolean(pay.trim()) });
     try {
       const result = await apiRequest<{ content: VacancyContent }>("/api/hiring/draft", {
         body: { brief, city, pay, schedule },
       });
       setContent(result.content);
+      trackEvent("vacancy_draft_generated", { questions: result.content.questions.length });
       setPhase("editor");
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (generationError) {
       setError(generationError instanceof Error ? generationError.message : "Не вдалося згенерувати вакансію.");
+      trackEvent("vacancy_draft_failed");
       setPhase("brief");
     }
   };
@@ -444,6 +456,7 @@ export function VacancyEditor({
                 className="chip transition hover:opacity-80"
                 onClick={async () => {
                   setCopied(await copyText(content.posting_text));
+                  trackEvent("posting_text_copied", { place: "builder" });
                   window.setTimeout(() => setCopied(false), 1800);
                 }}
               >

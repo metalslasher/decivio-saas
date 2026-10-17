@@ -43,8 +43,9 @@ Goal: the wow loop works end to end locally.
 
 - [ ] Telegram bot as an alternative candidate channel.
 - [ ] Candidate auto-reply / interview slot booking.
-- [ ] Analytics events in GTM for funnel metrics from `product-concept.md`.
-- [ ] Landing SEO pages per role/city ("як найняти баристу у Києві").
+- [x] Funnel events pushed to GTM `dataLayer` (`src/lib/analytics.ts`, 13 events, no personal data). Owner action: in GTM add Custom Event triggers and GA4 event tags for them.
+- [x] SEO role pages `/roles/<slug>` for 10 roles (`src/lib/seo-roles.ts`), in sitemap, linked from landing chips; CTA prefills the builder via `/hire/new?brief=`.
+- [ ] SEO city variants (role × city) once role pages show impressions in Search Console.
 
 Verified locally on 2026-10-16 with real OpenAI: draft generation (~20 s), publish after login (auto-publish via `?publish=1`), candidate flow on 375px mobile, screening (strong 85 → call, knockout 20 → reject, junior 65 → maybe), shortlist on mobile without horizontal overflow, `next build` passes.
 
@@ -52,6 +53,8 @@ Verified locally on 2026-10-16 with real OpenAI: draft generation (~20 s), publi
 
 - [ ] Push migration to production: `supabase link --project-ref <ref>` then `supabase db push`.
 - [ ] Make sure `OPENAI_API_KEY` / `OPENAI_MODEL` are set in Vercel.
+- [ ] Add GA4 event tags in GTM for the funnel events (names in `src/lib/analytics.ts`).
+- [ ] Submit the sitemap in Google Search Console.
 - [ ] Merge `pivot/hiring-assistant` into `main` (Vercel deploys `main`).
 
 ## Known Gaps / Notes

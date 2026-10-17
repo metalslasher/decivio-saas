@@ -4,6 +4,7 @@ import Link from "next/link";
 import QRCode from "qrcode";
 import { useEffect, useState } from "react";
 import { useEmployerSession } from "@/components/hiring/use-employer-session";
+import { trackEvent } from "@/lib/analytics";
 import { apiRequest, buildApplyUrl, copyText } from "@/lib/hiring/client";
 import type { VacancyDetail } from "@/lib/hiring/types";
 
@@ -54,7 +55,10 @@ export function VacancyPoster({ vacancyId }: { vacancyId: string }) {
           >
             {copied ? "Посилання скопійовано ✓" : "Копіювати посилання"}
           </button>
-          <button type="button" className="btn-primary !py-2.5 text-sm" onClick={() => window.print()}>
+          <button type="button" className="btn-primary !py-2.5 text-sm" onClick={() => {
+            trackEvent("poster_printed");
+            window.print();
+          }}>
             🖨️ Надрукувати / зберегти PDF
           </button>
         </div>

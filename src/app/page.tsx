@@ -3,6 +3,7 @@ import { JsonLd } from "@/components/json-ld";
 import { HeroDemo } from "@/components/landing/hero-demo";
 import { Reveal } from "@/components/reveal";
 import { formatUah, pricingPlans } from "@/lib/pricing";
+import { seoRoles } from "@/lib/seo-roles";
 import { createFaqSchema, createMetadata, createSoftwareApplicationSchema } from "@/lib/seo";
 
 export const metadata = createMetadata({
@@ -56,7 +57,7 @@ const roles = [
   "Продавець-консультант",
   "Касир",
   "Кур'єр",
-  "Водій кат. C",
+  "Водій категорії C",
   "Комплектувальник",
   "Вантажник",
   "Будівельник",
@@ -219,7 +220,10 @@ export default function HomePage() {
         </Reveal>
         <div className="mt-8 flex flex-wrap gap-2.5">
           {roles.map((role) => (
-            <Link key={role} href="/hire/new" className="chip chip-muted !px-4 !py-2 !text-[0.9rem] transition hover:bg-[var(--accent-soft)] hover:text-[var(--accent-strong)]">
+            <Link
+              key={role}
+              href={seoRoles.find((item) => item.name === role) ? `/roles/${seoRoles.find((item) => item.name === role)!.slug}` : "/hire/new"}
+              className="chip chip-muted !px-4 !py-2 !text-[0.9rem] transition hover:bg-[var(--accent-soft)] hover:text-[var(--accent-strong)]">
               {role}
             </Link>
           ))}

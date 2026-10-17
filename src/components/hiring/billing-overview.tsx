@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { useAuthDialog } from "@/components/auth-dialog-provider";
 import { useEmployerSession } from "@/components/hiring/use-employer-session";
+import { trackEvent } from "@/lib/analytics";
 import { apiRequest } from "@/lib/hiring/client";
 import type { BillingOverview } from "@/lib/hiring/types";
 
@@ -51,6 +52,7 @@ export function BillingOverviewPanel() {
           : "Підписку скасовано, нових списань не буде.",
       );
       setConfirming(false);
+      trackEvent("subscription_canceled");
       load();
     } catch (cancelError) {
       setError(cancelError instanceof Error ? cancelError.message : "Не вдалося скасувати підписку.");

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { PlanBanner } from "@/components/hiring/plan-banner";
 import { useEmployerSession } from "@/components/hiring/use-employer-session";
+import { trackEvent } from "@/lib/analytics";
 import { apiRequest, buildApplyUrl, copyText, formatRelativeDate, withApplyLink } from "@/lib/hiring/client";
 import {
   APPLICATION_STATUS_LABELS,
@@ -76,6 +77,7 @@ export function VacancyWorkspace({ vacancyId, justCreated }: { vacancyId: string
   const visible = filter === "all" ? applications : applications.filter((app) => app.verdict === filter);
 
   const copy = async (key: string, value: string) => {
+    trackEvent(key === "link" ? "apply_link_copied" : "posting_text_copied", { place: "workspace" });
     if (await copyText(value)) {
       setCopiedKey(key);
       window.setTimeout(() => setCopiedKey(null), 1800);
@@ -95,6 +97,7 @@ export function VacancyWorkspace({ vacancyId, justCreated }: { vacancyId: string
 
   const rescreen = async () => {
     setIsRescreening(true);
+    trackEvent("candidates_rescreened", { count: unscreenedCount });
     setNotice(null);
     try {
       // The API screens a small batch per call to stay within serverless time limits.

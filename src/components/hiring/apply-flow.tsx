@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { trackEvent } from "@/lib/analytics";
 import type { PublicVacancy } from "@/lib/hiring/types";
 
 type ApplyFlowProps = {
@@ -63,6 +64,7 @@ export function ApplyFlow({ vacancy, preview = false }: ApplyFlowProps) {
       if (!response.ok) {
         throw new Error(payload?.error ?? "Не вдалося надіслати відгук.");
       }
+      trackEvent("apply_submitted", { answered: Object.keys(answers).length });
       setStep({ kind: "done" });
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : "Не вдалося надіслати відгук.");
@@ -134,7 +136,10 @@ export function ApplyFlow({ vacancy, preview = false }: ApplyFlowProps) {
           <button
             type="button"
             className="btn-primary w-full"
-            onClick={() => setStep(total > 0 ? { kind: "question", index: 0 } : { kind: "contacts" })}
+            onClick={() => {
+              if (!preview) trackEvent("apply_started");
+              setStep(total > 0 ? { kind: "question", index: 0 } : { kind: "contacts" });
+            }}
           >
             Відгукнутися за 2 хвилини
           </button>

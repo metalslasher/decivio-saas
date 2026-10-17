@@ -12,6 +12,7 @@ Status: current repository map (hiring assistant, since 2026-10-16).
 - `/hire/[vacancyId]/poster`: printable A4 poster with a QR code to the apply link.
 - `/hire/billing`: plan, usage, monthly subscription cancel.
 - `/apply/[slug]`: public mobile-first candidate application (no registration).
+- `/roles/[slug]`: static SEO landing pages per role (data in `src/lib/seo-roles.ts`).
 - `/pricing`, `/checkout`, `/billing/return`: monobank billing flow.
 - `/login`, `/signup`, `/reset-password`, `/auth/callback`: auth. Default post-auth destination is `/hire`.
 - `/dashboard`: legacy URL, redirects to `/hire`.
@@ -30,6 +31,7 @@ Status: current repository map (hiring assistant, since 2026-10-16).
 - `src/app/api/apply/[slug]`: public candidate submission (rate-limited, screening never blocks saving).
 - `src/lib/hiring/plan.ts` (server-only): plan resolution and free/pro limits.
 - `src/app/api/billing/subscription`: billing overview (GET) and cancel (POST).
+- `src/lib/analytics.ts`: GTM funnel events (`trackEvent`).
 - `src/lib/db`: Supabase clients.
 - `src/lib/billing*.ts`, `src/lib/mono-acquiring.ts`, `src/app/api/payments/mono/*`: monobank payments.
 - `supabase/migrations`: schema; hiring tables in `20261016120000_add_hiring_core.sql`.
