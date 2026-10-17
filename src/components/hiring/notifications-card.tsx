@@ -10,7 +10,7 @@ const LEVELS: Array<{ value: NotifyLevel; label: string }> = [
   { value: "off", label: "Вимкнено" },
 ];
 
-export function NotificationsCard() {
+export function NotificationsCard({ fallback = null }: { fallback?: React.ReactNode }) {
   const [settings, setSettings] = useState<NotificationSettings | null>(null);
   const [isWaiting, setIsWaiting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -66,7 +66,7 @@ export function NotificationsCard() {
   };
 
   if (!settings?.botConfigured) {
-    return null;
+    return <>{fallback}</>;
   }
 
   return (

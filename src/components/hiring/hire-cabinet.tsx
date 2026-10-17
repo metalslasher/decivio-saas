@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useAuthDialog } from "@/components/auth-dialog-provider";
-import { NotificationsCard } from "@/components/hiring/notifications-card";
 import { PlanBanner } from "@/components/hiring/plan-banner";
 import { useEmployerSession } from "@/components/hiring/use-employer-session";
 import { apiRequest, formatRelativeDate } from "@/lib/hiring/client";
@@ -52,18 +51,12 @@ export function HireCabinet() {
           <h1 className="section-title">Мої вакансії</h1>
           <p className="body-copy mt-2">Кандидати впорядковані ШІ — починайте дзвонити з верхніх.</p>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <Link href="/hire/billing" className="btn-secondary">
-            Тариф і оплата
-          </Link>
-          <Link href="/hire/new" className="btn-primary">
-            + Нова вакансія
-          </Link>
-        </div>
+        <Link href="/hire/new" className="btn-primary">
+          + Нова вакансія
+        </Link>
       </div>
 
       <PlanBanner usage={usage} />
-      {session.status === "user" ? <NotificationsCard /> : null}
 
       {error ? <p className="mt-6 text-sm font-semibold text-[var(--bad)]">{error}</p> : null}
 

@@ -178,6 +178,19 @@ test("telegram bot walks a candidate through the screening dialog", async ({ req
   }
 });
 
+test("cabinet is closed for guests, the builder stays open", async ({ page }) => {
+  await page.goto("/hire");
+  await expect(page.getByRole("heading", { name: "Кабінет роботодавця" })).toBeVisible();
+  await expect(page.locator(".cabinet-sidebar")).toHaveCount(0);
+
+  await page.goto("/hire/billing");
+  await expect(page.getByRole("heading", { name: "Кабінет роботодавця" })).toBeVisible();
+
+  await page.goto("/hire/new");
+  await expect(page.getByRole("heading", { name: "Кого ви шукаєте?" })).toBeVisible();
+  await expect(page.locator(".mirror-header")).toHaveCount(0);
+});
+
 async function answerApplication(page: Page, choices: string[]) {
   for (const choice of choices) {
     await page.getByRole("button", { name: choice, exact: true }).click();
@@ -231,6 +244,9 @@ test("employer creates a vacancy, candidate applies, employer sees a scored cand
     // 4. Employer sees the candidate ranked as a strong match.
     await employer.reload();
     await expect(employer.getByText("Олена Тестова")).toBeVisible();
+    // The cabinet sidebar lists the vacancy with its new-candidate counter; the public site header is gone.
+    await expect(employer.locator(".cabinet-sidebar").getByRole("link", { name: /Бариста/ })).toBeVisible();
+    await expect(employer.locator(".mirror-header")).toHaveCount(0);
     await expect(employer.getByText("Дзвонити першим").first()).toBeVisible();
 
     // 5. Free plan allows only one active vacancy.
