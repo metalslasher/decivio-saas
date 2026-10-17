@@ -6,6 +6,7 @@ import { buildAnswers, submitApplication } from "@/lib/hiring/submit";
 import type { VacancyDetail } from "@/lib/hiring/types";
 import { normalizePhone } from "@/lib/hiring/validate";
 import { escapeHtml } from "@/lib/telegram/api";
+import { EMPLOYER_LINK_PREFIX, handleStatusCallback, linkEmployerChat } from "@/lib/telegram/employer";
 import type { TelegramAction, TelegramMessage, TelegramUpdate, TelegramUser } from "@/lib/telegram/types";
 
 // Dialog: vacancy card → screening questions (step 0..n-1) → name (step n) → phone (step n+1) → submit.
@@ -135,7 +136,7 @@ async function finish(
   vacancy: VacancyDetail,
   phone: string,
 ): Promise<TelegramAction[]> {
-  await submitApplication(supabase, vacancy, {
+  const employerNotifications = await submitApplication(supabase, vacancy, {
     name: session.candidate_name ?? "Кандидат з Telegram",
     phone,
     answers: buildAnswers(vacancy, session.answers),
@@ -146,6 +147,7 @@ async function finish(
   await deleteSession(supabase, session.chat_id);
 
   return [
+    ...employerNotifications,
     send(
       session.chat_id,
       `✅ Відгук на вакансію «${escapeHtml(vacancy.content.title)}» надіслано!\n\nРоботодавець отримав ваші відповіді. Якщо ви підходите — вам зателефонують найближчим часом.`,
@@ -156,6 +158,11 @@ async function finish(
 
 async function handleCallback(supabase: SupabaseClient, update: TelegramUpdate): Promise<TelegramAction[]> {
   const query = update.callback_query!;
+  if (query.data === "noop") {
+    return [{ method: "answerCallbackQuery", payload: { callback_query_id: query.id } }];
+  }
+  const statusActions = await handleStatusCallback(supabase, query);
+  if (statusActions) return statusActions;
   const actions: TelegramAction[] = [{ method: "answerCallbackQuery", payload: { callback_query_id: query.id } }];
   const message = query.message;
   if (!message) return actions;
@@ -212,6 +219,9 @@ async function handleMessage(supabase: SupabaseClient, message: TelegramMessage)
 
   if (text.startsWith("/start")) {
     const payload = text.split(/\s+/)[1];
+    if (payload?.startsWith(EMPLOYER_LINK_PREFIX)) {
+      return linkEmployerChat(supabase, chatId, payload.slice(EMPLOYER_LINK_PREFIX.length));
+    }
     return payload ? startDialog(supabase, message, payload) : [send(chatId, HELP_TEXT)];
   }
 

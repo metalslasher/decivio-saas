@@ -335,7 +335,7 @@ export async function createApplication(
     telegramUserId: number | null;
   },
 ) {
-  const { error } = await supabase.from("hiring_applications").insert({
+  const { data, error } = await supabase.from("hiring_applications").insert({
     source: input.source,
     telegram_user_id: input.telegramUserId,
     vacancy_id: input.vacancyId,
@@ -346,9 +346,11 @@ export async function createApplication(
     screening: input.screening,
     score: input.screening?.score ?? null,
     verdict: input.screening?.verdict ?? null,
-  });
+  }).select("id").single<{ id: string }>();
 
-  if (error) {
-    throw new Error(`Не вдалося зберегти відгук: ${error.message}`);
+  if (error || !data) {
+    throw new Error(`Не вдалося зберегти відгук: ${error?.message ?? "порожня відповідь"}`);
   }
+
+  return data.id;
 }

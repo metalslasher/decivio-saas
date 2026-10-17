@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useAuthDialog } from "@/components/auth-dialog-provider";
+import { NotificationsCard } from "@/components/hiring/notifications-card";
 import { PlanBanner } from "@/components/hiring/plan-banner";
 import { useEmployerSession } from "@/components/hiring/use-employer-session";
 import { apiRequest, formatRelativeDate } from "@/lib/hiring/client";
@@ -62,6 +63,7 @@ export function HireCabinet() {
       </div>
 
       <PlanBanner usage={usage} />
+      {session.status === "user" ? <NotificationsCard /> : null}
 
       {error ? <p className="mt-6 text-sm font-semibold text-[var(--bad)]">{error}</p> : null}
 

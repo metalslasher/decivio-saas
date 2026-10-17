@@ -3,6 +3,8 @@ import { getSupabaseServiceRoleClient } from "@/lib/db/supabase";
 import { enforceRateLimit, errorMessage, jsonError, readJsonBody, readOptionalString } from "@/lib/hiring/http";
 import { getVacancyBySlug } from "@/lib/hiring/store";
 import { buildAnswers, submitApplication } from "@/lib/hiring/submit";
+import { getTelegramBotToken, runTelegramActions } from "@/lib/telegram/api";
+import { isLocalTestModeEnabled } from "@/lib/test-mode";
 import { isRecord, normalizePhone } from "@/lib/hiring/validate";
 
 export const maxDuration = 60;
@@ -41,13 +43,16 @@ export async function POST(request: Request, { params }: RouteContext) {
       return jsonError("Набір на цю вакансію вже закрито.", 410);
     }
 
-    await submitApplication(supabase, vacancy, {
+    const notifications = await submitApplication(supabase, vacancy, {
       name,
       phone,
       answers: buildAnswers(vacancy, isRecord(body.answers) ? body.answers : {}),
       about: readOptionalString(body.about, 2000),
       source: "web",
     });
+    if (notifications.length > 0 && getTelegramBotToken() && !isLocalTestModeEnabled()) {
+      await runTelegramActions(notifications);
+    }
 
     return NextResponse.json({ ok: true }, { status: 201 });
   } catch (error) {

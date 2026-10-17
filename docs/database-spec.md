@@ -32,6 +32,10 @@ Migration: `20261016120000_add_hiring_core.sql`. RLS enabled without policies; n
 - `status`: `new` | `invited` | `hired` | `rejected`.
 - `source`: `web` | `telegram`; `telegram_user_id` for Telegram applicants (duplicate protection).
 
+### `employer_notification_settings`
+
+Migration `20261017150000_add_employer_notifications.sql`. Per employer: `telegram_chat_id` (unique), `notify_level` (`strong` | `all` | `off`, default `strong`), one-time `link_token` + `link_token_expires_at`. Server-only.
+
 ### `telegram_sessions`
 
 Migration `20261017120000_add_telegram_channel.sql`. One in-progress bot dialog per chat: `chat_id` PK, `telegram_user_id`, `vacancy_id`, `step` (questions → name → phone), `answers` jsonb, `candidate_name`. Deleted when the application is submitted or the candidate sends /cancel. Server-only.

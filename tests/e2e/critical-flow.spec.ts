@@ -49,10 +49,12 @@ test("vacancy content parser keeps only valid knockout answers", () => {
 test("telegram bot walks a candidate through the screening dialog", async ({ request }) => {
   const admin = getAdminClient();
   const email = `tg-${randomUUID().slice(0, 8)}@decivio.test`;
-  const { data: created } = await admin.auth.admin.createUser({ email, password: `Tg-${randomUUID()}A1`, email_confirm: true });
+  const employerPassword = `Tg-${randomUUID()}A1`;
+  const { data: created } = await admin.auth.admin.createUser({ email, password: employerPassword, email_confirm: true });
   const userId = created.user!.id;
   const slug = `tg${randomUUID().replace(/-/g, "").slice(0, 10)}`;
   const chatId = Math.floor(Math.random() * 1_000_000_000);
+  const employerChatId = chatId + 1;
   let updateId = 1;
 
   const content = parseVacancyContent({
@@ -88,12 +90,27 @@ test("telegram bot walks a candidate through the screening dialog", async ({ req
     return { status: response.status(), body: await response.json() };
   };
   const message = (extra: Record<string, unknown>) => ({ message: { message_id: updateId, chat, from, ...extra } });
+  const employerChat = { id: employerChatId, type: "private" };
+  const employerFrom = { id: employerChatId, first_name: "Власник" };
   const tap = (data: string) => ({ callback_query: { id: `cb${updateId}`, from, data, message: { message_id: 1, chat } } });
   const texts = (body: { actions: Array<{ method: string; payload: { text?: string } }> }) =>
     body.actions.filter((action) => action.method === "sendMessage").map((action) => action.payload.text ?? "");
 
   try {
     expect((await post(message({ text: `/start ${slug}` }), "wrong")).status).toBe(401);
+
+    // Employer links Telegram notifications from the cabinet.
+    const { data: auth } = await createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
+      .auth.signInWithPassword({ email, password: employerPassword });
+    const linkResponse = await request.post("/api/hiring/notifications", {
+      headers: { Authorization: `Bearer ${auth.session!.access_token}` },
+      data: { action: "link" },
+    });
+    const { url: linkUrl } = await linkResponse.json();
+    expect(linkUrl.startsWith("https://t.me/DecivioTestBot?start=e_")).toBe(true);
+    const linkPayload = new URL(linkUrl).searchParams.get("start");
+    const linked = await post({ message: { message_id: 1, chat: employerChat, from: employerFrom, text: `/start ${linkPayload}` } });
+    expect(texts(linked.body)[0]).toContain("Сповіщення Decivio підключено");
 
     const start = await post(message({ text: `/start ${slug}` }));
     expect(texts(start.body)[0]).toContain("Бариста &lt;Поділ&gt;");
@@ -107,7 +124,12 @@ test("telegram bot walks a candidate through the screening dialog", async ({ req
     expect(texts((await post(message({ text: "Два роки бариста" }))).body)[0]).toContain("Як до вас звертатися");
     expect(texts((await post(tap("n:me"))).body)[0]).toContain("номер телефону");
     const done = await post(message({ contact: { phone_number: "380671234567", user_id: chatId } }));
-    expect(texts(done.body)[0]).toContain("Відгук на вакансію");
+    const sent = done.body.actions.filter((action: { method: string }) => action.method === "sendMessage");
+    const employerMessage = sent.find((action: { payload: { chat_id: number } }) => action.payload.chat_id === employerChatId);
+    const candidateMessage = sent.find((action: { payload: { chat_id: number } }) => action.payload.chat_id === chatId);
+    expect(candidateMessage.payload.text).toContain("Відгук на вакансію");
+    expect(employerMessage.payload.text).toContain("Сильний кандидат");
+    expect(employerMessage.payload.text).toContain("+380671234567");
 
     const { data: applications } = await admin.from("hiring_applications").select("*").eq("vacancy_id", vacancy!.id);
     expect(applications).toHaveLength(1);
@@ -119,10 +141,20 @@ test("telegram bot walks a candidate through the screening dialog", async ({ req
     });
     expect(applications![0].screening).not.toBeNull();
 
+    // Employer taps "Запросити" in the notification; other chats cannot change statuses.
+    const inviteData = employerMessage.payload.reply_markup.inline_keyboard[0][0].callback_data as string;
+    const foreign = await post(tap(inviteData));
+    expect(foreign.body.actions[0].payload.text).toContain("не підключено");
+    const invited = await post({ callback_query: { id: "cb-invite", from: employerFrom, data: inviteData, message: { message_id: 7, chat: employerChat } } });
+    expect(invited.body.actions[0].payload.text).toContain("Запрошено");
+    const { data: afterInvite } = await admin.from("hiring_applications").select("status").eq("vacancy_id", vacancy!.id).single();
+    expect(afterInvite!.status).toBe("invited");
+
     const again = await post(message({ text: `/start ${slug}` }));
     expect(texts(again.body)[0]).toContain("вже відгукнулися");
   } finally {
     await admin.from("telegram_sessions").delete().eq("chat_id", chatId);
+    await admin.from("employer_notification_settings").delete().eq("user_id", userId);
     await admin.auth.admin.deleteUser(userId);
   }
 });

@@ -30,6 +30,6 @@ export type TelegramUpdate = {
 
 /** An outgoing Bot API call produced by the dialog engine. */
 export type TelegramAction = {
-  method: "sendMessage" | "answerCallbackQuery" | "editMessageText";
+  method: "sendMessage" | "answerCallbackQuery" | "editMessageText" | "editMessageReplyMarkup";
   payload: Record<string, unknown>;
 };

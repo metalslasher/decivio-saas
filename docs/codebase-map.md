@@ -34,6 +34,7 @@ Status: current repository map (hiring assistant, since 2026-10-16).
 - `src/lib/analytics.ts`: GTM funnel events (`trackEvent`).
 - `src/lib/hiring/submit.ts` (server-only): shared application submit (plan-aware screening + save) for web and Telegram.
 - `src/lib/telegram`: candidate bot — `bot.ts` dialog engine returns Bot API actions, `api.ts` sends them; `/api/telegram/webhook` checks `TELEGRAM_WEBHOOK_SECRET` (in test mode returns actions instead of sending).
+- `src/lib/telegram/employer.ts` + `/api/hiring/notifications`: employer chat linking, notify level, candidate notification cards with status buttons.
 - `scripts/telegram-setup.mjs`: registers webhook, commands and description for the bot.
 - `src/lib/db`: Supabase clients.
 - `src/lib/billing*.ts`, `src/lib/mono-acquiring.ts`, `src/app/api/payments/mono/*`: monobank payments.

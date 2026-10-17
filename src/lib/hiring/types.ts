@@ -108,6 +108,14 @@ export type PublicVacancy = {
 
 export type EmployerPlan = "free" | "pro";
 
+export type NotifyLevel = "strong" | "all" | "off";
+
+export type NotificationSettings = {
+  botConfigured: boolean;
+  connected: boolean;
+  level: NotifyLevel;
+};
+
 export const PLAN_LIMITS: Record<EmployerPlan, { activeVacancies: number; screenedApplications: number | null }> = {
   free: { activeVacancies: 1, screenedApplications: 10 },
   pro: { activeVacancies: 5, screenedApplications: null },
