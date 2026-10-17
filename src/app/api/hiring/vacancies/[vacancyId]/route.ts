@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getSupabaseServiceRoleClient } from "@/lib/db/supabase";
 import { errorMessage, jsonError, readJsonBody, requireUser } from "@/lib/hiring/http";
 import { countActiveVacancies, getEmployerUsage, resolveEmployerPlan, vacancyLimitMessage } from "@/lib/hiring/plan";
+import { saveInterviewSettings } from "@/lib/hiring/interview";
 import { getOwnerVacancy, listVacancyApplications, updateVacancyContent, updateVacancyStatus } from "@/lib/hiring/store";
 import { PLAN_LIMITS } from "@/lib/hiring/types";
 import { isRecord, parseVacancyContent } from "@/lib/hiring/validate";
@@ -38,6 +39,15 @@ export async function PATCH(request: Request, { params }: RouteContext) {
   }
 
   const body = await readJsonBody(request);
+
+  if (isRecord(body) && body.interview !== undefined) {
+    try {
+      const saved = await saveInterviewSettings(supabase, user.userId, vacancyId, body.interview);
+      return saved ? NextResponse.json({ interview: saved }) : jsonError("Вакансію не знайдено.", 404);
+    } catch (error) {
+      return jsonError(errorMessage(error, "Не вдалося зберегти слоти."), 400);
+    }
+  }
 
   if (isRecord(body) && body.content !== undefined) {
     try {

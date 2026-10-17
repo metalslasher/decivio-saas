@@ -23,6 +23,12 @@ export type VacancyContent = {
   red_flags: string[];
 };
 
+export type InterviewSettings = {
+  location: string;
+  /** Europe/Kyiv local "YYYY-MM-DDTHH:mm". */
+  slots: string[];
+};
+
 export type VacancyBrief = {
   brief: string;
   city: string | null;
@@ -75,6 +81,7 @@ export type VacancyDetail = {
   city: string | null;
   brief: string;
   content: VacancyContent;
+  interview: InterviewSettings | null;
   created_at: string;
 };
 
@@ -89,6 +96,8 @@ export type ApplicationRecord = {
   verdict: ScreeningVerdict | null;
   status: ApplicationStatus;
   source: ApplicationSource;
+  interview_token: string | null;
+  interview_slot: string | null;
   created_at: string;
 };
 

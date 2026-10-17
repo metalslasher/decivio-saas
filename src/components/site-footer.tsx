@@ -72,7 +72,7 @@ export function SiteFooter() {
   const pathname = usePathname();
   const year = new Date().getFullYear();
 
-  if (pathname?.startsWith("/hire") || pathname?.startsWith("/apply")) {
+  if (pathname?.startsWith("/hire") || pathname?.startsWith("/apply") || pathname?.startsWith("/interview")) {
     return null;
   }
 

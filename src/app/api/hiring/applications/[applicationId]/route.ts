@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
 import { getSupabaseServiceRoleClient } from "@/lib/db/supabase";
 import { errorMessage, jsonError, readJsonBody, requireUser } from "@/lib/hiring/http";
+import { prepareInvite } from "@/lib/hiring/interview";
 import { updateApplicationStatus } from "@/lib/hiring/store";
+import { getTelegramBotToken, runTelegramActions } from "@/lib/telegram/api";
+import { isLocalTestModeEnabled } from "@/lib/test-mode";
 import { APPLICATION_STATUS_LABELS, type ApplicationStatus } from "@/lib/hiring/types";
 import { isRecord } from "@/lib/hiring/validate";
 
@@ -27,7 +30,26 @@ export async function PATCH(request: Request, { params }: RouteContext) {
 
   try {
     const updated = await updateApplicationStatus(supabase, user.userId, applicationId, status);
-    return updated ? NextResponse.json({ ok: true }) : jsonError("Кандидата не знайдено.", 404);
+    if (!updated) {
+      return jsonError("Кандидата не знайдено.", 404);
+    }
+    if (status !== "invited") {
+      return NextResponse.json({ ok: true });
+    }
+
+    const invite = await prepareInvite(supabase, user.userId, applicationId);
+    const testMode = isLocalTestModeEnabled();
+    const sentToTelegram = invite.actions.length > 0 && (testMode || Boolean(getTelegramBotToken()));
+    if (sentToTelegram && !testMode) {
+      await runTelegramActions(invite.actions);
+    }
+
+    return NextResponse.json({
+      ok: true,
+      interviewUrl: invite.interviewUrl,
+      sentToTelegram,
+      ...(testMode ? { telegramActions: invite.actions } : {}),
+    });
   } catch (error) {
     return jsonError(errorMessage(error, "Не вдалося оновити кандидата."), 500);
   }

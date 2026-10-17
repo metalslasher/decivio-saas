@@ -2,9 +2,11 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { InterviewSlots } from "@/components/hiring/interview-slots";
 import { PlanBanner } from "@/components/hiring/plan-banner";
 import { useEmployerSession } from "@/components/hiring/use-employer-session";
 import { trackEvent } from "@/lib/analytics";
+import { formatSlot } from "@/lib/hiring/slots";
 import { apiRequest, buildApplyUrl, buildTelegramApplyUrl, copyText, formatRelativeDate, withApplyLink } from "@/lib/hiring/client";
 import {
   APPLICATION_STATUS_LABELS,
@@ -87,7 +89,21 @@ export function VacancyWorkspace({ vacancyId, justCreated }: { vacancyId: string
   const changeStatus = async (applicationId: string, status: ApplicationStatus) => {
     setApplications((current) => current.map((app) => (app.id === applicationId ? { ...app, status } : app)));
     try {
-      await apiRequest(`/api/hiring/applications/${applicationId}`, { auth: true, method: "PATCH", body: { status } });
+      const result = await apiRequest<{ interviewUrl?: string | null; sentToTelegram?: boolean }>(
+        `/api/hiring/applications/${applicationId}`,
+        { auth: true, method: "PATCH", body: { status } },
+      );
+      if (status === "invited") {
+        const hasSlots = (vacancy?.interview?.slots.length ?? 0) > 0;
+        setNotice(
+          result.sentToTelegram
+            ? "Кандидату надіслано вибір часу співбесіди в Telegram. Коли він запишеться, час з'явиться в картці."
+            : hasSlots
+              ? "Скопіюйте в картці кандидата повідомлення з посиланням для запису й надішліть у Viber чи SMS."
+              : "Додайте слоти в блоці «Співбесіди» праворуч — тоді кандидати зможуть записатися самі.",
+        );
+        void load();
+      }
     } catch {
       void load();
     }
@@ -248,13 +264,25 @@ export function VacancyWorkspace({ vacancyId, justCreated }: { vacancyId: string
           ) : (
             <ul className="mt-5 space-y-3">
               {visible.map((application, index) => (
-                <CandidateCard key={application.id} application={application} rank={index + 1} onStatus={changeStatus} />
+                <CandidateCard
+                  key={application.id}
+                  application={application}
+                  rank={index + 1}
+                  onStatus={changeStatus}
+                  vacancyTitle={vacancy.content.title}
+                />
               ))}
             </ul>
           )}
         </section>
 
         <aside className="min-w-0 space-y-4">
+          <InterviewSlots
+            vacancyId={vacancy.id}
+            initial={vacancy.interview}
+            bookedSlots={applications.map((app) => app.interview_slot).filter((slot): slot is string => Boolean(slot))}
+            onSaved={(interview) => setVacancy({ ...vacancy, interview })}
+          />
           <section className="card p-5">
             <h2 className="text-sm font-extrabold uppercase tracking-wide text-[var(--text-soft)]">Посилання на анкету</h2>
             <div className="mt-3 flex items-center gap-2 rounded-2xl bg-[var(--bg-surface)] p-2 pl-3">
@@ -308,12 +336,20 @@ function CandidateCard({
   application,
   rank,
   onStatus,
+  vacancyTitle,
 }: {
   application: ApplicationRecord;
   rank: number;
   onStatus: (id: string, status: ApplicationStatus) => void;
+  vacancyTitle: string;
 }) {
   const [open, setOpen] = useState(rank === 1);
+  const [inviteCopied, setInviteCopied] = useState(false);
+  const interviewUrl =
+    application.interview_token && typeof window !== "undefined" ? `${window.location.origin}/interview/${application.interview_token}` : null;
+  const inviteMessage = interviewUrl
+    ? `Вітаю, ${application.candidate_name.split(" ")[0]}! Запрошуємо вас на співбесіду на вакансію «${vacancyTitle}». Оберіть зручний час: ${interviewUrl}`
+    : null;
   const screening = application.screening;
   const tone = application.verdict ? VERDICT_TONE[application.verdict] : null;
 
@@ -330,6 +366,7 @@ function CandidateCard({
           <span className="flex flex-wrap items-center gap-2">
             <span className="font-extrabold text-[var(--text-strong)]">{application.candidate_name}</span>
             {application.verdict ? <span className={`chip ${tone?.chip}`}>{VERDICT_LABELS[application.verdict]}</span> : <span className="chip chip-muted">Без оцінки</span>}
+            {application.interview_slot ? <span className="chip chip-good">📅 {formatSlot(application.interview_slot)}</span> : null}
             {application.source === "telegram" ? <span className="chip !bg-[#e9f5fd] !text-[#1b6fa8]">Telegram</span> : null}
             {application.status !== "new" ? <span className="chip chip-muted">{APPLICATION_STATUS_LABELS[application.status]}</span> : null}
           </span>
@@ -398,6 +435,22 @@ function CandidateCard({
               </button>
             ))}
           </div>
+          {application.status === "invited" && !application.interview_slot && inviteMessage && application.source !== "telegram" ? (
+            <div className="rounded-2xl border border-dashed border-[var(--line-strong)] p-3">
+              <p className="text-sm font-bold text-[var(--text-strong)]">Запрошення на співбесіду</p>
+              <p className="mt-1 text-sm text-[var(--text-muted)]">{inviteMessage}</p>
+              <button
+                type="button"
+                className="chip mt-2"
+                onClick={async () => {
+                  setInviteCopied(await copyText(inviteMessage));
+                  window.setTimeout(() => setInviteCopied(false), 1800);
+                }}
+              >
+                {inviteCopied ? "Скопійовано ✓" : "Копіювати для Viber / SMS"}
+              </button>
+            </div>
+          ) : null}
         </div>
       ) : null}
     </li>

@@ -1,7 +1,10 @@
 import { expect, test, type Page } from "@playwright/test";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { randomUUID } from "node:crypto";
+import { addDaysToDate, kyivNowLocal } from "../../src/lib/hiring/slots";
 import { normalizePhone, parseVacancyContent } from "../../src/lib/hiring/validate";
+
+const tomorrow = addDaysToDate(kyivNowLocal().slice(0, 10), 1);
 
 // Requires: local Supabase with migrations applied. The Playwright web server runs with
 // DECIVIO_TEST_MODE=1, so AI calls are replaced with deterministic mocks (see src/lib/hiring/ai.ts).
@@ -141,7 +144,11 @@ test("telegram bot walks a candidate through the screening dialog", async ({ req
     });
     expect(applications![0].screening).not.toBeNull();
 
-    // Employer taps "Запросити" in the notification; other chats cannot change statuses.
+    // Employer publishes interview slots, then taps "Запросити" in the notification; other chats cannot change statuses.
+    await admin
+      .from("hiring_vacancies")
+      .update({ interview: { location: "Кав'ярня на Подолі", slots: [`${tomorrow}T10:00`, `${tomorrow}T11:00`] } })
+      .eq("id", vacancy!.id);
     const inviteData = employerMessage.payload.reply_markup.inline_keyboard[0][0].callback_data as string;
     const foreign = await post(tap(inviteData));
     expect(foreign.body.actions[0].payload.text).toContain("не підключено");
@@ -149,6 +156,18 @@ test("telegram bot walks a candidate through the screening dialog", async ({ req
     expect(invited.body.actions[0].payload.text).toContain("Запрошено");
     const { data: afterInvite } = await admin.from("hiring_applications").select("status").eq("vacancy_id", vacancy!.id).single();
     expect(afterInvite!.status).toBe("invited");
+
+    // The candidate gets slot buttons in Telegram and books one; the employer is notified.
+    const slotInvite = invited.body.actions.find((action: { payload: { chat_id?: number } }) => action.payload.chat_id === chatId);
+    expect(slotInvite.payload.text).toContain("Вас запрошують на співбесіду");
+    const slotButton = slotInvite.payload.reply_markup.inline_keyboard[0][0];
+    const stranger = await post({ callback_query: { id: "cb-stranger", from: { id: 42, first_name: "Хтось" }, data: slotButton.callback_data, message: { message_id: 9, chat: { id: 42, type: "private" } } } });
+    expect(stranger.body.actions[0].payload.text).toContain("не знайдено");
+    const booked = await post(tap(slotButton.callback_data));
+    expect(booked.body.actions[0].payload.text).toBe("Записано!");
+    expect(booked.body.actions.some((action: { payload: { chat_id?: number; text?: string } }) => action.payload.chat_id === employerChatId && action.payload.text?.includes("записався"))).toBe(true);
+    const { data: afterBooking } = await admin.from("hiring_applications").select("interview_slot").eq("vacancy_id", vacancy!.id).single();
+    expect(afterBooking!.interview_slot).toBe(`${tomorrow}T10:00`);
 
     const again = await post(message({ text: `/start ${slug}` }));
     expect(texts(again.body)[0]).toContain("вже відгукнулися");
@@ -227,6 +246,31 @@ test("employer creates a vacancy, candidate applies, employer sees a scored cand
       data: { content: vacancy.content, brief: "друга вакансія" },
     });
     expect(second.status()).toBe(402);
+
+    // 6. Employer invites the web candidate; the candidate books a slot by link.
+    const authHeaders = { Authorization: `Bearer ${session.session!.access_token}` };
+    await employer.request.patch(`/api/hiring/vacancies/${vacancyId}`, {
+      headers: authHeaders,
+      data: { interview: { location: "Офіс", slots: [`${tomorrow}T14:00`, `${tomorrow}T15:00`] } },
+    });
+    const { applications } = await (await employer.request.get(`/api/hiring/vacancies/${vacancyId}`, { headers: authHeaders })).json();
+    const invite = await employer.request.patch(`/api/hiring/applications/${applications[0].id}`, { headers: authHeaders, data: { status: "invited" } });
+    const { interviewUrl, sentToTelegram } = await invite.json();
+    expect(sentToTelegram).toBe(false);
+
+    const bookingContext = await browser.newContext({ viewport: { width: 375, height: 812 } });
+    const booking = await bookingContext.newPage();
+    await booking.goto(new URL(interviewUrl).pathname);
+    await expect(booking.getByText("вас запрошують на співбесіду")).toBeVisible();
+    await booking.getByRole("button", { name: "15:00", exact: true }).click();
+    await booking.getByRole("button", { name: /Записатися на/ }).click();
+    await expect(booking.getByText("Ви записані")).toBeVisible();
+    const invalid = await booking.request.post(`${new URL(interviewUrl).pathname.replace("/interview/", "/api/interview/")}`, { data: { slot: "2000-01-01T10:00" } });
+    expect(invalid.status()).toBe(409);
+    await bookingContext.close();
+
+    const { data: bookedRow } = await admin.from("hiring_applications").select("interview_slot").eq("id", applications[0].id).single();
+    expect(bookedRow!.interview_slot).toBe(`${tomorrow}T15:00`);
   } finally {
     await admin.auth.admin.deleteUser(userId);
   }

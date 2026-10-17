@@ -2,6 +2,7 @@ import "server-only";
 
 import { randomBytes } from "crypto";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { prepareInvite } from "@/lib/hiring/interview";
 import { updateApplicationStatus } from "@/lib/hiring/store";
 import {
   APPLICATION_STATUS_LABELS,
@@ -165,8 +166,31 @@ export async function handleStatusCallback(supabase: SupabaseClient, query: Tele
     return [ack("Кандидата не знайдено.")];
   }
 
+  const invite = status === "invited" ? await prepareInvite(supabase, settings.user_id, match[1]) : null;
+  const inviteText =
+    invite && invite.actions.length > 0
+      ? "Кандидату надіслано вибір часу співбесіди в Telegram. Я повідомлю, коли він запишеться."
+      : invite?.interviewUrl
+        ? `Посилання для запису на співбесіду — надішліть кандидату у Viber чи SMS:
+${invite.interviewUrl}`
+        : null;
+  const inviteNote =
+    inviteText
+      ? [
+          {
+            method: "sendMessage" as const,
+            payload: {
+              chat_id: chatId,
+              text: inviteText,
+            },
+          },
+        ]
+      : [];
+
   return [
     ack(`Позначено: ${APPLICATION_STATUS_LABELS[status]}`),
+    ...(invite?.actions ?? []),
+    ...inviteNote,
     {
       method: "editMessageReplyMarkup",
       payload: {

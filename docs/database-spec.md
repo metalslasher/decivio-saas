@@ -22,6 +22,7 @@ Migration: `20261016120000_add_hiring_core.sql`. RLS enabled without policies; n
 - `id` uuid PK, `owner_id` → `auth.users` (cascade), `slug` unique public id used in `/apply/<slug>`.
 - `status`: `active` | `closed` (closed vacancies reject new applications with 410).
 - `title`, `city`, `brief` (employer's original description).
+- `interview` jsonb: `{ location, slots[] }`, slots as Europe/Kyiv local `YYYY-MM-DDTHH:mm`.
 - `content` jsonb: `VacancyContent` from `src/lib/hiring/types.ts` (texts, questions with knockout answers, red flags).
 
 ### `hiring_applications`
@@ -30,6 +31,7 @@ Migration: `20261016120000_add_hiring_core.sql`. RLS enabled without policies; n
 - `candidate_name`, `candidate_phone` (normalised to +380...), `answers` jsonb (`CandidateAnswer[]`), `about`.
 - `screening` jsonb (`CandidateScreening`, null if AI failed), `score` 0–100, `verdict` `call`|`maybe`|`reject`.
 - `status`: `new` | `invited` | `hired` | `rejected`.
+- `interview_token` (unique booking link token), `interview_slot` (booked local time; unique per vacancy).
 - `source`: `web` | `telegram`; `telegram_user_id` for Telegram applicants (duplicate protection).
 
 ### `employer_notification_settings`

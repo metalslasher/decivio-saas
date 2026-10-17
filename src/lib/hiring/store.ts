@@ -13,6 +13,7 @@ import type {
   VacancyStatus,
   VacancySummary,
 } from "@/lib/hiring/types";
+import { parseInterviewSettings } from "@/lib/hiring/slots";
 import { parseVacancyContent } from "@/lib/hiring/validate";
 
 type VacancyRow = {
@@ -24,6 +25,7 @@ type VacancyRow = {
   city: string | null;
   brief: string;
   content: unknown;
+  interview: unknown;
   created_at: string;
 };
 
@@ -39,6 +41,8 @@ type ApplicationRow = {
   verdict: ApplicationRecord["verdict"];
   status: ApplicationStatus;
   source: ApplicationRecord["source"] | null;
+  interview_token: string | null;
+  interview_slot: string | null;
   created_at: string;
 };
 
@@ -59,6 +63,7 @@ function toVacancyDetail(row: VacancyRow): VacancyDetail {
     city: row.city,
     brief: row.brief,
     content: parseVacancyContent(row.content),
+    interview: parseInterviewSettings(row.interview),
     created_at: row.created_at,
   };
 }
@@ -75,6 +80,8 @@ function toApplicationRecord(row: ApplicationRow): ApplicationRecord {
     verdict: row.verdict,
     status: row.status,
     source: row.source ?? "web",
+    interview_token: row.interview_token ?? null,
+    interview_slot: row.interview_slot ?? null,
     created_at: row.created_at,
   };
 }

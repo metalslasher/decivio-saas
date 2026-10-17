@@ -1,6 +1,8 @@
 import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { bookInterviewSlot } from "@/lib/hiring/interview";
+import { formatSlot } from "@/lib/hiring/slots";
 import { getVacancyById, getVacancyBySlug } from "@/lib/hiring/store";
 import { buildAnswers, submitApplication } from "@/lib/hiring/submit";
 import type { VacancyDetail } from "@/lib/hiring/types";
@@ -156,6 +158,40 @@ async function finish(
   ];
 }
 
+/** Candidate picks an interview slot: `i:<applicationId>:<YYYYMMDDHHmm>`. */
+async function handleBookingCallback(supabase: SupabaseClient, query: NonNullable<TelegramUpdate["callback_query"]>): Promise<TelegramAction[] | null> {
+  const match = /^i:([0-9a-f-]{36}):(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})$/.exec(query.data ?? "");
+  if (!match || !query.message) return null;
+
+  const slot = `${match[2]}-${match[3]}-${match[4]}T${match[5]}:${match[6]}`;
+  const chatId = query.message.chat.id;
+  const result = await bookInterviewSlot(supabase, { applicationId: match[1], telegramUserId: query.from.id }, slot);
+
+  if (!result.ok) {
+    const text =
+      result.reason === "not_found"
+        ? "Запрошення не знайдено."
+        : "Цей час уже зайнятий або минув. Оберіть інший варіант.";
+    return [{ method: "answerCallbackQuery", payload: { callback_query_id: query.id, text, show_alert: true } }];
+  }
+
+  return [
+    { method: "answerCallbackQuery", payload: { callback_query_id: query.id, text: "Записано!" } },
+    {
+      method: "editMessageText",
+      payload: {
+        chat_id: chatId,
+        message_id: query.message.message_id,
+        text: `✅ Ви записані на співбесіду: <b>${formatSlot(slot)}</b>
+
+Якщо плани зміняться — повідомте роботодавця за телефоном.`,
+        parse_mode: "HTML",
+      },
+    },
+    ...result.actions,
+  ];
+}
+
 async function handleCallback(supabase: SupabaseClient, update: TelegramUpdate): Promise<TelegramAction[]> {
   const query = update.callback_query!;
   if (query.data === "noop") {
@@ -163,6 +199,9 @@ async function handleCallback(supabase: SupabaseClient, update: TelegramUpdate):
   }
   const statusActions = await handleStatusCallback(supabase, query);
   if (statusActions) return statusActions;
+
+  const bookingActions = await handleBookingCallback(supabase, query);
+  if (bookingActions) return bookingActions;
   const actions: TelegramAction[] = [{ method: "answerCallbackQuery", payload: { callback_query_id: query.id } }];
   const message = query.message;
   if (!message) return actions;

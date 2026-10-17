@@ -193,7 +193,7 @@ export function SiteHeader() {
     };
   }, [pathname]);
 
-  if (pathname?.startsWith("/auth/callback") || pathname?.startsWith("/apply")) {
+  if (pathname?.startsWith("/auth/callback") || pathname?.startsWith("/apply") || pathname?.startsWith("/interview")) {
     return null;
   }
 
