@@ -117,6 +117,15 @@ export type EmployerUsage = {
   screenedApplications: number;
 };
 
+export type BillingOverview = {
+  plan: EmployerPlan;
+  source: "subscription" | "one_time" | "manual" | null;
+  status: string | null;
+  currentPeriodEnd: string | null;
+  canCancel: boolean;
+  usage: EmployerUsage;
+};
+
 export const APPLICATION_STATUS_LABELS: Record<ApplicationStatus, string> = {
   new: "Новий",
   invited: "Запрошено",

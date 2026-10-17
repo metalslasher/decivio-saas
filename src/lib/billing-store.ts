@@ -138,6 +138,17 @@ export async function getUserSubscriptionAccess(supabase: SupabaseClient, userId
   return data;
 }
 
+export async function markSubscriptionCanceled(supabase: SupabaseClient, userId: string) {
+  const { error } = await supabase
+    .from("subscriptions")
+    .update({ status: "canceled" })
+    .eq("user_id", userId);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+}
+
 export async function assertUserDoesNotAlreadyHavePaidAccess(supabase: SupabaseClient, userId: string) {
   const subscription = await getUserSubscriptionAccess(supabase, userId);
   if (hasActiveAccess(subscription ?? null)) {

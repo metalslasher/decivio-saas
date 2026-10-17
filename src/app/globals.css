@@ -634,3 +634,25 @@ main {
 @media (prefers-reduced-motion: reduce) {
   .fade-up, .pulse-dot, .shimmer { animation: none; }
 }
+
+@media print {
+  header,
+  footer,
+  .no-print {
+    display: none !important;
+  }
+
+  body {
+    background: #fff !important;
+  }
+
+  main {
+    max-width: none;
+    padding: 0 !important;
+  }
+
+  @page {
+    size: A4;
+    margin: 12mm;
+  }
+}

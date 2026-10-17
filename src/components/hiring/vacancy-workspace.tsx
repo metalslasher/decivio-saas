@@ -30,6 +30,7 @@ export function VacancyWorkspace({ vacancyId, justCreated }: { vacancyId: string
   const [usage, setUsage] = useState<EmployerUsage | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [isRescreening, setIsRescreening] = useState(false);
   const [filter, setFilter] = useState<Filter>("all");
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [applyUrl, setApplyUrl] = useState("");
@@ -87,6 +88,28 @@ export function VacancyWorkspace({ vacancyId, justCreated }: { vacancyId: string
       await apiRequest(`/api/hiring/applications/${applicationId}`, { auth: true, method: "PATCH", body: { status } });
     } catch {
       void load();
+    }
+  };
+
+  const unscreenedCount = applications.filter((app) => !app.screening).length;
+
+  const rescreen = async () => {
+    setIsRescreening(true);
+    setNotice(null);
+    try {
+      // The API screens a small batch per call to stay within serverless time limits.
+      for (let guard = 0; guard < 40; guard += 1) {
+        const result = await apiRequest<{ screened: number; remaining: number }>(`/api/hiring/vacancies/${vacancyId}/rescreen`, {
+          auth: true,
+          body: {},
+        });
+        await load();
+        if (result.remaining === 0 || result.screened === 0) break;
+      }
+    } catch (rescreenError) {
+      setNotice(rescreenError instanceof Error ? rescreenError.message : "Не вдалося оцінити кандидатів.");
+    } finally {
+      setIsRescreening(false);
     }
   };
 
@@ -150,9 +173,17 @@ export function VacancyWorkspace({ vacancyId, justCreated }: { vacancyId: string
             {vacancy.content.pay_hint} · {vacancy.content.schedule}
           </p>
         </div>
-        <button type="button" onClick={toggleVacancy} className="btn-secondary !py-2.5 text-sm">
-          {vacancy.status === "active" ? "Закрити набір" : "Відновити набір"}
-        </button>
+        <div className="flex flex-wrap gap-2">
+          <Link href={`/hire/${vacancy.id}/edit`} className="btn-secondary !py-2.5 text-sm">
+            Редагувати
+          </Link>
+          <Link href={`/hire/${vacancy.id}/poster`} className="btn-secondary !py-2.5 text-sm">
+            QR-постер
+          </Link>
+          <button type="button" onClick={toggleVacancy} className="btn-secondary !py-2.5 text-sm">
+            {vacancy.status === "active" ? "Закрити набір" : "Відновити набір"}
+          </button>
+        </div>
       </div>
 
       {notice ? <p className="mt-4 rounded-2xl bg-[var(--warn-soft)] px-4 py-3 text-sm font-semibold text-[#7a5a0b]">{notice}</p> : null}
@@ -187,6 +218,17 @@ export function VacancyWorkspace({ vacancyId, justCreated }: { vacancyId: string
               ))}
             </div>
           </div>
+
+          {unscreenedCount > 0 ? (
+            <div className="mt-5 flex flex-col gap-3 rounded-2xl bg-[var(--warn-soft)] p-4 sm:flex-row sm:items-center">
+              <p className="flex-1 text-sm font-semibold text-[#7a5a0b]">
+                {unscreenedCount} {pluralCandidates(unscreenedCount)} без ШІ-оцінки
+              </p>
+              <button type="button" className="btn-dark !py-2 text-sm disabled:opacity-60" disabled={isRescreening} onClick={rescreen}>
+                {isRescreening ? "Оцінюємо..." : "Оцінити зараз"}
+              </button>
+            </div>
+          ) : null}
 
           {applications.length === 0 ? (
             <div className="mt-6 rounded-2xl border border-dashed border-[var(--line-strong)] p-8 text-center">
@@ -236,6 +278,14 @@ export function VacancyWorkspace({ vacancyId, justCreated }: { vacancyId: string
       </div>
     </div>
   );
+}
+
+function pluralCandidates(count: number) {
+  const mod10 = count % 10;
+  const mod100 = count % 100;
+  if (mod10 === 1 && mod100 !== 11) return "кандидат";
+  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return "кандидати";
+  return "кандидатів";
 }
 
 function CandidateCard({

@@ -110,3 +110,9 @@ Behavior:
 - paid access resolves to `pro` / `active` even without a paid subscription row;
 - checkout creation returns `subscription_already_active` and redirects to `/hire`;
 - payment/webhook logic for all other users remains unchanged.
+
+## Employer Billing Page
+
+- `/hire/billing` shows the plan, period end and usage (`GET /api/billing/subscription`).
+- Monthly subscriptions can be canceled there (`POST /api/billing/subscription` with `{ "action": "cancel" }`). The server calls mono `POST /api/merchant/subscription/edit` with `action: "cancel"` and marks the row `canceled`; access stays until `current_period_end`.
+- In `DECIVIO_TEST_MODE=1` the mono call is skipped.

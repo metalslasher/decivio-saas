@@ -51,9 +51,14 @@ export function HireCabinet() {
           <h1 className="section-title">Мої вакансії</h1>
           <p className="body-copy mt-2">Кандидати впорядковані ШІ — починайте дзвонити з верхніх.</p>
         </div>
-        <Link href="/hire/new" className="btn-primary">
-          + Нова вакансія
-        </Link>
+        <div className="flex flex-wrap gap-2">
+          <Link href="/hire/billing" className="btn-secondary">
+            Тариф і оплата
+          </Link>
+          <Link href="/hire/new" className="btn-primary">
+            + Нова вакансія
+          </Link>
+        </div>
       </div>
 
       <PlanBanner usage={usage} />

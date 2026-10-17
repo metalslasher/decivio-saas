@@ -7,6 +7,7 @@ const inheritedEnv = Object.fromEntries(
   Object.entries(process.env).filter((entry): entry is [string, string] => typeof entry[1] === "string")
 );
 const flowEnv = readOptionalEnvFile(".env.flow.local");
+const localEnv = readOptionalEnvFile(".env.local");
 const flowSupabaseEnv = Object.fromEntries(
   [
     "NEXT_PUBLIC_SUPABASE_URL",
@@ -53,7 +54,12 @@ function readOptionalEnvFile(filePath: string) {
 }
 
 function getFlowEnvValue(key: string) {
-  return process.env[`DECIVIO_FLOW_${key}`] ?? flowEnv[key] ?? inheritedEnv[key];
+  return process.env[`DECIVIO_FLOW_${key}`] ?? flowEnv[key] ?? inheritedEnv[key] ?? localEnv[key];
+}
+
+// Test files talk to Supabase directly (creating and cleaning up test users), so expose the same values to workers.
+for (const [key, value] of Object.entries(flowSupabaseEnv)) {
+  process.env[key] = value;
 }
 
 export default defineConfig({

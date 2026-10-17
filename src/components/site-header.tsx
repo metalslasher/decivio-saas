@@ -78,6 +78,16 @@ function CabinetIcon() {
   );
 }
 
+function BillingIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="account-menu-icon" fill="none" aria-hidden="true">
+      <rect x="3" y="5.5" width="18" height="13" rx="2.5" stroke="currentColor" strokeWidth="1.8" />
+      <path d="M3 10h18" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      <path d="M7.5 14.5h3.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 function LogoutIcon() {
   return (
     <svg viewBox="0 0 24 24" className="account-menu-icon" fill="none" aria-hidden="true">
@@ -251,6 +261,10 @@ export function SiteHeader() {
                           <CabinetIcon />
                           <span>Мої вакансії</span>
                         </Link>
+                        <Link href="/hire/billing" className="account-menu-link">
+                          <BillingIcon />
+                          <span>Тариф і оплата</span>
+                        </Link>
                         <div className="account-menu-divider" />
                         <button type="button" onClick={handleSignOut} disabled={isSigningOut} className="account-menu-link account-menu-link-danger disabled:cursor-not-allowed disabled:opacity-60">
                           <LogoutIcon />
@@ -320,6 +334,10 @@ export function SiteHeader() {
                       <CabinetIcon />
                       <span>Мої вакансії</span>
                     </Link>
+                        <Link href="/hire/billing" onClick={() => setIsOpen(false)} className="account-menu-link">
+                          <BillingIcon />
+                          <span>Тариф і оплата</span>
+                        </Link>
                     <div className="account-menu-divider" />
                     <button type="button" onClick={handleSignOut} disabled={isSigningOut} className="account-menu-link account-menu-link-danger disabled:cursor-not-allowed disabled:opacity-60">
                       <LogoutIcon />

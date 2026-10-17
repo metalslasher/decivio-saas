@@ -7,9 +7,12 @@ Status: current repository map (hiring assistant, since 2026-10-16).
 - `/`: landing page (`src/app/page.tsx`, animated hero demo in `src/components/landing/hero-demo.tsx`).
 - `/hire/new`: vacancy builder — brief → AI draft → editor with live candidate-form preview → publish (auth).
 - `/hire`: employer cabinet — list of vacancies with candidate counts.
-- `/hire/[vacancyId]`: shortlist — candidates ranked by AI score, statuses, apply link, posting text.
+- `/hire/[vacancyId]`: shortlist — candidates ranked by AI score, statuses, apply link, posting text, re-screen of unscored candidates.
+- `/hire/[vacancyId]/edit`: edit published vacancy (same editor as the builder).
+- `/hire/[vacancyId]/poster`: printable A4 poster with a QR code to the apply link.
+- `/hire/billing`: plan, usage, monthly subscription cancel.
 - `/apply/[slug]`: public mobile-first candidate application (no registration).
-- `/pricing`, `/checkout`, `/billing/return`: monobank billing flow (copy still needs a rework, see roadmap).
+- `/pricing`, `/checkout`, `/billing/return`: monobank billing flow.
 - `/login`, `/signup`, `/reset-password`, `/auth/callback`: auth. Default post-auth destination is `/hire`.
 - `/dashboard`: legacy URL, redirects to `/hire`.
 
@@ -25,6 +28,8 @@ Status: current repository map (hiring assistant, since 2026-10-16).
 - `src/components/hiring`: builder, apply flow, cabinet, vacancy workspace, session hook.
 - `src/app/api/hiring/*`: employer APIs (draft generation is public + rate-limited; the rest require auth).
 - `src/app/api/apply/[slug]`: public candidate submission (rate-limited, screening never blocks saving).
+- `src/lib/hiring/plan.ts` (server-only): plan resolution and free/pro limits.
+- `src/app/api/billing/subscription`: billing overview (GET) and cancel (POST).
 - `src/lib/db`: Supabase clients.
 - `src/lib/billing*.ts`, `src/lib/mono-acquiring.ts`, `src/app/api/payments/mono/*`: monobank payments.
 - `supabase/migrations`: schema; hiring tables in `20261016120000_add_hiring_core.sql`.

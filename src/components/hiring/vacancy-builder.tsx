@@ -245,7 +245,8 @@ function linesToList(value: string) {
     .filter(Boolean);
 }
 
-function VacancyEditor({
+export function VacancyEditor({
+  mode = "create",
   content,
   city,
   onChange,
@@ -255,6 +256,7 @@ function VacancyEditor({
   error,
   isLimitReached,
 }: {
+  mode?: "create" | "edit";
   content: VacancyContent;
   city: string;
   onChange: (content: VacancyContent) => void;
@@ -265,6 +267,8 @@ function VacancyEditor({
   isLimitReached: boolean;
 }) {
   const [copied, setCopied] = useState(false);
+  const isEdit = mode === "edit";
+  const primaryLabel = isPublishing ? (isEdit ? "Зберігаємо..." : "Публікуємо...") : isEdit ? "Зберегти зміни" : "🚀 Опублікувати й отримати посилання";
   const update = (patch: Partial<VacancyContent>) => onChange({ ...content, ...patch });
 
   const previewVacancy: PublicVacancy = useMemo(
@@ -314,12 +318,16 @@ function VacancyEditor({
     <div className="fade-up pb-28 lg:pb-0">
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
-          <span className="eyebrow-pill">Крок 2 з 2 · перевірте й опублікуйте</span>
-          <h1 className="section-title mt-4">Вакансія готова ✨</h1>
-          <p className="body-copy mt-2 max-w-xl">Усе можна редагувати. Праворуч — так анкету побачить кандидат на телефоні, спробуйте пройти її.</p>
+          <span className="eyebrow-pill">{isEdit ? "Редагування" : "Крок 2 з 2 · перевірте й опублікуйте"}</span>
+          <h1 className="section-title mt-4">{isEdit ? "Редагувати вакансію" : "Вакансія готова ✨"}</h1>
+          <p className="body-copy mt-2 max-w-xl">
+            {isEdit
+              ? "Зміни одразу з'являться в анкеті за тим самим посиланням. Відгуки, що вже надійшли, збережуться."
+              : "Усе можна редагувати. Праворуч — так анкету побачить кандидат на телефоні, спробуйте пройти її."}
+          </p>
         </div>
         <button type="button" onClick={onRestart} className="text-link text-sm">
-          ← Описати інакше
+          {isEdit ? "← До кандидатів" : "← Описати інакше"}
         </button>
       </div>
 
@@ -461,9 +469,9 @@ function VacancyEditor({
             {error ? <p className="text-center text-sm font-semibold text-[var(--bad)]">{error}</p> : null}
             {isLimitReached ? <UpgradeLinks /> : null}
             <button type="button" className="btn-primary w-full text-[1rem] disabled:opacity-60" disabled={isPublishing} onClick={onPublish}>
-              {isPublishing ? "Публікуємо..." : "🚀 Опублікувати й отримати посилання"}
+              {primaryLabel}
             </button>
-            <p className="text-center text-xs text-[var(--text-soft)]">Безкоштовно: 1 вакансія і до 10 оцінених кандидатів</p>
+            {isEdit ? null : <p className="text-center text-xs text-[var(--text-soft)]">Безкоштовно: 1 вакансія і до 10 оцінених кандидатів</p>}
           </div>
         </aside>
       </div>
@@ -479,7 +487,7 @@ function VacancyEditor({
         {error ? <p className="mb-2 text-center text-sm font-semibold text-[var(--bad)]">{error}</p> : null}
         {isLimitReached ? <UpgradeLinks /> : null}
         <button type="button" className="btn-primary w-full disabled:opacity-60" disabled={isPublishing} onClick={onPublish}>
-          {isPublishing ? "Публікуємо..." : "🚀 Опублікувати"}
+          {isEdit ? primaryLabel : isPublishing ? "Публікуємо..." : "🚀 Опублікувати"}
         </button>
       </div>
     </div>

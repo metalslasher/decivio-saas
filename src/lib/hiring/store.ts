@@ -199,6 +199,27 @@ export async function updateVacancyStatus(
   return Boolean(data);
 }
 
+export async function updateVacancyContent(
+  supabase: SupabaseClient,
+  ownerId: string,
+  vacancyId: string,
+  content: VacancyContent,
+) {
+  const { data, error } = await supabase
+    .from("hiring_vacancies")
+    .update({ title: content.title, content })
+    .eq("id", vacancyId)
+    .eq("owner_id", ownerId)
+    .select("id")
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(`Не вдалося зберегти вакансію: ${error.message}`);
+  }
+
+  return Boolean(data);
+}
+
 export async function updateApplicationStatus(
   supabase: SupabaseClient,
   ownerId: string,
@@ -229,6 +250,33 @@ export async function updateApplicationStatus(
   }
 
   return true;
+}
+
+export async function listUnscreenedApplications(supabase: SupabaseClient, vacancyId: string, limit: number) {
+  const { data, error } = await supabase
+    .from("hiring_applications")
+    .select("*")
+    .eq("vacancy_id", vacancyId)
+    .is("screening", null)
+    .order("created_at", { ascending: true })
+    .limit(limit);
+
+  if (error) {
+    throw new Error(`Не вдалося завантажити кандидатів: ${error.message}`);
+  }
+
+  return ((data ?? []) as ApplicationRow[]).map(toApplicationRecord);
+}
+
+export async function saveApplicationScreening(supabase: SupabaseClient, applicationId: string, screening: CandidateScreening) {
+  const { error } = await supabase
+    .from("hiring_applications")
+    .update({ screening, score: screening.score, verdict: screening.verdict })
+    .eq("id", applicationId);
+
+  if (error) {
+    throw new Error(`Не вдалося зберегти оцінку: ${error.message}`);
+  }
 }
 
 export async function getVacancyBySlug(supabase: SupabaseClient, slug: string) {

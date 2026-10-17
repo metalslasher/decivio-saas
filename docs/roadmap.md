@@ -32,12 +32,12 @@ Goal: the wow loop works end to end locally.
 - [x] `/pricing` rebuilt (Start / Pro 990 / Pro 90 days 2490, comparison table); reuses mono checkout via `PricingPurchaseButton`.
 - [x] Privacy/terms rewritten for the hiring product (candidate data, controller/processor roles, OpenAI, anti-discrimination). Have a lawyer review before scaling.
 - [x] Close / reopen vacancy (respects the active-vacancy limit).
-- [ ] Edit vacancy text and questions after publish.
-- [ ] QR code + downloadable poster for the apply link.
+- [x] Edit vacancy text and questions after publish (`/hire/<id>/edit`, reuses `VacancyEditor` in edit mode).
+- [x] Printable QR poster (`/hire/<id>/poster`, `qrcode` package, print CSS in `globals.css`).
 - [ ] Email notification to employer on new strong candidate.
-- [ ] Update e2e flow test for the new loop.
-- [ ] Subscription management for employers (see plan/expiry, cancel monthly mono subscription) — the old dashboard "access" view was removed.
-- [ ] Re-screen unscored candidates after upgrading to Pro.
+- [x] E2E flow test rewritten (`tests/e2e/critical-flow.spec.ts`): guest draft → login → auto-publish → mobile apply → scored candidate → free vacancy limit 402. Run: `npx playwright test --config=playwright.flow.config.ts` (needs local Supabase; stop other dev servers first).
+- [x] `/hire/billing`: plan, period end, usage, cancel monthly mono subscription (`POST /api/merchant/subscription/edit` with `action: "cancel"`). Cancel was verified only up to the confirm step locally — the real mono call is untested.
+- [x] Re-screen unscored candidates (`POST /api/hiring/vacancies/<id>/rescreen`, batches of 5, respects free quota).
 
 ## Iteration 3 — Growth Channels
 

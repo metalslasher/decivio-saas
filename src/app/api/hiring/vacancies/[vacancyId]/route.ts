@@ -2,9 +2,9 @@ import { NextResponse } from "next/server";
 import { getSupabaseServiceRoleClient } from "@/lib/db/supabase";
 import { errorMessage, jsonError, readJsonBody, requireUser } from "@/lib/hiring/http";
 import { countActiveVacancies, getEmployerUsage, resolveEmployerPlan, vacancyLimitMessage } from "@/lib/hiring/plan";
-import { getOwnerVacancy, listVacancyApplications, updateVacancyStatus } from "@/lib/hiring/store";
+import { getOwnerVacancy, listVacancyApplications, updateVacancyContent, updateVacancyStatus } from "@/lib/hiring/store";
 import { PLAN_LIMITS } from "@/lib/hiring/types";
-import { isRecord } from "@/lib/hiring/validate";
+import { isRecord, parseVacancyContent } from "@/lib/hiring/validate";
 
 type RouteContext = { params: Promise<{ vacancyId: string }> };
 
@@ -38,6 +38,16 @@ export async function PATCH(request: Request, { params }: RouteContext) {
   }
 
   const body = await readJsonBody(request);
+
+  if (isRecord(body) && body.content !== undefined) {
+    try {
+      const updated = await updateVacancyContent(supabase, user.userId, vacancyId, parseVacancyContent(body.content));
+      return updated ? NextResponse.json({ ok: true }) : jsonError("Вакансію не знайдено.", 404);
+    } catch (error) {
+      return jsonError(errorMessage(error, "Не вдалося зберегти вакансію."), 400);
+    }
+  }
+
   const status = isRecord(body) ? body.status : null;
   if (status !== "active" && status !== "closed") {
     return jsonError("Некоректний статус.", 400);

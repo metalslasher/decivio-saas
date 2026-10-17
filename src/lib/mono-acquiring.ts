@@ -53,6 +53,8 @@ export type MonoSubscriptionStatusWebhookPayload = Pick<MonoSubscriptionStatus, 
 type MonoRequestOptions = {
   method?: "GET" | "POST";
   body?: unknown;
+  /** Some mono endpoints answer 200 with an empty body. */
+  emptyResponse?: boolean;
 };
 
 let cachedMonoPublicKeyBase64: string | null = null;
@@ -123,6 +125,10 @@ async function monoRequest<T>(pathname: string, options: MonoRequestOptions = {}
     throw new Error(`mono API ${options.method ?? "GET"} ${pathname} failed with ${response.status}: ${responseText}`);
   }
 
+  if (options.emptyResponse) {
+    return null as T;
+  }
+
   return (await response.json()) as T;
 }
 
@@ -165,6 +171,15 @@ export async function createMonoSubscription(input: {
         statusUrl: buildMonoSubscriptionStatusWebhookUrl()
       }
     }
+  });
+}
+
+/** Stops future charges of a mono subscription. Already paid period stays active on our side. */
+export async function cancelMonoSubscription(subscriptionId: string) {
+  await monoRequest<null>("/api/merchant/subscription/edit", {
+    method: "POST",
+    body: { subscriptionId, action: "cancel" },
+    emptyResponse: true
   });
 }
 
