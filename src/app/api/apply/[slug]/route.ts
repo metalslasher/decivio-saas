@@ -1,11 +1,8 @@
 import { NextResponse } from "next/server";
 import { getSupabaseServiceRoleClient } from "@/lib/db/supabase";
-import { screenCandidate } from "@/lib/hiring/ai";
 import { enforceRateLimit, errorMessage, jsonError, readJsonBody, readOptionalString } from "@/lib/hiring/http";
-import { countScreenedApplications, resolveEmployerPlan } from "@/lib/hiring/plan";
-import { createApplication, getVacancyBySlug } from "@/lib/hiring/store";
-import { PLAN_LIMITS } from "@/lib/hiring/types";
-import type { CandidateAnswer, CandidateScreening } from "@/lib/hiring/types";
+import { getVacancyBySlug } from "@/lib/hiring/store";
+import { buildAnswers, submitApplication } from "@/lib/hiring/submit";
 import { isRecord, normalizePhone } from "@/lib/hiring/validate";
 
 export const maxDuration = 60;
@@ -44,29 +41,13 @@ export async function POST(request: Request, { params }: RouteContext) {
       return jsonError("Набір на цю вакансію вже закрито.", 410);
     }
 
-    const rawAnswers = isRecord(body.answers) ? body.answers : {};
-    const answers: CandidateAnswer[] = vacancy.content.questions.map((question) => ({
-      question_id: question.id,
-      question: question.text,
-      answer: readOptionalString(rawAnswers[question.id], 1000) ?? "—",
-    }));
-    const about = readOptionalString(body.about, 2000);
-
-    let screening: CandidateScreening | null = null;
-    try {
-      // Free plan: keep accepting candidates, but stop AI screening after the limit.
-      const { data: owner } = await supabase.auth.admin.getUserById(vacancy.owner_id);
-      const plan = await resolveEmployerPlan(supabase, { userId: vacancy.owner_id, email: owner.user?.email ?? null });
-      const screenLimit = PLAN_LIMITS[plan].screenedApplications;
-      const canScreen = screenLimit === null || (await countScreenedApplications(supabase, vacancy.owner_id)) < screenLimit;
-
-      if (canScreen) screening = await screenCandidate({ vacancy: vacancy.content, answers, about });
-    } catch (error) {
-      // The application must never be lost because of an AI failure.
-      console.error("Candidate screening failed", error);
-    }
-
-    await createApplication(supabase, { vacancyId: vacancy.id, name, phone, answers, about, screening });
+    await submitApplication(supabase, vacancy, {
+      name,
+      phone,
+      answers: buildAnswers(vacancy, isRecord(body.answers) ? body.answers : {}),
+      about: readOptionalString(body.about, 2000),
+      source: "web",
+    });
 
     return NextResponse.json({ ok: true }, { status: 201 });
   } catch (error) {

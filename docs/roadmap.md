@@ -41,7 +41,8 @@ Goal: the wow loop works end to end locally.
 
 ## Iteration 3 — Growth Channels
 
-- [ ] Telegram bot as an alternative candidate channel.
+- [x] Telegram bot as a second candidate channel (`src/lib/telegram/*`, webhook `/api/telegram/webhook`, migration `20261017120000_add_telegram_channel.sql`). Deep link `t.me/<bot>?start=<slug>`; questions as inline buttons, name suggestion, phone via "share contact"; same screening and plan limits as web; duplicate protection per Telegram user. Covered by the e2e test (fake updates in test mode). Not yet tried with a real bot.
+- [ ] Telegram notifications to the employer about strong candidates (needs employer to link their Telegram).
 - [ ] Candidate auto-reply / interview slot booking.
 - [x] Funnel events pushed to GTM `dataLayer` (`src/lib/analytics.ts`, 13 events, no personal data). Owner action: in GTM add Custom Event triggers and GA4 event tags for them.
 - [x] SEO role pages `/roles/<slug>` for 10 roles (`src/lib/seo-roles.ts`), in sitemap, linked from landing chips; CTA prefills the builder via `/hire/new?brief=`.
@@ -54,6 +55,7 @@ Verified locally on 2026-10-16 with real OpenAI: draft generation (~20 s), publi
 - [ ] Push migration to production: `supabase link --project-ref <ref>` then `supabase db push`.
 - [ ] Make sure `OPENAI_API_KEY` / `OPENAI_MODEL` are set in Vercel.
 - [ ] Add GA4 event tags in GTM for the funnel events (names in `src/lib/analytics.ts`).
+- [ ] Telegram bot: create it in @BotFather, set `TELEGRAM_BOT_TOKEN`, `TELEGRAM_WEBHOOK_SECRET` (any long random string) and `NEXT_PUBLIC_TELEGRAM_BOT_USERNAME` in Vercel, then run `node scripts/telegram-setup.mjs https://<domain>` after deploy.
 - [ ] Submit the sitemap in Google Search Console.
 - [ ] Merge `pivot/hiring-assistant` into `main` (Vercel deploys `main`).
 

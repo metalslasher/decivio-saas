@@ -82,6 +82,7 @@ export default defineConfig({
     env: {
       ...inheritedEnv,
       DECIVIO_TEST_MODE: "1",
+      TELEGRAM_WEBHOOK_SECRET: "flow-test-secret",
       NEXT_PUBLIC_SITE_URL: baseURL,
       ...flowSupabaseEnv
     }

@@ -30,6 +30,11 @@ Migration: `20261016120000_add_hiring_core.sql`. RLS enabled without policies; n
 - `candidate_name`, `candidate_phone` (normalised to +380...), `answers` jsonb (`CandidateAnswer[]`), `about`.
 - `screening` jsonb (`CandidateScreening`, null if AI failed), `score` 0–100, `verdict` `call`|`maybe`|`reject`.
 - `status`: `new` | `invited` | `hired` | `rejected`.
+- `source`: `web` | `telegram`; `telegram_user_id` for Telegram applicants (duplicate protection).
+
+### `telegram_sessions`
+
+Migration `20261017120000_add_telegram_channel.sql`. One in-progress bot dialog per chat: `chat_id` PK, `telegram_user_id`, `vacancy_id`, `step` (questions → name → phone), `answers` jsonb, `candidate_name`. Deleted when the application is submitted or the candidate sends /cancel. Server-only.
 
 ## Legacy Tables
 

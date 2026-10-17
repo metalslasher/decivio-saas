@@ -38,6 +38,7 @@ type ApplicationRow = {
   score: number | null;
   verdict: ApplicationRecord["verdict"];
   status: ApplicationStatus;
+  source: ApplicationRecord["source"] | null;
   created_at: string;
 };
 
@@ -73,6 +74,7 @@ function toApplicationRecord(row: ApplicationRow): ApplicationRecord {
     score: row.score,
     verdict: row.verdict,
     status: row.status,
+    source: row.source ?? "web",
     created_at: row.created_at,
   };
 }
@@ -279,6 +281,17 @@ export async function saveApplicationScreening(supabase: SupabaseClient, applica
   }
 }
 
+/** Server-side lookup without ownership check (public candidate channels only). */
+export async function getVacancyById(supabase: SupabaseClient, vacancyId: string) {
+  const { data, error } = await supabase.from("hiring_vacancies").select("*").eq("id", vacancyId).maybeSingle<VacancyRow>();
+
+  if (error) {
+    throw new Error(`Не вдалося завантажити вакансію: ${error.message}`);
+  }
+
+  return data ? toVacancyDetail(data) : null;
+}
+
 export async function getVacancyBySlug(supabase: SupabaseClient, slug: string) {
   const { data, error } = await supabase
     .from("hiring_vacancies")
@@ -318,9 +331,13 @@ export async function createApplication(
     answers: CandidateAnswer[];
     about: string | null;
     screening: CandidateScreening | null;
+    source: ApplicationRecord["source"];
+    telegramUserId: number | null;
   },
 ) {
   const { error } = await supabase.from("hiring_applications").insert({
+    source: input.source,
+    telegram_user_id: input.telegramUserId,
     vacancy_id: input.vacancyId,
     candidate_name: input.name,
     candidate_phone: input.phone,

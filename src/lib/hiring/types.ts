@@ -48,6 +48,8 @@ export type CandidateScreening = {
   interview_questions: string[];
 };
 
+export type ApplicationSource = "web" | "telegram";
+
 export type ApplicationStatus = "new" | "invited" | "hired" | "rejected";
 
 export type VacancyStatus = "active" | "closed";
@@ -86,6 +88,7 @@ export type ApplicationRecord = {
   score: number | null;
   verdict: ScreeningVerdict | null;
   status: ApplicationStatus;
+  source: ApplicationSource;
   created_at: string;
 };
 

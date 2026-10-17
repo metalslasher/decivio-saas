@@ -79,10 +79,17 @@ export function buildApplyUrl(slug: string) {
   return `${window.location.origin}/apply/${slug}`;
 }
 
-export function withApplyLink(postingText: string, url: string) {
-  return postingText.includes("[посилання]")
+/** Deep link into the candidate bot, or null when the bot is not configured. */
+export function buildTelegramApplyUrl(slug: string) {
+  const username = process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME?.trim().replace(/^@/, "");
+  return username ? `https://t.me/${username}?start=${slug}` : null;
+}
+
+export function withApplyLink(postingText: string, url: string, telegramUrl: string | null = null) {
+  const text = postingText.includes("[посилання]")
     ? postingText.split("[посилання]").join(url)
     : `${postingText}\n\n👉 Відгукнутися за 2 хвилини: ${url}`;
+  return telegramUrl ? `${text}\n✈️ Або в Telegram: ${telegramUrl}` : text;
 }
 
 export async function copyText(value: string) {

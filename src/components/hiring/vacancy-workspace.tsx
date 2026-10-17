@@ -5,7 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { PlanBanner } from "@/components/hiring/plan-banner";
 import { useEmployerSession } from "@/components/hiring/use-employer-session";
 import { trackEvent } from "@/lib/analytics";
-import { apiRequest, buildApplyUrl, copyText, formatRelativeDate, withApplyLink } from "@/lib/hiring/client";
+import { apiRequest, buildApplyUrl, buildTelegramApplyUrl, copyText, formatRelativeDate, withApplyLink } from "@/lib/hiring/client";
 import {
   APPLICATION_STATUS_LABELS,
   VERDICT_LABELS,
@@ -77,7 +77,7 @@ export function VacancyWorkspace({ vacancyId, justCreated }: { vacancyId: string
   const visible = filter === "all" ? applications : applications.filter((app) => app.verdict === filter);
 
   const copy = async (key: string, value: string) => {
-    trackEvent(key === "link" ? "apply_link_copied" : "posting_text_copied", { place: "workspace" });
+    trackEvent(key === "post" ? "posting_text_copied" : "apply_link_copied", { place: "workspace", channel: key === "telegram" ? "telegram" : "web" });
     if (await copyText(value)) {
       setCopiedKey(key);
       window.setTimeout(() => setCopiedKey(null), 1800);
@@ -161,7 +161,8 @@ export function VacancyWorkspace({ vacancyId, justCreated }: { vacancyId: string
     );
   }
 
-  const postingText = withApplyLink(vacancy.content.posting_text, applyUrl);
+  const telegramUrl = buildTelegramApplyUrl(vacancy.slug);
+  const postingText = withApplyLink(vacancy.content.posting_text, applyUrl, telegramUrl);
 
   return (
     <div className="fade-up">
@@ -265,6 +266,18 @@ export function VacancyWorkspace({ vacancyId, justCreated }: { vacancyId: string
             <a href={applyUrl} target="_blank" rel="noreferrer" className="text-link mt-3 inline-block text-sm">
               Подивитися як кандидат ↗
             </a>
+            {telegramUrl ? (
+              <>
+                <h2 className="mt-5 text-sm font-extrabold uppercase tracking-wide text-[var(--text-soft)]">Відгук у Telegram</h2>
+                <div className="mt-3 flex items-center gap-2 rounded-2xl bg-[#e9f5fd] p-2 pl-3">
+                  <span className="min-w-0 flex-1 truncate text-sm font-semibold text-[#1b6fa8]">{telegramUrl}</span>
+                  <button type="button" className="chip" onClick={() => copy("telegram", telegramUrl)}>
+                    {copiedKey === "telegram" ? "✓" : "Копіювати"}
+                  </button>
+                </div>
+                <p className="mt-2 text-xs text-[var(--text-muted)]">Кандидат відповідає на ті самі питання прямо в чаті з ботом і ділиться номером в один дотик.</p>
+              </>
+            ) : null}
           </section>
           <section className="card p-5">
             <div className="flex items-center justify-between gap-2">
@@ -317,6 +330,7 @@ function CandidateCard({
           <span className="flex flex-wrap items-center gap-2">
             <span className="font-extrabold text-[var(--text-strong)]">{application.candidate_name}</span>
             {application.verdict ? <span className={`chip ${tone?.chip}`}>{VERDICT_LABELS[application.verdict]}</span> : <span className="chip chip-muted">Без оцінки</span>}
+            {application.source === "telegram" ? <span className="chip !bg-[#e9f5fd] !text-[#1b6fa8]">Telegram</span> : null}
             {application.status !== "new" ? <span className="chip chip-muted">{APPLICATION_STATUS_LABELS[application.status]}</span> : null}
           </span>
           <span className="mt-1 block truncate text-sm text-[var(--text-muted)]">{screening?.headline ?? "Оцінка недоступна — перегляньте відповіді."}</span>

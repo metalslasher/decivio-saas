@@ -46,6 +46,87 @@ test("vacancy content parser keeps only valid knockout answers", () => {
   expect(content.questions[2]).toMatchObject({ options: [], knockout_answer: null });
 });
 
+test("telegram bot walks a candidate through the screening dialog", async ({ request }) => {
+  const admin = getAdminClient();
+  const email = `tg-${randomUUID().slice(0, 8)}@decivio.test`;
+  const { data: created } = await admin.auth.admin.createUser({ email, password: `Tg-${randomUUID()}A1`, email_confirm: true });
+  const userId = created.user!.id;
+  const slug = `tg${randomUUID().replace(/-/g, "").slice(0, 10)}`;
+  const chatId = Math.floor(Math.random() * 1_000_000_000);
+  let updateId = 1;
+
+  const content = parseVacancyContent({
+    title: "Бариста <Поділ>",
+    summary: "Кава біля метро",
+    pay_hint: "25 000 грн",
+    pay_note: "",
+    schedule: "2/2",
+    offer: ["Навчання"],
+    duties: ["Готувати каву"],
+    requirements: ["Пунктуальність"],
+    posting_text: "Текст",
+    red_flags: [],
+    questions: [
+      { text: "Графік 2/2 підходить?", kind: "yes_no", options: [], knockout_answer: "Ні" },
+      { text: "Досвід?", kind: "choice", options: ["Немає", "1–3 роки"], knockout_answer: null },
+      { text: "Розкажіть про досвід", kind: "text", options: [], knockout_answer: null },
+    ],
+  });
+  const { data: vacancy } = await admin
+    .from("hiring_vacancies")
+    .insert({ owner_id: userId, slug, title: content.title, brief: "test", content })
+    .select("id")
+    .single();
+
+  const from = { id: chatId, first_name: "Олена", last_name: "Бот" };
+  const chat = { id: chatId, type: "private" };
+  const post = async (update: Record<string, unknown>, secret = "flow-test-secret") => {
+    const response = await request.post("/api/telegram/webhook", {
+      headers: { "x-telegram-bot-api-secret-token": secret },
+      data: { update_id: updateId++, ...update },
+    });
+    return { status: response.status(), body: await response.json() };
+  };
+  const message = (extra: Record<string, unknown>) => ({ message: { message_id: updateId, chat, from, ...extra } });
+  const tap = (data: string) => ({ callback_query: { id: `cb${updateId}`, from, data, message: { message_id: 1, chat } } });
+  const texts = (body: { actions: Array<{ method: string; payload: { text?: string } }> }) =>
+    body.actions.filter((action) => action.method === "sendMessage").map((action) => action.payload.text ?? "");
+
+  try {
+    expect((await post(message({ text: `/start ${slug}` }), "wrong")).status).toBe(401);
+
+    const start = await post(message({ text: `/start ${slug}` }));
+    expect(texts(start.body)[0]).toContain("Бариста &lt;Поділ&gt;");
+    expect(texts(start.body)[1]).toContain("Питання 1 з 3");
+
+    // Stale or wrong-step taps are ignored; a valid tap moves to the next question.
+    expect(texts((await post(tap("a:1:0"))).body)).toEqual([]);
+    expect(texts((await post(tap("a:0:0"))).body)[0]).toContain("Питання 2 з 3");
+    expect(texts((await post(message({ text: "щось інше" }))).body)[0]).toContain("оберіть варіант");
+    expect(texts((await post(message({ text: "1–3 роки" }))).body)[0]).toContain("Питання 3 з 3");
+    expect(texts((await post(message({ text: "Два роки бариста" }))).body)[0]).toContain("Як до вас звертатися");
+    expect(texts((await post(tap("n:me"))).body)[0]).toContain("номер телефону");
+    const done = await post(message({ contact: { phone_number: "380671234567", user_id: chatId } }));
+    expect(texts(done.body)[0]).toContain("Відгук на вакансію");
+
+    const { data: applications } = await admin.from("hiring_applications").select("*").eq("vacancy_id", vacancy!.id);
+    expect(applications).toHaveLength(1);
+    expect(applications![0]).toMatchObject({
+      source: "telegram",
+      candidate_name: "Олена Бот",
+      candidate_phone: "+380671234567",
+      telegram_user_id: chatId,
+    });
+    expect(applications![0].screening).not.toBeNull();
+
+    const again = await post(message({ text: `/start ${slug}` }));
+    expect(texts(again.body)[0]).toContain("вже відгукнулися");
+  } finally {
+    await admin.from("telegram_sessions").delete().eq("chat_id", chatId);
+    await admin.auth.admin.deleteUser(userId);
+  }
+});
+
 async function answerApplication(page: Page, choices: string[]) {
   for (const choice of choices) {
     await page.getByRole("button", { name: choice, exact: true }).click();
