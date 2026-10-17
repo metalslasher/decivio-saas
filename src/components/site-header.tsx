@@ -197,7 +197,8 @@ export function SiteHeader() {
     return null;
   }
 
-  const effectiveHeaderProgress = Math.max(headerProgress, isOpen ? 1 : 0);
+  // The floating pill stays readable over the hero even before scrolling.
+  const effectiveHeaderProgress = Math.max(headerProgress, 0.65, isOpen ? 1 : 0);
   const headerStyle = {
     "--mirror-progress": effectiveHeaderProgress,
     "--mirror-blur": `${Math.round(effectiveHeaderProgress * 26)}px`
@@ -218,13 +219,13 @@ export function SiteHeader() {
   };
 
   return (
-    <header className="sticky top-0 z-50">
+    <header className="sticky top-0 z-50 px-3 pt-3 md:px-6">
       <div className="w-full">
-        <nav style={headerStyle} className="mirror-header relative w-full overflow-visible px-4 py-3 md:px-6 md:py-4 lg:px-8">
+        <nav style={headerStyle} className="mirror-header relative mx-auto w-full max-w-[1240px] overflow-visible rounded-[1.6rem] border border-white/70 px-4 py-2.5 md:px-5">
           <div className="relative z-[1] flex items-center justify-between gap-4">
             <div className="flex items-center gap-5">
               <Link href="/" aria-label="Decivio" className="inline-flex items-center">
-                <WordmarkLogo className="text-[2.1rem] md:text-[2.35rem]" />
+                <WordmarkLogo className="text-[1.85rem] md:text-[2rem]" />
               </Link>
             </div>
 

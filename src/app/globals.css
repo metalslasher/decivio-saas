@@ -159,12 +159,12 @@ main {
 }
 
 .header-login-button {
-  min-height: 3.25rem;
+  min-height: 2.75rem;
   border-radius: 9999px;
   border: 1px solid rgba(52, 83, 244, 0.72);
   background: rgba(255, 255, 255, calc(0.68 + 0.14 * var(--mirror-progress)));
-  padding: 0.78rem 1.45rem;
-  font-size: 0.98rem;
+  padding: 0.6rem 1.2rem;
+  font-size: 0.9rem;
   font-weight: 800;
   color: var(--accent-strong);
   box-shadow:
@@ -190,12 +190,12 @@ main {
 }
 
 .header-cta-button {
-  min-height: 3.25rem;
+  min-height: 2.75rem;
   border-radius: 9999px;
   border: 1px solid rgba(52, 83, 244, 0.86);
   background: linear-gradient(135deg, var(--accent-strong), var(--accent));
-  padding: 0.78rem 1.45rem;
-  font-size: 0.98rem;
+  padding: 0.6rem 1.25rem;
+  font-size: 0.9rem;
   font-weight: 800;
   color: #ffffff;
   box-shadow:
@@ -754,4 +754,66 @@ main:has(.cabinet-shell) {
     margin-left: 0 !important;
     padding: 0 !important;
   }
+}
+
+/* Landing: roles marquee, floating toasts, decorative blobs */
+.marquee-track {
+  animation: marquee 38s linear infinite;
+}
+
+.marquee-track:hover {
+  animation-play-state: paused;
+}
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+.float-slow {
+  animation: float-slow 6s ease-in-out infinite;
+}
+
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.toast-pop {
+  animation: toast-pop 7s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
+}
+
+@keyframes toast-pop {
+  0%, 8% { opacity: 0; transform: translateY(14px) scale(0.96); }
+  14%, 80% { opacity: 1; transform: none; }
+  90%, 100% { opacity: 0; transform: translateY(-8px) scale(0.98); }
+}
+
+.blob {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(60px);
+  opacity: 0.55;
+  pointer-events: none;
+  animation: blob-drift 18s ease-in-out infinite alternate;
+}
+
+@keyframes blob-drift {
+  from { transform: translate(0, 0) scale(1); }
+  to { transform: translate(40px, -30px) scale(1.12); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track, .float-slow, .toast-pop, .blob { animation: none; }
+  .toast-pop { opacity: 1; }
+}
+
+/* Floating header pill: keep decorative layers inside the rounded shape. */
+.mirror-header::before {
+  border-radius: inherit;
+}
+
+.mirror-header::after {
+  left: 1.5rem;
+  right: 1.5rem;
 }
