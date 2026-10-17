@@ -169,6 +169,26 @@ test("telegram bot walks a candidate through the screening dialog", async ({ req
     const { data: afterBooking } = await admin.from("hiring_applications").select("interview_slot").eq("vacancy_id", vacancy!.id).single();
     expect(afterBooking!.interview_slot).toBe(`${tomorrow}T10:00`);
 
+    // Daily cron: the candidate is reminded with confirm buttons, the employer gets tomorrow's digest.
+    const cron = async (secret = "flow-cron-secret") => {
+      const response = await request.get("/api/cron/interview-reminders", { headers: { Authorization: `Bearer ${secret}` } });
+      return { status: response.status(), body: await response.json() };
+    };
+    expect((await cron("wrong")).status).toBe(401);
+    const reminders = await cron();
+    const reminder = reminders.body.actions.find((action: { payload: { chat_id?: number } }) => action.payload.chat_id === chatId);
+    const digest = reminders.body.actions.find((action: { payload: { chat_id?: number } }) => action.payload.chat_id === employerChatId);
+    expect(reminder.payload.text).toContain("завтра співбесіда");
+    expect(digest.payload.text).toContain("Олена Бот");
+    expect((await cron()).body.reminded).toBe(0);
+
+    // Candidate can't come: the slot is released and the employer is told.
+    const cantCome = reminder.payload.reply_markup.inline_keyboard[0][1].callback_data as string;
+    const declined = await post(tap(cantCome));
+    expect(declined.body.actions.some((action: { payload: { chat_id?: number; text?: string } }) => action.payload.chat_id === employerChatId && action.payload.text?.includes("не зможе прийти"))).toBe(true);
+    const { data: afterDecline } = await admin.from("hiring_applications").select("interview_slot, interview_confirmed").eq("vacancy_id", vacancy!.id).single();
+    expect(afterDecline).toMatchObject({ interview_slot: null, interview_confirmed: false });
+
     const again = await post(message({ text: `/start ${slug}` }));
     expect(texts(again.body)[0]).toContain("вже відгукнулися");
   } finally {

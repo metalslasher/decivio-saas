@@ -98,6 +98,7 @@ export type ApplicationRecord = {
   source: ApplicationSource;
   interview_token: string | null;
   interview_slot: string | null;
+  interview_confirmed: boolean | null;
   created_at: string;
 };
 

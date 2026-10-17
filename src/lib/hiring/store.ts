@@ -43,6 +43,7 @@ type ApplicationRow = {
   source: ApplicationRecord["source"] | null;
   interview_token: string | null;
   interview_slot: string | null;
+  interview_confirmed: boolean | null;
   created_at: string;
 };
 
@@ -82,6 +83,7 @@ function toApplicationRecord(row: ApplicationRow): ApplicationRecord {
     source: row.source ?? "web",
     interview_token: row.interview_token ?? null,
     interview_slot: row.interview_slot ?? null,
+    interview_confirmed: row.interview_confirmed ?? null,
     created_at: row.created_at,
   };
 }

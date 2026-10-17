@@ -410,7 +410,14 @@ function CandidateCard({
           <span className="flex flex-wrap items-center gap-2">
             <span className="font-extrabold text-[var(--text-strong)]">{application.candidate_name}</span>
             {application.verdict ? <span className={`chip ${tone?.chip}`}>{VERDICT_LABELS[application.verdict]}</span> : <span className="chip chip-muted">Без оцінки</span>}
-            {application.interview_slot ? <span className="chip chip-good">📅 {formatSlot(application.interview_slot)}</span> : null}
+            {application.interview_slot ? (
+              <span className="chip chip-good">
+                📅 {formatSlot(application.interview_slot)}
+                {application.interview_confirmed ? " · підтверджено" : ""}
+              </span>
+            ) : application.interview_confirmed === false ? (
+              <span className="chip chip-warn">Скасував співбесіду</span>
+            ) : null}
             {application.source === "telegram" ? <span className="chip !bg-[#e9f5fd] !text-[#1b6fa8]">Telegram</span> : null}
             {application.status !== "new" ? <span className="chip chip-muted">{APPLICATION_STATUS_LABELS[application.status]}</span> : null}
           </span>

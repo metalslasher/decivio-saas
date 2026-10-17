@@ -2,6 +2,7 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { bookInterviewSlot } from "@/lib/hiring/interview";
+import { handleReminderCallback } from "@/lib/hiring/reminders";
 import { formatSlot } from "@/lib/hiring/slots";
 import { getVacancyById, getVacancyBySlug } from "@/lib/hiring/store";
 import { buildAnswers, submitApplication } from "@/lib/hiring/submit";
@@ -202,6 +203,9 @@ async function handleCallback(supabase: SupabaseClient, update: TelegramUpdate):
 
   const bookingActions = await handleBookingCallback(supabase, query);
   if (bookingActions) return bookingActions;
+
+  const reminderActions = await handleReminderCallback(supabase, query);
+  if (reminderActions) return reminderActions;
   const actions: TelegramAction[] = [{ method: "answerCallbackQuery", payload: { callback_query_id: query.id } }];
   const message = query.message;
   if (!message) return actions;

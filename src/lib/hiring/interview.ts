@@ -176,7 +176,8 @@ export async function bookInterviewSlot(
     return { ok: false, reason: taken ? "taken" : "invalid_slot" };
   }
 
-  const { error } = await supabase.from("hiring_applications").update({ interview_slot: slot }).eq("id", row.id);
+  const { error } = await supabase.from("hiring_applications").update({ interview_slot: slot, interview_reminded_at: null, interview_confirmed: null })
+    .eq("id", row.id);
   if (error) {
     // Unique index (vacancy_id, interview_slot): somebody booked it a moment earlier.
     if (error.code === "23505") return { ok: false, reason: "taken" };
