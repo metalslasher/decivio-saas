@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useAuthDialog } from "@/components/auth-dialog-provider";
 import { ApplyFlow } from "@/components/hiring/apply-flow";
+import { VoiceInput } from "@/components/hiring/voice-input";
 import { trackEvent } from "@/lib/analytics";
 import { ApiError, apiRequest, clearDraft, copyText, getAccessToken, loadDraft, saveDraft } from "@/lib/hiring/client";
 import type { PublicVacancy, ScreeningQuestion, ScreeningQuestionKind, VacancyContent } from "@/lib/hiring/types";
@@ -171,7 +172,7 @@ export function VacancyBuilder() {
         <span className="eyebrow-pill">Крок 1 з 2 · без реєстрації</span>
         <h1 className="page-title mx-auto mt-5 max-w-[18ch]">Кого ви шукаєте?</h1>
         <p className="lead-copy mx-auto mt-4 max-w-xl">
-          Опишіть посаду своїми словами — як сказали б знайомому. За 30 секунд отримаєте готову вакансію, оплату-орієнтир і
+          Опишіть посаду своїми словами або надиктуйте голосом — як сказали б знайомому. За 30 секунд отримаєте готову вакансію, оплату-орієнтир і
           анкету для кандидатів.
         </p>
       </div>
@@ -185,6 +186,9 @@ export function VacancyBuilder() {
           maxLength={2000}
           autoFocus
         />
+        <div className="mt-3">
+          <VoiceInput onText={(text) => setBrief((current) => (current.trim() ? `${current.trim()} ${text}` : text).slice(0, 2000))} />
+        </div>
         <div className="mt-3 flex flex-wrap gap-2">
           {EXAMPLES.map((example) => (
             <button
