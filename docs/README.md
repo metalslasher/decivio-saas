@@ -6,6 +6,7 @@ Decivio is an AI hiring assistant for Ukrainian small and medium businesses.
 
 - `product-concept.md`: what we build, for whom, why, monetization, guardrails. Source of truth.
 - `roadmap.md`: iteration plan and handoff notes for the next work session. Update it at the end of every session.
+- `launch-checklist.md`: production launch steps (owner vs Claude), smoke check, rollback.
 
 ## Engineering References
 

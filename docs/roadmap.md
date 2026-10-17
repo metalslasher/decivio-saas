@@ -53,6 +53,8 @@ Verified locally on 2026-10-16 with real OpenAI: draft generation (~20 s), publi
 
 ## Before First Deploy (owner actions)
 
+Full ordered procedure: `launch-checklist.md`. Post-deploy check: `node scripts/smoke-check.mjs https://www.decivio.net --ai`.
+
 - [ ] Push migration to production: `supabase link --project-ref <ref>` then `supabase db push`.
 - [ ] Make sure `OPENAI_API_KEY` / `OPENAI_MODEL` are set in Vercel.
 - [ ] Add GA4 event tags in GTM for the funnel events (names in `src/lib/analytics.ts`).
