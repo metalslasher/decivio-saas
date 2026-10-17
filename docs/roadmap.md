@@ -51,16 +51,15 @@ Goal: the wow loop works end to end locally.
 
 Verified locally on 2026-10-16 with real OpenAI: draft generation (~20 s), publish after login (auto-publish via `?publish=1`), candidate flow on 375px mobile, screening (strong 85 → call, knockout 20 → reject, junior 65 → maybe), shortlist on mobile without horizontal overflow, `next build` passes.
 
-## Before First Deploy (owner actions)
+## Production Launch (2026-10-17)
 
-Full ordered procedure: `launch-checklist.md`. Post-deploy check: `node scripts/smoke-check.mjs https://www.decivio.net --ai`.
-
-- [ ] Push migration to production: `supabase link --project-ref <ref>` then `supabase db push`.
-- [ ] Make sure `OPENAI_API_KEY` / `OPENAI_MODEL` are set in Vercel.
+- [x] 7 migrations pushed to production Supabase (incl. 3 older May migrations that had never been applied). Note: `supabase db push` via the CLI login role fails for this project; use `--db-url` with the session pooler `aws-0-eu-west-1.pooler.supabase.com:5432`, user `postgres.<ref>`.
+- [x] `main` pushed, Vercel deployed; `scripts/smoke-check.mjs https://www.decivio.net --ai` passes (real AI draft OK).
+- [x] Telegram bot @decivio_bot: webhook registered, secret matches Vercel, username baked into the build.
+- [ ] Owner: manual walkthrough from a phone (see `launch-checklist.md` step 5.3).
+- [ ] Owner: rotate the database password (it was shared in chat).
 - [ ] Add GA4 event tags in GTM for the funnel events (names in `src/lib/analytics.ts`).
-- [ ] Telegram bot: create it in @BotFather, set `TELEGRAM_BOT_TOKEN`, `TELEGRAM_WEBHOOK_SECRET` (any long random string) and `NEXT_PUBLIC_TELEGRAM_BOT_USERNAME` in Vercel, then run `node scripts/telegram-setup.mjs https://<domain>` after deploy.
 - [ ] Submit the sitemap in Google Search Console.
-- [ ] Merge `pivot/hiring-assistant` into `main` (Vercel deploys `main`).
 
 ## Known Gaps / Notes
 
