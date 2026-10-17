@@ -308,7 +308,17 @@ test("employer creates a vacancy, candidate applies, employer sees a scored cand
     const { data: bookedRow } = await admin.from("hiring_applications").select("interview_slot").eq("id", applications[0].id).single();
     expect(bookedRow!.interview_slot).toBe(`${tomorrow}T15:00`);
 
-    // 7. Deleting the vacancy removes its candidates.
+    // 7. Duplicating is blocked while the free vacancy is active, works after closing it.
+    expect((await employer.request.post(`/api/hiring/vacancies/${vacancyId}/duplicate`, { headers: authHeaders, data: {} })).status()).toBe(402);
+    await employer.request.patch(`/api/hiring/vacancies/${vacancyId}`, { headers: authHeaders, data: { status: "closed" } });
+    const duplicate = await employer.request.post(`/api/hiring/vacancies/${vacancyId}/duplicate`, { headers: authHeaders, data: {} });
+    expect(duplicate.status()).toBe(201);
+    const copy = await (await employer.request.get(`/api/hiring/vacancies/${(await duplicate.json()).id}`, { headers: authHeaders })).json();
+    expect(copy.vacancy.content.title).toBe(vacancy.content.title);
+    expect(copy.applications).toHaveLength(0);
+    expect(copy.vacancy.interview).toMatchObject({ location: "Офіс", slots: [] });
+
+    // 8. Deleting the vacancy removes its candidates.
     expect((await employer.request.delete(`/api/hiring/vacancies/${vacancyId}`, { headers: authHeaders })).status()).toBe(200);
     expect((await employer.request.get(`/api/hiring/vacancies/${vacancyId}`, { headers: authHeaders })).status()).toBe(404);
     const { count: leftover } = await admin.from("hiring_applications").select("id", { count: "exact", head: true }).eq("vacancy_id", vacancyId!);

@@ -136,6 +136,16 @@ export function VacancyWorkspace({ vacancyId, justCreated }: { vacancyId: string
     }
   };
 
+  const duplicateVacancy = async () => {
+    setNotice(null);
+    try {
+      const created = await apiRequest<{ id: string }>(`/api/hiring/vacancies/${vacancyId}/duplicate`, { auth: true, body: {} });
+      router.push(`/hire/${created.id}/edit`);
+    } catch (duplicateError) {
+      setNotice(duplicateError instanceof Error ? duplicateError.message : "Не вдалося скопіювати вакансію.");
+    }
+  };
+
   const removeVacancy = async () => {
     setIsDeleting(true);
     try {
@@ -216,6 +226,9 @@ export function VacancyWorkspace({ vacancyId, justCreated }: { vacancyId: string
           <Link href={`/hire/${vacancy.id}/poster`} className="btn-secondary !py-2.5 text-sm">
             QR-постер
           </Link>
+          <button type="button" onClick={duplicateVacancy} className="btn-secondary !py-2.5 text-sm">
+            Дублювати
+          </button>
           <button type="button" onClick={toggleVacancy} className="btn-secondary !py-2.5 text-sm">
             {vacancy.status === "active" ? "Закрити набір" : "Відновити набір"}
           </button>

@@ -39,6 +39,23 @@ Goal: the wow loop works end to end locally.
 - [x] `/hire/billing`: plan, period end, usage, cancel monthly mono subscription (`POST /api/merchant/subscription/edit` with `action: "cancel"`). Cancel was verified only up to the confirm step locally — the real mono call is untested.
 - [x] Re-screen unscored candidates (`POST /api/hiring/vacancies/<id>/rescreen`, batches of 5, respects free quota).
 
+## Iteration 4 — Cabinet, Landing, Retention Basics (2026-10-18)
+
+- [x] Delete vacancy with all candidate data (FK cascade); legacy career tables dropped (`20261018090000`).
+- [x] Separate employer cabinet (`src/app/hire/layout.tsx`, `cabinet-shell.tsx`): sidebar with active vacancies + new counters, plan status, account; mobile tab bar; guest gate; `/hire/settings`.
+- [x] Landing redesign: floating header, animated hero, roles marquee, four looping product demos (`src/components/landing/product-demos.tsx`, `poster-demo.tsx`).
+- [x] Interview reminders: Vercel Cron 18:00 Kyiv (`vercel.json`, `/api/cron/interview-reminders`, `src/lib/hiring/reminders.ts`), Буду / Не зможу buttons, employer digest. Needs `CRON_SECRET` in Vercel.
+- [x] Voice brief (`voice-input.tsx`, `/api/hiring/transcribe`, gpt-4o-mini-transcribe).
+- [x] Duplicate vacancy (`/api/hiring/vacancies/<id>/duplicate`).
+
+## Next (agreed with owner, in order)
+
+- [ ] Candidate base: offer good past candidates for a new vacancy in one click.
+- [ ] Team access (owner + admins) and Business plan.
+- [ ] Publish vacancies to city Telegram channels from Decivio.
+- [ ] New-hire onboarding checklist (first week) to reduce early churn.
+- [ ] Critical server errors to the owner's Telegram (instead of Sentry).
+
 ## Iteration 3 — Growth Channels
 
 - [x] Telegram bot as a second candidate channel (`src/lib/telegram/*`, webhook `/api/telegram/webhook`, migration `20261017120000_add_telegram_channel.sql`). Deep link `t.me/<bot>?start=<slug>`; questions as inline buttons, name suggestion, phone via "share contact"; same screening and plan limits as web; duplicate protection per Telegram user. Covered by the e2e test (fake updates in test mode). Not yet tried with a real bot.

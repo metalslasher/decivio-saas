@@ -31,6 +31,7 @@ Migration: `20261016120000_add_hiring_core.sql`. RLS enabled without policies; n
 - `candidate_name`, `candidate_phone` (normalised to +380...), `answers` jsonb (`CandidateAnswer[]`), `about`.
 - `screening` jsonb (`CandidateScreening`, null if AI failed), `score` 0–100, `verdict` `call`|`maybe`|`reject`.
 - `status`: `new` | `invited` | `hired` | `rejected`.
+- `interview_reminded_at`, `interview_confirmed` (daily reminder state, candidate answer).
 - `interview_token` (unique booking link token), `interview_slot` (booked local time; unique per vacancy).
 - `source`: `web` | `telegram`; `telegram_user_id` for Telegram applicants (duplicate protection).
 
@@ -44,7 +45,7 @@ Migration `20261017120000_add_telegram_channel.sql`. One in-progress bot dialog 
 
 ## Legacy Tables
 
-The tables below belong to the removed career product (`simulation_*`, `lead_requests`, `guest_sessions`). They stay until a cleanup migration drops them.
+The career-product tables (`simulation_*`, `lead_requests`, `guest_sessions`, `profiles.profile_context`) were dropped in `20261018090000_drop_legacy_career_tables.sql`. Sections below that describe them are historical.
 
 ## Core Tables
 

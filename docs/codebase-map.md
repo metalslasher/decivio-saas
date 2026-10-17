@@ -11,6 +11,8 @@ Status: current repository map (hiring assistant, since 2026-10-16).
 - `/hire/[vacancyId]/edit`: edit published vacancy (same editor as the builder).
 - `/hire/[vacancyId]/poster`: printable A4 poster with a QR code to the apply link.
 - `/hire/billing`: plan, usage, monthly subscription cancel.
+- `/hire/settings`: Telegram notifications and account.
+- All `/hire/*` pages render inside `CabinetShell` (`src/app/hire/layout.tsx`); the public header/footer are hidden there.
 - `/apply/[slug]`: public mobile-first candidate application (no registration).
 - `/interview/[token]`: public interview slot booking for invited candidates.
 - `/roles/[slug]`: static SEO landing pages per role (data in `src/lib/seo-roles.ts`).
@@ -33,6 +35,9 @@ Status: current repository map (hiring assistant, since 2026-10-16).
 - `src/lib/hiring/plan.ts` (server-only): plan resolution and free/pro limits.
 - `src/app/api/billing/subscription`: billing overview (GET) and cancel (POST).
 - `src/lib/hiring/interview.ts` (server-only) + `slots.ts` (shared): interview settings, invite links, slot booking.
+- `src/lib/hiring/reminders.ts` + `/api/cron/interview-reminders` (Vercel Cron, `CRON_SECRET`): daily interview reminders and employer digest.
+- `/api/hiring/transcribe`: voice brief transcription.
+- `src/components/landing/*`: landing demos (`product-demos.tsx`, `poster-demo.tsx`, `hero-demo.tsx`, `use-loop.ts`).
 - `src/lib/analytics.ts`: GTM funnel events (`trackEvent`).
 - `src/lib/hiring/submit.ts` (server-only): shared application submit (plan-aware screening + save) for web and Telegram.
 - `src/lib/telegram`: candidate bot — `bot.ts` dialog engine returns Bot API actions, `api.ts` sends them; `/api/telegram/webhook` checks `TELEGRAM_WEBHOOK_SECRET` (in test mode returns actions instead of sending).
